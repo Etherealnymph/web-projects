@@ -1,0 +1,13 @@
+# Python virtual environments
+.venv/
+.venv-1/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db

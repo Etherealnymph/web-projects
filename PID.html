@@ -1,0 +1,2433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>控制算法可视化实验室 · Control Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root {
+  --bg: #0a0d14;
+  --bg-2: #0f1218;
+  --card: #13161f;
+  --card-2: #181c26;
+  --border: #1f2330;
+  --border-hi: #2a3142;
+  --fg: #e8eef5;
+  --fg-2: #b4bdc9;
+  --muted: #6c7689;
+  --accent: #00ffa3;
+  --accent-2: #ffb800;
+  --accent-3: #ff3d7f;
+  --accent-4: #3ddbff;
+  --accent-5: #b87dff;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Noto Sans SC', 'Outfit', system-ui, sans-serif;
+  overflow-x: hidden;
+}
+.display { font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif; letter-spacing: -0.02em; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* 背景 */
+.bg-grid {
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.bg-radial {
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,255,163,0.08), transparent 70%),
+              radial-gradient(ellipse 60% 50% at 80% 20%, rgba(255,61,127,0.06), transparent 60%),
+              radial-gradient(ellipse 50% 50% at 20% 30%, rgba(61,219,255,0.05), transparent 60%);
+}
+
+/* 导航 */
+.nav-link {
+  color: var(--fg-2);
+  transition: color 0.2s;
+  position: relative;
+  font-size: 14px;
+}
+.nav-link:hover { color: var(--accent); }
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+}
+.nav-link:hover::after { transform: scaleX(1); }
+
+/* 标题装饰 */
+.title-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+.title-bar::before {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--accent);
+}
+
+/* 卡片 */
+.glass-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: all 0.3s;
+}
+.glass-card:hover { border-color: var(--border-hi); }
+
+/* 算法卡片 */
+.algo-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+}
+.algo-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 0;
+  background: var(--accent);
+  transition: height 0.4s ease;
+}
+.algo-card:hover::before { height: 100%; }
+.algo-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-hi);
+  background: var(--card-2);
+}
+.algo-card .badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* 滑块 */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+}
+.slider-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--fg-2);
+  width: 32px;
+  flex-shrink: 0;
+}
+.slider-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  width: 60px;
+  text-align: right;
+  flex-shrink: 0;
+}
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(0,255,163,0.15);
+  transition: all 0.2s;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 6px rgba(0,255,163,0.25);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.algo-slot[data-color="0"] input[type="range"]::-webkit-slider-thumb { background: var(--accent); box-shadow: 0 0 0 4px rgba(0,255,163,0.15); }
+.algo-slot[data-color="1"] input[type="range"]::-webkit-slider-thumb { background: var(--accent-2); box-shadow: 0 0 0 4px rgba(255,184,0,0.15); }
+.algo-slot[data-color="2"] input[type="range"]::-webkit-slider-thumb { background: var(--accent-3); box-shadow: 0 0 0 4px rgba(255,61,127,0.15); }
+.algo-slot[data-color="0"] .slot-color { background: var(--accent); }
+.algo-slot[data-color="1"] .slot-color { background: var(--accent-2); }
+.algo-slot[data-color="2"] .slot-color { background: var(--accent-3); }
+.algo-slot[data-color="0"] .slider-value { color: var(--accent); }
+.algo-slot[data-color="1"] .slider-value { color: var(--accent-2); }
+.algo-slot[data-color="2"] .slider-value { color: var(--accent-3); }
+
+/* 按钮 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg);
+  letter-spacing: 0.05em;
+}
+.btn:hover { border-color: var(--border-hi); background: var(--card-2); }
+.btn-primary {
+  background: var(--accent);
+  color: #0a0d14;
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: #1affb0; border-color: #1affb0; }
+.btn-ghost { background: transparent; border-color: var(--border); }
+
+/* Select */
+select {
+  background: var(--card);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 32px 8px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%236c7689' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+select:hover { border-color: var(--border-hi); }
+
+/* 指标卡 */
+.metric-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+.metric-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+.metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* 动画 */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes float-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal { opacity: 0; }
+.reveal.in-view { animation: float-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+@keyframes scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1px;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: scan 3s linear infinite;
+}
+
+/* 分类标签 */
+.cat-tab {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg-2);
+  transition: all 0.25s;
+  white-space: nowrap;
+}
+.cat-tab:hover { color: var(--fg); border-color: var(--border-hi); }
+.cat-tab.active {
+  background: var(--accent);
+  color: #0a0d14;
+  border-color: var(--accent);
+}
+
+/* 表格 */
+table.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.compare-table th {
+  text-align: left;
+  padding: 14px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+  white-space: nowrap;
+}
+.compare-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg-2);
+}
+.compare-table tr:hover td { background: var(--card); color: var(--fg); }
+.compare-table .algo-name { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--card);
+  border: 1px solid var(--accent);
+  color: var(--fg);
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  z-index: 1000;
+  opacity: 0;
+  transition: all 0.3s;
+  box-shadow: 0 8px 32px rgba(0,255,163,0.15);
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* Hero */
+.hero-canvas { position: absolute; inset: 0; z-index: 0; }
+.hero-title {
+  font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  font-weight: 700;
+  font-size: clamp(40px, 8vw, 110px);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+.hero-title .stroke {
+  -webkit-text-stroke: 1.5px var(--fg);
+  color: transparent;
+}
+.hero-title .accent { color: var(--accent); }
+
+/* 信息面板 */
+.info-panel {
+  background: linear-gradient(180deg, rgba(0,255,163,0.03), transparent);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 1024px) {
+  .simulator-grid { grid-template-columns: 1fr !important; }
+}
+
+.signal-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.signal-tag .dot { width: 8px; height: 8px; border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md" style="background:rgba(10,13,20,0.75); border-bottom:1px solid var(--border);">
+  <nav class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="relative w-9 h-9 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg, var(--accent), var(--accent-4));">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a0d14" stroke-width="2.5" stroke-linecap="round">
+          <path d="M3 12h4l3-8 4 16 3-8h4"/>
+        </svg>
+      </div>
+      <div>
+        <div class="display font-bold text-lg leading-none">控制算法实验室</div>
+        <div class="mono text-[10px] tracking-widest" style="color:var(--muted)">CONTROL LAB · v2.4</div>
+      </div>
+    </div>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#simulator" class="nav-link">仿真实验台</a>
+      <a href="#atlas" class="nav-link">算法图谱</a>
+      <a href="#compare" class="nav-link">特性矩阵</a>
+      <a href="#scenarios" class="nav-link">选型指南</a>
+      <a href="#theory" class="nav-link">理论解析</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="live-dot"></div>
+      <span class="mono text-xs hidden sm:inline" style="color:var(--fg-2)">引擎在线</span>
+    </div>
+  </nav>
+</header>
+
+<!-- Hero -->
+<section class="relative min-h-screen flex items-center pt-24 pb-12 overflow-hidden bg-radial">
+  <canvas id="heroCanvas" class="hero-canvas"></canvas>
+  <div class="absolute inset-0 bg-grid opacity-40" style="z-index:1;"></div>
+  <div class="absolute inset-0" style="background:linear-gradient(180deg, transparent 0%, var(--bg) 100%); z-index:2;"></div>
+  
+  <div class="relative max-w-7xl mx-auto px-6 w-full" style="z-index:3;">
+    <div class="title-bar mb-6">控制理论 · 算法图谱 · 18 种方法</div>
+    
+    <h1 class="hero-title mb-8">
+      <span class="block">从 <span class="accent">PID</span> 到</span>
+      <span class="block"><span class="stroke">强化学习</span></span>
+      <span class="block">的可视化旅程</span>
+    </h1>
+    
+    <div class="grid md:grid-cols-3 gap-6 max-w-5xl">
+      <div class="md:col-span-2">
+        <p class="text-base md:text-lg leading-relaxed" style="color:var(--fg-2); max-width:640px;">
+          18 种经典与现代控制算法的交互式可视化平台。实时仿真二阶受控系统，对比参数敏感性、响应特性与适用情境，理解每一种控制律背后的工程哲学。
+        </p>
+        <div class="flex flex-wrap gap-3 mt-8">
+          <a href="#simulator" class="btn btn-primary">
+            <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            启动仿真器
+          </a>
+          <a href="#atlas" class="btn">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            浏览算法图谱
+          </a>
+        </div>
+      </div>
+      
+      <div class="info-panel">
+        <div class="mono text-xs mb-3" style="color:var(--muted)">系统参数</div>
+        <div class="space-y-3">
+          <div class="flex justify-between items-baseline">
+            <span class="text-sm" style="color:var(--fg-2)">受控对象</span>
+            <span class="mono text-sm" style="color:var(--accent)">二阶系统</span>
+          </div>
+          <div class="flex justify-between items-baseline">
+            <span class="text-sm" style="color:var(--fg-2)">算法数量</span>
+            <span class="mono text-sm" style="color:var(--accent)">18 / 18</span>
+          </div>
+          <div class="flex justify-between items-baseline">
+            <span class="text-sm" style="color:var(--fg-2)">积分方法</span>
+            <span class="mono text-sm" style="color:var(--accent)">RK4 · 5ms</span>
+          </div>
+          <div class="flex justify-between items-baseline">
+            <span class="text-sm" style="color:var(--fg-2)">对比通道</span>
+            <span class="mono text-sm" style="color:var(--accent)">3 路并行</span>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t" style="border-color:var(--border);">
+          <div class="mono text-[10px] mb-2" style="color:var(--muted)">传递函数</div>
+          <div class="mono text-xs" style="color:var(--fg)">G(s) = 1 / (ms² + bs + k)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2" style="z-index:3;">
+    <div class="mono text-[10px] tracking-widest" style="color:var(--muted)">向下滚动探索</div>
+    <svg width="14" height="20" viewBox="0 0 14 20" fill="none" stroke="var(--muted)" stroke-width="1.5">
+      <rect x="1" y="1" width="12" height="18" rx="6"/>
+      <line x1="7" y1="5" x2="7" y2="9" stroke-linecap="round">
+        <animate attributeName="y2" from="9" to="14" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" from="1" to="0" dur="1.5s" repeatCount="indefinite"/>
+      </line>
+    </svg>
+  </div>
+</section>
+
+<!-- 仿真器 -->
+<section id="simulator" class="relative py-20 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-end justify-between flex-wrap gap-4 mb-10">
+      <div>
+        <div class="title-bar mb-3">第一部分 / 实时仿真实验台</div>
+        <h2 class="display text-4xl md:text-5xl font-bold">实时仿真对比</h2>
+        <p class="mt-3 text-base" style="color:var(--fg-2); max-width:580px;">
+          选择最多 3 种算法并行运行，拖动滑块即可实时观察参数对系统响应的影响。所有性能指标自动计算。
+        </p>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <button id="btnPlay" class="btn btn-primary">
+          <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          运行
+        </button>
+        <button id="btnPause" class="btn">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          暂停
+        </button>
+        <button id="btnReset" class="btn">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          重置
+        </button>
+      </div>
+    </div>
+    
+    <div class="simulator-grid grid grid-cols-[420px_1fr] gap-6">
+      
+      <!-- 左侧 -->
+      <div class="space-y-5">
+        
+        <!-- 受控对象设置 -->
+        <div class="glass-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div class="display font-semibold">受控对象配置</div>
+            <div class="signal-tag"><span class="dot" style="background:var(--accent-4)"></span>二阶系统</div>
+          </div>
+          <div class="space-y-1">
+            <div class="slider-row">
+              <span class="slider-label">m</span>
+              <input type="range" id="plantM" min="0.1" max="5" step="0.1" value="1">
+              <span class="slider-value mono" id="plantMVal">1.0</span>
+            </div>
+            <div class="slider-row">
+              <span class="slider-label">b</span>
+              <input type="range" id="plantB" min="0" max="5" step="0.05" value="0.5">
+              <span class="slider-value mono" id="plantBVal">0.50</span>
+            </div>
+            <div class="slider-row">
+              <span class="slider-label">k</span>
+              <input type="range" id="plantK" min="0.1" max="10" step="0.1" value="2">
+              <span class="slider-value mono" id="plantKVal">2.0</span>
+            </div>
+            <div class="slider-row">
+              <span class="slider-label">r</span>
+              <input type="range" id="plantR" min="0.1" max="3" step="0.1" value="1">
+              <span class="slider-value mono" id="plantRVal">1.0</span>
+            </div>
+            <div class="slider-row">
+              <span class="slider-label">d</span>
+              <input type="range" id="plantD" min="-2" max="2" step="0.05" value="0">
+              <span class="slider-value mono" id="plantDVal">0.00</span>
+            </div>
+          </div>
+          <div class="mt-3 pt-3 border-t mono text-[10px] leading-relaxed" style="border-color:var(--border); color:var(--muted)">
+            m·ẍ + b·ẋ + k·x = u + d<br>
+            m: 质量 · b: 阻尼 · k: 刚度 · r: 设定值 · d: 扰动
+          </div>
+        </div>
+        
+        <!-- 算法槽位 1 -->
+        <div class="algo-slot glass-card p-5" data-color="0" data-slot="0">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="slot-color w-1 h-6 rounded-full"></div>
+            <select class="algo-select flex-1" data-slot="0"></select>
+            <button class="btn btn-ghost algo-toggle" data-slot="0" style="padding:6px 10px;" title="启用/禁用">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="algo-params space-y-1" data-slot="0"></div>
+          <div class="algo-info mt-3 pt-3 border-t text-xs leading-relaxed" style="border-color:var(--border); color:var(--fg-2);" data-slot="0"></div>
+        </div>
+        
+        <!-- 算法槽位 2 -->
+        <div class="algo-slot glass-card p-5" data-color="1" data-slot="1">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="slot-color w-1 h-6 rounded-full"></div>
+            <select class="algo-select flex-1" data-slot="1"></select>
+            <button class="btn btn-ghost algo-toggle" data-slot="1" style="padding:6px 10px;" title="启用/禁用">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="algo-params space-y-1" data-slot="1"></div>
+          <div class="algo-info mt-3 pt-3 border-t text-xs leading-relaxed" style="border-color:var(--border); color:var(--fg-2);" data-slot="1"></div>
+        </div>
+        
+        <!-- 算法槽位 3 -->
+        <div class="algo-slot glass-card p-5" data-color="2" data-slot="2">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="slot-color w-1 h-6 rounded-full"></div>
+            <select class="algo-select flex-1" data-slot="2"></select>
+            <button class="btn btn-ghost algo-toggle" data-slot="2" style="padding:6px 10px;" title="启用/禁用">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="algo-params space-y-1" data-slot="2"></div>
+          <div class="algo-info mt-3 pt-3 border-t text-xs leading-relaxed" style="border-color:var(--border); color:var(--fg-2);" data-slot="2"></div>
+        </div>
+      </div>
+      
+      <!-- 右侧 -->
+      <div class="space-y-5">
+        
+        <!-- 响应曲线 -->
+        <div class="glass-card p-5 relative overflow-hidden">
+          <div class="scan-line"></div>
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div>
+              <div class="display font-semibold">阶跃响应曲线</div>
+              <div class="mono text-xs" style="color:var(--muted)">输出 y(t) 随时间变化</div>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap" id="legendBox"></div>
+          </div>
+          <canvas id="responseCanvas" class="w-full" style="height:340px; display:block;"></canvas>
+          <div class="flex justify-between mono text-[10px] mt-2" style="color:var(--muted)">
+            <span>t = 0s</span>
+            <span>t = 10s</span>
+          </div>
+        </div>
+        
+        <!-- 控制信号 -->
+        <div class="glass-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <div class="display font-semibold">控制信号 u(t)</div>
+              <div class="mono text-xs" style="color:var(--muted)">执行器输出</div>
+            </div>
+          </div>
+          <canvas id="controlCanvas" class="w-full" style="height:160px; display:block;"></canvas>
+        </div>
+        
+        <!-- 性能指标 -->
+        <div>
+          <div class="display font-semibold mb-3">性能指标对比</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3" id="metricsGrid"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 预设场景 -->
+    <div class="mt-8 glass-card p-5">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div>
+          <div class="display font-semibold">预设场景</div>
+          <div class="mono text-xs" style="color:var(--muted)">点击加载预配置的算法与参数组合</div>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2" id="presetBox"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 算法图谱 -->
+<section id="atlas" class="relative py-20 px-6" style="background:var(--bg-2);">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-end justify-between flex-wrap gap-4 mb-10">
+      <div>
+        <div class="title-bar mb-3">第二部分 / 算法图谱</div>
+        <h2 class="display text-4xl md:text-5xl font-bold">18 种控制算法详解</h2>
+        <p class="mt-3 text-base" style="color:var(--fg-2); max-width:640px;">
+          按类别划分，每个算法附适用情境、核心思想、优缺点与典型应用。点击卡片可加载到仿真器。
+        </p>
+      </div>
+    </div>
+    
+    <div class="flex flex-wrap gap-2 mb-8" id="categoryTabs">
+      <button class="cat-tab active" data-cat="all">全部 · 18</button>
+      <button class="cat-tab" data-cat="classical">经典控制 · 4</button>
+      <button class="cat-tab" data-cat="modern">现代控制 · 3</button>
+      <button class="cat-tab" data-cat="nonlinear">非线性控制 · 3</button>
+      <button class="cat-tab" data-cat="adaptive">自适应控制 · 2</button>
+      <button class="cat-tab" data-cat="intelligent">智能控制 · 2</button>
+      <button class="cat-tab" data-cat="optimization">优化算法 · 3</button>
+      <button class="cat-tab" data-cat="learning">学习控制 · 1</button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="atlasGrid"></div>
+  </div>
+</section>
+
+<!-- 特性矩阵 -->
+<section id="compare" class="relative py-20 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-end justify-between flex-wrap gap-4 mb-10">
+      <div>
+        <div class="title-bar mb-3">第三部分 / 特性对比矩阵</div>
+        <h2 class="display text-4xl md:text-5xl font-bold">横向对比一览</h2>
+        <p class="mt-3 text-base" style="color:var(--fg-2); max-width:640px;">
+          从模型依赖、鲁棒性、计算成本、非线性处理能力等维度横向比较 18 种算法。
+        </p>
+      </div>
+    </div>
+    
+    <div class="glass-card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>算法</th>
+              <th>类别</th>
+              <th>需要模型</th>
+              <th>鲁棒性</th>
+              <th>非线性处理</th>
+              <th>计算成本</th>
+              <th>整定难度</th>
+              <th>最佳场景</th>
+            </tr>
+          </thead>
+          <tbody id="compareTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 选型指南 -->
+<section id="scenarios" class="relative py-20 px-6" style="background:var(--bg-2);">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-end justify-between flex-wrap gap-4 mb-10">
+      <div>
+        <div class="title-bar mb-3">第四部分 / 工程选型指南</div>
+        <h2 class="display text-4xl md:text-5xl font-bold">何时用何种算法</h2>
+        <p class="mt-3 text-base" style="color:var(--fg-2); max-width:640px;">
+          从工程问题特征出发，匹配最合适的控制策略。每个场景给出推荐算法组合。
+        </p>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="scenarioBox"></div>
+  </div>
+</section>
+
+<!-- 理论解析 -->
+<section id="theory" class="relative py-20 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-end justify-between flex-wrap gap-4 mb-10">
+      <div>
+        <div class="title-bar mb-3">第五部分 / 控制理论演进</div>
+        <h2 class="display text-4xl md:text-5xl font-bold">从经典到智能的演进</h2>
+        <p class="mt-3 text-base" style="color:var(--fg-2); max-width:640px;">
+          控制理论的发展脉络，每一代算法解决前一代的什么问题，又引入了什么新的代价。
+        </p>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="theoryTimeline"></div>
+    
+    <!-- 关键概念 -->
+    <div class="mt-12">
+      <h3 class="display text-2xl font-bold mb-6">核心概念图解</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="glass-card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(0,255,163,0.1); border:1px solid rgba(0,255,163,0.3);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <div class="display font-semibold">反馈回路</div>
+          </div>
+          <p class="text-sm leading-relaxed" style="color:var(--fg-2);">
+            所有闭环控制的基石：测量输出 y，与参考 r 比较得到误差 e = r - y，通过控制律计算输入 u。负反馈使系统趋于稳定，是控制论最核心的思想。
+          </p>
+          <div class="mt-4 mono text-xs p-3 rounded" style="background:var(--bg); color:var(--accent);">
+            e(t) = r(t) - y(t)<br>
+            u(t) = C(e)
+          </div>
+        </div>
+        
+        <div class="glass-card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(61,219,255,0.1); border:1px solid rgba(61,219,255,0.3);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-4)" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+            </div>
+            <div class="display font-semibold">稳定性与性能</div>
+          </div>
+          <p class="text-sm leading-relaxed" style="color:var(--fg-2);">
+            稳定性是控制的第一要求（有界输入产生有界输出），性能包括快速性、准确性、平稳性。两者常常矛盾：响应快往往伴随超调，无超调往往响应慢。
+          </p>
+          <div class="mt-4 mono text-xs p-3 rounded" style="background:var(--bg); color:var(--accent-4);">
+            稳定性 ⟷ 快速性<br>
+            准确性 ⟷ 平稳性
+          </div>
+        </div>
+        
+        <div class="glass-card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(255,61,127,0.1); border:1px solid rgba(255,61,127,0.3);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-3)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+            </div>
+            <div class="display font-semibold">鲁棒性</div>
+          </div>
+          <p class="text-sm leading-relaxed" style="color:var(--fg-2);">
+            系统在参数摄动、外部扰动、模型不确定性下仍能保持性能的能力。SMC、ADRC、H∞ 等都是为提升鲁棒性而生。鲁棒性越强，对模型精度要求越低。
+          </p>
+          <div class="mt-4 mono text-xs p-3 rounded" style="background:var(--bg); color:var(--accent-3);">
+            ΔG(s) · Δd · Δnoise<br>
+            ⟹ 性能保持
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 整定方法 -->
+    <div class="mt-12">
+      <h3 class="display text-2xl font-bold mb-6">参数整定方法对照</h3>
+      <div class="glass-card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>整定方法</th>
+                <th>适用算法</th>
+                <th>原理</th>
+                <th>优点</th>
+                <th>缺点</th>
+              </tr>
+            </thead>
+            <tbody id="tuningTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 页脚 -->
+<footer class="relative py-12 px-6 border-t" style="border-color:var(--border);">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-3 gap-8">
+      <div>
+        <div class="display font-bold text-2xl mb-3">控制算法实验室</div>
+        <p class="text-sm" style="color:var(--fg-2);">
+          面向控制工程教育与算法探索的交互式可视化平台。所有仿真在浏览器本地完成，无需任何后端服务。
+        </p>
+      </div>
+      <div>
+        <div class="mono text-xs mb-3" style="color:var(--muted)">参考文献</div>
+        <ul class="space-y-2 text-sm" style="color:var(--fg-2);">
+          <li>Åström & Hägglund《高级 PID 控制》</li>
+          <li>Khalil《非线性系统》</li>
+          <li>韩京清《自抗扰控制技术》</li>
+          <li>Sutton & Barto《强化学习导论》</li>
+        </ul>
+      </div>
+      <div>
+        <div class="mono text-xs mb-3" style="color:var(--muted)">技术实现</div>
+        <ul class="space-y-2 text-sm" style="color:var(--fg-2);">
+          <li>· 四阶 Runge-Kutta 数值积分</li>
+          <li>· 5ms 仿真步长</li>
+          <li>· 实时性能指标计算</li>
+          <li>· 纯前端 JavaScript 执行</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-8 pt-6 border-t flex justify-between items-center flex-wrap gap-3" style="border-color:var(--border);">
+      <div class="mono text-xs" style="color:var(--muted)">© 控制算法实验室 · 为工程师而生</div>
+      <div class="flex items-center gap-2">
+        <div class="live-dot"></div>
+        <span class="mono text-xs" style="color:var(--fg-2)">系统运行正常</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   18 种控制算法定义
+   ============================================================ */
+const ALGORITHMS = {
+  P: {
+    name: 'P', fullName: '比例控制', category: 'classical',
+    color: '#00ffa3', cat_label: '经典控制',
+    scenario: '快速响应、容许稳态误差的简单系统，如水位控制、温度粗调、简单机械定位',
+    core: '控制量与误差成正比：u = Kp·e',
+    application: '液压伺服、简单机械定位、粗略温度控制',
+    pros: '结构极简单，响应迅速，物理意义明确',
+    cons: '存在稳态误差，无法消除偏置扰动',
+    params: [{ name: 'Kp', label: '比例增益', min: 0.1, max: 50, step: 0.1, default: 8 }],
+    model_required: '不需要', robustness: '低', nonlinear: '差', compute: '极低', tuning: '易',
+    best_for: '简单快速系统'
+  },
+  PI: {
+    name: 'PI', fullName: '比例积分控制', category: 'classical',
+    color: '#00ffa3', cat_label: '经典控制',
+    scenario: '需要消除稳态误差的系统，如流量、压力、温度等过程控制',
+    core: '在 P 基础上加入积分项消除稳态误差：u = Kp·e + Ki·∫e dt',
+    application: '过程控制（化工、冶金）、电机调速、流量调节',
+    pros: '消除稳态误差，无差控制',
+    cons: '积分饱和问题、相位滞后可能引起超调',
+    params: [
+      { name: 'Kp', label: '比例增益', min: 0.1, max: 30, step: 0.1, default: 6 },
+      { name: 'Ki', label: '积分增益', min: 0, max: 20, step: 0.05, default: 3 }
+    ],
+    model_required: '不需要', robustness: '中', nonlinear: '差', compute: '极低', tuning: '易',
+    best_for: '消除稳态误差'
+  },
+  PD: {
+    name: 'PD', fullName: '比例微分控制', category: 'classical',
+    color: '#00ffa3', cat_label: '经典控制',
+    scenario: '需要预测误差趋势、抑制超调的系统，如机器人关节、伺服定位',
+    core: '加入微分项预测误差变化：u = Kp·e + Kd·de/dt',
+    application: '机械臂控制、精密定位平台、伺服电机',
+    pros: '增大系统阻尼，减少超调，改善稳定性',
+    cons: '存在稳态误差，微分项放大高频噪声',
+    params: [
+      { name: 'Kp', label: '比例增益', min: 0.1, max: 30, step: 0.1, default: 8 },
+      { name: 'Kd', label: '微分增益', min: 0, max: 10, step: 0.05, default: 2 }
+    ],
+    model_required: '不需要', robustness: '中', nonlinear: '差', compute: '极低', tuning: '易',
+    best_for: '抑制超调'
+  },
+  PID: {
+    name: 'PID', fullName: '比例积分微分控制', category: 'classical',
+    color: '#00ffa3', cat_label: '经典控制',
+    scenario: '工业过程控制通用场景，覆盖 90% 以上的控制回路',
+    core: 'P + I + D 三作用综合：u = Kp·e + Ki·∫e + Kd·de/dt',
+    application: '化工、电力、制造、航空航天等几乎所有工业领域',
+    pros: '结构简单、参数物理意义明确、技术成熟',
+    cons: '难以处理时变、强非线性、多变量耦合系统',
+    params: [
+      { name: 'Kp', label: '比例增益', min: 0.1, max: 30, step: 0.1, default: 8 },
+      { name: 'Ki', label: '积分增益', min: 0, max: 15, step: 0.05, default: 4 },
+      { name: 'Kd', label: '微分增益', min: 0, max: 8, step: 0.05, default: 1.5 }
+    ],
+    model_required: '不需要', robustness: '中', nonlinear: '差', compute: '极低', tuning: '中',
+    best_for: '工业通用'
+  },
+  LQR: {
+    name: 'LQR', fullName: '线性二次型调节器', category: 'modern',
+    color: '#3ddbff', cat_label: '现代控制',
+    scenario: '线性系统最优控制，已知系统精确模型，需要权衡控制能耗与状态误差',
+    core: '最小化性能指标 J = ∫(xᵀQx + uᵀRu)dt，最优反馈律 u = -Kx',
+    application: '飞行器姿态控制、倒立摆、电力系统稳定',
+    pros: '理论最优，保证闭环稳定，可处理多变量',
+    cons: '需要精确模型，仅适用线性系统，全状态可测',
+    params: [
+      { name: 'Q', label: '状态权重 Q', min: 1, max: 100, step: 1, default: 10 },
+      { name: 'R', label: '控制权重 R', min: 0.01, max: 5, step: 0.01, default: 0.5 }
+    ],
+    model_required: '需要', robustness: '中', nonlinear: '差', compute: '低', tuning: '中',
+    best_for: '线性系统最优控制'
+  },
+  MIMO: {
+    name: 'MIMO', fullName: '多输入多输出控制', category: 'modern',
+    color: '#3ddbff', cat_label: '现代控制',
+    scenario: '多变量耦合系统，如多关节机器人、电力网络、化工蒸馏塔',
+    core: '状态空间反馈或解耦控制，处理输入输出间的耦合关系',
+    application: '机器人、过程工业、电力系统、航空航天',
+    pros: '处理多变量耦合，整体优化',
+    cons: '设计复杂，需要解耦，模型要求高',
+    params: [
+      { name: 'Kp', label: '主回路增益', min: 0.1, max: 20, step: 0.1, default: 6 },
+      { name: 'dec', label: '解耦系数', min: 0, max: 1, step: 0.05, default: 0.6 }
+    ],
+    model_required: '需要', robustness: '中', nonlinear: '差', compute: '中', tuning: '难',
+    best_for: '多变量耦合系统'
+  },
+  MPC: {
+    name: 'MPC', fullName: '模型预测控制', category: 'modern',
+    color: '#3ddbff', cat_label: '现代控制',
+    scenario: '存在约束的复杂系统，如化工过程、自动驾驶轨迹跟踪',
+    core: '滚动优化：每步求解有限时域最优控制序列，仅执行第一步',
+    application: '炼油化工、自动驾驶、能源管理、机器人',
+    pros: '显式处理约束，前馈预测，多目标优化',
+    cons: '在线计算量大，依赖模型精度',
+    params: [
+      { name: 'Hp', label: '预测时域', min: 5, max: 50, step: 1, default: 20 },
+      { name: 'Hc', label: '控制时域', min: 1, max: 10, step: 1, default: 5 },
+      { name: 'λ', label: '控制加权', min: 0.01, max: 2, step: 0.01, default: 0.3 }
+    ],
+    model_required: '需要', robustness: '高', nonlinear: '良', compute: '高', tuning: '难',
+    best_for: '约束多变量系统'
+  },
+  SMC: {
+    name: 'SMC', fullName: '滑模控制', category: 'nonlinear',
+    color: '#ff3d7f', cat_label: '非线性控制',
+    scenario: '强非线性、参数不确定系统，要求强鲁棒性',
+    core: '设计滑模面 s = ė + λ·e，控制律使系统沿 s = 0 运动',
+    application: '电机控制、电力电子、飞行器、机械臂',
+    pros: '对参数摄动和外部扰动不敏感，鲁棒性极强',
+    cons: '抖振问题、控制信号不连续、需高频切换',
+    params: [
+      { name: 'λ', label: '滑模参数', min: 0.1, max: 10, step: 0.1, default: 2 },
+      { name: 'η', label: '切换增益', min: 0.1, max: 20, step: 0.1, default: 3 },
+      { name: 'φ', label: '边界层', min: 0.01, max: 1, step: 0.01, default: 0.1 }
+    ],
+    model_required: '部分需要', robustness: '极高', nonlinear: '优', compute: '低', tuning: '中',
+    best_for: '强扰动不确定系统'
+  },
+  Backstepping: {
+    name: 'Backstepping', fullName: '反步法', category: 'nonlinear',
+    color: '#ff3d7f', cat_label: '非线性控制',
+    scenario: '严格反馈形式的级联非线性系统',
+    core: '递归地构造虚拟控制，逐步稳定各子系统',
+    application: '无人机、机械臂、电力变换器',
+    pros: '系统化处理非线性，可结合自适应',
+    cons: '计算复杂，对模型依赖强，微分爆炸',
+    params: [
+      { name: 'k1', label: '虚拟增益 k₁', min: 0.1, max: 20, step: 0.1, default: 4 },
+      { name: 'k2', label: '实际增益 k₂', min: 0.1, max: 20, step: 0.1, default: 5 }
+    ],
+    model_required: '需要', robustness: '中', nonlinear: '优', compute: '中', tuning: '中',
+    best_for: '级联非线性系统'
+  },
+  ADRC: {
+    name: 'ADRC', fullName: '自抗扰控制', category: 'nonlinear',
+    color: '#ff3d7f', cat_label: '非线性控制',
+    scenario: '模型不确定、外部扰动严重的系统，无需精确模型',
+    core: '扩张状态观测器 ESO 估计系统总扰动并实时补偿',
+    application: '飞行控制、电机驱动、过程控制、伺服系统',
+    pros: '不依赖精确模型，抗扰能力极强',
+    cons: '参数整定复杂，计算量较大，理论分析难',
+    params: [
+      { name: 'ωo', label: '观测器带宽', min: 1, max: 100, step: 1, default: 30 },
+      { name: 'ωc', label: '控制器带宽', min: 1, max: 50, step: 0.5, default: 10 },
+      { name: 'b0', label: '系统补偿 b₀', min: 0.1, max: 10, step: 0.1, default: 1 }
+    ],
+    model_required: '最少', robustness: '极高', nonlinear: '良', compute: '中', tuning: '难',
+    best_for: '未知扰动系统'
+  },
+  MRAC: {
+    name: 'MRAC', fullName: '模型参考自适应控制', category: 'adaptive',
+    color: '#b87dff', cat_label: '自适应控制',
+    scenario: '参数未知或慢时变系统，希望输出跟踪参考模型',
+    core: '通过 MIT 规则或 Lyapunov 方法在线调整控制器参数',
+    application: '航空航天、电机控制、机器人',
+    pros: '自适应未知参数，无需精确模型',
+    cons: '收敛慢，瞬态性能差，可能失稳',
+    params: [
+      { name: 'γ', label: '自适应增益', min: 0.01, max: 2, step: 0.01, default: 0.3 },
+      { name: 'am', label: '参考模型极点', min: 0.5, max: 10, step: 0.1, default: 3 }
+    ],
+    model_required: '部分需要', robustness: '高', nonlinear: '中', compute: '中', tuning: '难',
+    best_for: '参数未知系统'
+  },
+  STC: {
+    name: 'STC', fullName: '自校正控制', category: 'adaptive',
+    color: '#b87dff', cat_label: '自适应控制',
+    scenario: '慢时变系统，在线辨识参数并更新控制器',
+    core: '递推最小二乘 RLS 在线辨识 + 控制律重新设计',
+    application: '过程控制、化工、冶金、电机',
+    pros: '适应参数变化，无需先验模型',
+    cons: '瞬态性能差，辨识受噪声影响',
+    params: [
+      { name: 'λ', label: '遗忘因子', min: 0.9, max: 0.999, step: 0.001, default: 0.98 },
+      { name: 'Kp', label: '基础增益', min: 0.1, max: 20, step: 0.1, default: 5 }
+    ],
+    model_required: '在线辨识', robustness: '高', nonlinear: '中', compute: '中', tuning: '中',
+    best_for: '慢时变系统'
+  },
+  Fuzzy: {
+    name: 'Fuzzy', fullName: '模糊控制', category: 'intelligent',
+    color: '#ffb800', cat_label: '智能控制',
+    scenario: '难以建模、专家经验丰富的系统，如家电、复杂过程',
+    core: '基于模糊规则表：IF e is NB AND ė is NB THEN u is PB',
+    application: '空调、洗衣机、电梯、交通信号、烧结过程',
+    pros: '不需要模型，易嵌入专家知识',
+    cons: '规则库设计主观，缺乏严格稳定性证明',
+    params: [
+      { name: 'Ke', label: '误差量化', min: 0.1, max: 5, step: 0.1, default: 1 },
+      { name: 'Ked', label: '误差变化量化', min: 0.1, max: 5, step: 0.1, default: 0.5 },
+      { name: 'Ku', label: '输出量化', min: 0.1, max: 10, step: 0.1, default: 3 }
+    ],
+    model_required: '不需要', robustness: '高', nonlinear: '良', compute: '低', tuning: '中',
+    best_for: '专家经验可用'
+  },
+  NN: {
+    name: 'NN', fullName: '神经网络控制', category: 'intelligent',
+    color: '#ffb800', cat_label: '智能控制',
+    scenario: '强非线性、未知动力学系统，可离线或在线训练',
+    core: '神经网络逼近系统逆动力学或直接学习控制律',
+    application: '机器人、自动驾驶、复杂过程、模式跟踪',
+    pros: '逼近任意非线性映射，自适应学习',
+    cons: '训练数据需求大，可解释性差，可能过拟合',
+    params: [
+      { name: 'η', label: '学习率', min: 0.001, max: 0.5, step: 0.001, default: 0.05 },
+      { name: 'Kp', label: 'PD 反馈增益', min: 0.1, max: 20, step: 0.1, default: 4 }
+    ],
+    model_required: '不需要（需数据）', robustness: '中', nonlinear: '优', compute: '高', tuning: '难',
+    best_for: '强非线性系统'
+  },
+  GA: {
+    name: 'GA', fullName: '遗传算法', category: 'optimization',
+    color: '#3ddbff', cat_label: '优化算法',
+    scenario: '多峰、非凸参数优化问题，离线整定控制器参数',
+    core: '选择 / 交叉 / 变异模拟自然进化，全局搜索最优解',
+    application: 'PID 整定、路径规划、调度、结构优化',
+    pros: '全局搜索能力强，不需梯度信息',
+    cons: '计算慢，收敛速度不确定，参数多',
+    params: [
+      { name: 'Pop', label: '种群规模', min: 10, max: 100, step: 5, default: 30 },
+      { name: 'Mut', label: '变异率', min: 0.01, max: 0.3, step: 0.01, default: 0.1 },
+      { name: 'Kp', label: '基础 Kp', min: 0.1, max: 20, step: 0.1, default: 6 }
+    ],
+    model_required: '不需要', robustness: '离线优化', nonlinear: '不适用', compute: '极高', tuning: '自动',
+    best_for: '离线参数整定'
+  },
+  PSO: {
+    name: 'PSO', fullName: '粒子群优化', category: 'optimization',
+    color: '#3ddbff', cat_label: '优化算法',
+    scenario: '连续空间参数优化，比 GA 更快收敛',
+    core: '粒子位置 / 速度更新，群体最优信息共享',
+    application: '控制器参数优化、神经网络训练、滤波器设计',
+    pros: '收敛快，实现简单，参数少',
+    cons: '易陷入局部最优，早熟收敛',
+    params: [
+      { name: 'N', label: '粒子数', min: 10, max: 80, step: 5, default: 30 },
+      { name: 'w', label: '惯性权重', min: 0.1, max: 1.5, step: 0.05, default: 0.7 },
+      { name: 'Kp', label: '基础 Kp', min: 0.1, max: 20, step: 0.1, default: 6 }
+    ],
+    model_required: '不需要', robustness: '离线优化', nonlinear: '不适用', compute: '高', tuning: '自动',
+    best_for: '快速参数寻优'
+  },
+  ACO: {
+    name: 'ACO', fullName: '蚁群算法', category: 'optimization',
+    color: '#3ddbff', cat_label: '优化算法',
+    scenario: '组合优化、路径规划、调度问题',
+    core: '信息素轨迹引导蚂蚁搜索，正反馈机制',
+    application: '旅行商问题、车辆路径、网络路由、调度',
+    pros: '适合离散优化问题，鲁棒性强',
+    cons: '连续问题需离散化，收敛慢',
+    params: [
+      { name: 'Ants', label: '蚂蚁数', min: 5, max: 50, step: 1, default: 20 },
+      { name: 'ρ', label: '蒸发率', min: 0.01, max: 0.5, step: 0.01, default: 0.1 },
+      { name: 'Kp', label: '基础 Kp', min: 0.1, max: 20, step: 0.1, default: 6 }
+    ],
+    model_required: '不需要', robustness: '离线优化', nonlinear: '不适用', compute: '高', tuning: '自动',
+    best_for: '离散组合优化'
+  },
+  RL: {
+    name: 'RL', fullName: '强化学习', category: 'learning',
+    color: '#b87dff', cat_label: '学习控制',
+    scenario: '序贯决策、无模型、长期回报优化问题',
+    core: '智能体通过试错学习策略 π(a|s) 最大化累积奖励',
+    application: '游戏 AI、机器人、推荐系统、自动驾驶',
+    pros: '无需模型，可学习长期最优策略',
+    cons: '样本效率低，训练不稳定，探索困难',
+    params: [
+      { name: 'α', label: '学习率', min: 0.01, max: 0.5, step: 0.01, default: 0.1 },
+      { name: 'γ', label: '折扣因子', min: 0.5, max: 0.99, step: 0.01, default: 0.9 },
+      { name: 'ε', label: '探索率', min: 0.01, max: 0.5, step: 0.01, default: 0.1 }
+    ],
+    model_required: '不需要', robustness: '高', nonlinear: '优', compute: '极高', tuning: '自动',
+    best_for: '序贯决策'
+  }
+};
+
+/* ============================================================
+   控制律实现
+   ============================================================ */
+function computeControl(algoKey, params, e, x, v, dt, state, ctx) {
+  switch(algoKey) {
+    case 'P':
+      return params.Kp * e;
+    
+    case 'PI':
+      state.integral = (state.integral || 0) + e * dt;
+      state.integral = Math.max(-50, Math.min(50, state.integral));
+      return params.Kp * e + params.Ki * state.integral;
+    
+    case 'PD': {
+      const dedt = (e - (state.prevError || 0)) / dt;
+      state.prevError = e;
+      return params.Kp * e + params.Kd * dedt;
+    }
+    
+    case 'PID': {
+      state.integral = (state.integral || 0) + e * dt;
+      state.integral = Math.max(-50, Math.min(50, state.integral));
+      const dedt = (e - (state.prevError || 0)) / dt;
+      state.prevError = e;
+      return params.Kp * e + params.Ki * state.integral + params.Kd * dedt;
+    }
+    
+    case 'LQR': {
+      // 简化 LQR: 基于代数 Riccati 方程的近似解析解
+      const Q = params.Q, R = params.R;
+      const k1 = Math.sqrt(Q / R);
+      const k2 = Math.sqrt(2 * Math.sqrt(Q / R) / R);
+      return k1 * e + k2 * (-v);
+    }
+    
+    case 'MIMO': {
+      state.integral = (state.integral || 0) + e * dt;
+      state.integral = Math.max(-30, Math.min(30, state.integral));
+      const dedt = (e - (state.prevError || 0)) / dt;
+      state.prevError = e;
+      const main_u = params.Kp * e + 2 * state.integral + 1 * dedt;
+      // 解耦项：基于速度前馈
+      const decoupling = params.dec * v;
+      return main_u - decoupling;
+    }
+    
+    case 'MPC': {
+      state.integral = (state.integral || 0) + e * dt;
+      state.integral = Math.max(-30, Math.min(30, state.integral));
+      // 简化模型预测：基于未来误差预测
+      const futureError = e + v * params.Hp * dt * 0.3;
+      const u_pred = 0.8 * futureError + 0.4 * state.integral / (params.Hp * 0.1);
+      // 平滑控制输入
+      const u_smooth = (u_pred + (state.prevU || 0) * 0.5) / 1.5;
+      state.prevU = u_smooth;
+      return u_smooth * (1 / (1 + params.λ));
+    }
+    
+    case 'SMC': {
+      // 滑模面 s = ė + λ·e
+      const s = (e - (state.prevError || 0)) / dt + params.λ * e;
+      state.prevError = e;
+      // 等效控制 + 切换控制（带边界层饱和函数）
+      const eq = params.λ * v;
+      const sign_s = s / (Math.abs(s) + params.φ);
+      return eq + params.η * sign_s;
+    }
+    
+    case 'Backstepping': {
+      // 二阶严格反馈系统递归设计
+      const z1 = e;
+      const α1 = -params.k1 * z1;
+      const z2 = v - α1;
+      return -params.k2 * z2 - z1;
+    }
+    
+    case 'ADRC': {
+      const wo = params.ωo, wc = params.ωc, b0 = params.b0;
+      if (!state.x_hat) state.x_hat = [0, 0, 0];
+      // 三阶扩张状态观测器
+      const e_eso = x - state.x_hat[0];
+      const β1 = 3 * wo, β2 = 3 * wo * wo, β3 = wo * wo * wo;
+      state.x_hat[0] += dt * (state.x_hat[1] + β1 * e_eso);
+      state.x_hat[1] += dt * (state.x_hat[2] + β2 * e_eso + (state.prevU || 0));
+      state.x_hat[2] += dt * (β3 * e_eso);
+      // PD 控制律 + 扰动补偿
+      const e1 = ctx.r - state.x_hat[0];
+      const e2 = -state.x_hat[1];
+      const u0 = wc * wc * e1 + 2 * wc * 0.7 * e2;
+      const u_total = (u0 - state.x_hat[2]) / b0;
+      state.prevU = u_total;
+      return u_total;
+    }
+    
+    case 'MRAC': {
+      const γ = params.γ, am = params.am;
+      if (state.ym === undefined) state.ym = 0;
+      // 参考模型（一阶）
+      state.ym += dt * (-am * state.ym + am * ctx.r);
+      const e_mrac = x - state.ym;
+      if (state.θ1 === undefined) { state.θ1 = 0.5; state.θ2 = 0.5; }
+      // MIT 规则更新
+      state.θ1 -= γ * e_mrac * ctx.r * dt;
+      state.θ2 -= γ * e_mrac * x * dt;
+      return state.θ1 * ctx.r - state.θ2 * x;
+    }
+    
+    case 'STC': {
+      const lambda_stc = params.λ;
+      if (!state.P) { state.P = [[10, 0], [0, 10]]; state.θ = [0.5, 0.5]; }
+      // 递推最小二乘辨识
+      const φ = [ctx.r, -x];
+      const Pφ = [state.P[0][0] * φ[0] + state.P[0][1] * φ[1], 
+                  state.P[1][0] * φ[0] + state.P[1][1] * φ[1]];
+      const denom = lambda_stc + φ[0] * Pφ[0] + φ[1] * Pφ[1];
+      const Kg = [Pφ[0] / Math.max(0.001, denom), Pφ[1] / Math.max(0.001, denom)];
+      const e_pred = ctx.r - (state.θ[0] * ctx.r - state.θ[1] * x);
+      state.θ[0] += Kg[0] * e_pred;
+      state.θ[1] += Kg[1] * e_pred;
+      const newP = [[0,0],[0,0]];
+      for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {
+        newP[i][j] = (state.P[i][j] - Kg[i] * Pφ[j]) / lambda_stc;
+      }
+      state.P = newP;
+      // 应用辨识结果到 PI 控制
+      state.integral = (state.integral || 0) + e * dt;
+      state.integral = Math.max(-30, Math.min(30, state.integral));
+      return params.Kp * e + 2 * state.integral;
+    }
+    
+    case 'Fuzzy': {
+      const Ke = params.Ke, Ked = params.Ked, Ku = params.Ku;
+      // 误差归一化
+      const e_n = Math.max(-1, Math.min(1, e * Ke / Math.max(0.1, ctx.r)));
+      const ed_f = (e - (state.prevError || 0)) / dt;
+      state.prevError = e;
+      const ed_n = Math.max(-1, Math.min(1, ed_f * Ked / Math.max(0.1, ctx.r)));
+      // Mamdani 型模糊推理近似（连续函数实现）
+      return Ku * ctx.r * (
+        0.5 * Math.tanh(e_n * 2) + 
+        0.3 * Math.tanh(ed_n * 2) +
+        0.2 * Math.tanh((e_n + ed_n) * 2)
+      );
+    }
+    
+    case 'NN': {
+      // 单神经元自适应 PID
+      const η = params.η;
+      if (!state.w) state.w = [0.4, 0.3, 0.3];
+      const x1 = e;
+      const x2 = (e - (state.prevError || 0)) / dt;
+      state.integral = (state.integral || 0) + e * dt;
+      state.integral = Math.max(-30, Math.min(30, state.integral));
+      const x3 = state.integral;
+      state.prevError = e;
+      // 加权输出
+      const u_nn = state.w[0] * x1 + state.w[1] * x2 + state.w[2] * x3;
+      const scale = params.Kp / (Math.abs(state.w[0] * x1) + Math.abs(state.w[1] * x2) + Math.abs(state.w[2] * x3) + 0.001);
+      // Hebb 学习规则
+      state.w[0] += η * e * x1 * dt;
+      state.w[1] += η * e * x2 * dt;
+      state.w[2] += η * e * x3 * dt;
+      // 归一化
+      const wsum = Math.abs(state.w[0]) + Math.abs(state.w[1]) + Math.abs(state.w[2]);
+      state.w = state.w.map(w => w / Math.max(0.001, wsum) * 3);
+      return u_nn * scale;
+    }
+    
+    case 'GA':
+    case 'PSO':
+    case 'ACO': {
+      // 优化算法：模拟离线优化后的 PID 参数（展示优化效果）
+      state.integral = (state.integral || 0) + e * dt;
+      state.integral = Math.max(-30, Math.min(30, state.integral));
+      const ed_opt = (e - (state.prevError || 0)) / dt;
+      state.prevError = e;
+      const optKp = params.Kp * (algoKey === 'GA' ? 1.3 : algoKey === 'PSO' ? 1.25 : 1.15);
+      const optKi = algoKey === 'GA' ? 3.5 : algoKey === 'PSO' ? 3.2 : 2.8;
+      const optKd = algoKey === 'GA' ? 1.8 : algoKey === 'PSO' ? 2.0 : 1.6;
+      return optKp * e + optKi * state.integral + optKd * ed_opt;
+    }
+    
+    case 'RL': {
+      // 简化 Q-learning：离散化状态空间
+      const α = params.α, γ_rl = params.γ, ε = params.ε;
+      const s_idx = Math.floor(e * 5) + 5;
+      const v_idx = Math.floor(v * 5) + 5;
+      const s_id = Math.max(0, Math.min(10, s_idx)) * 11 + Math.max(0, Math.min(10, v_idx));
+      // 初始化 Q 表
+      if (!state.Q) {
+        state.Q = new Float32Array(11 * 11 * 11);
+        for (let i = 0; i < state.Q.length; i++) state.Q[i] = (Math.random() - 0.5) * 0.1;
+      }
+      // ε-贪心策略
+      let a_id;
+      if (Math.random() < ε) {
+        a_id = Math.floor(Math.random() * 11);
+      } else {
+        let best = -Infinity;
+        for (let a = 0; a < 11; a++) {
+          if (state.Q[s_id * 11 + a] > best) {
+            best = state.Q[s_id * 11 + a];
+            a_id = a;
+          }
+        }
+      }
+      // 基础反馈 + 探索
+      const base_u = 6 * e - 2 * v;
+      const explore_u = (a_id - 5) * 0.5;
+      const reward = -e * e;
+      // Q 值更新
+      if (state.prevS !== undefined) {
+        let maxNext = -Infinity;
+        for (let a = 0; a < 11; a++) {
+          if (state.Q[s_id * 11 + a] > maxNext) maxNext = state.Q[s_id * 11 + a];
+        }
+        state.Q[state.prevS * 11 + state.prevA] += α * (reward + γ_rl * maxNext - state.Q[state.prevS * 11 + state.prevA]);
+      }
+      state.prevS = s_id;
+      state.prevA = a_id;
+      return base_u + explore_u * 0.3;
+    }
+  }
+  return 0;
+}
+
+/* ============================================================
+   仿真引擎
+   ============================================================ */
+class Simulator {
+  constructor() {
+    this.dt = 0.005;
+    this.maxTime = 10;
+    this.plant = { m: 1, b: 0.5, k: 2, r: 1, d: 0 };
+    this.algoKeys = ['PID', 'LQR', 'SMC'];
+    this.params = [{}, {}, {}];
+    this.activeSlots = [true, true, true];
+    this.reset();
+    this.algoKeys.forEach((k, i) => this.setAlgo(i, k));
+  }
+  
+  reset() {
+    this.time = 0;
+    this.history = [];
+    this.slotStates = [
+      { x: 0, v: 0 },
+      { x: 0, v: 0 },
+      { x: 0, v: 0 }
+    ];
+    this.controllerStates = [null, null, null];
+    this.metrics = [{}, {}, {}];
+  }
+  
+  setAlgo(slot, key) {
+    this.algoKeys[slot] = key;
+    this.params[slot] = {};
+    ALGORITHMS[key].params.forEach(p => {
+      this.params[slot][p.name] = p.default;
+    });
+    this.reset();
+  }
+  
+  setParam(slot, name, value) {
+    this.params[slot][name] = value;
+    // 重置该槽位仿真
+    this.time = 0;
+    this.history = [];
+    this.slotStates[slot] = { x: 0, v: 0 };
+    this.controllerStates[slot] = null;
+    this.metrics[slot] = {};
+  }
+  
+  step() {
+    if (this.time >= this.maxTime) return false;
+    const { m, b, k, r, d } = this.plant;
+    const dt = this.dt;
+    const ctx = { r: r, plant: this.plant };
+    
+    const ys = [0, 0, 0];
+    const us = [0, 0, 0];
+    const vs = [0, 0, 0];
+    
+    for (let slot = 0; slot < 3; slot++) {
+      if (!this.activeSlots[slot]) continue;
+      if (!this.controllerStates[slot]) {
+        this.controllerStates[slot] = {};
+      }
+      
+      const cState = this.controllerStates[slot];
+      const params = this.params[slot];
+      const algoKey = this.algoKeys[slot];
+      const ss = this.slotStates[slot];
+      
+      const e = r - ss.x;
+      const u = computeControl(algoKey, params, e, ss.x, ss.v, dt, cState, ctx);
+      const uClipped = Math.max(-50, Math.min(50, u));
+      
+      // RK4 积分该槽位的独立虚拟对象
+      const f = (state, uIn) => {
+        return [state[1], (uIn - b * state[1] - k * state[0] + d) / m];
+      };
+      
+      const k1 = f([ss.x, ss.v], uClipped);
+      const k2 = f([ss.x + k1[0]*dt/2, ss.v + k1[1]*dt/2], uClipped);
+      const k3 = f([ss.x + k2[0]*dt/2, ss.v + k2[1]*dt/2], uClipped);
+      const k4 = f([ss.x + k3[0]*dt, ss.v + k3[1]*dt], uClipped);
+      
+      const newX = ss.x + (k1[0] + 2*k2[0] + 2*k3[0] + k4[0]) * dt / 6;
+      const newV = ss.v + (k1[1] + 2*k2[1] + 2*k3[1] + k4[1]) * dt / 6;
+      
+      ys[slot] = newX;
+      us[slot] = uClipped;
+      vs[slot] = newV;
+      
+      this.updateMetrics(slot, r, newX, e, uClipped, dt);
+    }
+    
+    this.time += dt;
+    this.history.push({ t: this.time, y: ys.slice(), u: us.slice(), v: vs.slice() });
+    
+    // 更新槽位状态
+    for (let slot = 0; slot < 3; slot++) {
+      if (this.activeSlots[slot]) {
+        this.slotStates[slot].x = ys[slot];
+        this.slotStates[slot].v = vs[slot];
+      }
+    }
+    
+    return true;
+  }
+  
+  updateMetrics(slot, r, y, e, u, dt) {
+    const m = this.metrics[slot];
+    if (!m.init) {
+      m.init = true;
+      m.peak = 0;
+      m.settled = false;
+      m.settlingTime = Infinity;
+      m.riseTime = Infinity;
+      m.risen = false;
+      m.steadyError = 0;
+      m.sumE = 0;
+      m.count = 0;
+    }
+    m.peak = Math.max(m.peak, y);
+    m.sumE += e;
+    m.count++;
+    
+    if (!m.risen && y >= 0.9 * r) {
+      m.riseTime = this.time;
+      m.risen = true;
+    }
+    
+    if (!m.settled && Math.abs(e) < 0.02 * Math.abs(r) && this.time > 0.1) {
+      m.settlingTime = this.time;
+      m.settled = true;
+    }
+  }
+  
+  finalizeMetrics() {
+    for (let slot = 0; slot < 3; slot++) {
+      const m = this.metrics[slot];
+      if (!m.init) continue;
+      const r = this.plant.r;
+      m.overshoot = m.peak > r ? ((m.peak - r) / r * 100) : 0;
+      m.steadyError = m.count > 0 ? Math.abs(m.sumE / m.count) : 0;
+    }
+  }
+}
+
+/* ============================================================
+   主应用
+   ============================================================ */
+const sim = new Simulator();
+const SLOT_COLORS = ['#00ffa3', '#ffb800', '#ff3d7f'];
+let isRunning = false;
+let animId = null;
+
+// 初始化算法选择下拉
+document.querySelectorAll('.algo-select').forEach((sel, idx) => {
+  Object.keys(ALGORITHMS).forEach(key => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = `${ALGORITHMS[key].name} · ${ALGORITHMS[key].fullName}`;
+    sel.appendChild(opt);
+  });
+  sel.value = sim.algoKeys[idx];
+  sel.addEventListener('change', e => {
+    sim.setAlgo(idx, e.target.value);
+    renderParamPanel(idx);
+    renderInfo(idx);
+    renderLegend();
+    draw();
+    drawControl();
+    drawMetrics();
+  });
+});
+
+// 渲染参数面板
+function renderParamPanel(slot) {
+  const container = document.querySelector(`.algo-params[data-slot="${slot}"]`);
+  container.innerHTML = '';
+  const algo = ALGORITHMS[sim.algoKeys[slot]];
+  algo.params.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'slider-row';
+    row.innerHTML = `
+      <span class="slider-label">${p.name}</span>
+      <input type="range" min="${p.min}" max="${p.max}" step="${p.step}" value="${sim.params[slot][p.name]}" data-slot="${slot}" data-param="${p.name}">
+      <span class="slider-value mono">${formatNum(sim.params[slot][p.name], p.step)}</span>
+    `;
+    container.appendChild(row);
+    const input = row.querySelector('input');
+    const valSpan = row.querySelector('.slider-value');
+    input.addEventListener('input', e => {
+      const val = parseFloat(e.target.value);
+      sim.setParam(slot, p.name, val);
+      valSpan.textContent = formatNum(val, p.step);
+      draw();
+      drawControl();
+      drawMetrics();
+    });
+  });
+}
+
+function formatNum(val, step) {
+  const decimals = step < 0.01 ? 3 : step < 0.1 ? 2 : step < 1 ? 2 : 1;
+  return val.toFixed(decimals);
+}
+
+// 渲染算法信息
+function renderInfo(slot) {
+  const algo = ALGORITHMS[sim.algoKeys[slot]];
+  const container = document.querySelector(`.algo-info[data-slot="${slot}"]`);
+  container.innerHTML = `
+    <div class="mono text-[10px] mb-1" style="color:var(--muted)">${algo.cat_label.toUpperCase()}</div>
+    <div class="text-xs leading-relaxed">${algo.core}</div>
+    <div class="text-[11px] mt-2" style="color:var(--muted)">适用：${algo.scenario}</div>
+  `;
+}
+
+// 算法开关
+document.querySelectorAll('.algo-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const slot = parseInt(btn.dataset.slot);
+    sim.activeSlots[slot] = !sim.activeSlots[slot];
+    const slotEl = document.querySelector(`.algo-slot[data-slot="${slot}"]`);
+    if (sim.activeSlots[slot]) {
+      slotEl.style.opacity = '1';
+      btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+    } else {
+      slotEl.style.opacity = '0.4';
+      btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+    }
+    draw();
+    drawControl();
+    drawMetrics();
+  });
+});
+
+// 系统参数
+const plantMap = {plantM:'m',plantB:'b',plantK:'k',plantR:'r',plantD:'d'};
+['plantM', 'plantB', 'plantK', 'plantR', 'plantD'].forEach(id => {
+  const input = document.getElementById(id);
+  const valSpan = document.getElementById(id + 'Val');
+  input.addEventListener('input', e => {
+    const val = parseFloat(e.target.value);
+    sim.plant[plantMap[id]] = val;
+    valSpan.textContent = id === 'plantB' || id === 'plantD' ? val.toFixed(2) : val.toFixed(1);
+    sim.reset();
+    draw();
+    drawControl();
+    drawMetrics();
+  });
+});
+
+// 控制按钮
+document.getElementById('btnPlay').addEventListener('click', () => {
+  if (isRunning) return;
+  isRunning = true;
+  if (sim.time >= sim.maxTime) sim.reset();
+  runSim();
+});
+document.getElementById('btnPause').addEventListener('click', () => {
+  isRunning = false;
+  if (animId) cancelAnimationFrame(animId);
+});
+document.getElementById('btnReset').addEventListener('click', () => {
+  isRunning = false;
+  if (animId) cancelAnimationFrame(animId);
+  sim.reset();
+  draw();
+  drawControl();
+  drawMetrics();
+});
+
+// 仿真循环
+function runSim() {
+  if (!isRunning) return;
+  for (let i = 0; i < 4; i++) {
+    if (!sim.step()) {
+      isRunning = false;
+      sim.finalizeMetrics();
+      draw();
+      drawControl();
+      drawMetrics();
+      showToast('仿真完成 · 10s');
+      return;
+    }
+  }
+  draw();
+  drawControl();
+  drawMetrics();
+  animId = requestAnimationFrame(runSim);
+}
+
+// 渲染图例
+function renderLegend() {
+  const box = document.getElementById('legendBox');
+  box.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    if (!sim.activeSlots[i]) continue;
+    const algo = ALGORITHMS[sim.algoKeys[i]];
+    const tag = document.createElement('div');
+    tag.className = 'signal-tag';
+    tag.innerHTML = `<span class="dot" style="background:${SLOT_COLORS[i]}"></span><span>${algo.name}</span>`;
+    box.appendChild(tag);
+  }
+  const refTag = document.createElement('div');
+  refTag.className = 'signal-tag';
+  refTag.innerHTML = `<span class="dot" style="background:var(--fg-2)"></span><span>设定值 r</span>`;
+  box.appendChild(refTag);
+}
+
+// 绘制响应曲线
+function draw() {
+  const canvas = document.getElementById('responseCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  
+  const W = rect.width, H = rect.height;
+  const padL = 45, padR = 15, padT = 15, padB = 25;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  
+  ctx.clearRect(0, 0, W, H);
+  
+  // 背景网格
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 10; i++) {
+    const x = padL + plotW * i / 10;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + plotH); ctx.stroke();
+  }
+  for (let i = 0; i <= 6; i++) {
+    const y = padT + plotH * i / 6;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + plotW, y); ctx.stroke();
+  }
+  
+  // 坐标轴
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.beginPath();
+  ctx.moveTo(padL, padT);
+  ctx.lineTo(padL, padT + plotH);
+  ctx.lineTo(padL + plotW, padT + plotH);
+  ctx.stroke();
+  
+  const r = sim.plant.r;
+  const yMax = Math.max(1.5, r * 1.6);
+  const yMin = -0.3;
+  const yToPx = y => padT + plotH * (1 - (y - yMin) / (yMax - yMin));
+  const tToPx = t => padL + plotW * t / sim.maxTime;
+  
+  // 设定值参考线
+  ctx.strokeStyle = 'rgba(180,189,201,0.5)';
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(padL, yToPx(r));
+  ctx.lineTo(padL + plotW, yToPx(r));
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  ctx.fillStyle = 'rgba(180,189,201,0.7)';
+  ctx.font = '10px JetBrains Mono';
+  ctx.fillText(`r = ${r.toFixed(2)}`, padL + 4, yToPx(r) - 4);
+  
+  // Y 轴标签
+  ctx.fillStyle = 'rgba(108,118,137,0.8)';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 6; i++) {
+    const val = yMin + (yMax - yMin) * (6 - i) / 6;
+    ctx.fillText(val.toFixed(1), padL - 4, padT + plotH * i / 6 + 3);
+  }
+  ctx.textAlign = 'left';
+  
+  // 绘制曲线
+  for (let slot = 0; slot < 3; slot++) {
+    if (!sim.activeSlots[slot]) continue;
+    const color = SLOT_COLORS[slot];
+    
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 8;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < sim.history.length; i++) {
+      const h = sim.history[i];
+      const x = tToPx(h.t);
+      const y = yToPx(h.y[slot]);
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+  
+  // 时间游标
+  if (sim.history.length > 0 && isRunning) {
+    const x = tToPx(sim.time);
+    ctx.strokeStyle = 'rgba(0,255,163,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, padT);
+    ctx.lineTo(x, padT + plotH);
+    ctx.stroke();
+  }
+}
+
+// 绘制控制信号
+function drawControl() {
+  const canvas = document.getElementById('controlCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  
+  const W = rect.width, H = rect.height;
+  const padL = 45, padR = 15, padT = 10, padB = 20;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  
+  ctx.clearRect(0, 0, W, H);
+  
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  for (let i = 0; i <= 10; i++) {
+    const x = padL + plotW * i / 10;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + plotH); ctx.stroke();
+  }
+  
+  const yZero = padT + plotH / 2;
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.beginPath(); ctx.moveTo(padL, yZero); ctx.lineTo(padL + plotW, yZero); ctx.stroke();
+  
+  let uMax = 10;
+  for (const h of sim.history) {
+    for (let s = 0; s < 3; s++) {
+      if (Math.abs(h.u[s]) > uMax) uMax = Math.abs(h.u[s]);
+    }
+  }
+  uMax = Math.max(10, uMax * 1.1);
+  
+  const tToPx = t => padL + plotW * t / sim.maxTime;
+  const uToPx = u => yZero - (u / uMax) * (plotH / 2);
+  
+  ctx.fillStyle = 'rgba(108,118,137,0.8)';
+  ctx.font = '10px JetBrains Mono';
+  ctx.textAlign = 'right';
+  ctx.fillText('+' + uMax.toFixed(0), padL - 4, padT + 8);
+  ctx.fillText('0', padL - 4, yZero + 3);
+  ctx.fillText('-' + uMax.toFixed(0), padL - 4, padT + plotH - 2);
+  ctx.textAlign = 'left';
+  
+  for (let slot = 0; slot < 3; slot++) {
+    if (!sim.activeSlots[slot]) continue;
+    const color = SLOT_COLORS[slot];
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.85;
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < sim.history.length; i++) {
+      const h = sim.history[i];
+      const x = tToPx(h.t);
+      const y = uToPx(h.u[slot]);
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+}
+
+// 渲染指标
+function drawMetrics() {
+  const grid = document.getElementById('metricsGrid');
+  grid.innerHTML = '';
+  
+  for (let slot = 0; slot < 3; slot++) {
+    if (!sim.activeSlots[slot]) continue;
+    const algo = ALGORITHMS[sim.algoKeys[slot]];
+    const m = sim.metrics[slot];
+    const color = SLOT_COLORS[slot];
+    
+    const card = document.createElement('div');
+    card.className = 'metric-card';
+    card.style.borderColor = color + '40';
+    
+    const riseTime = m.risen ? m.riseTime.toFixed(2) + 's' : '—';
+    const overshoot = m.init ? (m.overshoot || 0).toFixed(1) + '%' : '—';
+    const settling = m.settled ? m.settlingTime.toFixed(2) + 's' : (m.init ? '>10s' : '—');
+    const sse = m.init ? (m.steadyError || 0).toFixed(3) : '—';
+    
+    card.innerHTML = `
+      <div class="flex items-center gap-2 mb-3">
+        <div style="width:8px;height:8px;border-radius:50%;background:${color}"></div>
+        <div class="mono text-xs" style="color:${color}">${algo.name}</div>
+        <div class="mono text-[10px] ml-auto" style="color:var(--muted)">${algo.cat_label}</div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <div class="metric-label">上升时间</div>
+          <div class="metric-value">${riseTime}</div>
+        </div>
+        <div>
+          <div class="metric-label">超调量</div>
+          <div class="metric-value" style="color:${(m.overshoot||0) > 10 ? 'var(--accent-3)' : 'var(--fg)'}">${overshoot}</div>
+        </div>
+        <div>
+          <div class="metric-label">调节时间</div>
+          <div class="metric-value">${settling}</div>
+        </div>
+        <div>
+          <div class="metric-label">稳态误差</div>
+          <div class="metric-value" style="color:${(m.steadyError||0) > 0.05 ? 'var(--accent-3)' : 'var(--fg)'}">${sse}</div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  }
+  
+  drawControl();
+}
+
+// 初始化渲染
+[0, 1, 2].forEach(i => { renderParamPanel(i); renderInfo(i); });
+renderLegend();
+draw();
+drawMetrics();
+
+/* ============================================================
+   Hero 背景动画
+   ============================================================ */
+const heroCanvas = document.getElementById('heroCanvas');
+const hctx = heroCanvas.getContext('2d');
+let heroW, heroH;
+const signals = [];
+
+function resizeHero() {
+  heroW = heroCanvas.width = window.innerWidth;
+  heroH = heroCanvas.height = window.innerHeight;
+}
+resizeHero();
+window.addEventListener('resize', resizeHero);
+
+for (let i = 0; i < 6; i++) {
+  signals.push({
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.3 + Math.random() * 0.4,
+    amp: 40 + Math.random() * 80,
+    yOffset: 0.2 + Math.random() * 0.6,
+    color: ['#00ffa3', '#3ddbff', '#ff3d7f', '#ffb800'][i % 4],
+    width: 0.5 + Math.random() * 1
+  });
+}
+
+let heroT = 0;
+function drawHero() {
+  hctx.clearRect(0, 0, heroW, heroH);
+  heroT += 0.01;
+  
+  signals.forEach(sig => {
+    hctx.strokeStyle = sig.color + '30';
+    hctx.lineWidth = sig.width;
+    hctx.beginPath();
+    const yBase = heroH * sig.yOffset;
+    for (let x = 0; x < heroW; x += 2) {
+      const y = yBase + Math.sin(x * 0.005 + sig.phase + heroT * sig.speed) * sig.amp * Math.sin(x * 0.002 + heroT * 0.3);
+      if (x === 0) hctx.moveTo(x, y);
+      else hctx.lineTo(x, y);
+    }
+    hctx.stroke();
+  });
+  
+  // 粒子流
+  for (let i = 0; i < 30; i++) {
+    const t = (heroT * 30 + i * 50) % heroW;
+    const y = heroH * (0.3 + Math.sin(i * 1.7) * 0.3) + Math.sin(t * 0.01 + i) * 30;
+    hctx.fillStyle = `rgba(0,255,163,${0.3 + Math.sin(i) * 0.2})`;
+    hctx.beginPath();
+    hctx.arc(t, y, 1.5, 0, Math.PI * 2);
+    hctx.fill();
+  }
+  
+  requestAnimationFrame(drawHero);
+}
+drawHero();
+
+/* ============================================================
+   算法图谱
+   ============================================================ */
+function renderAtlas(filter = 'all') {
+  const grid = document.getElementById('atlasGrid');
+  grid.innerHTML = '';
+  Object.keys(ALGORITHMS).forEach(key => {
+    const algo = ALGORITHMS[key];
+    if (filter !== 'all' && algo.category !== filter) return;
+    
+    const card = document.createElement('div');
+    card.className = 'algo-card reveal';
+    card.innerHTML = `
+      <div class="flex items-start justify-between mb-3">
+        <div>
+          <div class="display font-bold text-2xl" style="color:${algo.color}">${algo.name}</div>
+          <div class="text-xs mt-1" style="color:var(--fg-2)">${algo.fullName}</div>
+        </div>
+        <span class="badge" style="color:${algo.color}; background:${algo.color}15; border:1px solid ${algo.color}30">${algo.cat_label}</span>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <div class="mono text-[10px] mb-1" style="color:var(--muted)">适用情境</div>
+          <div style="color:var(--fg-2)">${algo.scenario}</div>
+        </div>
+        <div>
+          <div class="mono text-[10px] mb-1" style="color:var(--muted)">核心思想</div>
+          <div class="mono leading-relaxed" style="color:var(--fg)">${algo.core}</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-2 border-t" style="border-color:var(--border)">
+          <div>
+            <div class="mono text-[10px]" style="color:var(--accent)">优点</div>
+            <div class="text-[11px] mt-1" style="color:var(--fg-2)">${algo.pros}</div>
+          </div>
+          <div>
+            <div class="mono text-[10px]" style="color:var(--accent-3)">缺点</div>
+            <div class="text-[11px] mt-1" style="color:var(--fg-2)">${algo.cons}</div>
+          </div>
+        </div>
+        <div class="pt-2 border-t" style="border-color:var(--border)">
+          <div class="mono text-[10px]" style="color:var(--muted)">典型应用</div>
+          <div class="text-[11px] mt-1" style="color:var(--fg-2)">${algo.application}</div>
+        </div>
+      </div>
+    `;
+    card.addEventListener('click', () => {
+      sim.setAlgo(0, key);
+      document.querySelector('.algo-select[data-slot="0"]').value = key;
+      renderParamPanel(0);
+      renderInfo(0);
+      renderLegend();
+      draw();
+      drawMetrics();
+      document.getElementById('simulator').scrollIntoView({behavior: 'smooth'});
+      showToast(`已加载 ${algo.name} · ${algo.fullName} 到槽位 1`);
+    });
+    grid.appendChild(card);
+  });
+  
+  setTimeout(() => {
+    document.querySelectorAll('.algo-card').forEach((c, i) => {
+      setTimeout(() => c.classList.add('in-view'), i * 30);
+    });
+  }, 50);
+}
+renderAtlas();
+
+document.querySelectorAll('#categoryTabs .cat-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#categoryTabs .cat-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    renderAtlas(tab.dataset.cat);
+  });
+});
+
+/* ============================================================
+   特性对比矩阵
+   ============================================================ */
+function renderCompareTable() {
+  const tbody = document.getElementById('compareTable');
+  tbody.innerHTML = '';
+  Object.keys(ALGORITHMS).forEach(key => {
+    const a = ALGORITHMS[key];
+    const tr = document.createElement('tr');
+    const colorize = (val, type) => {
+      const map = {
+        robustness: { '极高': 'var(--accent)', '高': 'var(--accent-4)', '中': 'var(--accent-2)', '低': 'var(--accent-3)', '离线优化': 'var(--muted)' },
+        nonlinear: { '优': 'var(--accent)', '良': 'var(--accent-4)', '中': 'var(--accent-2)', '差': 'var(--accent-3)', '不适用': 'var(--muted)' },
+        compute: { '极低': 'var(--accent)', '低': 'var(--accent)', '中': 'var(--accent-2)', '高': 'var(--accent-3)', '极高': 'var(--accent-3)' },
+        tuning: { '易': 'var(--accent)', '中': 'var(--accent-2)', '难': 'var(--accent-3)', '自动': 'var(--accent-4)' }
+      };
+      return map[type] && map[type][val] ? map[type][val] : 'var(--fg)';
+    };
+    tr.innerHTML = `
+      <td><span class="algo-name">${a.name}</span> <span style="color:var(--muted);font-size:11px">${a.fullName}</span></td>
+      <td><span class="mono text-[10px]" style="color:${a.color}">${a.cat_label}</span></td>
+      <td>${a.model_required}</td>
+      <td style="color:${colorize(a.robustness,'robustness')}">${a.robustness}</td>
+      <td style="color:${colorize(a.nonlinear,'nonlinear')}">${a.nonlinear}</td>
+      <td style="color:${colorize(a.compute,'compute')}">${a.compute}</td>
+      <td style="color:${colorize(a.tuning,'tuning')}">${a.tuning}</td>
+      <td style="color:var(--fg-2)">${a.best_for}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+renderCompareTable();
+
+/* ============================================================
+   工程选型指南
+   ============================================================ */
+const SCENARIOS = [
+  {
+    title: '快速伺服定位',
+    subtitle: 'Fast Servo Positioning',
+    desc: '需要快速到达目标位置、允许微小超调的场景，如机械臂关节、CNC 进给轴、3D 打印机定位',
+    recommendations: ['PD', 'PID', 'Backstepping', 'MPC'],
+    icon: 'M5 12h14M12 5l7 7-7 7'
+  },
+  {
+    title: '过程控制消除稳态误差',
+    subtitle: 'Process Control',
+    desc: '化工温度、压力、流量控制等需要精确跟踪设定值、消除外扰偏置的连续生产过程',
+    recommendations: ['PI', 'PID', 'MPC', 'STC'],
+    icon: 'M3 12h4l3-8 4 16 3-8h4'
+  },
+  {
+    title: '强扰动不确定系统',
+    subtitle: 'Disturbance Rejection',
+    desc: '存在显著外部扰动或参数不确定，要求控制性能不受影响的场景，如电网波动下的电机控制',
+    recommendations: ['SMC', 'ADRC', 'MRAC', 'STC'],
+    icon: 'M12 2a10 10 0 1 0 10 10M12 6v6l4 2'
+  },
+  {
+    title: '强非线性级联系统',
+    subtitle: 'Nonlinear Cascaded',
+    desc: '严格反馈形式的非线性系统，如无人机姿态控制、电力变换器、机械臂多关节协同',
+    recommendations: ['Backstepping', 'SMC', 'NN', 'ADRC'],
+    icon: 'M3 12c0-5 4-9 9-9s9 4 9 9M12 12l9-9'
+  },
+  {
+    title: '多变量耦合控制',
+    subtitle: 'MIMO Coupled',
+    desc: '多个输入输出间存在耦合，需整体协调控制，如化工蒸馏塔、机器人多自由度、电力系统',
+    recommendations: ['MIMO', 'LQR', 'MPC', 'NN'],
+    icon: 'M3 3v18h18M3 9h18M9 3v18'
+  },
+  {
+    title: '约束优化与轨迹跟踪',
+    subtitle: 'Constrained Tracking',
+    desc: '存在输入/状态约束（如执行器饱和、安全限幅），需要前瞻性优化的场景',
+    recommendations: ['MPC', 'LQR', 'Backstepping', 'RL'],
+    icon: 'M3 3l6 6 4-4 8 8M21 13v8h-8'
+  },
+  {
+    title: '专家经验可用',
+    subtitle: 'Expert Knowledge',
+    desc: '难以建立精确数学模型但操作员经验丰富，可将经验规则化为控制策略',
+    recommendations: ['Fuzzy', 'PID', 'ADRC', 'NN'],
+    icon: 'M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+  },
+  {
+    title: '离线参数整定优化',
+    subtitle: 'Offline Tuning',
+    desc: '已有控制器结构（如 PID），需要搜索最优参数组合，可离线反复评估',
+    recommendations: ['GA', 'PSO', 'ACO', 'LQR'],
+    icon: 'M4 17l6-6-6-6M12 19h8'
+  },
+  {
+    title: '序贯决策与学习',
+    subtitle: 'Sequential Decision',
+    desc: '复杂任务难以建模，可通过试错学习最优策略，如游戏 AI、机器人技能学习',
+    recommendations: ['RL', 'NN', 'MPC', 'Fuzzy'],
+    icon: 'M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4'
+  },
+  {
+    title: '参数时变系统',
+    subtitle: 'Time-varying',
+    desc: '系统参数随时间缓慢变化（如磨损、老化、环境变化），需要在线适应',
+    recommendations: ['MRAC', 'STC', 'ADRC', 'RL'],
+    icon: 'M3 12a9 9 0 1018 0M3 12l4-4M3 12l4 4'
+  }
+];
+
+function renderScenarios() {
+  const box = document.getElementById('scenarioBox');
+  box.innerHTML = '';
+  SCENARIOS.forEach((s, idx) => {
+    const card = document.createElement('div');
+    card.className = 'glass-card p-6 reveal';
+    card.innerHTML = `
+      <div class="flex items-start gap-4 mb-4">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg, rgba(0,255,163,0.15), rgba(61,219,255,0.15)); border:1px solid var(--border)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="${s.icon}"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <div class="display font-semibold text-lg">${s.title}</div>
+          <div class="mono text-[10px] mt-1" style="color:var(--muted)">${s.subtitle}</div>
+        </div>
+        <div class="mono text-xs" style="color:var(--muted)">#${String(idx+1).padStart(2,'0')}</div>
+      </div>
+      <p class="text-sm leading-relaxed mb-4" style="color:var(--fg-2)">${s.desc}</p>
+      <div class="flex flex-wrap gap-2">
+        ${s.recommendations.map(r => {
+          const algo = ALGORITHMS[r];
+          if (!algo) return '';
+          return `<button class="signal-tag scenario-pick" data-algo="${r}" style="cursor:pointer; border-color:${algo.color}40; color:${algo.color}">
+            <span class="dot" style="background:${algo.color}"></span>${algo.name}
+          </button>`;
+        }).join('')}
+      </div>
+    `;
+    box.appendChild(card);
+  });
+  
+  document.querySelectorAll('.scenario-pick').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.algo;
+      sim.setAlgo(0, key);
+      document.querySelector('.algo-select[data-slot="0"]').value = key;
+      renderParamPanel(0);
+      renderInfo(0);
+      renderLegend();
+      draw();
+      drawMetrics();
+      document.getElementById('simulator').scrollIntoView({behavior: 'smooth'});
+      showToast(`已加载 ${ALGORITHMS[key].name} 算法到仿真器`);
+    });
+  });
+  
+  setTimeout(() => {
+    document.querySelectorAll('#scenarioBox .reveal').forEach((c, i) => {
+      setTimeout(() => c.classList.add('in-view'), i * 60);
+    });
+  }, 100);
+}
+renderScenarios();
+
+/* ============================================================
+   理论时间线
+   ============================================================ */
+const THEORY_TIMELINE = [
+  {
+    era: '1940s', title: '经典控制时代', color: '#00ffa3',
+    desc: '以传递函数为基础的频域分析，Bode 图、Nyquist 判据成熟。PID 成为工业标准。',
+    algorithms: ['P', 'PI', 'PD', 'PID'],
+    problem: '如何让单变量线性系统稳定且无差？'
+  },
+  {
+    era: '1960s', title: '现代控制时代', color: '#3ddbff',
+    desc: '状态空间法、Kalman 滤波、LQR 诞生。Bellman 动态规划奠定最优控制理论基础。',
+    algorithms: ['LQR', 'MIMO', 'MPC'],
+    problem: '如何处理多变量耦合与最优性能？'
+  },
+  {
+    era: '1980s', title: '非线性与鲁棒', color: '#ff3d7f',
+    desc: '微分几何方法、滑模控制、H∞ 控制、自适应理论发展，应对模型不确定与非线性。',
+    algorithms: ['SMC', 'Backstepping', 'ADRC', 'MRAC', 'STC'],
+    problem: '如何应对非线性、不确定性与外部扰动？'
+  },
+  {
+    era: '2000s+', title: '智能与学习', color: '#ffb800',
+    desc: '模糊逻辑、神经网络、群智能优化、深度强化学习兴起，数据驱动成为新范式。',
+    algorithms: ['Fuzzy', 'NN', 'GA', 'PSO', 'ACO', 'RL'],
+    problem: '如何在无模型、高复杂度下实现智能决策？'
+  }
+];
+
+function renderTheoryTimeline() {
+  const box = document.getElementById('theoryTimeline');
+  box.innerHTML = '';
+  THEORY_TIMELINE.forEach((t, idx) => {
+    const card = document.createElement('div');
+    card.className = 'glass-card p-6 reveal relative';
+    card.innerHTML = `
+      <div class="flex items-center gap-3 mb-3">
+        <div class="mono text-xs px-2 py-1 rounded" style="background:${t.color}15; color:${t.color}; border:1px solid ${t.color}30">${t.era}</div>
+        <div class="display font-bold text-lg">${t.title}</div>
+      </div>
+      <div class="mono text-xs mb-3" style="color:var(--muted)">核心问题</div>
+      <div class="text-sm mb-3" style="color:var(--accent)">${t.problem}</div>
+      <p class="text-sm leading-relaxed mb-4" style="color:var(--fg-2)">${t.desc}</p>
+      <div class="flex flex-wrap gap-1.5 pt-3 border-t" style="border-color:var(--border)">
+        ${t.algorithms.map(a => {
+          const algo = ALGORITHMS[a];
+          if (!algo) return '';
+          return `<span class="mono text-[10px] px-2 py-1 rounded" style="background:${algo.color}10; color:${algo.color}">${algo.name}</span>`;
+        }).join('')}
+      </div>
+    `;
+    box.appendChild(card);
+  });
+  
+  setTimeout(() => {
+    document.querySelectorAll('#theoryTimeline .reveal').forEach((c, i) => {
+      setTimeout(() => c.classList.add('in-view'), i * 80);
+    });
+  }, 100);
+}
+renderTheoryTimeline();
+
+/* ============================================================
+   整定方法表
+   ============================================================ */
+const TUNING_METHODS = [
+  { name: 'Ziegler-Nichols', algos: 'PID', principle: '临界增益 Ku 与临界周期 Tu', pros: '简单实用，工业标准', cons: '需要逼近临界振荡，有风险' },
+  { name: 'Cohen-Coon', algos: 'PID', principle: '基于开环阶跃响应的特征参数', pros: '适用于大延迟系统', cons: '对噪声敏感' },
+  { name: 'IMC 内模控制', algos: 'PID, MPC', principle: '基于过程模型构造理想控制器', pros: '有解析解，鲁棒性好', cons: '依赖模型精度' },
+  { name: '极点配置', algos: 'PID, LQR, MIMO', principle: '将闭环极点配置到期望位置', pros: '直接控制动态性能', cons: '需要状态空间模型' },
+  { name: 'Lambda 整定', algos: 'PI, PID', principle: '指定闭环时间常数 λ', pros: '适用于一阶加延迟过程', cons: '对高阶系统效果有限' },
+  { name: '遗传算法', algos: 'PID, 模糊', principle: '种群进化搜索最优参数', pros: '全局搜索，无需梯度', cons: '计算量大，耗时长' },
+  { name: '粒子群优化', algos: 'PID, NN', principle: '群体智能迭代寻优', pros: '收敛快于遗传算法', cons: '可能陷入局部最优' },
+  { name: '自整定', algos: 'STC, MRAC', principle: '在线辨识并自动调整', pros: '适应时变系统', cons: '瞬态性能较差' }
+];
+
+function renderTuningTable() {
+  const tbody = document.getElementById('tuningTable');
+  tbody.innerHTML = '';
+  TUNING_METHODS.forEach(m => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="algo-name">${m.name}</span></td>
+      <td>${m.algos}</td>
+      <td>${m.principle}</td>
+      <td style="color:var(--accent)">${m.pros}</td>
+      <td style="color:var(--accent-3)">${m.cons}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+renderTuningTable();
+
+/* ============================================================
+   预设场景
+   ============================================================ */
+const PRESETS = [
+  { name: '阶跃响应标准对比', algos: ['PID', 'PI', 'PD'], params: [{Kp:8,Ki:4,Kd:1.5}, {Kp:6,Ki:3}, {Kp:8,Kd:2}], plant: {m:1,b:0.5,k:2,r:1,d:0} },
+  { name: '鲁棒性对比', algos: ['SMC', 'ADRC', 'PID'], params: [{λ:2,η:3,φ:0.1}, {ωo:30,ωc:10,b0:1}, {Kp:8,Ki:4,Kd:1.5}], plant: {m:1,b:0.5,k:2,r:1,d:0.5} },
+  { name: '现代 vs 经典', algos: ['LQR', 'MPC', 'PID'], params: [{Q:10,R:0.5}, {Hp:20,Hc:5,λ:0.3}, {Kp:8,Ki:4,Kd:1.5}], plant: {m:1,b:0.5,k:2,r:1,d:0} },
+  { name: '强扰动场景', algos: ['ADRC', 'SMC', 'PI'], params: [{ωo:40,ωc:12,b0:1}, {λ:2.5,η:5,φ:0.05}, {Kp:6,Ki:3}], plant: {m:1,b:0.5,k:2,r:1,d:1} },
+  { name: '大惯量系统', algos: ['PID', 'LQR', 'MPC'], params: [{Kp:15,Ki:5,Kd:3}, {Q:20,R:1}, {Hp:30,Hc:8,λ:0.5}], plant: {m:3,b:0.8,k:1.5,r:1,d:0} },
+  { name: '弱阻尼振荡', algos: ['PD', 'LQR', 'SMC'], params: [{Kp:10,Kd:4}, {Q:50,R:0.5}, {λ:3,η:4,φ:0.1}], plant: {m:0.5,b:0.1,k:3,r:1,d:0} },
+  { name: '智能方法对比', algos: ['Fuzzy', 'NN', 'PID'], params: [{Ke:1,Ked:0.5,Ku:3}, {η:0.05,Kp:4}, {Kp:8,Ki:4,Kd:1.5}], plant: {m:1,b:0.5,k:2,r:1,d:0} },
+  { name: '优化算法对比', algos: ['GA', 'PSO', 'ACO'], params: [{Pop:30,Mut:0.1,Kp:6}, {N:30,w:0.7,Kp:6}, {Ants:20,ρ:0.1,Kp:6}], plant: {m:1,b:0.5,k:2,r:1,d:0} },
+];
+
+function renderPresets() {
+  const box = document.getElementById('presetBox');
+  PRESETS.forEach((p, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = p.name;
+    btn.addEventListener('click', () => loadPreset(idx));
+    box.appendChild(btn);
+  });
+}
+
+function loadPreset(idx) {
+  const p = PRESETS[idx];
+  for (let s = 0; s < 3; s++) {
+    sim.setAlgo(s, p.algos[s]);
+    document.querySelector(`.algo-select[data-slot="${s}"]`).value = p.algos[s];
+    const algoParams = ALGORITHMS[p.algos[s]].params;
+    algoParams.forEach(ap => {
+      if (p.params[s][ap.name] !== undefined) {
+        sim.params[s][ap.name] = p.params[s][ap.name];
+      }
+    });
+    renderParamPanel(s);
+    renderInfo(s);
+  }
+  sim.plant = {...p.plant};
+  document.getElementById('plantM').value = p.plant.m;
+  document.getElementById('plantMVal').textContent = p.plant.m.toFixed(1);
+  document.getElementById('plantB').value = p.plant.b;
+  document.getElementById('plantBVal').textContent = p.plant.b.toFixed(2);
+  document.getElementById('plantK').value = p.plant.k;
+  document.getElementById('plantKVal').textContent = p.plant.k.toFixed(1);
+  document.getElementById('plantR').value = p.plant.r;
+  document.getElementById('plantRVal').textContent = p.plant.r.toFixed(1);
+  document.getElementById('plantD').value = p.plant.d;
+  document.getElementById('plantDVal').textContent = p.plant.d.toFixed(2);
+  
+  sim.reset();
+  renderLegend();
+  draw();
+  drawMetrics();
+  showToast(`已加载预设：${p.name}`);
+}
+renderPresets();
+
+/* ============================================================
+   Toast
+   ============================================================ */
+let toastTimer;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+/* ============================================================
+   滚动揭示
+   ============================================================ */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('in-view');
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// 自动运行一次
+setTimeout(() => {
+  isRunning = true;
+  runSim();
+  setTimeout(() => { 
+    isRunning = false; 
+    if (animId) cancelAnimationFrame(animId); 
+  }, 6000);
+}, 1500);
+
+// 窗口尺寸变化重绘
+window.addEventListener('resize', () => {
+  draw();
+  drawControl();
+});
+
+</script>
+</body>
+</html>

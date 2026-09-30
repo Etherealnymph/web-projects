@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幸运老虎机</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #08080e;
+            --fg: #f0ebe0;
+            --muted: #5a5548;
+            --accent: #d4a017;
+            --accent-bright: #ffd700;
+            --card: #141420;
+            --border: #252535;
+            --red: #c41e3a;
+            --red-dark: #7a0019;
+            --sym-h: 100px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .font-display { font-family: 'Orbitron', monospace; }
+
+        /* 背景与特效画布 */
+        #bg-canvas, #win-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+        }
+        #bg-canvas { z-index: 0; }
+        #win-canvas { z-index: 50; }
+
+        /* 老虎机机身 */
+        .machine {
+            background: linear-gradient(180deg, #181830 0%, #0e0e1a 100%);
+            border: 2.5px solid var(--accent);
+            border-radius: 20px;
+            box-shadow:
+                0 0 50px rgba(212,160,23,0.1),
+                0 24px 64px rgba(0,0,0,0.55),
+                inset 0 1px 0 rgba(255,255,255,0.06);
+            overflow: hidden;
+            position: relative;
+        }
+        .machine::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 50%;
+            background: radial-gradient(ellipse at 50% 0%, rgba(212,160,23,0.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* 装饰灯带 */
+        .light-bar { display: flex; justify-content: center; gap: 14px; padding: 12px 0; }
+        .light-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            animation: blink 1.6s ease infinite;
+        }
+        .light-dot:nth-child(odd) { background: var(--accent-bright); }
+        .light-dot:nth-child(even) { background: var(--red); }
+        @keyframes blink {
+            0%,100% { opacity: .25; box-shadow: none; }
+            50% { opacity: 1; box-shadow: 0 0 8px currentColor; }
+        }
+
+        /* 转轮窗口 */
+        .reel-frame {
+            display: flex; justify-content: center; gap: 6px;
+            padding: 16px; position: relative;
+        }
+        .reel-win {
+            width: 110px; height: calc(var(--sym-h) * 3);
+            overflow: hidden; position: relative;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #060610, #0b0b16, #060610);
+            border: 1px solid var(--border);
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
+        }
+        /* 上下渐变遮罩 */
+        .reel-win::before, .reel-win::after {
+            content: ''; position: absolute; left: 0; right: 0;
+            height: calc(var(--sym-h) * 0.85); z-index: 3; pointer-events: none;
+        }
+        .reel-win::before { top: 0; background: linear-gradient(to bottom, #060610ee, transparent); }
+        .reel-win::after  { bottom: 0; background: linear-gradient(to top, #060610ee, transparent); }
+
+        /* 中间行高亮带 */
+        .reel-win .mid-highlight {
+            position: absolute;
+            top: var(--sym-h); left: 0; right: 0;
+            height: var(--sym-h);
+            background: rgba(212,160,23,0.03);
+            border-top: 1px solid rgba(212,160,23,0.08);
+            border-bottom: 1px solid rgba(212,160,23,0.08);
+            z-index: 1; pointer-events: none;
+        }
+
+        /* Strip 滚动条 */
+        .strip { will-change: transform; }
+        .strip.no-tr { transition: none !important; }
+        .strip.spin-tr {
+            transition: transform var(--dur, 2s) cubic-bezier(0.1, 0.75, 0.25, 1);
+        }
+
+        /* 单个符号格 */
+        .sym {
+            width: 110px; height: var(--sym-h);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 50px; flex-shrink: 0; user-select: none;
+        }
+        .sym.txt { font-family: 'Orbitron', monospace; font-weight: 900; font-size: 48px; }
+        .sym.bar { font-size: 26px; letter-spacing: 4px; }
+
+        /* 中奖线指示器 */
+        .pl-dot {
+            position: absolute; top: 50%; width: 14px; height: 14px;
+            background: var(--accent-bright); border-radius: 50%;
+            transform: translateY(-50%); z-index: 6;
+            box-shadow: 0 0 8px var(--accent);
+        }
+        .pl-dot.l { left: -2px; }
+        .pl-dot.r { right: -2px; }
+        .pl-line {
+            position: absolute; top: 50%; left: 0; right: 0;
+            height: 2px; background: var(--accent);
+            transform: translateY(-50%); z-index: 5; opacity: .45;
+            box-shadow: 0 0 6px var(--accent);
+        }
+        .pl-line.win {
+            opacity: 1; height: 3px;
+            animation: plFlash .25s ease infinite alternate;
+        }
+        @keyframes plFlash {
+            to { box-shadow: 0 0 18px var(--accent-bright), 0 0 36px var(--accent); }
+        }
+
+        /* 控制面板 */
+        .ctrl-panel {
+            border-top: 1px solid var(--border);
+            background: rgba(0,0,0,0.25);
+        }
+
+        /* 旋转按钮 */
+        .spin-btn {
+            background: linear-gradient(180deg, var(--red), var(--red-dark));
+            border: 2.5px solid var(--accent);
+            color: var(--accent-bright);
+            font-family: 'Orbitron', monospace;
+            font-size: 20px; font-weight: 900;
+            letter-spacing: 5px;
+            padding: 15px 46px; border-radius: 50px;
+            cursor: pointer; position: relative; overflow: hidden;
+            transition: all .15s;
+            box-shadow: 0 4px 22px rgba(196,30,58,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
+        }
+        .spin-btn:hover:not(:disabled) {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 32px rgba(196,30,58,0.5);
+        }
+        .spin-btn:active:not(:disabled) { transform: translateY(1px) scale(.97); }
+        .spin-btn:disabled { opacity: .35; cursor: not-allowed; filter: saturate(.4); }
+        .spin-btn::after {
+            content: ''; position: absolute;
+            top: -50%; left: -60%; width: 200%; height: 200%;
+            background: linear-gradient(transparent, rgba(255,255,255,0.06), transparent);
+            transform: rotate(30deg); transition: left .55s;
+        }
+        .spin-btn:hover:not(:disabled)::after { left: 100%; }
+
+        /* 下注按钮 */
+        .bet-btn {
+            width: 38px; height: 38px; border-radius: 50%;
+            border: 2px solid var(--accent); background: transparent;
+            color: var(--accent-bright); font-size: 16px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all .15s;
+        }
+        .bet-btn:hover { background: rgba(212,160,23,0.12); }
+        .bet-btn:active { transform: scale(.88); }
+        .bet-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+        /* 信息卡片 */
+        .info-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+        }
+
+        /* 赔率行 */
+        .pay-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 5px 10px; border-radius: 6px; font-size: 13px;
+            transition: background .15s;
+        }
+        .pay-row:hover { background: rgba(212,160,23,0.06); }
+
+        /* 历史条目 */
+        .h-entry {
+            padding: 6px 10px; border-radius: 6px; font-size: 12px;
+            border-left: 3px solid var(--border);
+            background: rgba(255,255,255,0.012);
+        }
+        .h-entry.w { border-left-color: var(--accent); background: rgba(212,160,23,0.04); }
+        .h-entry.l { border-left-color: #333; }
+
+        /* 中奖弹窗 */
+        .win-popup {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%,-50%) scale(0);
+            background: linear-gradient(145deg, #1c1c34, #0a0a18);
+            border: 2.5px solid var(--accent-bright);
+            border-radius: 22px; padding: 40px 60px;
+            text-align: center; z-index: 60; opacity: 0;
+            transition: all .4s cubic-bezier(.175,.885,.32,1.275);
+            box-shadow: 0 0 90px rgba(212,160,23,0.25);
+        }
+        .win-popup.show { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+
+        /* 提示条 */
+        .toast {
+            position: fixed; bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--card); border: 1px solid var(--border);
+            padding: 10px 24px; border-radius: 10px;
+            z-index: 100; font-size: 14px; white-space: nowrap;
+            transition: transform .3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* 数字弹跳 */
+        .num-pop { animation: numPop .35s ease; }
+        @keyframes numPop {
+            0% { transform: scale(1); }
+            45% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+
+        /* 符号高亮 */
+        .sym.hl { animation: symPulse .4s ease 3; }
+        @keyframes symPulse {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+        }
+
+        /* 标题流光 */
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, var(--accent), var(--accent-bright), #fff, var(--accent-bright), var(--accent));
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
+        }
+
+        /* 快捷下注按钮 */
+        .quick-bet {
+            padding: 4px 10px; border-radius: 6px; font-size: 11px;
+            border: 1px solid var(--border); background: transparent;
+            color: var(--muted); cursor: pointer; transition: all .15s;
+            font-family: 'Orbitron', monospace;
+        }
+        .quick-bet:hover { border-color: var(--accent); color: var(--accent-bright); }
+        .quick-bet.active { border-color: var(--accent); color: var(--accent-bright); background: rgba(212,160,23,0.1); }
+
+        /* 响应式 */
+        @media (max-width: 640px) {
+            :root { --sym-h: 80px; }
+            .reel-win { width: 85px; }
+            .sym { width: 85px; font-size: 38px; }
+            .sym.txt { font-size: 38px; }
+            .sym.bar { font-size: 20px; letter-spacing: 2px; }
+            .spin-btn { font-size: 16px; padding: 12px 32px; letter-spacing: 3px; }
+            .win-popup { padding: 28px 36px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center min-h-screen py-6 px-4 relative">
+
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <canvas id="win-canvas" aria-hidden="true"></canvas>
+
+    <main class="relative z-10 w-full max-w-2xl flex flex-col items-center gap-5">
+
+        <!-- 标题 -->
+        <header class="text-center select-none">
+            <h1 class="font-display shimmer text-3xl md:text-4xl font-black tracking-widest">LUCKY SLOTS</h1>
+            <p class="text-xs mt-1.5 tracking-wide" style="color:var(--muted)">按空格键快速旋转</p>
+        </header>
+
+        <!-- 老虎机 -->
+        <section class="machine w-full" aria-label="老虎机游戏区">
+            <div class="light-bar" id="lights" aria-hidden="true"></div>
+
+            <div class="reel-frame" id="reel-frame">
+                <div class="reel-win" id="rw-0">
+                    <div class="mid-highlight"></div>
+                    <div class="strip no-tr" id="s-0"></div>
+                </div>
+                <div class="reel-win" id="rw-1">
+                    <div class="mid-highlight"></div>
+                    <div class="strip no-tr" id="s-1"></div>
+                </div>
+                <div class="reel-win" id="rw-2">
+                    <div class="mid-highlight"></div>
+                    <div class="strip no-tr" id="s-2"></div>
+                </div>
+                <div class="pl-line" id="pl-line"></div>
+                <div class="pl-dot l" id="pl-l"></div>
+                <div class="pl-dot r" id="pl-r"></div>
+            </div>
+
+            <!-- 控制面板 -->
+            <div class="ctrl-panel flex flex-wrap items-center justify-center gap-5 md:gap-8 px-4 py-5">
+                <div class="text-center min-w-[90px]">
+                    <div class="text-[10px] uppercase tracking-widest mb-1" style="color:var(--muted)">余额</div>
+                    <div class="font-display text-xl font-bold" style="color:var(--accent-bright)" id="el-bal">1000</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-[10px] uppercase tracking-widest mb-1.5" style="color:var(--muted)">下注</div>
+                    <div class="flex items-center gap-2 mb-1.5">
+                        <button class="bet-btn" id="bd" aria-label="减少下注"><i class="fas fa-minus text-xs"></i></button>
+                        <span class="font-display text-xl font-bold w-14 text-center" id="el-bet">10</span>
+                        <button class="bet-btn" id="bu" aria-label="增加下注"><i class="fas fa-plus text-xs"></i></button>
+                    </div>
+                    <div class="flex gap-1 justify-center" id="quick-bets"></div>
+                </div>
+                <button class="spin-btn" id="spin-btn" aria-label="旋转">SPIN</button>
+                <div class="text-center min-w-[80px]">
+                    <div class="text-[10px] uppercase tracking-widest mb-1" style="color:var(--muted)">赢取</div>
+                    <div class="font-display text-xl font-bold" id="el-win" style="color:#555">0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 下方信息 -->
+        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="info-card p-4">
+                <h2 class="font-display text-xs font-bold tracking-widest mb-3" style="color:var(--accent)">
+                    <i class="fas fa-trophy mr-2"></i>赔率表（三连）
+                </h2>
+                <div class="flex flex-col gap-0.5" id="paytable"></div>
+                <div class="mt-3 pt-3 flex gap-4 text-[11px]" style="border-top:1px solid var(--border);color:var(--muted)">
+                    <span><i class="fas fa-link mr-1"></i>任意两个相同：x2</span>
+                </div>
+            </div>
+            <div class="info-card p-4">
+                <h2 class="font-display text-xs font-bold tracking-widest mb-3" style="color:var(--accent)">
+                    <i class="fas fa-clock-rotate-left mr-2"></i>历史记录
+                </h2>
+                <div class="flex flex-col gap-1.5 max-h-52 overflow-y-auto pr-1" id="h-list" style="scrollbar-width:thin;scrollbar-color:var(--border) transparent">
+                    <p class="text-xs" style="color:var(--muted)">暂无记录</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 中奖弹窗 -->
+    <div class="win-popup" id="win-pop" role="dialog" aria-label="中奖提示">
+        <div class="text-xs uppercase tracking-[.25em] mb-2" style="color:var(--accent)">恭喜中奖</div>
+        <div class="font-display text-5xl font-black mb-2" id="pop-amt" style="background:linear-gradient(135deg,var(--accent-bright),#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">+0</div>
+        <div class="text-sm" style="color:var(--muted)" id="pop-desc"></div>
+    </div>
+
+    <!-- 提示条 -->
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===========================
+   符号定义与权重
+=========================== */
+const SYM = [
+    { id:'seven',   d:'7',   t:'txt',  ex:'',   c:'#ff1744', pay:77,  w:2  },
+    { id:'diamond', d:'💎', t:'emo',  ex:'',   c:'',       pay:50,  w:3  },
+    { id:'bar',     d:'BAR', t:'txt',  ex:'bar',c:'#ffd600', pay:30,  w:4  },
+    { id:'star',    d:'⭐', t:'emo',  ex:'',   c:'',       pay:20,  w:5  },
+    { id:'bell',    d:'🔔', t:'emo',  ex:'',   c:'',       pay:12,  w:6  },
+    { id:'grape',   d:'🍇', t:'emo',  ex:'',   c:'',       pay:8,   w:7  },
+    { id:'cherry',  d:'🍒', t:'emo',  ex:'',   c:'',       pay:5,   w:8  },
+    { id:'lemon',   d:'🍋', t:'emo',  ex:'',   c:'',       pay:3,   w:8  },
+];
+const WTOTAL = SYM.reduce((s,v)=>s+v.w, 0);
+
+/* 常量 */
+const SLEN = 42;                        // strip 长度
+const TPOS = [30, 34, 38];              // 三个 reel 的目标索引
+const DURS = [1.5, 2.0, 2.5];           // 旋转秒数
+const BETS = [1,5,10,25,50,100,200,500];
+
+/* 状态 */
+let bal = 1000, bet = 10, spinning = false, lastW = 0;
+let hist = [];
+
+/* DOM */
+const strips = [document.getElementById('s-0'),document.getElementById('s-1'),document.getElementById('s-2')];
+const elBal = document.getElementById('el-bal');
+const elBet = document.getElementById('el-bet');
+const elWin = document.getElementById('el-win');
+const spinBtn = document.getElementById('spin-btn');
+const bdBtn = document.getElementById('bd');
+const buBtn = document.getElementById('bu');
+const plLine = document.getElementById('pl-line');
+const winPop = document.getElementById('win-pop');
+const popAmt = document.getElementById('pop-amt');
+const popDesc = document.getElementById('pop-desc');
+const toastEl = document.getElementById('toast');
+const hList = document.getElementById('h-list');
+
+/* ===========================
+   音效（Web Audio API）
+=========================== */
+let actx = null;
+function ac(){ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); return actx; }
+function tone(f,dur,type='sine',vol=.08){
+    try{
+        const c=ac(), o=c.createOscillator(), g=c.createGain();
+        o.type=type; o.frequency.value=f;
+        g.gain.setValueAtTime(vol,c.currentTime);
+        g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur);
+        o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+dur);
+    }catch(e){}
+}
+function sndSpin(){ tone(110,.25,'sawtooth',.03); }
+function sndStop(){ tone(880,.06,'square',.05); setTimeout(()=>tone(660,.05,'square',.03),40); }
+function sndWin(big){
+    (big?[523,659,784,1047,1319]:[523,659,784]).forEach((f,i)=>setTimeout(()=>tone(f,.22,'sine',.07),i*90));
+}
+function sndLose(){ tone(200,.12,'triangle',.03); setTimeout(()=>tone(140,.18,'triangle',.025),90); }
+
+/* ===========================
+   加权随机
+=========================== */
+function wRand(){
+    let r = Math.random()*WTOTAL;
+    for(const s of SYM){ r-=s.w; if(r<=0) return {...s}; }
+    return {...SYM[SYM.length-1]};
+}
+
+/* ===========================
+   获取实际符号高度（响应式）
+=========================== */
+function symH(){
+    const el = strips[0].querySelector('.sym');
+    return el ? el.offsetHeight : 100;
+}
+
+/* ===========================
+   构建 & 渲染 Strip
+=========================== */
+function buildStrip(ri, target){
+    const arr = [];
+    for(let i=0;i<SLEN;i++) arr.push(i===TPOS[ri] ? target : wRand());
+    return arr;
+}
+
+function renderStrip(ri, data){
+    const el = strips[ri];
+    el.innerHTML = '';
+    data.forEach(s=>{
+        const d = document.createElement('div');
+        d.className = 'sym' + (s.t==='txt'?' txt':'') + (s.ex?' '+s.ex:'');
+        if(s.c) d.style.color = s.c;
+        d.textContent = s.d;
+        el.appendChild(d);
+    });
+}
+
+/* ===========================
+   初始化转轮
+=========================== */
+function initReels(){
+    for(let r=0;r<3;r++){
+        const data = Array.from({length:SLEN}, ()=>wRand());
+        renderStrip(r, data);
+        strips[r].classList.add('no-tr');
+        strips[r].style.transform = 'translateY(0)';
+    }
+}
+
+/* ===========================
+   旋转
+=========================== */
+function spin(){
+    if(spinning) return;
+    if(bal < bet){ showToast('余额不足，请降低下注金额'); return; }
+
+    spinning = true;
+    spinBtn.disabled = true;
+    bdBtn.disabled = true;
+    buBtn.disabled = true;
+    lastW = 0;
+    elWin.textContent = '0';
+    elWin.style.color = '#555';
+    plLine.classList.remove('win');
+
+    bal -= bet;
+    updDisp();
+    sndSpin();
+
+    const targets = [wRand(), wRand(), wRand()];
+    let stopped = 0;
+    const h = symH();
+
+    for(let r=0;r<3;r++){
+        const data = buildStrip(r, targets[r]);
+        renderStrip(r, data);
+
+        const st = strips[r];
+        const off = (TPOS[r]-1) * h;
+
+        // 重置
+        st.classList.add('no-tr');
+        st.classList.remove('spin-tr');
+        st.style.transform = 'translateY(0)';
+        void st.offsetHeight; // 强制重绘
+
+        // 启动动画
+        st.classList.remove('no-tr');
+        st.style.setProperty('--dur', DURS[r]+'s');
+        st.classList.add('spin-tr');
+        st.style.transform = `translateY(${-off}px)`;
+
+        // 监听停止
+        let done = false;
+        const onEnd = ()=>{
+            if(done) return; done = true;
+            st.removeEventListener('transitionend', onEnd);
+            sndStop();
+            stopped++;
+            if(stopped===3) setTimeout(()=>judge(targets), 180);
+        };
+        st.addEventListener('transitionend', onEnd);
+        // 超时兜底
+        setTimeout(()=>{ if(!done) onEnd(); }, DURS[r]*1000+600);
+    }
+}
+
+/* ===========================
+   判定结果
+=========================== */
+function judge(res){
+    const [a,b,c] = res;
+    let win = 0, type = '';
+
+    if(a.id===b.id && b.id===c.id){
+        win = bet * a.pay; type = 'triple';
+    } else if(a.id===b.id || b.id===c.id || a.id===c.id){
+        win = bet * 2; type = 'pair';
+    }
+
+    if(win > 0){
+        bal += win;
+        lastW = win;
+        if(type==='triple'){
+            plLine.classList.add('win');
+            hlSyms();
+            showPop(win, a);
+            sndWin(true);
+            fireWin(true);
+        } else {
+            plLine.classList.add('win');
+            sndWin(false);
+            fireWin(false);
+            showToast(`赢得 ${win} 金币`);
+        }
+        addHist(res, win);
+    } else {
+        sndLose();
+        addHist(res, 0);
+    }
+
+    updDisp();
+    spinning = false;
+    spinBtn.disabled = false;
+    bdBtn.disabled = false;
+    buBtn.disabled = false;
+
+    if(bal <= 0){
+        setTimeout(()=>{
+            showToast('余额已耗尽，已重置为 1000');
+            bal = 1000;
+            updDisp();
+        }, 1200);
+    }
+}
+
+/* ===========================
+   高亮中奖符号
+=========================== */
+function hlSyms(){
+    for(let r=0;r<3;r++){
+        const cells = strips[r].children;
+        if(cells[TPOS[r]]) cells[TPOS[r]].classList.add('hl');
+    }
+}
+
+/* ===========================
+   UI 更新
+=========================== */
+function updDisp(){
+    elBal.textContent = bal;
+    elBet.textContent = bet;
+    elWin.textContent = lastW;
+    elWin.style.color = lastW > 0 ? '#4caf50' : '#555';
+    if(lastW > 0){
+        elWin.classList.remove('num-pop');
+        void elWin.offsetHeight;
+        elWin.classList.add('num-pop');
+    }
+    // 更新快捷下注按钮激活态
+    document.querySelectorAll('.quick-bet').forEach(b=>{
+        b.classList.toggle('active', parseInt(b.dataset.v)===bet);
+    });
+}
+
+let toastTimer = null;
+function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>toastEl.classList.remove('show'), 2600);
+}
+
+function showPop(amt, sym){
+    popAmt.textContent = '+' + amt;
+    popDesc.textContent = `${sym.d} x3 — ${sym.pay}倍赔付`;
+    winPop.classList.add('show');
+    setTimeout(()=>winPop.classList.remove('show'), 3200);
+}
+
+function addHist(res, win){
+    hist.unshift({
+        syms: res.map(s=>s.d).join(' '),
+        win, bet, time: new Date().toLocaleTimeString()
+    });
+    if(hist.length>30) hist.pop();
+    renderHist();
+}
+
+function renderHist(){
+    if(!hist.length){ hList.innerHTML='<p class="text-xs" style="color:var(--muted)">暂无记录</p>'; return; }
+    hList.innerHTML = hist.map(h=>`
+        <div class="h-entry ${h.win>0?'w':'l'}">
+            <span style="color:var(--muted)">${h.time}</span>
+            <span class="ml-2 text-sm">${h.syms}</span>
+            <span class="float-right font-display text-xs" style="color:${h.win>0?'var(--accent-bright)':'var(--muted)'}">
+                ${h.win>0?'+'+h.win:'-'+h.bet}
+            </span>
+        </div>`).join('');
+}
+
+/* ===========================
+   赔率表
+=========================== */
+function renderPay(){
+    document.getElementById('paytable').innerHTML = SYM.map(s=>{
+        const disp = s.t==='txt'
+            ? `<span class="font-display font-bold" style="color:${s.c};font-size:15px">${s.d}</span>`
+            : `<span style="font-size:20px">${s.d}</span>`;
+        return `<div class="pay-row">
+            <div class="flex items-center gap-2">${disp}<span style="color:var(--muted)">x3</span></div>
+            <span class="font-display font-bold" style="color:var(--accent-bright)">${s.pay}x</span>
+        </div>`;
+    }).join('');
+}
+
+/* ===========================
+   装饰灯
+=========================== */
+function renderLights(){
+    const c = document.getElementById('lights');
+    for(let i=0;i<22;i++){
+        const d = document.createElement('div');
+        d.className = 'light-dot';
+        d.style.animationDelay = (i*.14)+'s';
+        c.appendChild(d);
+    }
+}
+
+/* ===========================
+   快捷下注按钮
+=========================== */
+function renderQuickBets(){
+    const c = document.getElementById('quick-bets');
+    BETS.forEach(v=>{
+        const b = document.createElement('button');
+        b.className = 'quick-bet' + (v===bet?' active':'');
+        b.dataset.v = v;
+        b.textContent = v;
+        b.addEventListener('click', ()=>{ if(!spinning){ bet=v; if(bet>bal) clampBet(); updDisp(); }});
+        c.appendChild(b);
+    });
+}
+
+/* ===========================
+   下注控制
+=========================== */
+function clampBet(){
+    for(let i=BETS.length-1;i>=0;i--){ if(BETS[i]<=bal){ bet=BETS[i]; return; } }
+    bet = BETS[0];
+}
+function chgBet(dir){
+    if(spinning) return;
+    const i = BETS.indexOf(bet);
+    if(dir==='up' && i<BETS.length-1) bet = BETS[i+1];
+    else if(dir==='down' && i>0) bet = BETS[i-1];
+    if(bet>bal) clampBet();
+    updDisp();
+}
+
+/* ===========================
+   背景粒子
+=========================== */
+function initBg(){
+    const cv = document.getElementById('bg-canvas');
+    const cx = cv.getContext('2d');
+    let ps = [];
+    const N = 55;
+
+    function resize(){ cv.width=innerWidth; cv.height=innerHeight; }
+    resize(); addEventListener('resize', resize);
+
+    for(let i=0;i<N;i++) ps.push({
+        x: Math.random()*cv.width, y: Math.random()*cv.height,
+        vx: (Math.random()-.5)*.25, vy: -Math.random()*.4-.08,
+        sz: Math.random()*1.8+.5,
+        a: Math.random()*.35+.08,
+        col: Math.random()>.72 ? '#d4a017' : '#28283a'
+    });
+
+    (function loop(){
+        cx.clearRect(0,0,cv.width,cv.height);
+        ps.forEach(p=>{
+            p.x+=p.vx; p.y+=p.vy;
+            p.a+=(Math.random()-.5)*.008;
+            p.a=Math.max(.04,Math.min(.45,p.a));
+            if(p.y<-10){ p.y=cv.height+10; p.x=Math.random()*cv.width; }
+            if(p.x<-10) p.x=cv.width+10;
+            if(p.x>cv.width+10) p.x=-10;
+            cx.beginPath();
+            cx.arc(p.x,p.y,Math.max(.1,p.sz),0,Math.PI*2);
+            cx.fillStyle=p.col;
+            cx.globalAlpha=p.a;
+            cx.fill();
+        });
+        cx.globalAlpha=1;
+        requestAnimationFrame(loop);
+    })();
+}
+
+/* ===========================
+   中奖粒子特效
+=========================== */
+let wps=[], waid=null;
+function fireWin(big){
+    const cv=document.getElementById('win-canvas');
+    const cx=cv.getContext('2d');
+    cv.width=innerWidth; cv.height=innerHeight;
+    const n=big?160:55;
+    const cols=big?['#ffd700','#ff8c00','#ff1744','#fff','#d4a017','#ffeb3b']:['#d4a017','#ffd700','#ff8c00'];
+    const mx=cv.width/2, my=cv.height/2;
+    for(let i=0;i<n;i++){
+        const ang=Math.random()*Math.PI*2;
+        const spd=Math.random()*(big?9:5)+2;
+        wps.push({
+            x:mx, y:my,
+            vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd-2,
+            sz:Math.random()*3.5+1,
+            col:cols[Math.floor(Math.random()*cols.length)],
+            a:1, dec:Math.random()*.014+.007,
+            g:.08, shape:Math.random()>.5?0:1,
+            rot:Math.random()*Math.PI*2, rs:(Math.random()-.5)*.2
+        });
+    }
+    if(!waid) animWP();
+}
+function animWP(){
+    const cv=document.getElementById('win-canvas');
+    const cx=cv.getContext('2d');
+    cx.clearRect(0,0,cv.width,cv.height);
+    wps.forEach(p=>{
+        p.x+=p.vx; p.vy+=p.g; p.y+=p.vy;
+        p.a-=p.dec; p.rot+=p.rs;
+        if(p.a<=0) return;
+        cx.save(); cx.translate(p.x,p.y); cx.rotate(p.rot);
+        cx.globalAlpha=Math.max(0,p.a); cx.fillStyle=p.col;
+        if(p.shape===0){ cx.beginPath(); cx.arc(0,0,Math.max(.1,p.sz),0,Math.PI*2); cx.fill(); }
+        else { cx.fillRect(-p.sz,-p.sz*.4,p.sz*2,p.sz*.8); }
+        cx.restore();
+    });
+    wps=wps.filter(p=>p.a>0);
+    if(wps.length>0) waid=requestAnimationFrame(animWP);
+    else { waid=null; cx.clearRect(0,0,cv.width,cv.height); }
+}
+
+/* ===========================
+   事件绑定
+=========================== */
+spinBtn.addEventListener('click', spin);
+bdBtn.addEventListener('click', ()=>chgBet('down'));
+buBtn.addEventListener('click', ()=>chgBet('up'));
+document.addEventListener('keydown', e=>{
+    if(e.code==='Space' && !spinning){ e.preventDefault(); spin(); }
+});
+
+/* ===========================
+   初始化
+=========================== */
+initReels();
+renderPay();
+renderLights();
+renderQuickBets();
+initBg();
+updDisp();
+</script>
+</body>
+</html>

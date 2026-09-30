@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESP32C3 控制面板</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+:root{--bg:#08080e;--bg2:#10101a;--card:rgba(18,18,30,0.75);--border:rgba(255,255,255,0.06);--fg:#e8e8f0;--muted:#6b6b80;--accent:#00e89d;--red:#ff3b5c;--blue:#3b8bff;--orange:#ffb03b;--purple:#c77dff;--radius:16px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:10px}
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.grid-bg{position:fixed;top:0;left:0;width:100%;height:100%;background-image:linear-gradient(rgba(255,255,255,0.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.012) 1px,transparent 1px);background-size:50px 50px;z-index:0;pointer-events:none}
+#app{position:relative;z-index:1;min-height:100vh}
+
+/* ====== 主页 ====== */
+.home-header{text-align:center;padding:50px 20px 20px}
+.home-chip{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:100px;padding:6px 18px;font-size:11px;color:var(--muted);margin-bottom:18px;backdrop-filter:blur(10px);letter-spacing:1.5px;text-transform:uppercase}
+.home-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.home-header h1{font-family:'Orbitron',sans-serif;font-size:clamp(30px,7vw,48px);font-weight:900;letter-spacing:4px;background:linear-gradient(135deg,#fff 20%,#888 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.home-header .sub{margin-top:8px;font-size:13px;color:var(--muted);font-weight:300;letter-spacing:.5px}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:30px 20px 60px;max-width:560px;margin:0 auto}
+.func-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px 18px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,border-color .3s;backdrop-filter:blur(10px);position:relative;overflow:hidden;outline:none;-webkit-tap-highlight-color:transparent}
+.func-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0;opacity:.7;transition:opacity .3s}
+.func-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,0.1)}
+.func-card:active{transform:scale(.96)}
+.func-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.func-card .card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px;transition:transform .3s}
+.func-card:hover .card-icon{transform:scale(1.1)}
+.func-card h3{font-size:15px;font-weight:600;margin-bottom:6px;letter-spacing:.3px}
+.func-card p{font-size:11px;color:var(--muted);line-height:1.5}
+.func-card .card-arrow{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px;opacity:0;transition:opacity .3s,transform .3s}
+.func-card:hover .card-arrow{opacity:1;transform:translateY(-50%) translateX(3px)}
+/* 卡片主题色 */
+.card-led .card-icon{background:rgba(0,232,157,.12);color:var(--accent)}.card-led::before{background:var(--accent)}
+.card-ultra .card-icon{background:rgba(59,139,255,.12);color:var(--blue)}.card-ultra::before{background:var(--blue)}
+.card-ir .card-icon{background:rgba(255,59,92,.12);color:var(--red)}.card-ir::before{background:var(--red)}
+.card-adc .card-icon{background:rgba(255,176,59,.12);color:var(--orange)}.card-adc::before{background:var(--orange)}
+.card-morse .card-icon{background:rgba(199,125,255,.12);color:var(--purple)}.card-morse::before{background:var(--purple)}
+.card-wifi .card-icon{background:rgba(0,232,157,.12);color:var(--accent)}.card-wifi::before{background:var(--accent)}
+.card-ble .card-icon{background:rgba(59,139,255,.12);color:var(--blue)}.card-ble::before{background:var(--blue)}
+.card-grid .func-card:nth-child(odd):last-child{grid-column:1/-1;max-width:50%;justify-self:center}
+.home-footer{text-align:center;padding:0 20px 40px;font-size:11px;color:var(--muted);opacity:.4;letter-spacing:.5px}
+
+/* ====== 子页面通用 ====== */
+.sub-page{min-height:100vh;display:flex;flex-direction:column}
+.sub-nav{display:flex;align-items:center;gap:14px;padding:16px 20px;background:rgba(8,8,14,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.sub-nav .back-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:background .2s,border-color .2s;flex-shrink:0}
+.sub-nav .back-btn:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.sub-nav .nav-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;letter-spacing:1.5px}
+.sub-nav .nav-color{width:4px;height:20px;border-radius:2px;flex-shrink:0}
+.sub-body{flex:1;padding:24px 20px 40px;max-width:560px;margin:0 auto;width:100%}
+
+/* ====== 通用组件 ====== */
+.data-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;backdrop-filter:blur(10px)}
+.data-card .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.big-value{font-family:'Orbitron',sans-serif;font-size:clamp(40px,10vw,56px);font-weight:900;line-height:1}
+.big-value .unit{font-size:16px;font-weight:400;color:var(--muted);margin-left:4px}
+.section-title{font-size:13px;font-weight:600;color:var(--muted);margin:24px 0 12px;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.btn-primary{width:100%;padding:14px;border:none;border-radius:12px;font-family:'Noto Sans SC',sans-serif;font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s,filter .2s;outline:none;-webkit-tap-highlight-color:transparent}
+.btn-primary:active{transform:scale(.97)}
+.btn-primary:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.input-field{width:100%;padding:12px 16px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;color:var(--fg);font-family:'Noto Sans SC',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.input-field:focus{border-color:rgba(255,255,255,.15)}
+.input-field::placeholder{color:var(--muted)}
+textarea.input-field{resize:vertical;min-height:80px;line-height:1.6}
+.signal-bars{display:flex;align-items:flex-end;gap:3px;height:20px}
+.signal-bars span{width:4px;border-radius:2px;background:rgba(255,255,255,.1);transition:background .3s}
+.signal-bars span.active{background:var(--accent)}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.5px}
+.status-badge.connected{background:rgba(0,232,157,.1);color:var(--accent)}
+.status-badge.disconnected{background:rgba(255,59,92,.1);color:var(--red)}
+
+/* ====== LED 子页 ====== */
+.led-preview-wrap{display:flex;justify-content:center;padding:20px 0;position:relative}
+.led-preview{width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(30,30,45,.6),rgba(10,10,18,.9));border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:border-color .6s,box-shadow .6s}
+.led-bulb{width:52px;height:52px;border-radius:50%;background:rgba(50,50,70,.5);transition:all .5s}
+.led-preview.on-red .led-bulb{background:var(--red);box-shadow:0 0 30px var(--red),0 0 80px rgba(255,59,92,.3)}
+.led-preview.on-red{border-color:rgba(255,59,92,.25);box-shadow:0 0 50px rgba(255,59,92,.1)}
+.led-preview.on-green .led-bulb{background:var(--accent);box-shadow:0 0 30px var(--accent),0 0 80px rgba(0,232,157,.3)}
+.led-preview.on-green{border-color:rgba(0,232,157,.25);box-shadow:0 0 50px rgba(0,232,157,.1)}
+.led-preview.on-blue .led-bulb{background:var(--blue);box-shadow:0 0 30px var(--blue),0 0 80px rgba(59,139,255,.3)}
+.led-preview.on-blue{border-color:rgba(59,139,255,.25);box-shadow:0 0 50px rgba(59,139,255,.1)}
+.led-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.led-btn{height:52px;border:none;border-radius:14px;font-family:'Noto Sans SC',sans-serif;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .3s;outline:none}
+.led-btn:active{transform:scale(.93)}
+.led-btn.selected{box-shadow:0 0 0 3px rgba(255,255,255,.2)}
+.led-btn-r{background:linear-gradient(135deg,#ff3b5c,#cc2040)}.led-btn-g{background:linear-gradient(135deg,#00e89d,#00b87a)}.led-btn-b{background:linear-gradient(135deg,#3b8bff,#2060cc)}.led-btn-off{background:linear-gradient(135deg,#3a3a4a,#2a2a38)}
+.slider-wrap{margin-top:16px}.slider-wrap label{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:8px}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,.08);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 10px rgba(0,232,157,.3)}
+
+/* ====== 仪表盘 ====== */
+.gauge-wrap{display:flex;justify-content:center;padding:10px 0}
+.gauge-wrap svg{width:220px;height:130px}
+.gauge-bg{fill:none;stroke:rgba(255,255,255,.06);stroke-width:14;stroke-linecap:round}
+.gauge-fill{fill:none;stroke-width:14;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.22,1,.36,1)}
+.gauge-label{font-family:'Orbitron',sans-serif;font-size:11px;fill:var(--muted)}
+.gauge-val{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;fill:var(--fg)}
+.history-list{max-height:180px;overflow-y:auto}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.history-item:last-child{border-bottom:none}
+.history-item .time{color:var(--muted);font-size:11px}
+.history-item .val{font-family:'Orbitron',sans-serif;font-weight:700;font-size:14px}
+
+/* ====== 折线图 ====== */
+.chart-canvas{width:100%;height:160px;border-radius:12px;background:rgba(255,255,255,.02)}
+.channel-tabs{display:flex;gap:8px;margin-bottom:16px}
+.ch-tab{padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Noto Sans SC',sans-serif}
+.ch-tab.active{background:rgba(255,176,59,.1);border-color:rgba(255,176,59,.3);color:var(--orange)}
+
+/* ====== 莫斯转译 ====== */
+.morse-tabs{display:flex;gap:0;background:rgba(255,255,255,.03);border-radius:12px;padding:4px;margin-bottom:16px}
+.morse-tab{flex:1;padding:10px;text-align:center;border-radius:10px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .25s;border:none;background:transparent;font-family:'Noto Sans SC',sans-serif}
+.morse-tab.active{background:var(--card);color:var(--fg);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.morse-output{min-height:80px;padding:16px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;font-family:'Orbitron',monospace;font-size:14px;line-height:1.8;letter-spacing:2px;word-break:break-all;color:var(--purple)}
+.morse-table{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:6px;margin-top:12px}
+.morse-cell{padding:8px 4px;text-align:center;background:rgba(255,255,255,.02);border-radius:8px;font-size:11px}
+.morse-cell .char{font-weight:700;font-size:14px;margin-bottom:2px}
+.morse-cell .code{color:var(--muted);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:1px}
+.play-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:12px;border:1px solid rgba(199,125,255,.3);background:rgba(199,125,255,.08);color:var(--purple);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Noto Sans SC',sans-serif;margin-top:12px}
+.play-btn:hover{background:rgba(199,125,255,.15)}
+.play-btn:active{transform:scale(.96)}
+
+/* ====== WiFi/BLE ====== */
+.net-item{display:flex;align-items:center;gap:14px;padding:14px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;cursor:pointer;transition:background .2s,border-color .2s}
+.net-item:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1)}
+.net-item .net-icon{font-size:18px;color:var(--accent);width:24px;text-align:center}
+.net-item .net-info{flex:1}.net-item .net-name{font-size:14px;font-weight:600}.net-item .net-detail{font-size:11px;color:var(--muted);margin-top:2px}
+.net-item .net-lock{color:var(--muted);font-size:12px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;letter-spacing:.5px}
+.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-row .info-label{color:var(--muted)}
+.info-row .info-val{font-weight:600;font-family:'Orbitron',sans-serif;font-size:12px}
+.scan-anim{display:inline-block;width:16px;height:16px;border:2px solid var(--blue);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ====== Toast ====== */
+#toast-container{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.toast{background:rgba(20,20,32,.9);border:1px solid var(--border);backdrop-filter:blur(20px);color:var(--fg);padding:10px 22px;border-radius:100px;font-size:13px;display:flex;align-items:center;gap:8px;animation:toast-in .4s cubic-bezier(.34,1.56,.64,1) forwards;white-space:nowrap}
+.toast.out{animation:toast-out .3s ease forwards}
+@keyframes toast-in{from{opacity:0;transform:translateY(20px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toast-out{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-10px) scale(.9)}}
+
+/* ====== 入场动画 ====== */
+.fade-in{opacity:0;transform:translateY(20px);animation:fade-in-anim .6s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes fade-in-anim{to{opacity:1;transform:translateY(0)}}
+.stagger-1{animation-delay:.05s}.stagger-2{animation-delay:.1s}.stagger-3{animation-delay:.15s}.stagger-4{animation-delay:.2s}.stagger-5{animation-delay:.25s}.stagger-6{animation-delay:.3s}.stagger-7{animation-delay:.35s}
+
+/* ====== 响应式 ====== */
+@media(max-width:400px){.card-grid{gap:10px;padding:20px 14px 40px}.func-card{padding:18px 14px}.led-btns{gap:8px}.led-btn{height:46px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="grid-bg"></div>
+<div id="app"></div>
+<div id="toast-container"></div>
+
+<script>
+/* =============================================
+   全局状态与工具函数
+============================================= */
+let currentCleanup = null;
+let currentPage = '';
+
+// Toast 通知
+function showToast(msg, color) {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${color||'var(--accent)'};flex-shrink:0"></span>${msg}`;
+    c.appendChild(t);
+    setTimeout(() => { t.classList.add('out'); t.addEventListener('animationend', () => t.remove()); }, 2200);
+}
+
+// 简易模板
+function el(tag, attrs, ...children) {
+    const e = document.createElement(tag);
+    if (attrs) Object.entries(attrs).forEach(([k, v]) => {
+        if (k === 'className') e.className = v;
+        else if (k === 'innerHTML') e.innerHTML = v;
+        else if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
+        else if (k === 'style' && typeof v === 'object') Object.assign(e.style, v);
+        else e.setAttribute(k, v);
+    });
+    children.flat().forEach(c => { if (typeof c === 'string') e.appendChild(document.createTextNode(c)); else if (c) e.appendChild(c); });
+    return e;
+}
+
+/* =============================================
+   路由系统
+============================================= */
+const pages = {
+    home: renderHome,
+    led: renderLed,
+    ultrasonic: renderUltrasonic,
+    infrared: renderInfrared,
+    adc: renderAdc,
+    morse: renderMorse,
+    wifi: renderWifi,
+    ble: renderBle
+};
+
+function navigate(page) {
+    if (currentCleanup) { currentCleanup(); currentCleanup = null; }
+    currentPage = page;
+    const app = document.getElementById('app');
+    app.innerHTML = '';
+    app.style.opacity = '0';
+    setTimeout(() => {
+        pages[page]();
+        app.style.transition = 'opacity .35s ease';
+        app.style.opacity = '1';
+    }, 80);
+    window.location.hash = page === 'home' ? '' : page;
+}
+
+window.addEventListener('hashchange', () => {
+    const h = window.location.hash.slice(1) || 'home';
+    if (h !== currentPage && pages[h]) navigate(h);
+});
+
+/* =============================================
+   主页
+============================================= */
+function renderHome() {
+    const app = document.getElementById('app');
+    const cards = [
+        { id:'led', cls:'card-led', icon:'fa-lightbulb', title:'LED 点灯', desc:'RGB 三色灯光控制与亮度调节', color:'var(--accent)' },
+        { id:'ultrasonic', cls:'card-ultra', icon:'fa-satellite-dish', title:'超声波测距', desc:'HC-SR04 实时距离检测', color:'var(--blue)' },
+        { id:'infrared', cls:'card-ir', icon:'fa-broadcast-tower', title:'红外测距', desc:'红外传感器距离与信号检测', color:'var(--red)' },
+        { id:'adc', cls:'card-adc', icon:'fa-bolt', title:'ADC 电压测量', desc:'模拟电压采集与波形监控', color:'var(--orange)' },
+        { id:'morse', cls:'card-morse', icon:'fa-ellipsis', title:'莫斯转译', desc:'文字与莫尔斯电码互转', color:'var(--purple)' },
+        { id:'wifi', cls:'card-wifi', icon:'fa-wifi', title:'WiFi 设置', desc:'无线网络连接与配置', color:'var(--accent)' },
+        { id:'ble', cls:'card-ble', icon:'fa-bluetooth-b', title:'BLE 设置', desc:'低功耗蓝牙设备管理', color:'var(--blue)' },
+    ];
+    const grid = el('div', { className:'card-grid' });
+    cards.forEach((c, i) => {
+        const card = el('div', { className:`func-card ${c.cls} fade-in stagger-${i+1}`, onClick:() => navigate(c.id), tabIndex:'0', role:'button', 'aria-label':c.title });
+        card.innerHTML = `
+            <div class="card-icon"><i class="fa-solid ${c.icon}"></i></div>
+            <h3>${c.title}</h3>
+            <p>${c.desc}</p>
+            <i class="fa-solid fa-chevron-right card-arrow"></i>`;
+        card.addEventListener('keydown', e => { if(e.key==='Enter') navigate(c.id); });
+        grid.appendChild(card);
+    });
+    const header = el('header', { className:'home-header fade-in' });
+    header.innerHTML = `
+        <div class="home-chip"><span class="dot"></span>ESP32C3 Online</div>
+        <h1>ESP32C3</h1>
+        <p class="sub">嵌入式多功能控制面板</p>`;
+    const footer = el('footer', { className:'home-footer fade-in stagger-7' });
+    footer.textContent = 'RISC-V 160MHz · 4MB Flash · Wi-Fi + BLE 5.0';
+    app.appendChild(header);
+    app.appendChild(grid);
+    app.appendChild(footer);
+}
+
+/* =============================================
+   子页面导航栏生成
+============================================= */
+function subNav(color, title, goBack) {
+    const nav = el('div', { className:'sub-nav' });
+    nav.innerHTML = `<button class="back-btn" aria-label="返回"><i class="fa-solid fa-arrow-left"></i></button>
+        <div class="nav-color" style="background:${color}"></div>
+        <span class="nav-title">${title}</span>`;
+    nav.querySelector('.back-btn').addEventListener('click', () => navigate('home'));
+    return nav;
+}
+
+/* =============================================
+   LED 点灯
+============================================= */
+function renderLed() {
+    const app = document.getElementById('app');
+    const page = el('div', { className:'sub-page' });
+    const nav = subNav('var(--accent)', 'LED 点灯');
+    const body = el('div', { className:'sub-body' });
+    body.innerHTML = `
+        <div class="led-preview-wrap"><div class="led-preview" id="ledPrev"><div class="led-bulb"></div></div></div>
+        <div class="data-card" style="text-align:center">
+            <div class="label">当前状态</div>
+            <div id="ledStatus" style="font-size:14px;color:var(--muted);margin-top:4px">灯光已关闭</div>
+        </div>
+        <div class="led-btns" id="ledBtns">
+            <button class="led-btn led-btn-r" data-c="red">红色</button>
+            <button class="led-btn led-btn-g" data-c="green">绿色</button>
+            <button class="led-btn led-btn-b" data-c="blue">蓝色</button>
+            <button class="led-btn led-btn-off selected" data-c="off">关闭</button>
+        </div>
+        <div class="slider-wrap" style="margin-top:20px">
+            <label><span>亮度调节</span><span id="brightVal">100%</span></label>
+            <input type="range" min="5" max="100" value="100" id="brightSlider">
+        </div>`;
+    page.appendChild(nav);
+    page.appendChild(body);
+    app.appendChild(page);
+
+    let ledColor = 'off';
+    const prev = document.getElementById('ledPrev');
+    const status = document.getElementById('ledStatus');
+    const btns = document.querySelectorAll('#ledBtns .led-btn');
+    const slider = document.getElementById('brightSlider');
+    const brightVal = document.getElementById('brightVal');
+
+    function updateLed() {
+        prev.className = 'led-preview';
+        if (ledColor !== 'off') prev.classList.add('on-' + ledColor);
+        const labels = { red:'红色灯光', green:'绿色灯光', blue:'蓝色灯光', off:'灯光已关闭' };
+        const colors = { red:'var(--red)', green:'var(--accent)', blue:'var(--blue)', off:'var(--muted)' };
+        status.textContent = labels[ledColor];
+        status.style.color = colors[ledColor];
+    }
+
+    btns.forEach(b => b.addEventListener('click', () => {
+        btns.forEach(x => x.classList.remove('selected'));
+        b.classList.add('selected');
+        ledColor = b.dataset.c;
+        updateLed();
+        showToast(ledColor === 'off' ? '灯光已关闭' : `${ledColor === 'red' ? '红色' : ledColor === 'green' ? '绿色' : '蓝色'}灯光已开启`,
+            ledColor === 'off' ? 'var(--muted)' : `var(--${ledColor === 'green' ? 'accent' : ledColor})`);
+    }));
+
+    slider.addEventListener('input', () => {
+        brightVal.textContent = slider.value + '%';
+        const v = slider.value / 100;
+        prev.style.opacity = ledColor === 'off' ? 1 : 0.3 + v * 0.7;
+    });
+}
+
+/* =============================================
+   超声波测距
+============================================= */
+function renderUltrasonic() {
+    const app = document.getElementById('app');
+    const page = el('div', { className:'sub-page' });
+    page.appendChild(subNav('var(--blue)', '超声波测距'));
+    const body = el('div', { className:'sub-body' });
+    body.innerHTML = `
+        <div class="data-card" style="text-align:center">
+            <div class="label">实时距离</div>
+            <div class="big-value" id="ultraDist" style="color:var(--blue)">--<span class="unit">cm</span></div>
+        </div>
+        <div class="gauge-wrap">
+            <svg viewBox="0 0 220 130">
+                <path class="gauge-bg" d="M 20 110 A 90 90 0 0 1 200 110"/>
+                <path class="gauge-fill" id="gaugeArc" d="M 20 110 A 90 90 0 0 1 200 110" stroke="var(--blue)" stroke-dasharray="283" stroke-dashoffset="283"/>
+                <text class="gauge-label" x="30" y="125">0</text>
+                <text class="gauge-label" x="175" y="125">400</text>
+                <text class="gauge-val" id="gaugeText" x="110" y="90" text-anchor="middle">--</text>
+            </svg>
+        </div>
+        <div class="section-title">测量记录</div>
+        <div class="data-card history-list" id="ultraHistory" style="padding:12px 18px">
+            <div style="color:var(--muted);font-size:12px;text-align:center;padding:20px 0">等待测量数据...</div>
+        </div>`;
+    page.appendChild(body);
+    app.appendChild(page);
+
+    const distEl = document.getElementById('ultraDist');
+    const arc = document.getElementById('gaugeArc');
+    const gText = document.getElementById('gaugeText');
+    const histEl = document.getElementById('ultraHistory');
+    const history = [];
+    const maxLen = 283; // 半圆弧长
+
+    function updateDist() {
+        const d = Math.round(20 + Math.random() * 350);
+        distEl.innerHTML = `${d}<span class="unit">cm</span>`;
+        const ratio = Math.min(d / 400, 1);
+        arc.style.strokeDashoffset = maxLen * (1 - ratio);
+        gText.textContent = d + ' cm';
+        const now = new Date();
+        const ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
+        history.unshift({ time: ts, val: d });
+        if (history.length > 20) history.pop();
+        histEl.innerHTML = history.map(h => `<div class="history-item"><span class="time">${h.time}</span><span class="val" style="color:var(--blue)">${h.val} cm</span></div>`).join('');
+    }
+
+    updateDist();
+    const timer = setInterval(updateDist, 1500);
+    currentCleanup = () => clearInterval(timer);
+}
+
+/* =============================================
+   红外测距
+============================================= */
+function renderInfrared() {
+    const app = document.getElementById('app');
+    const page = el('div', { className:'sub-page' });
+    page.appendChild(subNav('var(--red)', '红外测距'));
+    const body = el('div', { className:'sub-body' });
+    body.innerHTML = `
+        <div class="data-card" style="text-align:center">
+            <div class="label">检测距离</div>
+            <div class="big-value" id="irDist" style="color:var(--red)">--<span class="unit">cm</span></div>
+            <div style="margin-top:14px"><span class="status-badge disconnected" id="irBadge"><i class="fa-solid fa-circle" style="font-size:6px"></i> 检测中</span></div>
+        </div>
+        <div class="data-card">
+            <div class="label">信号强度</div>
+            <div style="display:flex;align-items:center;gap:16px;margin-top:10px">
+                <div class="signal-bars" id="irBars">
+                    <span style="height:5px"></span><span style="height:8px"></span><span style="height:12px"></span><span style="height:16px"></span><span style="height:20px"></span>
+                </div>
+                <span id="irSignal" style="font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--red)">--%</span>
+            </div>
+        </div>
+        <div class="data-card">
+            <div class="label">传感器信息</div>
+            <div class="info-row"><span class="info-label">型号</span><span class="info-val">Sharp GP2Y0A21</span></div>
+            <div class="info-row"><span class="info-label">量程</span><span class="info-val">10 ~ 80 cm</span></div>
+            <div class="info-row"><span class="info-label">工作电压</span><span class="info-val">4.5 ~ 5.5V</span></div>
+            <div class="info-row"><span class="info-label">输出类型</span><span class="info-val">模拟电压</span></div>
+        </div>
+        <div class="section-title">测量记录</div>
+        <div class="data-card history-list" id="irHistory" style="padding:12px 18px">
+            <div style="color:var(--muted);font-size:12px;text-align:center;padding:20px 0">等待测量数据...</div>
+        </div>`;
+    page.appendChild(body);
+    app.appendChild(page);
+
+    const distEl = document.getElementById('irDist');
+    const badge = document.getElementById('irBadge');
+    const bars = document.querySelectorAll('#irBars span');
+    const sigEl = document.getElementById('irSignal');
+    const histEl = document.getElementById('irHistory');
+    const history = [];
+
+    function updateIR() {
+        const d = Math.round(10 + Math.random() * 70);
+        const sig = Math.round(100 - (d / 80) * 80);
+        distEl.innerHTML = `${d}<span class="unit">cm</span>`;
+        sigEl.textContent = sig + '%';
+        bars.forEach((b, i) => b.classList.toggle('active', sig > i * 20));
+        const inRange = d >= 10 && d <= 80;
+        badge.className = 'status-badge ' + (inRange ? 'connected' : 'disconnected');
+        badge.innerHTML = `<i class="fa-solid fa-circle" style="font-size:6px"></i> ${inRange ? '正常范围' : '超出量程'}`;
+        const now = new Date();
+        const ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
+        history.unshift({ time: ts, val: d, ok: inRange });
+        if (history.length > 15) history.pop();
+        histEl.innerHTML = history.map(h => `<div class="history-item"><span class="time">${h.time}</span><span class="val" style="color:${h.ok?'var(--red)':'var(--muted)'}">${h.val} cm ${h.ok?'':'(超限)'}</span></div>`).join('');
+    }
+
+    updateIR();
+    const timer = setInterval(updateIR, 2000);
+    currentCleanup = () => clearInterval(timer);
+}
+
+/* =============================================
+   ADC 电压测量
+============================================= */
+function renderAdc() {
+    const app = document.getElementById('app');
+    const page = el('div', { className:'sub-page' });
+    page.appendChild(subNav('var(--orange)', 'ADC 电压'));
+    const body = el('div', { className:'sub-body' });
+    body.innerHTML = `
+        <div class="data-card" style="text-align:center">
+            <div class="label">当前电压</div>
+            <div class="big-value" id="adcVolt" style="color:var(--orange)">--<span class="unit">V</span></div>
+        </div>
+        <div class="channel-tabs" id="adcTabs">
+            <button class="ch-tab active" data-ch="0">GPIO 2</button>
+            <button class="ch-tab" data-ch="1">GPIO 3</button>
+            <button class="ch-tab" data-ch="2">GPIO 4</button>
+        </div>
+        <div class="data-card" style="padding:14px">
+            <canvas class="chart-canvas" id="adcChart"></canvas>
+        </div>
+        <div class="data-card">
+            <div class="label">ADC 参数</div>
+            <div class="info-row"><span class="info-label">分辨率</span><span class="info-val">12 bit</span></div>
+            <div class="info-row"><span class="info-label">量程</span><span class="info-val">0 ~ 3.3V</span></div>
+            <div class="info-row"><span class="info-label">原始值</span><span class="info-val" id="adcRaw">--</span></div>
+            <div class="info-row"><span class="info-label">采样率</span><span class="info-val">10 Hz</span></div>
+        </div>`;
+    page.appendChild(body);
+    app.appendChild(page);
+
+    const voltEl = document.getElementById('adcVolt');
+    const rawEl = document.getElementById('adcRaw');
+    const canvas = document.getElementById('adcChart');
+    const ctx = canvas.getContext('2d');
+    const data = [];
+    const maxPts = 60;
+    let channel = 0;
+    const baseV = [1.8, 2.5, 0.9];
+
+    // 通道切换
+    document.querySelectorAll('#adcTabs .ch-tab').forEach(t => t.addEventListener('click', () => {
+        document.querySelectorAll('#adcTabs .ch-tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        channel = parseInt(t.dataset.ch);
+        data.length = 0;
+        showToast(`切换到 GPIO ${[2,3,4][channel]}`, 'var(--orange)');
+    }));
+
+    function resizeChart() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width - 28;
+        canvas.height = 160;
+    }
+    resizeChart();
+    window.addEventListener('resize', resizeChart);
+
+    function drawChart() {
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        // 网格
+        ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const y = (h / 4) * i;
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+        }
+        // Y轴标签
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.font = '10px Orbitron';
+        ctx.fillText('3.3V', 4, 12);
+        ctx.fillText('0V', 4, h - 4);
+        if (data.length < 2) return;
+        // 渐变填充
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, 'rgba(255,176,59,0.15)');
+        grad.addColorStop(1, 'rgba(255,176,59,0)');
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+        data.forEach((v, i) => {
+            const x = (i / (maxPts - 1)) * w;
+            const y = h - (v / 3.3) * h;
+            if (i === 0) ctx.lineTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.lineTo(((data.length - 1) / (maxPts - 1)) * w, h);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+        // 折线
+        ctx.beginPath();
+        data.forEach((v, i) => {
+            const x = (i / (maxPts - 1)) * w;
+            const y = h - (v / 3.3) * h;
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = '#ffb03b';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        // 最后一个点
+        const lastX = ((data.length - 1) / (maxPts - 1)) * w;
+        const lastY = h - (data[data.length - 1] / 3.3) * h;
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffb03b';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 8, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,176,59,0.2)';
+        ctx.fill();
+    }
+
+    function updateADC() {
+        const v = baseV[channel] + (Math.random() - 0.5) * 0.6;
+        const clamped = Math.max(0, Math.min(3.3, v));
+        const raw = Math.round((clamped / 3.3) * 4095);
+        voltEl.innerHTML = `${clamped.toFixed(2)}<span class="unit">V</span>`;
+        rawEl.textContent = raw;
+        data.push(clamped);
+        if (data.length > maxPts) data.shift();
+        drawChart();
+    }
+
+    updateADC();
+    const timer = setInterval(updateADC, 500);
+    currentCleanup = () => { clearInterval(timer); window.removeEventListener('resize', resizeChart); };
+}
+
+/* =============================================
+   莫斯转译
+============================================= */
+function renderMorse() {
+    const app = document.getElementById('app');
+    const page = el('div', { className:'sub-page' });
+    page.appendChild(subNav('var(--purple)', '莫斯转译'));
+    const body = el('div', { className:'sub-body' });
+    body.innerHTML = `
+        <div class="morse-tabs" id="morseTabs">
+            <button class="morse-tab active" data-m="t2m">文字 → 莫尔斯</button>
+            <button class="morse-tab" data-m="m2t">莫尔斯 → 文字</button>
+        </div>
+        <div class="form-group">
+            <label id="morseInputLabel">输入文字</label>
+            <textarea class="input-field" id="morseInput" placeholder="输入英文文字..." rows="3"></textarea>
+        </div>
+        <div class="form-group">
+            <label>输出结果</label>
+            <div class="morse-output" id="morseOutput">等待输入...</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="play-btn" id="morsePlay"><i class="fa-solid fa-play"></i> 播放蜂鸣</button>
+            <button class="play-btn" id="morseCopy" style="border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--muted)"><i class="fa-solid fa-copy"></i> 复制结果</button>
+        </div>
+        <div class="section-title">莫尔斯码参考表</div>
+        <div class="data-card" style="padding:14px">
+            <div class="morse-table" id="morseTable"></div>
+        </div>`;
+    page.appendChild(body);
+    app.appendChild(page);
+
+    const MORSE = { 'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..','J':'.---','K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-','R':'.-.','S':'...','T':'-','U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.', ' ':' / ' };
+    const REV_MORSE = {};
+    Object.entries(MORSE).forEach(([k, v]) => { if (k !== ' ') REV_MORSE[v] = k; });
+
+    // 参考表
+    const tableEl = document.getElementById('morseTable');
+    Object.entries(MORSE).filter(([k]) => k !== ' ').forEach(([k, v]) => {
+        tableEl.innerHTML += `<div class="morse-cell"><div class="char">${k}</div><div class="code">${v}</div></div>`;
+    });
+
+    let mode = 't2m';
+    const input = document.getElementById('morseInput');
+    const output = document.getElementById('morseOutput');
+    const inputLabel = document.getElementById('morseInputLabel');
+
+    function convert() {
+        const val = input.value.trim();
+        if (!val) { output.textContent = '等待输入...'; return; }
+        if (mode === 't2m') {
+            output.textContent = val.toUpperCase().split('').map(c => MORSE[c] || '').join(' ');
+        } else {
+            output.textContent = val.split(' ').map(code => REV_MORSE[code] || '?').join('');
+        }
+    }
+    input.addEventListener('input', convert);
+
+    document.querySelectorAll('#morseTabs .morse-tab').forEach(t => t.addEventListener('click', () => {
+        document.querySelectorAll('#morseTabs .morse-tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        mode = t.dataset.m;
+        input.value = '';
+        output.textContent = '等待输入...';
+        inputLabel.textContent = mode === 't2m' ? '输入文字' : '输入莫尔斯码（用空格分隔）';
+        input.placeholder = mode === 't2m' ? '输入英文文字...' : '例如: ... --- ...';
+    }));
+
+    // 播放蜂鸣
+    document.getElementById('morsePlay').addEventListener('click', () => {
+        const text = output.textContent;
+        if (text === '等待输入...') return;
+        let audioCtx = null;
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return; }
+        const symbols = text.split('');
+        let t = audioCtx.currentTime + 0.05;
+        const dotLen = 0.08;
+        symbols.forEach(s => {
+            if (s === '.') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.frequency.value = 680;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.15, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + dotLen);
+                osc.start(t); osc.stop(t + dotLen);
+                t += dotLen + 0.04;
+            } else if (s === '-') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.frequency.value = 680;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.15, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + dotLen * 3);
+                osc.start(t); osc.stop(t + dotLen * 3);
+                t += dotLen * 3 + 0.04;
+            } else if (s === ' ') {
+                t += dotLen * 2;
+            } else if (s === '/') {
+                t += dotLen * 4;
+            }
+        });
+        showToast('正在播放莫尔斯码', 'var(--purple)');
+    });
+
+    // 复制
+    document.getElementById('morseCopy').addEventListener('click', () => {
+        const text = output.textContent;
+        if (text === '等待输入...') return;
+        navigator.clipboard.writeText(text).then(() => showToast('已复制到剪贴板', 'var(--accent)'));
+    });
+
+    currentCleanup = () => {};
+}
+
+/* =============================================
+   WiFi 设置
+============================================= */
+function renderWifi() {
+    const app = document.getElementById('app');
+    const page = el('div', { className:'sub-page' });
+    page.appendChild(subNav('var(--accent)', 'WiFi 设置'));
+    const body = el('div', { className:'sub-body' });
+    const networks = [
+        { name:'Lab-Network-5G', locked:true, signal:4, channel:'CH 36' },
+        { name:'IoT-Devices', locked:false, signal:3, channel:'CH 6' },
+        { name:'Office-WiFi', locked:true, signal:5, channel:'CH 149' },
+        { name:'Guest-Access', locked:false, signal:2, channel:'CH 1' },
+        { name:'ESP32-AP-Mode', locked:false, signal:5, channel:'CH 11' },
+        { name:'Neighbor_Net', locked:true, signal:1, channel:'CH 3' },
+    ];
+    let connected = false;
+    let connectedName = '';
+
+    function renderBody() {
+        body.innerHTML = `
+            <div class="data-card" style="text-align:center">
+                <div style="font-size:36px;margin-bottom:10px;color:${connected?'var(--accent)':'var(--muted)'}"><i class="fa-solid fa-wifi"></i></div>
+                <span class="status-badge ${connected?'connected':'disconnected'}" id="wifiBadge"><i class="fa-solid fa-circle" style="font-size:6px"></i> ${connected?'已连接: '+connectedName:'未连接'}</span>
+                ${connected ? `<div style="margin-top:14px">
+                    <div class="info-row"><span class="info-label">IP 地址</span><span class="info-val">192.168.1.${Math.round(100+Math.random()*150)}</span></div>
+                    <div class="info-row"><span class="info-label">网关</span><span class="info-val">192.168.1.1</span></div>
+                    <div class="info-row"><span class="info-label">DNS</span><span class="info-val">8.8.8.8</span></div>
+                    <div class="info-row"><span class="info-label">信号强度</span><span class="info-val">-${(70-Math.round(Math.random()*40))} dBm</span></div>
+                </div>` : ''}
+            </div>
+            <div class="section-title">可用网络</div>
+            <div id="wifiList"></div>
+            <div class="section-title">手动连接</div>
+            <div class="data-card">
+                <div class="form-group"><label>SSID</label><input class="input-field" id="wifiSSID" placeholder="输入网络名称"></div>
+                <div class="form-group"><label>密码</label><input class="input-field" id="wifiPass" type="password" placeholder="输入密码"></div>
+                <button class="btn-primary" id="wifiConnect" style="background:linear-gradient(135deg,var(--accent),#00b87a);box-shadow:0 4px 20px rgba(0,232,157,.25)">连接</button>
+            </div>`;
+        const list = document.getElementById('wifiList');
+        networks.forEach(n => {
+            const bars = Array.from({length:5}, (_,i) => `<span style="height:${5+i*4}px;${i<n.signal?'background:var(--accent)':''}"></span>`).join('');
+            list.innerHTML += `<div class="net-item" data-name="${n.name}">
+                <div class="net-icon"><i class="fa-solid fa-wifi"></i></div>
+                <div class="net-info"><div class="net-name">${n.name}${connected&&connectedName===n.name?' <span style="color:var(--accent);font-size:11px">(已连接)</span>':''}</div><div class="net-detail">${n.channel}</div></div>
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div class="signal-bars">${bars}</div>
+                    ${n.locked?'<i class="fa-solid fa-lock net-lock"></i>':''}
+                </div>
+            </div>`;
+        });
+        // 点击网络
+        list.querySelectorAll('.net-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const name = item.dataset.name;
+                if (connected && connectedName === name) return;
+                if (networks.find(n => n.name === name && !n.locked)) {
+                    doConnect(name);
+                } else {
+                    document.getElementById('wifiSSID').value = name;
+                    document.getElementById('wifiPass').focus();
+                    showToast('请输入密码后连接', 'var(--orange)');
+                }
+            });
+        });
+        // 手动连接
+        document.getElementById('wifiConnect').addEventListener('click', () => {
+            const ssid = document.getElementById('wifiSSID').value.trim();
+            if (!ssid) { showToast('请输入 SSID', 'var(--red)'); return; }
+            doConnect(ssid);
+        });
+    }
+
+    function doConnect(name) {
+        const btn = document.getElementById('wifiConnect');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<span class="scan-anim"></span>连接中...'; }
+        setTimeout(() => {
+            connected = true;
+            connectedName = name;
+            renderBody();
+            showToast(`已连接到 ${name}`, 'var(--accent)');
+        }, 1500);
+    }
+
+    renderBody();
+    page.appendChild(body);
+    app.appendChild(page);
+    currentCleanup = () => {};
+}
+
+/* =============================================
+   BLE 设置
+============================================= */
+function renderBle() {
+    const app = document.getElementById('app');
+    const page = el('div', { className:'sub-page' });
+    page.appendChild(subNav('var(--blue)', 'BLE 设置'));
+    const body = el('div', { className:'sub-body' });
+
+    const devices = [
+        { name:'Mi Band 7', addr:'4C:65:A8:D2:1F:03', rssi:-45 },
+        { name:'ESP32-Sensor', addr:'24:62:AB:D4:77:B1', rssi:-62 },
+        { name:'JDY-23-Module', addr:'7C:DF:A1:33:90:EE', rssi:-78 },
+        { name:'Unknown Device', addr:'00:11:22:33:44:55', rssi:-89 },
+    ];
+    const services = [
+        { uuid:'0x180A', name:'Device Information', chars:['Model Number','Firmware Rev','Hardware Rev'] },
+        { uuid:'0xFFE0', name:'Custom Service', chars:['TX Characteristic','RX Characteristic'] },
+    ];
+    let scanning = false;
+    let connectedDev = null;
+
+    function renderBody() {
+        body.innerHTML = `
+            <div class="data-card" style="text-align:center">
+                <div style="font-size:36px;margin-bottom:10px;color:${connectedDev?'var(--blue)':'var(--muted)'}"><i class="fa-brands fa-bluetooth-b"></i></div>
+                <span class="status-badge ${connectedDev?'connected':'disconnected'}"><i class="fa-solid fa-circle" style="font-size:6px"></i> ${connectedDev?'已连接: '+connectedDev.name:'未连接'}</span>
+            </div>
+            <button class="btn-primary" id="bleScan" style="background:linear-gradient(135deg,var(--blue),#2060cc);box-shadow:0 4px 20px rgba(59,139,255,.25);margin-bottom:20px">${scanning?'<span class="scan-anim"></span>扫描中...':'<i class="fa-solid fa-magnifying-glass" style="margin-right:8px"></i>扫描设备'}</button>
+            <div id="bleDeviceList"></div>
+            ${connectedDev ? `
+                <div class="section-title">服务与特征值</div>
+                ${services.map(s => `<div class="data-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                        <span style="font-weight:600;font-size:14px">${s.name}</span>
+                        <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:var(--muted)">${s.uuid}</span>
+                    </div>
+                    ${s.chars.map(c => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--border);font-size:13px">
+                        <span>${c}</span>
+                        <div style="display:flex;gap:6px">
+                            <button class="ble-rw-btn" data-op="read" style="padding:4px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(59,139,255,.08);color:var(--blue);font-size:11px;cursor:pointer;font-family:inherit">读取</button>
+                            <button class="ble-rw-btn" data-op="write" style="padding:4px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(0,232,157,.08);color:var(--accent);font-size:11px;cursor:pointer;font-family:inherit">写入</button>
+                        </div>
+                    </div>`).join('')}
+                </div>`).join('')}
+                <button class="btn-primary" id="bleDisconnect" style="background:linear-gradient(135deg,var(--red),#cc2040);box-shadow:0 4px 20px rgba(255,59,92,.2);margin-top:8px">断开连接</button>
+            ` : ''}`;
+        // 设备列表
+        const list = document.getElementById('bleDeviceList');
+        if (!scanning && !connectedDev) {
+            list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">点击上方按钮扫描附近的 BLE 设备</div>';
+        } else if (scanning || (!connectedDev && devices.length)) {
+            devices.forEach(d => {
+                const rssiColor = d.rssi > -60 ? 'var(--accent)' : d.rssi > -80 ? 'var(--orange)' : 'var(--red)';
+                list.innerHTML += `<div class="net-item" data-addr="${d.addr}">
+                    <div class="net-icon" style="color:var(--blue)"><i class="fa-brands fa-bluetooth-b"></i></div>
+                    <div class="net-info"><div class="net-name">${d.name}</div><div class="net-detail">${d.addr}</div></div>
+                    <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:${rssiColor}">${d.rssi} dBm</span>
+                </div>`;
+            });
+            list.querySelectorAll('.net-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const addr = item.dataset.addr;
+                    const dev = devices.find(d => d.addr === addr);
+                    if (dev) {
+                        connectedDev = dev;
+                        scanning = false;
+                        renderBody();
+                        showToast(`已连接 ${dev.name}`, 'var(--blue)');
+                    }
+                });
+            });
+        }
+        // 扫描按钮
+        const scanBtn = document.getElementById('bleScan');
+        if (scanBtn) scanBtn.addEventListener('click', () => {
+            if (connectedDev) return;
+            scanning = true;
+            renderBody();
+            setTimeout(() => { scanning = false; renderBody(); }, 3000);
+        });
+        // 断开
+        const discBtn = document.getElementById('bleDisconnect');
+        if (discBtn) discBtn.addEventListener('click', () => {
+            connectedDev = null;
+            renderBody();
+            showToast('已断开 BLE 连接', 'var(--red)');
+        });
+        // 读写按钮
+        document.querySelectorAll('.ble-rw-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const op = btn.dataset.op;
+                if (op === 'read') {
+                    showToast('读取成功: 0x' + Math.random().toString(16).substr(2,4).toUpperCase(), 'var(--blue)');
+                } else {
+                    showToast('写入成功', 'var(--accent)');
+                }
+            });
+        });
+    }
+
+    renderBody();
+    page.appendChild(body);
+    app.appendChild(page);
+    currentCleanup = () => {};
+}
+
+/* =============================================
+   背景粒子
+============================================= */
+(function initBg() {
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let mx = -999, my = -999;
+
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+    class P {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.s = Math.random() * 1.2 + 0.4;
+            this.vx = (Math.random() - 0.5) * 0.25;
+            this.vy = (Math.random() - 0.5) * 0.25;
+            this.o = Math.random() * 0.25 + 0.08;
+            this.bo = this.o;
+        }
+        update() {
+            this.x += this.vx; this.y += this.vy;
+            const dx = this.x - mx, dy = this.y - my;
+            const d = Math.sqrt(dx*dx + dy*dy);
+            if (d < 130) {
+                const f = (130 - d) / 130;
+                this.o = this.bo + f * 0.35;
+                this.x += (dx / d) * f * 0.4;
+                this.y += (dy / d) * f * 0.4;
+            } else {
+                this.o += (this.bo - this.o) * 0.05;
+            }
+            if (this.x < -10) this.x = canvas.width + 10;
+            if (this.x > canvas.width + 10) this.x = -10;
+            if (this.y < -10) this.y = canvas.height + 10;
+            if (this.y > canvas.height + 10) this.y = -10;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.s, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(160,170,200,${this.o})`;
+            ctx.fill();
+        }
+    }
+
+    const count = Math.min(70, Math.floor(canvas.width * canvas.height / 18000));
+    for (let i = 0; i < count; i++) particles.push(new P());
+
+    function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const d = Math.sqrt(dx*dx + dy*dy);
+                if (d < 110) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(160,170,200,${(1 - d/110) * 0.06})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(loop);
+    }
+    loop();
+})();
+
+/* =============================================
+   初始化
+============================================= */
+navigate(window.location.hash.slice(1) || 'home');
+</script>
+</body>
+</html>

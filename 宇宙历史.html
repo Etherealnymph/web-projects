@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>太阳系起源与演化 — 互动教学</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>
+tailwind.config={theme:{extend:{fontFamily:{display:['Cinzel','serif'],body:['Noto Sans SC','sans-serif']}}}}
+</script>
+<style>
+:root{--bg:#0A0E1A;--fg:#E8E0D4;--muted:#8A8078;--accent:#D4A76A;--card:rgba(20,18,25,0.78);--border:rgba(212,167,106,0.2)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans SC',sans-serif;background:#000;color:var(--fg);overflow:hidden;height:100vh;width:100vw}
+#solarCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
+.glass{background:var(--card);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:14px}
+.font-display{font-family:'Cinzel',serif}
+.timeline-track{position:relative;height:6px;border-radius:3px;cursor:pointer}
+.timeline-thumb{position:absolute;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px rgba(212,167,106,0.6),inset 0 0 4px rgba(255,255,255,0.3);cursor:grab;z-index:10;transition:box-shadow .2s}
+.timeline-thumb:hover,.timeline-thumb:active{box-shadow:0 0 28px rgba(212,167,106,0.9),inset 0 0 4px rgba(255,255,255,0.4);cursor:grabbing}
+.stage-dot{position:absolute;top:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);z-index:5;transition:all .3s}
+.stage-dot.active{background:var(--accent);box-shadow:0 0 10px rgba(212,167,106,0.5)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal-content{max-width:700px;width:90%;max-height:82vh;overflow-y:auto;transform:translateY(24px) scale(.97);transition:transform .35s cubic-bezier(.16,1,.3,1)}
+.modal-overlay.show .modal-content{transform:translateY(0) scale(1)}
+.sim-panel{position:fixed;top:0;right:-420px;width:400px;height:100vh;z-index:60;transition:right .45s cubic-bezier(.16,1,.3,1);overflow-y:auto;padding:28px}
+.sim-panel.open{right:0}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,0.12);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 8px rgba(212,167,106,0.4)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#B8864A);color:#1A1410;font-weight:600;padding:8px 20px;border-radius:8px;border:none;cursor:pointer;transition:all .2s;font-family:inherit;font-size:.9rem}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(212,167,106,0.3)}
+.btn-ghost{background:transparent;color:var(--fg);border:1px solid var(--border);padding:8px 16px;border-radius:8px;cursor:pointer;transition:all .2s;font-family:inherit;font-size:.85rem}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(212,167,106,0.25);border-radius:3px}
+.formula{font-family:'Times New Roman',serif;font-style:italic;color:var(--accent);font-size:1.05em;letter-spacing:.5px}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeInUp .5s ease-out}
+@keyframes pulseRing{0%,100%{box-shadow:0 0 0 0 rgba(212,167,106,0.3)}50%{box-shadow:0 0 0 8px rgba(212,167,106,0)}}
+.pulse-ring{animation:pulseRing 2s infinite}
+@media(max-width:768px){.sim-panel{width:100%;right:-100%}.info-panel{left:8px!important;right:8px!important;max-width:none!important}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:0.01ms!important}}
+</style>
+</head>
+<body>
+
+<canvas id="solarCanvas"></canvas>
+
+<!-- 顶部标题 -->
+<header class="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-5 py-3 pointer-events-none">
+  <div class="pointer-events-auto">
+    <h1 class="font-display text-lg md:text-xl tracking-widest" style="color:var(--accent)">SOLAR SYSTEM</h1>
+    <p class="text-xs tracking-wider opacity-60" style="font-weight:300">起源与演化 · 互动教学</p>
+  </div>
+  <div class="flex gap-2 pointer-events-auto">
+    <button id="btnSimulator" class="btn-ghost text-xs flex items-center gap-1.5" title="参数模拟器">
+      <i class="fas fa-sliders-h"></i><span class="hidden md:inline">参数模拟器</span>
+    </button>
+    <button id="btnHelp" class="btn-ghost text-xs w-8 h-8 flex items-center justify-center rounded-full" title="操作指南">
+      <i class="fas fa-question"></i>
+    </button>
+  </div>
+</header>
+
+<!-- 当前阶段信息 -->
+<div id="stageInfo" class="info-panel glass fixed left-4 top-16 z-20 p-4 fade-in" style="max-width:300px">
+  <div class="flex items-center gap-2 mb-2">
+    <span id="stageIcon" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm" style="background:rgba(212,167,106,0.15);color:var(--accent)"><i class="fas fa-cloud"></i></span>
+    <div>
+      <div id="stageName" class="font-display text-sm tracking-wide" style="color:var(--accent)">分子云</div>
+      <div id="stageTime" class="text-xs opacity-50">46 亿年前</div>
+    </div>
+  </div>
+  <p id="stageDesc" class="text-xs leading-relaxed opacity-75 mb-3"></p>
+  <button id="btnDetail" class="btn-primary text-xs py-1.5 px-4">了解物理过程</button>
+</div>
+
+<!-- 行星详情面板 -->
+<div id="planetPanel" class="glass fixed right-4 top-16 z-20 p-4 hidden" style="max-width:280px">
+  <div class="flex items-center justify-between mb-2">
+    <h3 id="plName" class="font-display text-sm" style="color:var(--accent)"></h3>
+    <button id="plClose" class="opacity-50 hover:opacity-100 text-sm cursor-pointer"><i class="fas fa-times"></i></button>
+  </div>
+  <div id="plBody" class="text-xs leading-relaxed opacity-80 space-y-1.5"></div>
+</div>
+
+<!-- 底部控制区 -->
+<div class="fixed bottom-0 left-0 right-0 z-30 pb-4 px-4 md:px-8">
+  <div class="glass p-4 max-w-4xl mx-auto">
+    <!-- 时间显示 -->
+    <div class="flex items-center justify-between mb-3">
+      <span id="timeDisplay" class="font-display text-sm tracking-wider" style="color:var(--accent)">46 亿年前</span>
+      <div class="flex items-center gap-3">
+        <button id="btnPlay" class="w-9 h-9 rounded-full flex items-center justify-center transition-all" style="background:rgba(212,167,106,0.15);color:var(--accent)" title="播放/暂停">
+          <i class="fas fa-play text-xs"></i>
+        </button>
+        <button id="btnReset" class="btn-ghost text-xs py-1 px-3">重置</button>
+      </div>
+    </div>
+    <!-- 时间轴 -->
+    <div id="timelineContainer" class="relative px-3">
+      <div class="timeline-track" id="timelineTrack"
+           style="background:linear-gradient(90deg,#5A2D14,#8B4513 15%,#B8651A 30%,#7A6050 50%,#2A3A5A 70%,#0F1A2E 85%,#060A14)">
+      </div>
+      <div id="timelineThumb" class="timeline-thumb" style="left:0%"></div>
+      <!-- 阶段标记 -->
+      <div class="stage-dot" style="left:0%" data-idx="0"></div>
+      <div class="stage-dot" style="left:15%" data-idx="1"></div>
+      <div class="stage-dot" style="left:30%" data-idx="2"></div>
+      <div class="stage-dot" style="left:50%" data-idx="3"></div>
+      <div class="stage-dot" style="left:68%" data-idx="4"></div>
+      <div class="stage-dot" style="left:82%" data-idx="5"></div>
+      <!-- 标签 -->
+      <div class="flex justify-between mt-3 text-xs opacity-40 select-none" style="font-size:10px">
+        <span>46亿年前</span><span>40</span><span>35</span><span>25</span><span>10</span><span>现在</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 物理详情模态 -->
+<div id="detailModal" class="modal-overlay">
+  <div class="modal-content glass p-6 md:p-8">
+    <div class="flex items-center justify-between mb-5">
+      <h2 id="modalTitle" class="font-display text-lg tracking-wide" style="color:var(--accent)"></h2>
+      <button id="modalClose" class="opacity-50 hover:opacity-100 text-lg cursor-pointer"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="modalBody" class="text-sm leading-relaxed space-y-4 opacity-85"></div>
+  </div>
+</div>
+
+<!-- 帮助模态 -->
+<div id="helpModal" class="modal-overlay">
+  <div class="modal-content glass p-6 md:p-8" style="max-width:500px">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-display text-base tracking-wide" style="color:var(--accent)">操作指南</h2>
+      <button id="helpClose" class="opacity-50 hover:opacity-100 text-lg cursor-pointer"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="text-sm leading-relaxed space-y-3 opacity-80">
+      <p><i class="fas fa-arrows-left-right mr-2" style="color:var(--accent)"></i><b>拖动时间轴</b>：从46亿年前到现在，观看太阳系演化全过程</p>
+      <p><i class="fas fa-play mr-2" style="color:var(--accent)"></i><b>自动播放</b>：点击播放按钮自动推进时间</p>
+      <p><i class="fas fa-hand-pointer mr-2" style="color:var(--accent)"></i><b>行星点击</b>：在稳定阶段点击行星查看详细数据</p>
+      <p><i class="fas fa-book-open mr-2" style="color:var(--accent)"></i><b>物理过程</b>：每个阶段可查看引力、角动量守恒等详细解释</p>
+      <p><i class="fas fa-sliders-h mr-2" style="color:var(--accent)"></i><b>参数模拟器</b>：调整太阳质量或行星距离，观察系统变化</p>
+    </div>
+  </div>
+</div>
+
+<!-- 参数模拟器面板 -->
+<div id="simPanel" class="sim-panel glass" style="background:rgba(12,10,18,0.92);backdrop-filter:blur(30px)">
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="font-display text-sm tracking-wider" style="color:var(--accent)">PARAMETER SIMULATOR</h2>
+    <button id="simClose" class="opacity-50 hover:opacity-100 cursor-pointer"><i class="fas fa-times"></i></button>
+  </div>
+  <p class="text-xs opacity-50 mb-5">调整参数，观察太阳系会发生什么变化</p>
+
+  <div class="space-y-6">
+    <!-- 太阳质量 -->
+    <div>
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-xs font-medium">太阳质量</label>
+        <span id="sunMassVal" class="text-xs font-display" style="color:var(--accent)">1.00 M☉</span>
+      </div>
+      <input type="range" id="sunMassSlider" min="0.3" max="3" step="0.05" value="1">
+      <div class="flex justify-between text-xs opacity-30 mt-1"><span>0.3x</span><span>3.0x</span></div>
+    </div>
+    <!-- 地球距离 -->
+    <div>
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-xs font-medium">地球轨道半径</label>
+        <span id="earthDistVal" class="text-xs font-display" style="color:var(--accent)">1.00 AU</span>
+      </div>
+      <input type="range" id="earthDistSlider" min="0.3" max="3" step="0.05" value="1">
+      <div class="flex justify-between text-xs opacity-30 mt-1"><span>0.3 AU</span><span>3.0 AU</span></div>
+    </div>
+    <!-- 计算结果 -->
+    <div class="glass p-4 space-y-3" style="background:rgba(212,167,106,0.05)">
+      <h3 class="text-xs font-medium mb-2" style="color:var(--accent)">模拟结果</h3>
+      <div id="simResults" class="space-y-2 text-xs"></div>
+    </div>
+    <!-- 宜居带图示 -->
+    <div>
+      <h3 class="text-xs font-medium mb-2">宜居带位置</h3>
+      <div id="hzDiagram" class="relative h-16 rounded-lg overflow-hidden" style="background:rgba(0,0,0,0.4)">
+        <div class="absolute inset-0 flex items-center justify-center text-xs opacity-40">加载中...</div>
+      </div>
+      <p class="text-xs opacity-40 mt-1">绿色区域表示液态水可能存在的宜居带</p>
+    </div>
+    <button id="simReset" class="btn-ghost text-xs w-full">恢复默认参数</button>
+  </div>
+</div>
+
+<script>
+/* ========== 阶段与行星数据 ========== */
+const STAGES = [
+  {
+    name: '分子云', icon: 'fa-cloud', time: '46 亿年前',
+    progress: [0, 0.15],
+    desc: '在银河系的一角，一团巨大的分子云在自身引力下开始变得不稳定。温度仅约10-20开尔文，密度却逐渐增长，为即将到来的壮阔演化埋下伏笔。',
+    physics: {
+      title: '分子云与 Jeans 不稳定性',
+      sections: [
+        { subtitle: '分子云的本质', text: '太阳系起源于一团巨分子云（Giant Molecular Cloud），主要由氢分子（H₂）和氦原子组成，混有少量重元素尘埃颗粒。典型温度 10-20 K，密度约 10³ 粒子/cm³，质量可达 10⁴-10⁶ 太阳质量。' },
+        { subtitle: 'Jeans 不稳定性', text: '当云团的引力能超过热运动的动能时，云团开始坍缩。Jeans 质量判据：', formula: 'M_J = (5kT / Gμm_H)^(3/2) · (3 / 4πρ)^(1/2)' },
+        { subtitle: '触发机制', text: '可能的触发因素包括： nearby 超新星爆发的冲击波、银河旋臂的密度波压缩、或是 OB 星协中年轻恒星的星风和辐射压。这些扰动使局部密度超过 Jeans 临界值，坍缩便不可逆转地开始了。' }
+      ]
+    }
+  },
+  {
+    name: '引力坍缩', icon: 'fa-compress-arrows-alt', time: '45.7 亿年前',
+    progress: [0.15, 0.30],
+    desc: '分子云核心在引力作用下快速坍缩。角动量守恒使旋转加速，物质开始向赤道面集中，一个扁平的盘状结构正在酝酿。',
+    physics: {
+      title: '引力坍缩与角动量守恒',
+      sections: [
+        { subtitle: '自由下落时标', text: '坍缩发生在自由下落时标内，与初始密度相关：', formula: 't_ff = √(3π / 32Gρ) ≈ 3.4×10⁵ 年' },
+        { subtitle: '角动量守恒', text: '云团即使有微小的初始旋转，在坍缩过程中由于角动量 L = Iω 守恒，旋转角速度急剧增大。这就像花样滑冰运动员收拢双臂后旋转加速。', formula: 'L = I·ω = mr²·ω = 常数 → r↓ 则 ω↑' },
+        { subtitle: '能量耗散与扁平化', text: '气体分子通过碰撞将垂直于旋转面的动能辐射出去，但角动量守恒阻止了径向坍缩。结果：云团逐渐扁平化为原行星盘——一个围绕原恒星旋转的薄盘。' }
+      ]
+    }
+  },
+  {
+    name: '原行星盘', icon: 'fa-compact-disc', time: '45.5 亿年前',
+    progress: [0.30, 0.50],
+    desc: '原恒星被一个炽热的气体尘埃盘包围。盘中温度从内到外递减，不同物质在不同距离凝结，奠定了行星多样性的基础。',
+    physics: {
+      title: '原行星盘与尘埃凝聚',
+      sections: [
+        { subtitle: '盘的热结构', text: '原行星盘的温度分布近似幂律：T(r) ∝ r^(-3/4)。内盘温度可达 2000K 以上，所有固体皆气化；约 150-170K 处存在"雪线"（Snow Line），雪线之外水冰才能稳定存在。', formula: 'T(r) ≈ 280K · (r/1AU)^(-3/4)' },
+        { subtitle: '尘埃生长过程', text: '微米级尘埃颗粒通过碰撞粘合逐步生长：μm → mm（微碰撞粘合）→ cm（重力凝聚）→ m → km（自引力）。当星子（Planetesimal）达到约 1km 直径时，引力成为主导力量。' },
+        { subtitle: '雪线的关键作用', text: '雪线将盘分为内区（岩石质）和外区（富冰）。这解释了为什么类地行星小而密实，气巨行星大而轻——雪线外可用固体原料多出数倍，能更快生长到临界质量以捕获气体。' }
+      ]
+    }
+  },
+  {
+    name: '行星吸积', icon: 'fa-meteor', time: '45-44 亿年前',
+    progress: [0.50, 0.68],
+    desc: '星子通过相互碰撞和引力吸积快速生长。类地行星在数百万年内形成，而木星等气巨行星的核心则开始大规模捕获周围气体。',
+    physics: {
+      title: '核心吸积与行星形成',
+      sections: [
+        { subtitle: '核心吸积模型', text: '行星形成的主流理论。星子碰撞生长为行星胚胎（~月球到火星大小），胚胎间继续碰撞合并。类地行星形成时标约 10-100 百万年。', formula: 'dM/dt ≈ πR²·ρ_s·v_rel · F_grav' },
+        { subtitle: '气巨行星的形成', text: '木星和土星：首先形成 ~10 M⊕ 的冰/岩核心，当核心引力足够强时，剧烈吸积周围氢氦气体。这一过程需在盘气体耗散前完成（约 3-5 百万年），形成巨大的气体包层。' },
+        { subtitle: '寡头生长阶段', text: '少数最大胚胎主导吸积，形成规则间距的"寡头"。每个寡头的引力喂养区扫清轨道附近的碎片，最终演化为成熟行星。' }
+      ]
+    }
+  },
+  {
+    name: '晚期轰击', icon: 'fa-explosion', time: '44-38 亿年前',
+    progress: [0.68, 0.82],
+    desc: '太阳系经历剧烈碰撞时期。一颗火星大小的天体撞击原始地球，碎片凝聚成月球。外行星迁移扰动小天体，引发晚期重轰击。',
+    physics: {
+      title: '大碰撞与月球起源',
+      sections: [
+        { subtitle: '大碰撞假说', text: '约 45 亿年前，一颗约火星大小的天体（忒伊亚 Theia）与原始地球发生倾斜碰撞。碰撞抛射的物质在地球引力下聚集形成了月球。', formula: 'E_collision ≈ ½ · (M_Theia · v²) ≈ 10³² J' },
+        { subtitle: '月球形成的意义', text: '月球稳定了地球的自转轴倾角（约 23.5°），使气候在数十亿年间保持相对温和，这可能是地球能维持液态水和生命的关键条件之一。' },
+        { subtitle: '晚期重轰击 (LHB)', text: '约 38-41 亿年前，外行星轨道迁移（Nice 模型）扰动柯伊伯带天体，大量小天体被散射至内太阳系。月球、水星、火星上的大型撞击盆地就是这一时期的遗迹。' }
+      ]
+    }
+  },
+  {
+    name: '稳定太阳系', icon: 'fa-sun', time: '38 亿年前 — 现在',
+    progress: [0.82, 1.0],
+    desc: '八大行星各居其位，在引力共振中达成动态平衡。小行星带和柯伊伯带残留着太阳系形成初期的原始物质，等待人类的探索。',
+    physics: {
+      title: '行星系统的长期稳定性',
+      sections: [
+        { subtitle: '轨道共振保护', text: '木星与土星的 5:2 平均运动共振曾经驱动了晚期重轰击，但最终外行星系统收敛到了当前稳定构型。拉普拉斯共振（Io-Europa-Ganymede 4:2:1）是轨道共振维持系统稳定的经典例子。' },
+        { subtitle: '宜居带', text: '太阳宜居带约 0.95-1.37 AU（保守估计），地球恰好位于其中。一颗恒星的宜居带位置取决于其光度：', formula: 'd_HZ = √(L_star / L_sun) AU' },
+        { subtitle: '太阳的未来', text: '太阳目前约 47 亿岁，处于主序阶段中期。约 50 亿年后将膨胀为红巨星，吞噬内行星轨道，最终抛射外层成为白矮星。太阳系的演化远未结束。' }
+      ]
+    }
+  }
+];
+
+const PLANETS = [
+  { name:'水星', nameEn:'Mercury', mass:'3.30×10²³ kg', radius:'2,440 km', orbit:'0.387 AU', period:'87.97 天', composition:'铁核占比约 70%，硅酸盐地幔', moons:0, temp:'−173~427°C', color:'#A0826D', orbitNorm:0.10, displayR:3 },
+  { name:'金星', nameEn:'Venus', mass:'4.87×10²⁴ kg', radius:'6,052 km', orbit:'0.723 AU', period:'224.7 天', composition:'CO₂ 浓密大气，硫酸云层覆盖', moons:0, temp:'462°C (表面)', color:'#DEB887', orbitNorm:0.16, displayR:5 },
+  { name:'地球', nameEn:'Earth', mass:'5.97×10²⁴ kg', radius:'6,371 km', orbit:'1.000 AU', period:'365.25 天', composition:'铁镍核心，硅酸盐地幔，液态水海洋', moons:1, temp:'−89~57°C', color:'#4A90D9', orbitNorm:0.22, displayR:5, note:'月球形成于忒伊亚撞击' },
+  { name:'火星', nameEn:'Mars', mass:'6.42×10²³ kg', radius:'3,390 km', orbit:'1.524 AU', period:'687 天', composition:'铁核，玄武岩表面，氧化铁(红色)', moons:2, temp:'−140~20°C', color:'#CD6839', orbitNorm:0.28, displayR:4 },
+  { name:'木星', nameEn:'Jupiter', mass:'1.90×10²⁷ kg', radius:'69,911 km', orbit:'5.203 AU', period:'11.86 年', composition:'氢(~90%) 氦(~10%)，岩石/冰核心', moons:95, temp:'−145°C (云顶)', color:'#DAA06D', orbitNorm:0.42, displayR:13, note:'太阳系最大行星，质量为其余行星之和的2.5倍' },
+  { name:'土星', nameEn:'Saturn', mass:'5.68×10²⁶ kg', radius:'58,232 km', orbit:'9.537 AU', period:'29.46 年', composition:'氢(~96%) 氦(~3%)，壮丽的冰环系统', moons:146, temp:'−178°C (云顶)', color:'#F4C67A', orbitNorm:0.54, displayR:11, note:'密度低于水（0.687 g/cm³）' },
+  { name:'天王星', nameEn:'Uranus', mass:'8.68×10²⁵ kg', radius:'25,362 km', orbit:'19.19 AU', period:'84.01 年', composition:'氢、氦、甲烷（蓝绿色）', moons:27, temp:'−224°C', color:'#7EC8E3', orbitNorm:0.68, displayR:8, note:'自转轴倾斜 97.77°，几乎"躺着"公转' },
+  { name:'海王星', nameEn:'Neptune', mass:'1.02×10²⁶ kg', radius:'24,622 km', orbit:'30.07 AU', period:'164.8 年', composition:'氢、氦、甲烷（深蓝色）', moons:16, temp:'−218°C', color:'#3F6BBB', orbitNorm:0.80, displayR:8, note:'风速可达 2,100 km/h，太阳系之最' }
+];
+
+/* ========== 全局状态 ========== */
+let progress = 0;       // 0-1 时间进度
+let animTime = 0;       // 动画时间
+let isPlaying = false;
+let playSpeed = 0.0003;
+let simSunMass = 1.0;
+let simEarthDist = 1.0;
+let selectedPlanet = -1;
+let dragTimeline = false;
+
+/* ========== Canvas 设置 ========== */
+const canvas = document.getElementById('solarCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, CX, CY, maxR, dpr;
+
+function resizeCanvas() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  CX = W / 2;
+  CY = H / 2 - 30;
+  maxR = Math.min(CX, CY) * 0.78;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+/* ========== 工具函数 ========== */
+function lerp(a, b, t) { return a + (b - a) * Math.max(0, Math.min(1, t)); }
+function smoothStep(edge0, edge1, x) { const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0))); return t * t * (3 - 2 * t); }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return [r, g, b];
+}
+function lerpColor(c1, c2, t) {
+  const a = hexToRgb(c1), b = hexToRgb(c2);
+  const r = Math.round(lerp(a[0],b[0],t)), g = Math.round(lerp(a[1],b[1],t)), bl = Math.round(lerp(a[2],b[2],t));
+  return `rgb(${r},${g},${bl})`;
+}
+
+/* ========== 粒子系统 ========== */
+const particles = [];
+const PCOUNT = 350;
+const stars = []; // 背景恒星
+
+function initParticles() {
+  for (let i = 0; i < PCOUNT; i++) {
+    const isPlanet = i < 8;
+    particles.push({
+      baseAngle: Math.random() * Math.PI * 2,
+      baseDist: 0.1 + Math.random() * 0.9,
+      baseZ: (Math.random() - 0.5) * 0.8,
+      speed: 0.3 + Math.random() * 0.8,
+      size: isPlanet ? (1.5 + Math.random()) : (0.5 + Math.random() * 2),
+      brightness: 0.3 + Math.random() * 0.7,
+      isPlanet: isPlanet,
+      planetIdx: i,
+      hueShift: Math.random(),
+      flicker: Math.random() * Math.PI * 2
+    });
+  }
+  // 背景恒星（始终可见，随progress逐渐显现）
+  for (let i = 0; i < 200; i++) {
+    stars.push({
+      x: Math.random(),
+      y: Math.random(),
+      size: 0.3 + Math.random() * 1.2,
+      twinkle: Math.random() * Math.PI * 2,
+      twinkleSpeed: 0.5 + Math.random() * 2
+    });
+  }
+}
+initParticles();
+
+/* ========== 碰撞闪光 ========== */
+const flashes = [];
+let lastFlashTime = 0;
+function addFlash(x, y, size) {
+  flashes.push({ x, y, size: size || 8, life: 1.0 });
+}
+
+/* ========== 渲染引擎 ========== */
+function getBackgroundColors(p) {
+  // 从暖红棕 → 冷蓝黑
+  const inner = lerpColor('#3A1A0A', '#050510', smoothStep(0, 0.7, p));
+  const outer = lerpColor('#1A0A04', '#020208', smoothStep(0, 0.6, p));
+  const mid = lerpColor('#2A1208', '#080818', smoothStep(0.1, 0.65, p));
+  return { inner, mid, outer };
+}
+
+function drawBackground(p) {
+  const c = getBackgroundColors(p);
+  const grad = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(W, H) * 0.75);
+  grad.addColorStop(0, c.inner);
+  grad.addColorStop(0.5, c.mid);
+  grad.addColorStop(1, c.outer);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawStars(p) {
+  const alpha = lerp(0.1, 0.7, smoothStep(0.3, 0.9, p));
+  if (alpha < 0.01) return;
+  for (const s of stars) {
+    const twinkle = 0.5 + 0.5 * Math.sin(animTime * s.twinkleSpeed + s.twinkle);
+    const a = alpha * twinkle;
+    ctx.fillStyle = `rgba(255,248,240,${a.toFixed(3)})`;
+    ctx.beginPath();
+    ctx.arc(s.x * W, s.y * H, Math.max(0.3, s.size), 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawSun(p) {
+  // 太阳在坍缩阶段开始显现，逐渐变亮
+  const sunVis = smoothStep(0.1, 0.25, p);
+  if (sunVis < 0.01) return;
+  const brightness = lerp(0.3, 1.0, smoothStep(0.15, 0.5, p));
+  const baseSize = lerp(4, 18, smoothStep(0.1, 0.5, p));
+  const sunR = Math.max(1, baseSize * (simSunMass > 0 ? Math.pow(simSunMass, 0.3) : 1));
+
+  // 外层辉光
+  const glowR = sunR * 8;
+  const g1 = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(1, glowR));
+  const warmAlpha = (brightness * 0.25).toFixed(3);
+  g1.addColorStop(0, `rgba(255,200,80,${warmAlpha})`);
+  g1.addColorStop(0.3, `rgba(255,140,40,${(brightness * 0.12).toFixed(3)})`);
+  g1.addColorStop(1, 'rgba(255,100,20,0)');
+  ctx.fillStyle = g1;
+  ctx.beginPath();
+  ctx.arc(CX, CY, Math.max(1, glowR), 0, Math.PI * 2);
+  ctx.fill();
+
+  // 中层辉光
+  const g2 = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(1, sunR * 3));
+  g2.addColorStop(0, `rgba(255,240,200,${(brightness * 0.8).toFixed(3)})`);
+  g2.addColorStop(0.5, `rgba(255,180,60,${(brightness * 0.3).toFixed(3)})`);
+  g2.addColorStop(1, 'rgba(255,120,20,0)');
+  ctx.fillStyle = g2;
+  ctx.beginPath();
+  ctx.arc(CX, CY, Math.max(1, sunR * 3), 0, Math.PI * 2);
+  ctx.fill();
+
+  // 核心
+  ctx.fillStyle = `rgba(255,250,230,${brightness.toFixed(3)})`;
+  ctx.beginPath();
+  ctx.arc(CX, CY, Math.max(1, sunR), 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawParticles(p) {
+  // 连续参数
+  const spreadness = 1 - smoothStep(0.05, 0.45, p);
+  const diskiness = smoothStep(0.18, 0.40, p);
+  const accretion = smoothStep(0.48, 0.65, p);
+  const stabilization = smoothStep(0.72, 0.88, p);
+
+  // 粒子颜色基调
+  const warmColor = [255, 180, 80];
+  const coolColor = [180, 200, 255];
+  const cr = Math.round(lerp(warmColor[0], coolColor[0], smoothStep(0.3, 0.8, p)));
+  const cg = Math.round(lerp(warmColor[1], coolColor[1], smoothStep(0.3, 0.8, p)));
+  const cb = Math.round(lerp(warmColor[2], coolColor[2], smoothStep(0.3, 0.8, p)));
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+
+  for (const pt of particles) {
+    let dist = pt.baseDist;
+    // 散布度影响范围
+    dist *= lerp(0.35, 1.0, spreadness);
+
+    // 旋转角度
+    let angSpeed = lerp(0.15, 1.2, diskiness) * pt.speed;
+    // 开普勒修正：内快外慢
+    angSpeed *= (0.5 + 0.5 / Math.max(0.2, dist));
+    let angle = pt.baseAngle + animTime * angSpeed;
+
+    // 扁平度
+    const flatY = lerp(0.9, 0.32, diskiness);
+
+    // 行星吸积
+    let alpha = pt.brightness;
+    let size = pt.size;
+    if (pt.isPlanet) {
+      const planet = PLANETS[pt.planetIdx];
+      const targetDist = planet.orbitNorm;
+      dist = lerp(dist, targetDist, accretion);
+      size = lerp(pt.size, planet.displayR, stabilization);
+      alpha = lerp(pt.brightness, 1.0, stabilization);
+      // 行星颜色
+      const pc = hexToRgb(planet.color);
+      if (stabilization > 0.3) {
+        // 混合行星颜色
+        const mix = (stabilization - 0.3) / 0.7;
+        // 用行星颜色替代
+        drawParticleDot(pt, dist, angle, flatY, pc[0], pc[1], pc[2], alpha, size, p);
+        continue;
+      }
+    } else {
+      // 非行星粒子在吸积/稳定阶段逐渐变暗
+      alpha *= lerp(1.0, 0.15, stabilization);
+      // 在吸积阶段有些被行星吞噬
+      if (accretion > 0.3) {
+        alpha *= lerp(1.0, 0.4, (accretion - 0.3) / 0.7);
+      }
+    }
+
+    if (alpha < 0.02) continue;
+    drawParticleDot(pt, dist, angle, flatY, cr, cg, cb, alpha, size, p);
+  }
+  ctx.restore();
+}
+
+function drawParticleDot(pt, dist, angle, flatY, r, g, b, alpha, size, prog) {
+  const x = CX + Math.cos(angle) * dist * maxR;
+  const y = CY + Math.sin(angle) * dist * maxR * flatY;
+  const flicker = 0.8 + 0.2 * Math.sin(animTime * 3 + pt.flicker);
+  const a = alpha * flicker;
+  const sz = Math.max(0.5, size * (0.8 + 0.2 * Math.sin(animTime * 2 + pt.baseAngle)));
+
+  if (sz > 3) {
+    // 大粒子画辉光
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, Math.max(1, sz * 2.5));
+    grad.addColorStop(0, `rgba(${r},${g},${b},${(a * 0.8).toFixed(3)})`);
+    grad.addColorStop(0.4, `rgba(${r},${g},${b},${(a * 0.3).toFixed(3)})`);
+    grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, Math.max(1, sz * 2.5), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = `rgba(${r},${g},${b},${a.toFixed(3)})`;
+  ctx.beginPath();
+  ctx.arc(x, y, Math.max(0.3, sz), 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawOrbits(p) {
+  const vis = smoothStep(0.78, 0.88, p);
+  if (vis < 0.01) return;
+  ctx.save();
+  ctx.globalAlpha = vis * 0.3;
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.setLineDash([3, 6]);
+  for (const pl of PLANETS) {
+    const r = Math.max(1, pl.orbitNorm * maxR);
+    ctx.beginPath();
+    ctx.ellipse(CX, CY, r, r * 0.32, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+function drawStablePlanets(p) {
+  const vis = smoothStep(0.82, 0.92, p);
+  if (vis < 0.01) return;
+
+  for (let i = 0; i < PLANETS.length; i++) {
+    const pl = PLANETS[i];
+    const orbitR = Math.max(1, pl.orbitNorm * maxR);
+    const angleSpeed = 0.8 / Math.max(0.1, Math.pow(pl.orbitNorm, 1.5));
+    const angle = animTime * angleSpeed + i * 0.8;
+    const flatY = 0.32;
+    const x = CX + Math.cos(angle) * orbitR;
+    const y = CY + Math.sin(angle) * orbitR * flatY;
+    const r = Math.max(2, pl.displayR * vis);
+    const pc = hexToRgb(pl.color);
+
+    // 辉光
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, Math.max(1, r * 3));
+    grad.addColorStop(0, `rgba(${pc[0]},${pc[1]},${pc[2]},${(vis * 0.5).toFixed(3)})`);
+    grad.addColorStop(1, `rgba(${pc[0]},${pc[1]},${pc[2]},0)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, Math.max(1, r * 3), 0, Math.PI * 2);
+    ctx.fill();
+
+    // 行星本体
+    ctx.fillStyle = `rgba(${pc[0]},${pc[1]},${pc[2]},${vis.toFixed(3)})`;
+    ctx.beginPath();
+    ctx.arc(x, y, Math.max(1, r), 0, Math.PI * 2);
+    ctx.fill();
+
+    // 土星环
+    if (i === 5 && vis > 0.5) {
+      ctx.save();
+      ctx.strokeStyle = `rgba(244,198,122,${(vis * 0.5).toFixed(3)})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(x, y, Math.max(1, r * 2), Math.max(0.5, r * 0.5), -0.3, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 行星名标签
+    if (vis > 0.6) {
+      ctx.save();
+      ctx.fillStyle = `rgba(232,224,212,${(vis * 0.6).toFixed(3)})`;
+      ctx.font = '10px "Noto Sans SC"';
+      ctx.textAlign = 'center';
+      ctx.fillText(pl.name, x, y - r - 6);
+      ctx.restore();
+    }
+
+    // 存储位置用于点击检测
+    pl._screenX = x;
+    pl._screenY = y;
+    pl._screenR = r;
+  }
+}
+
+function drawAsteroidBelt(p) {
+  const vis = smoothStep(0.80, 0.90, p);
+  if (vis < 0.01) return;
+  const beltInner = 0.33 * maxR;
+  const beltOuter = 0.38 * maxR;
+  ctx.save();
+  ctx.globalAlpha = vis * 0.35;
+  for (let i = 0; i < 80; i++) {
+    const angle = (i / 80) * Math.PI * 2 + animTime * 0.05 + Math.sin(i * 7.3) * 0.3;
+    const rr = lerp(beltInner, beltOuter, (Math.sin(i * 13.7) + 1) / 2);
+    const x = CX + Math.cos(angle) * rr;
+    const y = CY + Math.sin(angle) * rr * 0.32;
+    ctx.fillStyle = `rgba(180,170,150,${(0.3 + Math.random() * 0.3).toFixed(2)})`;
+    ctx.beginPath();
+    ctx.arc(x, y, 0.5 + Math.random() * 1, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawFlashes() {
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = flashes.length - 1; i >= 0; i--) {
+    const f = flashes[i];
+    f.life -= 0.025;
+    if (f.life <= 0) { flashes.splice(i, 1); continue; }
+    const grad = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, Math.max(1, f.size * f.life * 3));
+    grad.addColorStop(0, `rgba(255,240,200,${(f.life * 0.8).toFixed(3)})`);
+    grad.addColorStop(0.5, `rgba(255,180,80,${(f.life * 0.3).toFixed(3)})`);
+    grad.addColorStop(1, 'rgba(255,100,20,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, Math.max(1, f.size * f.life * 3), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+// 随机碰撞闪光（在吸积和轰击阶段）
+function maybeAddFlash(p) {
+  if (p > 0.45 && p < 0.82 && animTime - lastFlashTime > 0.3 + Math.random() * 0.5) {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = (0.1 + Math.random() * 0.7) * maxR;
+    const flatY = lerp(0.9, 0.32, smoothStep(0.18, 0.4, p));
+    addFlash(
+      CX + Math.cos(angle) * dist,
+      CY + Math.sin(angle) * dist * flatY,
+      5 + Math.random() * 10
+    );
+    lastFlashTime = animTime;
+  }
+}
+
+// 星云尘埃氛围（早期阶段）
+function drawNebulaHaze(p) {
+  const vis = 1 - smoothStep(0.3, 0.6, p);
+  if (vis < 0.01) return;
+  ctx.save();
+  ctx.globalAlpha = vis * 0.15;
+  for (let i = 0; i < 5; i++) {
+    const angle = animTime * 0.1 * (i + 1) + i * 1.2;
+    const dist = maxR * (0.3 + i * 0.12);
+    const x = CX + Math.cos(angle) * dist * 0.4;
+    const y = CY + Math.sin(angle) * dist * 0.3;
+    const r = Math.max(1, maxR * (0.2 + i * 0.08));
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+    const hue = lerp(15, 35, i / 5);
+    grad.addColorStop(0, `hsla(${hue},70%,40%,0.3)`);
+    grad.addColorStop(1, `hsla(${hue},60%,20%,0)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ========== 主渲染 ========== */
+function render() {
+  ctx.clearRect(0, 0, W, H);
+  drawBackground(progress);
+  drawStars(progress);
+  drawNebulaHaze(progress);
+  drawSun(progress);
+  drawParticles(progress);
+  drawOrbits(progress);
+  drawAsteroidBelt(progress);
+  drawStablePlanets(progress);
+  maybeAddFlash(progress);
+  drawFlashes();
+}
+
+/* ========== UI 更新 ========== */
+function getCurrentStage(p) {
+  for (let i = STAGES.length - 1; i >= 0; i--) {
+    if (p >= STAGES[i].progress[0]) return i;
+  }
+  return 0;
+}
+
+function updateUI() {
+  // 时间显示
+  const yearsAgo = lerp(46, 0, progress);
+  document.getElementById('timeDisplay').textContent = yearsAgo < 0.5 ? '现在' : `${yearsAgo.toFixed(1)} 亿年前`;
+
+  // 阶段信息
+  const si = getCurrentStage(progress);
+  const stage = STAGES[si];
+  document.getElementById('stageIcon').innerHTML = `<i class="fas ${stage.icon}"></i>`;
+  document.getElementById('stageName').textContent = stage.name;
+  document.getElementById('stageTime').textContent = stage.time;
+  document.getElementById('stageDesc').textContent = stage.desc;
+
+  // 时间轴位置
+  document.getElementById('timelineThumb').style.left = (progress * 100) + '%';
+
+  // 阶段标记高亮
+  document.querySelectorAll('.stage-dot').forEach(dot => {
+    const idx = parseInt(dot.dataset.idx);
+    dot.classList.toggle('active', idx === si);
+  });
+
+  // 行星面板（只在稳定阶段显示提示）
+  if (progress < 0.82) {
+    document.getElementById('planetPanel').classList.add('hidden');
+    selectedPlanet = -1;
+  }
+}
+
+/* ========== 时间轴交互 ========== */
+const timelineTrack = document.getElementById('timelineTrack');
+const timelineThumb = document.getElementById('timelineThumb');
+const timelineContainer = document.getElementById('timelineContainer');
+
+function setProgressFromEvent(e) {
+  const rect = timelineTrack.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  progress = clamp((clientX - rect.left) / rect.width, 0, 1);
+  updateUI();
+}
+
+timelineContainer.addEventListener('mousedown', e => { dragTimeline = true; setProgressFromEvent(e); });
+window.addEventListener('mousemove', e => { if (dragTimeline) setProgressFromEvent(e); });
+window.addEventListener('mouseup', () => { dragTimeline = false; });
+timelineContainer.addEventListener('touchstart', e => { dragTimeline = true; setProgressFromEvent(e); }, { passive: true });
+window.addEventListener('touchmove', e => { if (dragTimeline) setProgressFromEvent(e); }, { passive: true });
+window.addEventListener('touchend', () => { dragTimeline = false; });
+
+/* ========== 播放控制 ========== */
+const btnPlay = document.getElementById('btnPlay');
+btnPlay.addEventListener('click', () => {
+  isPlaying = !isPlaying;
+  btnPlay.innerHTML = isPlaying ? '<i class="fas fa-pause text-xs"></i>' : '<i class="fas fa-play text-xs"></i>';
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  progress = 0;
+  isPlaying = false;
+  btnPlay.innerHTML = '<i class="fas fa-play text-xs"></i>';
+  updateUI();
+});
+
+/* ========== 详情模态 ========== */
+document.getElementById('btnDetail').addEventListener('click', () => {
+  const si = getCurrentStage(progress);
+  const phys = STAGES[si].physics;
+  document.getElementById('modalTitle').textContent = phys.title;
+  let html = '';
+  for (const sec of phys.sections) {
+    html += `<div>`;
+    html += `<h3 class="font-medium text-sm mb-1" style="color:var(--accent)">${sec.subtitle}</h3>`;
+    html += `<p class="opacity-80">${sec.text}</p>`;
+    if (sec.formula) {
+      html += `<div class="glass p-3 my-2 text-center" style="background:rgba(212,167,106,0.06)"><span class="formula">${sec.formula}</span></div>`;
+    }
+    html += `</div>`;
+  }
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('detailModal').classList.add('show');
+});
+
+document.getElementById('modalClose').addEventListener('click', () => {
+  document.getElementById('detailModal').classList.remove('show');
+});
+document.getElementById('detailModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('show');
+});
+
+/* ========== 帮助模态 ========== */
+document.getElementById('btnHelp').addEventListener('click', () => document.getElementById('helpModal').classList.add('show'));
+document.getElementById('helpClose').addEventListener('click', () => document.getElementById('helpModal').classList.remove('show'));
+document.getElementById('helpModal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('show'); });
+
+/* ========== 行星点击 ========== */
+canvas.addEventListener('click', e => {
+  if (progress < 0.82) return;
+  const mx = e.clientX, my = e.clientY;
+  for (let i = 0; i < PLANETS.length; i++) {
+    const pl = PLANETS[i];
+    if (!pl._screenX) continue;
+    const dx = mx - pl._screenX, dy = my - pl._screenY;
+    if (Math.sqrt(dx * dx + dy * dy) < Math.max(pl._screenR * 2, 15)) {
+      showPlanetInfo(i);
+      return;
+    }
+  }
+});
+
+function showPlanetInfo(idx) {
+  selectedPlanet = idx;
+  const pl = PLANETS[idx];
+  document.getElementById('plName').textContent = `${pl.name} ${pl.nameEn}`;
+  let html = '';
+  html += `<div class="grid grid-cols-2 gap-1"><span class="opacity-50">质量</span><span>${pl.mass}</span></div>`;
+  html += `<div class="grid grid-cols-2 gap-1"><span class="opacity-50">半径</span><span>${pl.radius}</span></div>`;
+  html += `<div class="grid grid-cols-2 gap-1"><span class="opacity-50">轨道半径</span><span>${pl.orbit}</span></div>`;
+  html += `<div class="grid grid-cols-2 gap-1"><span class="opacity-50">公转周期</span><span>${pl.period}</span></div>`;
+  html += `<div class="grid grid-cols-2 gap-1"><span class="opacity-50">温度</span><span>${pl.temp}</span></div>`;
+  html += `<div class="grid grid-cols-2 gap-1"><span class="opacity-50">已知卫星</span><span>${pl.moons}</span></div>`;
+  html += `<div class="mt-2 pt-2" style="border-top:1px solid var(--border)"><span class="opacity-50">成分/特征</span><p class="mt-1">${pl.composition}</p></div>`;
+  if (pl.note) html += `<div class="mt-1.5 glass p-2 text-xs" style="background:rgba(212,167,106,0.08);color:var(--accent)">${pl.note}</div>`;
+  document.getElementById('plBody').innerHTML = html;
+  document.getElementById('planetPanel').classList.remove('hidden');
+}
+
+document.getElementById('plClose').addEventListener('click', () => {
+  document.getElementById('planetPanel').classList.add('hidden');
+  selectedPlanet = -1;
+});
+
+/* ========== 参数模拟器 ========== */
+const simPanel = document.getElementById('simPanel');
+document.getElementById('btnSimulator').addEventListener('click', () => simPanel.classList.toggle('open'));
+document.getElementById('simClose').addEventListener('click', () => simPanel.classList.remove('open'));
+document.getElementById('simReset').addEventListener('click', () => {
+  simSunMass = 1; simEarthDist = 1;
+  document.getElementById('sunMassSlider').value = 1;
+  document.getElementById('earthDistSlider').value = 1;
+  updateSimulator();
+});
+
+document.getElementById('sunMassSlider').addEventListener('input', e => {
+  simSunMass = parseFloat(e.target.value);
+  updateSimulator();
+});
+document.getElementById('earthDistSlider').addEventListener('input', e => {
+  simEarthDist = parseFloat(e.target.value);
+  updateSimulator();
+});
+
+function updateSimulator() {
+  document.getElementById('sunMassVal').textContent = simSunMass.toFixed(2) + ' M☉';
+  document.getElementById('earthDistVal').textContent = simEarthDist.toFixed(2) + ' AU';
+
+  // 物理计算
+  const L = Math.pow(simSunMass, 3.5); // 光度 ∝ M^3.5
+  const hzInner = Math.sqrt(L * 0.95); // 宜居带内界
+  const hzOuter = Math.sqrt(L * 1.37); // 宜居带外界
+  const earthPeriod = Math.pow(simEarthDist, 1.5) / Math.sqrt(simSunMass); // 开普勒第三定律
+  const earthTemp = 279 * Math.pow(simSunMass, 0.875) / Math.sqrt(simEarthDist); // 平衡温度
+  const isHabitable = simEarthDist >= hzInner && simEarthDist <= hzOuter;
+
+  let results = '';
+  results += `<div class="flex justify-between"><span class="opacity-50">太阳光度</span><span>${L.toFixed(2)} L☉</span></div>`;
+  results += `<div class="flex justify-between"><span class="opacity-50">宜居带范围</span><span>${hzInner.toFixed(2)} — ${hzOuter.toFixed(2)} AU</span></div>`;
+  results += `<div class="flex justify-between"><span class="opacity-50">地球公转周期</span><span>${earthPeriod.toFixed(2)} 年</span></div>`;
+  results += `<div class="flex justify-between"><span class="opacity-50">地球平衡温度</span><span>${earthTemp.toFixed(0)} K (${(earthTemp - 273).toFixed(0)}°C)</span></div>`;
+  results += `<div class="flex justify-between items-center"><span class="opacity-50">宜居性判断</span><span style="color:${isHabitable ? '#6BCB77' : '#E85555'}">${isHabitable ? '位于宜居带内' : '不在宜居带内'}</span></div>`;
+
+  if (simSunMass > 2.5) {
+    results += `<div class="glass p-2 mt-2 text-xs" style="background:rgba(232,85,85,0.1);color:#E85555"><i class="fas fa-exclamation-triangle mr-1"></i>大质量恒星寿命极短（~${(10/Math.pow(simSunMass,2.5)).toFixed(0)} 亿年），不足以支持复杂生命演化</div>`;
+  }
+  if (earthTemp < 273) {
+    results += `<div class="glass p-2 mt-2 text-xs" style="background:rgba(100,160,255,0.1);color:#7EC8E3"><i class="fas fa-snowflake mr-1"></i>温度过低，水以冰的形式存在</div>`;
+  } else if (earthTemp > 373) {
+    results += `<div class="glass p-2 mt-2 text-xs" style="background:rgba(232,85,85,0.1);color:#E85555"><i class="fas fa-fire mr-1"></i>温度过高，水无法以液态形式存在</div>`;
+  }
+
+  document.getElementById('simResults').innerHTML = results;
+
+  // 宜居带图示
+  drawHZDiagram(hzInner, hzOuter, isHabitable);
+}
+
+function drawHZDiagram(hzInner, hzOuter, isHabitable) {
+  const el = document.getElementById('hzDiagram');
+  const maxAU = 3.5;
+  const w = el.offsetWidth || 340;
+  const h = 60;
+
+  let svg = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">`;
+
+  // 背景
+  svg += `<rect x="0" y="0" width="${w}" height="${h}" fill="rgba(0,0,0,0.3)" rx="8"/>`;
+
+  // 宜居带
+  const hzX1 = (hzInner / maxAU) * w;
+  const hzX2 = (hzOuter / maxAU) * w;
+  svg += `<rect x="${clamp(hzX1,0,w)}" y="5" width="${clamp(hzX2 - hzX1, 0, w)}" height="${h-10}" fill="rgba(76,175,80,0.2)" rx="4"/>`;
+  svg += `<text x="${(hzX1+hzX2)/2}" y="${h/2+3}" text-anchor="middle" fill="#6BCB77" font-size="9" font-family="Noto Sans SC">宜居带</text>`;
+
+  // 行星位置标记
+  const planetsToShow = [
+    { name: '水', dist: 0.387 }, { name: '金', dist: 0.723 },
+    { name: '地', dist: simEarthDist }, { name: '火', dist: 1.524 },
+    { name: '木', dist: 5.203 }
+  ];
+  for (const p of planetsToShow) {
+    if (p.dist > maxAU) continue;
+    const x = (p.dist / maxAU) * w;
+    const isEarth = p.name === '地';
+    const col = isEarth ? (isHabitable ? '#6BCB77' : '#E85555') : '#888';
+    svg += `<circle cx="${x}" cy="${h-12}" r="${isEarth ? 4 : 3}" fill="${col}"/>`;
+    svg += `<text x="${x}" y="${h-18}" text-anchor="middle" fill="${col}" font-size="8" font-family="Noto Sans SC">${p.name}</text>`;
+  }
+
+  // 太阳
+  svg += `<circle cx="6" cy="${h/2}" r="5" fill="#D4A76A" opacity="0.8"/>`;
+  svg += `<text x="6" y="${h/2+14}" text-anchor="middle" fill="#D4A76A" font-size="7">恒星</text>`;
+
+  // 刻度
+  for (let au = 1; au <= 3; au++) {
+    const x = (au / maxAU) * w;
+    svg += `<line x1="${x}" y1="${h-3}" x2="${x}" y2="${h}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`;
+    svg += `<text x="${x}" y="${h-5}" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="7">${au}AU</text>`;
+  }
+
+  svg += `</svg>`;
+  el.innerHTML = svg;
+}
+
+// 初始化模拟器
+updateSimulator();
+
+/* ========== 动画循环 ========== */
+let lastTime = 0;
+function animate(timestamp) {
+  const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+  lastTime = timestamp;
+  animTime += dt;
+
+  // 自动播放
+  if (isPlaying && !dragTimeline) {
+    progress = Math.min(1, progress + playSpeed);
+    if (progress >= 1) {
+      isPlaying = false;
+      btnPlay.innerHTML = '<i class="fas fa-play text-xs"></i>';
+    }
+    updateUI();
+  }
+
+  render();
+  requestAnimationFrame(animate);
+}
+
+// 初始化
+updateUI();
+requestAnimationFrame(animate);
+
+/* ========== 键盘控制 ========== */
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    btnPlay.click();
+  } else if (e.code === 'ArrowRight') {
+    progress = Math.min(1, progress + 0.02);
+    updateUI();
+  } else if (e.code === 'ArrowLeft') {
+    progress = Math.max(0, progress - 0.02);
+    updateUI();
+  } else if (e.code === 'Escape') {
+    document.getElementById('detailModal').classList.remove('show');
+    document.getElementById('helpModal').classList.remove('show');
+    simPanel.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>

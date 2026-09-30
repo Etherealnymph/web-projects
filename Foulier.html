@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>傅里叶实验室 · 圆上之圆</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1013; --bg2:#0b0e11; --panel:#141920; --panel2:#11151b;
+  --line:#232a33; --line2:#2e3742;
+  --ink:#e9e4d8; --dim:#96a0ab; --faint:#5c6670;
+  --accent:#e9a94e; --accent-ink:#171006;
+  --bad:#d0655f;
+  --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Consolas,monospace;
+  --serif:'Noto Serif SC','Times New Roman',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.65 -apple-system,'PingFang SC','Microsoft YaHei',sans-serif;padding:0 18px 30px}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:#2b333d;border-radius:4px}
+::-webkit-scrollbar-track{background:transparent}
+.mono{font-family:var(--mono)}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input{font:inherit;color:var(--ink)}
+.wrap{max-width:1560px;margin:0 auto}
+
+/* ---------- 顶栏 ---------- */
+header{display:flex;align-items:center;gap:26px;padding:14px 2px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;color:var(--accent);flex:none}
+.brand h1{font-family:var(--serif);font-weight:900;font-size:21px;letter-spacing:.14em;white-space:nowrap}
+.brand small{display:block;font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.32em;margin-top:1px}
+.tabs{display:flex;gap:4px;margin:0 auto}
+.tab{padding:9px 16px 7px;color:var(--dim);font-family:var(--serif);font-weight:700;font-size:15px;letter-spacing:.06em;border-bottom:2px solid transparent;transition:.18s}
+.tab .tn{font-family:var(--mono);font-size:11px;color:var(--faint);margin-right:7px;letter-spacing:0}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+.tab.on .tn{color:var(--accent)}
+.tagline{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.25em;white-space:nowrap}
+
+/* ---------- 布局 ---------- */
+#app{display:grid;grid-template-columns:336px minmax(0,1fr);gap:16px;margin-top:16px}
+aside{display:flex;flex-direction:column;gap:14px;min-width:0}
+
+/* ---------- 左栏面板 ---------- */
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:15px 15px 13px}
+.box h2{font-family:var(--serif);font-size:15px;font-weight:700;letter-spacing:.05em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.box h2 .no{font-family:var(--mono);font-size:10px;color:var(--accent);border:1px solid var(--line2);border-radius:20px;padding:1px 8px;letter-spacing:.1em}
+.field{margin-bottom:10px}
+.field>label{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--dim);margin-bottom:5px;letter-spacing:.03em}
+.field output{font-family:var(--mono);font-size:12px;color:var(--ink)}
+input[type=text]{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:7px;padding:7px 10px;font-family:var(--mono);font-size:13px;outline:none;transition:border-color .15s}
+input[type=text]:focus{border-color:var(--accent)}
+input.bad{border-color:var(--bad) !important}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-2px 0 10px}
+.chLbl{font-size:11px;color:var(--faint);margin-right:2px}
+.chip{font-size:12px;color:var(--dim);border:1px solid var(--line2);border-radius:20px;padding:2px 11px;transition:.15s}
+.chip:hover{color:var(--accent);border-color:var(--accent)}
+.btn{border-radius:8px;padding:8px 14px;font-size:14px;font-weight:600;letter-spacing:.12em;transition:.15s}
+.btn.primary{background:var(--accent);color:var(--accent-ink);width:100%}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.ghost{border:1px solid var(--line2);color:var(--dim);font-weight:400;letter-spacing:.02em}
+.btn.ghost:hover{color:var(--ink);border-color:var(--faint)}
+.btn.accentGhost{border:1px solid var(--accent);color:var(--accent);width:100%;letter-spacing:.05em}
+.btn.accentGhost:hover{background:rgba(233,169,78,.09)}
+.err{color:var(--bad);font-size:12px;min-height:0;margin-top:8px;font-family:var(--mono)}
+.hint{font-size:11.5px;color:var(--faint);line-height:1.6;margin-top:9px}
+.subttl{font-size:12px;color:var(--dim);letter-spacing:.05em;margin:4px 0 8px;font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:7px;overflow:hidden}
+.seg button{padding:5px 16px;font-family:var(--mono);font-size:12px;color:var(--dim)}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.srcinfo{margin-top:10px;background:rgba(233,169,78,.07);border:1px solid rgba(233,169,78,.35);border-radius:8px;padding:9px 11px;font-size:12px;color:var(--dim);line-height:1.6}
+.srcinfo b{color:var(--accent)}
+
+/* 分量编辑表 */
+.listHead{display:grid;grid-template-columns:14px 1fr 1fr 1fr 26px 26px;gap:6px;font-size:10px;color:var(--faint);font-family:var(--mono);padding:0 2px 5px;letter-spacing:.05em}
+.crows{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;padding-right:2px}
+.crow{display:grid;grid-template-columns:14px 1fr 1fr 1fr 26px 26px;gap:6px;align-items:center}
+.crow .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.crow input{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:5px 4px 4px;font-family:var(--mono);font-size:12px;text-align:center;outline:none;min-width:0}
+.crow input:focus{border-color:var(--accent)}
+.ib{width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:var(--dim);border-radius:6px;border:1px solid transparent}
+.ib:hover{color:var(--ink);border-color:var(--line2)}
+.ib svg{width:15px;height:15px}
+.ib.eye.off{color:var(--faint)}
+.ib.eye.off svg .slash{display:block}
+.ib.eye svg .slash{display:none}
+.ib.del:hover{color:var(--bad)}
+.btnRow{display:flex;gap:8px;margin-top:10px}
+.btnRow .ghost{flex:1;padding:7px 4px;font-size:12.5px}
+.emptyRow{font-size:12px;color:var(--faint);text-align:center;padding:10px 0}
+
+/* 系数表 */
+details{margin-top:12px}
+summary{cursor:pointer;font-size:12.5px;color:var(--dim);letter-spacing:.05em;user-select:none}
+summary:hover{color:var(--ink)}
+#coeffTableWrap{max-height:220px;overflow:auto;margin-top:8px;border:1px solid var(--line);border-radius:7px}
+#coeffTable table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px}
+#coeffTable th{position:sticky;top:0;background:var(--panel2);color:var(--faint);font-weight:400;text-align:right;padding:5px 9px;border-bottom:1px solid var(--line)}
+#coeffTable td{text-align:right;padding:3.5px 9px;color:var(--dim);border-bottom:1px solid #1a2028;white-space:nowrap}
+#coeffTable tr:hover td{color:var(--ink)}
+
+/* ---------- 主区 ---------- */
+main{display:flex;flex-direction:column;gap:14px;min-width:0}
+.canvasCard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+.canvasBar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:2px 4px 10px}
+.round{width:36px;height:36px;border-radius:50%;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--dim);transition:.15s;flex:none}
+.round:hover{border-color:var(--accent);color:var(--accent)}
+.round.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.round svg{width:16px;height:16px;fill:currentColor}
+.spd{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim)}
+.spd input{width:130px}
+.spd output,.spd .unit{font-family:var(--mono);font-size:11.5px;color:var(--ink)}
+.spd .unit{color:var(--faint)}
+.mini{font-size:12px;color:var(--dim);border:1px solid var(--line2);border-radius:7px;padding:4px 10px;letter-spacing:.03em}
+.mini:hover{color:var(--ink);border-color:var(--faint)}
+.spacer{flex:1}
+.chk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);cursor:pointer;user-select:none}
+.chk input{accent-color:var(--accent)}
+#canvasWrap{position:relative;height:clamp(340px,46vh,560px);background:var(--bg2);border:1px solid #1c2229;border-radius:8px;overflow:hidden}
+#cv{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+.statusbar{display:flex;gap:18px;align-items:center;padding:8px 6px 0;font-family:var(--mono);font-size:11.5px;color:var(--faint);flex-wrap:wrap}
+.statusbar span b{color:var(--dim);font-weight:500;margin-right:6px}
+.statusbar span i{font-style:normal;color:var(--ink);min-width:52px;display:inline-block}
+.statusbar .tip{margin-left:auto;color:#48525c;letter-spacing:.02em}
+
+/* 公式 & 分量条带 */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card h3{font-family:var(--serif);font-size:14px;font-weight:700;letter-spacing:.06em;margin-bottom:8px}
+.hsub{font-size:11px;color:var(--faint);font-family:var(--mono);font-weight:400;letter-spacing:.08em;margin-left:10px}
+.formula{font-family:var(--serif);font-size:17px;line-height:2.15;color:var(--ink);word-break:break-word}
+.formula .v{font-style:italic;padding:0 1px}
+.formula .eq{color:var(--dim);margin:0 8px}
+.formula .plus{color:var(--faint);margin:0 2px}
+.term{padding:1px 6px;border-radius:6px;cursor:pointer;white-space:nowrap;transition:background .12s}
+.term:hover{background:color-mix(in srgb,var(--c) 16%,transparent)}
+.term.solo{background:color-mix(in srgb,var(--c) 24%,transparent);box-shadow:inset 0 -2px 0 var(--c)}
+.term .co{color:var(--c);font-weight:600}
+.term .co::first-letter{color:var(--c)}
+.term .sf{font-style:normal;margin-left:3px}
+.term .k{font-family:var(--serif)}
+.term i.vt{font-style:italic;margin:0 2px}
+.term .ph{color:var(--dim);font-size:15px}
+.term .pr{color:var(--faint)}
+.term.const{color:var(--dim);cursor:default;padding:1px 3px}
+.more{font-family:var(--mono);font-size:11px;color:var(--accent);border:1px solid rgba(233,169,78,.4);border-radius:20px;padding:1px 10px;margin-left:8px;vertical-align:2px}
+.more:hover{background:rgba(233,169,78,.1)}
+.fmeta{margin-top:9px;font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.03em}
+.fmeta em{color:var(--accent);font-style:normal}
+.strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
+.scard{flex:none;width:160px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:8px 9px 7px;cursor:pointer;transition:border-color .15s}
+.scard:hover{border-color:var(--faint)}
+.scard.solo{border-color:var(--accent)}
+.scard.off{opacity:.45}
+.scH{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.scH .dot{width:8px;height:8px;border-radius:50%;flex:none}
+.scH b{font-family:var(--mono);font-size:12px;font-weight:600;white-space:nowrap}
+.scH .sub{font-family:var(--mono);font-size:9.5px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scard canvas{width:100%;height:44px;display:block}
+.empty{font-size:12.5px;color:var(--faint);padding:8px 2px}
+footer{max-width:1560px;margin:22px auto 0;border-top:1px solid var(--line);padding-top:12px;font-size:12px;color:#48525c;letter-spacing:.04em}
+
+@media (max-width:980px){
+  #app{grid-template-columns:1fr}
+  .tabs{margin:0;order:3;width:100%;justify-content:space-between}
+  .tagline{display:none}
+  .statusbar .tip{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 44 44" fill="none">
+      <circle cx="19" cy="18" r="14" stroke="currentColor" stroke-width="1.3" opacity=".9"/>
+      <circle cx="29" cy="12" r="6" stroke="currentColor" stroke-width="1.1" opacity=".75"/>
+      <circle cx="33.5" cy="9.5" r="2.1" fill="currentColor"/>
+      <circle cx="19" cy="18" r="1.4" fill="currentColor" opacity=".7"/>
+      <path d="M3 35 q5 -11 10 0 t10 0 t10 0 t8 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <h1>傅里叶实验室</h1>
+      <small>FOURIER LABORATORY</small>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab on" data-m="expand"><span class="tn">Ⅰ</span>傅里叶展开</button>
+    <button class="tab" data-m="sum"><span class="tn">Ⅱ</span>级数求和</button>
+    <button class="tab" data-m="prod"><span class="tn">Ⅲ</span>级数求积</button>
+  </nav>
+  <div class="tagline">以圆绘波 · DRAW WITH CIRCLES</div>
+</header>
+
+<div id="app">
+<!-- ============ 左栏 ============ -->
+<aside>
+  <div class="box" id="p1">
+    <h2><span class="no">Ⅰ</span>输入周期函数</h2>
+    <div class="field">
+      <label><span>表达式 f(t)</span><span style="font-family:var(--mono);font-size:10px;color:var(--faint)">支持 sin cos tan exp ln sqrt abs sign floor max …</span></label>
+      <input type="text" id="exprIn" value="sign(sin(t))" spellcheck="false">
+    </div>
+    <div class="chips"><span class="chLbl">预设</span>
+      <button class="chip" data-x="sign(sin(t))">方波</button>
+      <button class="chip" data-x="2*(t/pi - floor(t/pi+0.5))">锯齿</button>
+      <button class="chip" data-x="1-2*abs(2*(t/(2*pi)-floor(t/(2*pi)+0.5)))">三角</button>
+      <button class="chip" data-x="max(sin(t),0)">半波整流</button>
+      <button class="chip" data-x="abs(sin(t))">全波整流</button>
+    </div>
+    <div class="row2">
+      <div class="field"><label>周期 T（可输 2pi 等）</label><input type="text" id="periodIn" value="2pi" spellcheck="false"></div>
+      <div class="field"><label>角频率 ω</label><output id="omegaOut">1</output></div>
+    </div>
+    <div class="field"><label><span>谐波数 N（圆的个数）</span><output id="nOut">8</output></label>
+      <input type="range" id="nRange" min="1" max="48" value="8">
+    </div>
+    <button class="btn primary" id="expandBtn">展 开</button>
+    <div class="err" id="err1" hidden></div>
+    <div class="srcinfo" id="srcInfo" hidden><b>来自「Ⅲ · 求积」</b>：当前输入为乘积函数，周期 T 已按各倍频自动推得。可直接修改表达式继续实验。</div>
+    <details>
+      <summary>▾ 系数表 aₙ / bₙ / Rₙ / φₙ</summary>
+      <div id="coeffTableWrap"><div id="coeffTable"></div></div>
+    </details>
+  </div>
+
+  <div class="box" id="p2" hidden>
+    <h2><span class="no">Ⅱ</span>级数求和</h2>
+    <div class="field"><label>波形基（各分量统一）</label>
+      <div class="seg" id="waveSeg2"><button data-w="sin" class="on">sin</button><button data-w="cos">cos</button></div>
+    </div>
+    <div class="field"><label>主频（基频角频率）ω₀</label><input type="text" id="om2" value="1" spellcheck="false"></div>
+    <h3 class="subttl">分量 · <span id="cnt2">3</span> 个 · g(t) = Σ</h3>
+    <div class="listHead"><span></span><span>n 倍频</span><span>A 幅值</span><span>φ 初相</span><span></span><span></span></div>
+    <div class="crows" id="rows2"></div>
+    <div class="btnRow">
+      <button class="btn ghost" id="add2">＋ 新建分量</button>
+      <button class="btn ghost" id="refill2">⇅ 倍频重排 1…K</button>
+    </div>
+    <p class="hint">频率 = n × ω₀。新建分量自动接续倍频（n 依次 +1），幅值与初相默认为 0；「倍频重排」把现有分量按 1…K 重排。数值框支持 pi/3、2pi 之类的写法。</p>
+    <div class="err" id="err2" hidden></div>
+  </div>
+
+  <div class="box" id="p3" hidden>
+    <h2><span class="no">Ⅲ</span>级数求积</h2>
+    <div class="field"><label>波形基（各因子统一）</label>
+      <div class="seg" id="waveSeg3"><button data-w="sin" class="on">sin</button><button data-w="cos">cos</button></div>
+    </div>
+    <div class="field"><label>主频（基频角频率）ω₀</label><input type="text" id="om3" value="1" spellcheck="false"></div>
+    <h3 class="subttl">因子 · <span id="cnt3">2</span> 个 · g(t) = Π</h3>
+    <div class="listHead"><span></span><span>n 倍频</span><span>A 幅值</span><span>φ 初相</span><span></span><span></span></div>
+    <div class="crows" id="rows3"></div>
+    <div class="btnRow">
+      <button class="btn ghost" id="add3">＋ 新建因子</button>
+      <button class="btn ghost" id="refill3">⇅ 倍频重排 1…K</button>
+    </div>
+    <p class="hint">g(t) = Π Aₖ·sin(nₖω₀t + φₖ)，停用的因子视为 1。新建因子同样自动接续倍频、幅值初相默认 0。</p>
+    <div class="err" id="err3" hidden></div>
+    <div class="btnRow"><button class="btn accentGhost" id="anaProd">⟶ 用傅里叶展开分析此乘积</button></div>
+  </div>
+</aside>
+
+<!-- ============ 主区 ============ -->
+<main>
+  <div class="canvasCard">
+    <div class="canvasBar">
+      <button class="round on" id="playBtn" title="播放 / 暂停">
+        <svg viewBox="0 0 24 24" id="icPlay" hidden><path d="M8 5.5v13l10.5-6.5z"/></svg>
+        <svg viewBox="0 0 24 24" id="icPause"><path d="M7.5 5h3.4v14H7.5zM13.1 5h3.4v14h-3.4z"/></svg>
+      </button>
+      <div class="spd"><span>速度</span><input type="range" id="spdRange" min="0.05" max="2" step="0.01" value="0.3"><output id="spdVal">0.30</output><span class="unit">周期/s</span></div>
+      <button class="mini" id="phReset">⟲ 相位归零</button>
+      <div class="spacer"></div>
+      <label class="chk"><input type="checkbox" id="ovChk"><span>叠加各分量</span></label>
+      <button class="mini" id="zoomReset">重置视图</button>
+    </div>
+    <div id="canvasWrap"><canvas id="cv"></canvas></div>
+    <div class="statusbar">
+      <span><b>t</b><i id="roT">0.00</i></span>
+      <span><b>ωt</b><i id="roPh">0.00</i></span>
+      <span><b id="roFL">S</b><i id="roF">0.000</i></span>
+      <span id="roF2Wrap"><b>f</b><i id="roF2">0.000</i></span>
+      <span><b>T</b><i id="roTb">—</i></span>
+      <span class="tip">波形区拖动可回放 · 滚轮缩放纵轴 · 双击复位</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 id="formulaTitle">傅里叶展开式（幅度–相位形式）</h3>
+    <div class="formula" id="formula"></div>
+    <div class="fmeta" id="fmeta"></div>
+  </div>
+
+  <div class="card">
+    <h3>各分量图像<span class="hsub">悬停公式项或点击卡片可单独查看</span></h3>
+    <div class="strip" id="strip"></div>
+  </div>
+</main>
+</div>
+
+<footer>傅里叶实验室 —— 级数即旋转圆链之叠加：每个圆以前一个圆的端点为中心、以谐波频率 nω 旋转，链末端的高度便是 f(t)。</footer>
+</div>
+
+<script>
+'use strict';
+/* ================= 基础工具 ================= */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const TAU=Math.PI*2;
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const HUES=[174,199,31,4,338,300,262,60,100,140,216,238];
+const colorOf=idx=>{const h=HUES[((idx%HUES.length)+HUES.length)%HUES.length];return `hsl(${h},60%,62%)`;};
+const MONO="'IBM Plex Mono',monospace";
+const C={ink:'#e9e4d8',dim:'#8f99a4',faint:'#4a545e',accent:'#e9a94e',raw:'#5a646e'};
+const MODE_TXT={expand:'Ⅰ · 傅里叶展开 · FOURIER EXPANSION',sum:'Ⅱ · 级数求和 · SUMMATION',prod:'Ⅲ · 级数求积 · PRODUCT'};
+
+function fmt(v){ // 紧凑数字格式
+  if(v==null||!isFinite(v))return '—';
+  if(Math.abs(v)<5e-5)return '0';
+  const a=Math.abs(v);
+  let s=a>=100?v.toFixed(1):a>=10?v.toFixed(2):v.toFixed(4);
+  return s.replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'');
+}
+function fmtN(n){return Number.isInteger(n)?String(n):fmt(n);}
+function fmtSig(v,sig){ // 高精度（用于生成可解析表达式）
+  if(!isFinite(v))return '0';
+  let s=v.toPrecision(sig);
+  if(s.indexOf('e')>=0)s=Number(v.toFixed(12)).toString();
+  return s.replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'');
+}
+function fmtAxis(v){
+  const a=Math.abs(v);
+  let s=a>=100?v.toFixed(0):a>=1?v.toFixed(2):v.toFixed(3);
+  s=s.replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'');
+  return s==='-0'?'0':s;
+}
+function fmtPhi(phi){ // 相位的有理化 π 表示
+  if(Math.abs(phi)<1e-9)return '';
+  const r=phi/Math.PI;
+  for(let q=1;q<=12;q++){
+    const p=Math.round(r*q);
+    if(p!==0&&Math.abs(r*q-p)<1e-6){
+      const sign=p<0?'−':'+',ap=Math.abs(p);
+      const s=q===1?(ap===1?'π':ap+'π'):(ap===1?'π/'+q:ap+'π/'+q);
+      return ' '+sign+' '+s;
+    }
+  }
+  return (phi<0?' − ':' + ')+fmt(Math.abs(phi));
+}
+function phiShort(p){const s=fmtPhi(p).trim();return s||'0';}
+function tickLabel(t){ // 坐标轴刻度：尽量用 π 记号
+  const r=t/Math.PI,p=Math.round(r*2);
+  if(Math.abs(r*2-p)<1e-6&&Math.abs(p)<=24){
+    if(p===0)return '0';
+    const sign=p<0?'−':'',ap=Math.abs(p);
+    if(ap===2)return sign+'π';
+    if(ap===1)return sign+'π/2';
+    return ap%2===0?sign+(ap/2)+'π':sign+ap+'π/2';
+  }
+  return t.toFixed(Math.abs(t)<10?2:1);
+}
+function niceStep(raw){
+  const p=Math.pow(10,Math.floor(Math.log10(raw))),r=raw/p;
+  return (r<1.5?1:r<3.5?2:r<7.5?5:10)*p;
+}
+function showErr(el,msg){el.textContent=msg||'';el.hidden=!msg;}
+function debounce(fn,ms){let t=0;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+
+/* ================= 表达式解析器（安全，非 eval） ================= */
+const FUNCS={sin:Math.sin,cos:Math.cos,tan:Math.tan,asin:Math.asin,acos:Math.acos,atan:Math.atan,
+  sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,exp:Math.exp,ln:Math.log,log:Math.log,
+  log2:Math.log2,log10:Math.log10,sqrt:Math.sqrt,cbrt:Math.cbrt,abs:Math.abs,sign:Math.sign,
+  floor:Math.floor,ceil:Math.ceil,round:Math.round,atan2:Math.atan2,pow:Math.pow,
+  mod:(a,b)=>a-b*Math.floor(a/b),min:Math.min,max:Math.max};
+const ARITY={sin:1,cos:1,tan:1,asin:1,acos:1,atan:1,sinh:1,cosh:1,tanh:1,exp:1,ln:1,log:1,
+  log2:1,log10:1,sqrt:1,cbrt:1,abs:1,sign:1,floor:1,ceil:1,round:1,atan2:2,pow:2,mod:2,min:2,max:2};
+const CONSTS={pi:Math.PI,e:Math.E,tau:TAU};
+
+function tokenize(s){
+  const toks=[];let i=0;
+  while(i<s.length){
+    const ch=s[i];
+    if(/\s/.test(ch)){i++;continue;}
+    if(/[0-9.]/.test(ch)){
+      let j=i;
+      while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      if(j<s.length&&(s[j]==='e'||s[j]==='E')&&/[0-9+\-]/.test(s[j+1]||'')){
+        j++;if(s[j]==='+'||s[j]==='-')j++;
+        while(j<s.length&&/[0-9]/.test(s[j]))j++;
+      }
+      const v=parseFloat(s.slice(i,j));
+      if(!isFinite(v))throw new Error(`无法解析数字 "${s.slice(i,j)}"`);
+      toks.push({k:'num',v});i=j;continue;
+    }
+    if(/[A-Za-z_]/.test(ch)){
+      let j=i;while(j<s.length&&/[A-Za-z_0-9]/.test(s[j]))j++;
+      toks.push({k:'id',v:s.slice(i,j)});i=j;continue;
+    }
+    if('+-*/^(),'.includes(ch)){toks.push({k:'op',v:ch});i++;continue;}
+    throw new Error(`意外字符 "${ch}"`);
+  }
+  return toks;
+}
+function parse(src){
+  const toks=tokenize(src);let p=0;
+  const peek=()=>toks[p],next=()=>toks[p++];
+  function expect(v){const t=toks[p++];if(!t||t.k!=='op'||t.v!==v)throw new Error(`期望 "${v}"`);}
+  function expr(){
+    let n=term();
+    while(peek()&&peek().k==='op'&&(peek().v==='+'||peek().v==='-')){
+      const op=next().v;n={type:'bin',op,a:n,b:term()};
+    }
+    return n;
+  }
+  function term(){
+    let n=unary();
+    for(;;){
+      const t=peek();if(!t)break;
+      if(t.k==='op'&&(t.v==='*'||t.v==='/')){const op=next().v;n={type:'bin',op,a:n,b:unary()};}
+      else if(t.k==='num'||t.k==='id'||(t.k==='op'&&t.v==='(')){n={type:'bin',op:'*',a:n,b:unary()};} // 隐式乘法
+      else break;
+    }
+    return n;
+  }
+  function unary(){
+    const t=peek();
+    if(t&&t.k==='op'&&(t.v==='-'||t.v==='+')){const op=next().v;const a=unary();return op==='-'?{type:'neg',a}:a;}
+    return power();
+  }
+  function power(){
+    const base=atom();
+    const t=peek();
+    if(t&&t.k==='op'&&t.v==='^'){next();return {type:'bin',op:'^',a:base,b:unary()};} // 右结合
+    return base;
+  }
+  function atom(){
+    const t=next();
+    if(!t)throw new Error('表达式意外结束');
+    if(t.k==='num')return {type:'num',v:t.v};
+    if(t.k==='id'){
+      const name=t.v.toLowerCase();
+      if(peek()&&peek().k==='op'&&peek().v==='('){
+        next();const args=[expr()];
+        while(peek()&&peek().k==='op'&&peek().v===','){next();args.push(expr());}
+        expect(')');
+        if(!FUNCS[name])throw new Error(`未知函数 "${t.v}"`);
+        return {type:'call',name,args};
+      }
+      if(name in CONSTS)return {type:'num',v:CONSTS[name]};
+      if(name==='t'||name==='x')return {type:'var'};
+      if(FUNCS[name])throw new Error(`函数 "${t.v}" 的调用需要括号`);
+      throw new Error(`无法识别的符号 "${t.v}"`);
+    }
+    if(t.k==='op'&&t.v==='('){const n=expr();expect(')');return n;}
+    throw new Error(`意外的符号 "${t.v}"`);
+  }
+  const ast=expr();
+  if(p<toks.length)throw new Error(`多余的符号 "${toks[p].v}"`);
+  return ast;
+}
+function compileAst(n){
+  switch(n.type){
+    case 'num':{const v=n.v;return {fn:()=>v,hasVar:false};}
+    case 'var':return {fn:t=>t,hasVar:true};
+    case 'neg':{const a=compileAst(n.a);return {fn:t=>-a.fn(t),hasVar:a.hasVar};}
+    case 'bin':{
+      const A=compileAst(n.a),B=compileAst(n.b),op=n.op;
+      const fn=op==='+'?t=>A.fn(t)+B.fn(t):op==='-'?t=>A.fn(t)-B.fn(t):
+        op==='*'?t=>A.fn(t)*B.fn(t):op==='/'?t=>A.fn(t)/B.fn(t):t=>Math.pow(A.fn(t),B.fn(t));
+      return {fn,hasVar:A.hasVar||B.hasVar};
+    }
+    case 'call':{
+      const F=FUNCS[n.name],ar=ARITY[n.name],As=n.args.map(compileAst);
+      if(ar!=null&&As.length!==ar)throw new Error(`函数 ${n.name} 需要 ${ar} 个参数`);
+      return {fn:t=>{const vs=As.map(a=>a.fn(t));return F(...vs);},hasVar:As.some(a=>a.hasVar)};
+    }
+  }
+}
+function parseToFn(src){const c=compileAst(parse(src));return c.fn;}
+function parseNum(src){
+  src=String(src==null?'':src).trim();
+  if(!src)throw new Error('请输入数值（支持 2pi、pi/3 等写法）');
+  const c=compileAst(parse(src));
+  if(c.hasVar)throw new Error('此处需为常数（不能含变量 t）');
+  const v=c.fn(0);
+  if(!isFinite(v))throw new Error('结果不是有限数值');
+  return v;
+}
+
+/* ================= 数值傅里叶系数（周期梯形 / DFT） ================= */
+function fourier(f,T,N,M){
+  M=M||16384;
+  const w=TAU/T,xs=new Float64Array(M),fs=new Float64Array(M);
+  let bad=0;
+  for(let i=0;i<M;i++){
+    const t=-T/2+(i+0.5)*T/M; // 中点采样，避开典型间断点
+    let v=f(t);
+    if(typeof v!=='number'||!isFinite(v)){v=0;bad++;}
+    xs[i]=t;fs[i]=v;
+  }
+  let s0=0;for(let i=0;i<M;i++)s0+=fs[i];
+  const a0=2*s0/M,a=new Float64Array(N+1),b=new Float64Array(N+1);
+  for(let n=1;n<=N;n++){
+    let sa=0,sb=0;
+    for(let i=0;i<M;i++){
+      const th=n*w*xs[i];
+      sa+=fs[i]*Math.cos(th);sb+=fs[i]*Math.sin(th);
+    }
+    a[n]=2*sa/M;b[n]=2*sb/M;
+  }
+  return {a0,a,b,w,T,M,bad};
+}
+function sampleCurve(f,t0,t1,n){
+  const pts=new Array(n);
+  for(let i=0;i<n;i++){
+    const t=t0+(t1-t0)*i/(n-1);
+    let y=f(t);
+    if(typeof y!=='number'||!isFinite(y))y=null;
+    pts[i]=[t,y];
+  }
+  return pts;
+}
+
+/* ================= 全局状态 ================= */
+const state={
+  mode:'expand',playing:true,speed:0.30,t:0,traceStart:0,userZoom:1,
+  hoverRef:null,soloRef:null,
+  overlay:{expand:false,sum:true,prod:true},
+  showAllTerms:false,nextColor:5,trail:[],
+  tab1:null,
+  sum:{wave:'sin',omega0:1,Tbase:TAU,omega:1,c0:0,chain:null,evalF:()=>0,vmin:-1,vmax:1,E:0,curve:[],
+    comps:[
+      {n:1,A:1,phi:0,on:true,colorIdx:0},
+      {n:2,A:0.5,phi:Math.PI/2,on:true,colorIdx:1},
+      {n:3,A:1/3,phi:0,on:true,colorIdx:2},
+    ]},
+  prod:{wave:'sin',omega0:1,Tbase:TAU,omega:1,chain:null,evalF:()=>1,vmin:-1,vmax:1,E:0,curve:[],
+    comps:[
+      {n:1,A:1,phi:0,on:true,colorIdx:3},
+      {n:2,A:1,phi:0,on:true,colorIdx:4},
+    ]},
+};
+const curD=()=>state.mode==='expand'?state.tab1:state.mode==='sum'?state.sum:state.prod;
+function waveVal(c,t,om,wave){const th=c.n*om*t+c.phi;return wave==='sin'?c.A*Math.sin(th):c.A*Math.cos(th);}
+
+/* ================= DOM 引用 ================= */
+const exprIn=$('#exprIn'),periodIn=$('#periodIn'),omegaOut=$('#omegaOut'),
+  nRange=$('#nRange'),nOut=$('#nOut'),expandBtn=$('#expandBtn'),err1=$('#err1'),
+  srcInfo=$('#srcInfo'),coeffTable=$('#coeffTable'),
+  err2=$('#err2'),err3=$('#err3'),
+  formulaEl=$('#formula'),formulaTitle=$('#formulaTitle'),fmetaEl=$('#fmeta'),stripEl=$('#strip'),
+  cv=$('#cv'),cctx=cv.getContext('2d'),wrap=$('#canvasWrap'),
+  playBtn=$('#playBtn'),icPlay=$('#icPlay'),icPause=$('#icPause'),
+  spdRange=$('#spdRange'),spdVal=$('#spdVal'),
+  ovChk=$('#ovChk'),
+  roT=$('#roT'),roPh=$('#roPh'),roF=$('#roF'),roF2=$('#roF2'),roF2Wrap=$('#roF2Wrap'),roFL=$('#roFL'),roTb=$('#roTb');
+const EYE='<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 5C6.2 5 2.5 9.9 1.7 12c.8 2.1 4.5 7 10.3 7s9.5-4.9 10.3-7C21.5 9.9 17.8 5 12 5zm0 10.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/><line class="slash" x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2"/></svg>';
+const XX='<svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+
+/* ================= 模式 Ⅰ ：分析与派生 ================= */
+function rebuildTab1(){
+  const D=state.tab1;if(!D)return;
+  const co=D.co,N=D.N;
+  D.items=[];D.chain=[];
+  for(let n=1;n<=N;n++){
+    const R=Math.hypot(co.a[n],co.b[n]);
+    if(R<1e-9)continue;
+    D.items.push({n,R,phi:Math.atan2(co.a[n],co.b[n]),colorIdx:n-1});
+  }
+  // 圆链按幅值降序：大圆在外，视觉更清晰（加法与顺序无关）
+  D.chain=D.items.map(it=>({R:it.R,n:it.n,phase:it.phi,colorIdx:it.colorIdx})).sort((a,b)=>b.R-a.R);
+  D.c0=co.a0/2;D.omega=co.w;D.Tbase=D.T;
+  D.evalApprox=t=>{let s=D.c0;for(const it of D.items)s+=it.R*Math.sin(it.n*co.w*t+it.phi);return s;};
+  D.evalF=D.evalApprox;
+  const t0=-D.T/2,span=2*D.T;
+  D.approxCurve=sampleCurve(D.evalApprox,t0,t0+span,701);
+  let vmin=0,vmax=0;
+  for(const arr of [D.rawCurve,D.approxCurve])
+    for(const p of arr){const v=p[1];if(v==null)continue;if(v<vmin)vmin=v;if(v>vmax)vmax=v;}
+  if(vmax-vmin<1e-12){vmax=1;vmin=-1;}
+  D.vmin=vmin;D.vmax=vmax;
+  D.E=0;
+  for(let i=0;i<256;i++){
+    const t=t0+span*i/256;let x=0,y=D.c0;
+    for(const it of D.chain){const th=it.n*co.w*t+it.phase;x+=it.R*Math.cos(th);y+=it.R*Math.sin(th);}
+    D.E=Math.max(D.E,Math.hypot(x,y));
+  }
+  renderFormula();renderStrip();renderCoeff();
+}
+let anaTimer=0;
+function tryAnalyze(immediate){
+  clearTimeout(anaTimer);
+  const run=()=>{
+    let fn,T;
+    try{
+      fn=parseToFn(exprIn.value);
+      T=parseNum(periodIn.value);
+      if(!(T>0))throw new Error('周期 T 需为正数');
+    }catch(e){showErr(err1,e.message);return;}
+    showErr(err1,'');
+    const NMAX=64,co=fourier(fn,T,NMAX,16384);
+    state.tab1={desc:exprIn.value,T,N:state.tab1?state.tab1.N:+nRange.value,co,rawFn:fn,
+      rawCurve:sampleCurve(fn,-T/2,3*T/2,901)};
+    rebuildTab1();
+  };
+  immediate?run():anaTimer=setTimeout(run,450);
+}
+
+/* ================= 模式 Ⅱ / Ⅲ ：派生 ================= */
+function rebuildData(which){
+  const st=state[which],om=st.omega0,wave=st.wave;
+  const on=st.comps.filter(c=>c.on&&c.n>0&&isFinite(c.A)&&isFinite(c.phi));
+  st.Tbase=TAU/om;st.omega=om;
+  const t0=-st.Tbase/2,span=2*st.Tbase;
+  if(which==='sum'){
+    st.c0=0;
+    st.evalF=t=>on.reduce((s,c)=>s+waveVal(c,t,om,wave),0);
+    st.chain=on.filter(c=>Math.abs(c.A)>1e-9)
+      .map(c=>({R:Math.abs(c.A),n:c.n,phase:c.phi+(wave==='cos'?Math.PI/2:0),colorIdx:c.colorIdx}))
+      .sort((a,b)=>b.R-a.R);
+  }else{
+    st.evalF=t=>on.reduce((p,c)=>p*waveVal(c,t,om,wave),1);
+    st.chain=null;
+  }
+  const nmax=on.length?Math.max(...on.map(c=>c.n)):1;
+  const nPts=which==='prod'?clamp(Math.ceil(nmax*90),400,4000):900;
+  st.curve=sampleCurve(st.evalF,t0,t0+span,nPts);
+  let vmin=0,vmax=0;
+  for(const p of st.curve){const v=p[1];if(v==null)continue;if(v<vmin)vmin=v;if(v>vmax)vmax=v;}
+  for(const c of on)for(let i=0;i<=120;i++){
+    const v=waveVal(c,t0+span*i/120,om,wave);
+    if(v<vmin)vmin=v;if(v>vmax)vmax=v;
+  }
+  st.vmin=vmin;st.vmax=vmax;
+  st.E=0;
+  if(st.chain)for(let i=0;i<256;i++){
+    const t=t0+span*i/256;let x=0,y=st.c0;
+    for(const it of st.chain){const th=it.n*om*t+it.phase;x+=it.R*Math.cos(th);y+=it.R*Math.sin(th);}
+    st.E=Math.max(st.E,Math.hypot(x,y));
+  }
+  renderFormula();renderStrip();
+  $('#cnt'+(which==='sum'?'2':'3')).textContent=st.comps.length;
+}
+
+/* ================= Ⅲ → Ⅰ ：乘积的周期推算与联动 ================= */
+function toFraction(x){
+  for(let q=1;q<=256;q++){
+    const p=Math.round(x*q);
+    if(p!==0&&Math.abs(x*q-p)<1e-6*Math.max(1,q))return [p,q];
+  }
+  return null;
+}
+const gcd2=(a,b)=>b?gcd2(b,a%b):Math.abs(a);
+const lcm2=(a,b)=>a/gcd2(a,b)*b;
+const gcdArr=a=>a.reduce(gcd2);
+const lcmArr=a=>a.reduce(lcm2);
+function prodPeriod(on){ // Π sin(nₖω₀t+φₖ) 的周期 = 2π/ω₀ · lcm(qₖ)/gcd(pₖ)
+  try{
+    const fr=on.map(c=>toFraction(c.n));
+    if(fr.some(f=>!f))return {ln:1,ld:1,ok:false};
+    const qs=fr.map(f=>f[1]),ps=fr.map(f=>f[0]).filter(p=>p!==0);
+    if(!ps.length)return {ln:1,ld:1,ok:true};
+    const ln=lcmArr(qs),ld=gcdArr(ps);
+    if(!isFinite(ln)||!isFinite(ld)||ln<=0||ld<=0||ln>4096)return {ln:1,ld:1,ok:false};
+    return {ln,ld,ok:ld<=8&&ln<=64};
+  }catch(e){return {ln:1,ld:1,ok:false};}
+}
+function analyzeProduct(){
+  const st=state.prod;
+  const on=st.comps.filter(c=>c.on&&c.n>0&&isFinite(c.A)&&isFinite(c.phi));
+  if(!on.length){showErr(err3,'请先添加并启用至少一个因子');return;}
+  showErr(err3,'');
+  const {ln,ld,ok}=prodPeriod(on);
+  const omS=fmtSig(st.omega0,8);
+  const fac=c=>`(${fmtSig(c.A,8)}*${st.wave}(${fmtSig(c.n,8)}*${omS}*t+${fmtSig(c.phi,8)}))`;
+  exprIn.value=on.map(fac).join('*');
+  periodIn.value=ld===1?`${ln}*2*pi/(${omS})`:`(${ln}/${ld})*2*pi/(${omS})`;
+  try{omegaOut.textContent=fmt(TAU/parseNum(periodIn.value));}catch(e){}
+  srcInfo.hidden=false;
+  switchMode('expand');
+  tryAnalyze(true);
+  if(!ok)showErr(err1,'含非简单倍频，已按推得的最长周期窗口展开（若倍频为无理数则按基频周期化）。');
+}
+
+/* ================= 公式渲染 ================= */
+function termHTML(A,n,phi,wave,ref){
+  const col=colorOf(ref);
+  const aStr=Math.abs(A-1)>1e-9?`<span class="co">${fmt(A)}</span>`:'';
+  return `<span class="term" data-ref="${ref}" style="--c:${col}">${aStr}<span class="sf">${wave}</span><span class="pr">(</span><span class="k">${fmtN(n)}</span><i class="vt">ωt</i><span class="ph">${fmtPhi(phi)}</span><span class="pr">)</span></span>`;
+}
+function joinTerms(terms,op){
+  const sep=op==='+'?' <span class="plus">+</span> ':' <span class="plus">·</span> ';
+  const shown=state.showAllTerms?terms:terms.slice(0,8);
+  let s=shown.join(sep);
+  if(terms.length>8){
+    s+=(state.showAllTerms?'':' <span class="plus">…</span>')+
+      ` <button class="more" id="moreTerms">共 ${terms.length} 项 · ${state.showAllTerms?'收起':'显示全部'}</button>`;
+  }
+  return s;
+}
+function renderFormula(){
+  const md=state.mode,D=curD();
+  if(!D){formulaEl.innerHTML='';return;}
+  let h='';
+  if(md==='expand'){
+    formulaTitle.textContent='傅里叶展开式（幅度–相位形式）';
+    h=`<i class="v">f</i>(<i class="v">t</i>)<span class="eq">≈</span>`;
+    const terms=D.items.map(it=>termHTML(it.R,it.n,it.phi,'sin',it.colorIdx));
+    const hasC=Math.abs(D.c0)>1e-9;
+    h+=(hasC?`<span class="term const">${fmt(D.c0)}</span>`:'')+
+      (terms.length?((hasC?' <span class="plus">+</span> ':'')+joinTerms(terms,'+')):(hasC?'':'<span class="term const">0</span>'));
+    fmetaEl.innerHTML=`ω = ${fmt(D.omega)} rad · T = ${fmt(D.T)} · 截取 N = ${D.N} 阶 · 积分采样 ${D.co.M} 点`+
+      (D.co.bad?` · <em>⚠ ${D.co.bad} 个非有限采样点已按 0 处理</em>`:'');
+  }else if(md==='sum'){
+    formulaTitle.textContent='求和式';
+    const terms=D.comps.filter(c=>c.on).map(c=>termHTML(c.A,c.n,c.phi,D.wave,c.colorIdx));
+    h=`<i class="v">g</i>(<i class="v">t</i>)<span class="eq">=</span>`+
+      (terms.length?joinTerms(terms,'+'):'<span class="term const">0</span>');
+    fmetaEl.innerHTML=`ω₀ = ${fmt(D.omega0)} rad · 基频周期 T₀ = ${fmt(D.Tbase)} · 共 ${D.comps.length} 个分量 · 右侧圆链即此级数`;
+  }else{
+    formulaTitle.textContent='求积式';
+    const on=D.comps.filter(c=>c.on&&c.n>0);
+    const terms=on.map(c=>termHTML(c.A,c.n,c.phi,D.wave,c.colorIdx));
+    h=`<i class="v">g</i>(<i class="v">t</i>)<span class="eq">=</span>`+
+      (terms.length?joinTerms(terms,'·'):'<span class="term const">1</span>');
+    const {ln,ld,ok}=prodPeriod(on);
+    fmetaEl.innerHTML=`ω₀ = ${fmt(D.omega0)} rad · 乘积周期 T = ${ok&&on.length?fmt(ln/ld*D.Tbase):'——（含非简单倍频）'} · 共 ${D.comps.length} 个因子 · 点击下方按钮可展开为圆链`;
+  }
+  formulaEl.innerHTML=h;
+}
+function renderCoeff(){
+  const D=state.tab1;if(!D){coeffTable.innerHTML='';return;}
+  const co=D.co;
+  let h='<table><thead><tr><th>n</th><th>aₙ</th><th>bₙ</th><th>Rₙ</th><th>φₙ / rad</th></tr></thead><tbody>';
+  h+=`<tr><td>0</td><td>${fmt(co.a0)}</td><td style="color:#3d4750">—</td><td>${fmt(Math.abs(D.c0))}</td><td style="color:#3d4750">—</td></tr>`;
+  for(let n=1;n<=D.N;n++){
+    const R=Math.hypot(co.a[n],co.b[n]);
+    h+=`<tr><td>${n}</td><td>${fmt(co.a[n])}</td><td>${fmt(co.b[n])}</td><td>${fmt(R)}</td><td>${fmt(Math.atan2(co.a[n],co.b[n]))}</td></tr>`;
+  }
+  coeffTable.innerHTML=h+'</tbody></table>';
+}
+
+/* ================= 分量条带（sparkline） ================= */
+function renderStrip(){
+  const md=state.mode,D=curD();
+  if(!D){stripEl.innerHTML='';return;}
+  const list=[];
+  if(md==='expand'){
+    for(const it of D.items)
+      list.push({label:`n = ${it.n}`,sub:`R ${fmt(it.R)} · φ ${phiShort(it.phi)}`,ref:it.colorIdx,on:true,
+        f:t=>it.R*Math.sin(it.n*D.omega*t+it.phi)});
+  }else{
+    const st=D;
+    for(const c of st.comps)
+      list.push({label:`n = ${fmtN(c.n)}`,sub:`A ${fmt(c.A)} · φ ${phiShort(c.phi)}`,ref:c.colorIdx,on:c.on,
+        f:t=>waveVal(c,t,st.omega0,st.wave)});
+  }
+  if(!list.length){stripEl.innerHTML='<span class="empty">暂无分量 —— 在左侧「新建分量」。</span>';return;}
+  stripEl.innerHTML=list.map(it=>
+    `<div class="scard${it.on===false?' off':''}${state.soloRef===it.ref?' solo':''}" data-ref="${it.ref}">`+
+    `<div class="scH"><span class="dot" style="background:${colorOf(it.ref)}"></span><b>${it.label}</b><span class="sub">${it.sub}</span></div>`+
+    `<canvas></canvas></div>`).join('');
+  stripEl.querySelectorAll('.scard').forEach((el,i)=>{
+    const cvs=el.querySelector('canvas');
+    const w=cvs.clientWidth||140,h=44,dpr=window.devicePixelRatio||1;
+    cvs.width=Math.round(w*dpr);cvs.height=Math.round(h*dpr);
+    const g=cvs.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+    const t0=-D.Tbase/2,span=2*D.Tbase,f=list[i].f;
+    let mn=0,mx=0;
+    for(let k=0;k<=140;k++){const v=f(t0+span*k/140);if(v<mn)mn=v;if(v>mx)mx=v;}
+    if(mx-mn<1e-9){mx+=1;mn-=1;}
+    const pad=(mx-mn)*0.15,Y=v=>h-3-(v-mn)/(mx+pad*0.5-mn-pad*0.5)*(h-6);
+    g.strokeStyle='#232a32';g.beginPath();g.moveTo(0,h/2);g.lineTo(w,h/2);g.stroke();
+    g.strokeStyle=colorOf(list[i].ref);g.lineWidth=1.4;g.beginPath();
+    for(let k=0;k<=140;k++){
+      const X=w*k/140,Yv=Y(f(t0+span*k/140));
+      k?g.lineTo(X,Yv):g.moveTo(X,Yv);
+    }
+    g.stroke();
+  });
+}
+
+/* ================= 主画布绘制 ================= */
+let L=null,cssW=0,cssH=0;
+function resize(){
+  const r=wrap.getBoundingClientRect();
+  cssW=r.width;cssH=r.height;
+  const dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(cssW*dpr);cv.height=Math.round(cssH*dpr);
+  cctx.setTransform(dpr,0,0,dpr,0,0);
+}
+function glowDot(ctx,x,y,c,r){
+  ctx.save();ctx.shadowColor=c;ctx.shadowBlur=14;ctx.fillStyle=c;
+  ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();ctx.restore();
+}
+function strokePts(ctx,pts,xOf,sy,style,brk){
+  ctx.beginPath();
+  let pen=false,py=null;
+  for(const p of pts){
+    const v=p[1];
+    if(v==null){pen=false;py=null;continue;}
+    const X=xOf(p[0]),Y=sy(v);
+    if(!pen||Math.abs(v-py)>brk)ctx.moveTo(X,Y);else ctx.lineTo(X,Y);
+    pen=true;py=v;
+  }
+  ctx.strokeStyle=style.c;ctx.lineWidth=style.w;
+  if(style.d)ctx.setLineDash(style.d);
+  ctx.stroke();ctx.setLineDash([]);
+}
+function strokeFn(ctx,f,t0,span,xOf,sy,color,alpha,w){
+  ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=w;ctx.beginPath();
+  const n=260;
+  for(let i=0;i<=n;i++){
+    const t=t0+span*i/n,X=xOf(t),Y=sy(f(t));
+    i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);
+  }
+  ctx.stroke();ctx.globalAlpha=1;
+}
+function findComp(md,D,ref){
+  if(md==='expand'){
+    const it=D.items.find(i=>i.colorIdx===ref);
+    return it?{f:t=>it.R*Math.sin(it.n*D.omega*t+it.phi),color:colorOf(it.colorIdx)}:null;
+  }
+  const c=D.comps.find(c=>c.colorIdx===ref);
+  return c?{f:t=>waveVal(c,t,D.omega0,D.wave),color:colorOf(c.colorIdx)}:null;
+}
+function drawChain(ctx,D,EW,sc,sy){
+  const t=state.t,om=D.omega,items=D.chain;
+  let px=EW/2,py=sy(D.c0||0);
+  ctx.fillStyle='#5a6470';ctx.beginPath();ctx.arc(px,py,1.8,0,TAU);ctx.fill();
+  const solo=state.soloRef,hov=state.hoverRef,end={x:0,y:D.c0||0};
+  for(let i=0;i<items.length;i++){
+    const it=items[i],th=it.n*om*t+it.phase;
+    const dx=it.R*Math.cos(th),dy=it.R*Math.sin(th);
+    const nx=px+dx*sc,ny=py-dy*sc;
+    const hot=solo!=null?it.colorIdx===solo:(hov!=null?it.colorIdx===hov:false);
+    const dim=solo!=null&&!hot;
+    const col=colorOf(it.colorIdx);
+    ctx.globalAlpha=dim?0.08:hot?0.9:Math.max(0.42-0.34*i/items.length,0.10);
+    ctx.strokeStyle=col;ctx.lineWidth=hot?1.8:1;
+    ctx.beginPath();ctx.arc(px,py,Math.max(it.R*sc,0.4),0,TAU);ctx.stroke();
+    ctx.globalAlpha=dim?0.12:hot?1:0.8;ctx.lineWidth=hot?2.4:1.4;
+    ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(nx,ny);ctx.stroke();
+    ctx.globalAlpha=1;
+    px=nx;py=ny;end.x+=dx;end.y+=dy;
+  }
+  // 末端轨迹尾迹
+  const arr=state.trail,life=0.8*L.T;
+  ctx.lineWidth=1;
+  for(let i=1;i<arr.length;i++){
+    const age=state.t-arr[i].t;
+    if(age>life)continue;
+    const al=(1-age/life)*0.45;
+    if(al<=0)continue;
+    ctx.strokeStyle=`rgba(233,169,78,${al.toFixed(3)})`;
+    ctx.beginPath();
+    ctx.moveTo(EW/2+arr[i-1].x*sc,sy(arr[i-1].y));
+    ctx.lineTo(EW/2+arr[i].x*sc,sy(arr[i].y));
+    ctx.stroke();
+  }
+  return end;
+}
+function pushTrail(x,y){
+  const arr=state.trail,last=arr[arr.length-1];
+  if(last&&Math.abs(last.t-state.t)<1e-12){last.x=x;last.y=y;return;}
+  arr.push({t:state.t,x,y});
+  while(arr.length&&state.t-arr[0].t>0.9*L.T)arr.shift();
+}
+function drawScene(){
+  const W=cssW,H=cssH;
+  if(!cctx||W<60||H<60)return;
+  const ctx=cctx;
+  ctx.clearRect(0,0,W,H);
+  const md=state.mode,D=curD();
+  if(!D||!D.Tbase)return;
+  const T=D.Tbase,span=2*T,t0=-T/2;
+  const EW=md==='prod'?0:Math.round(W*0.40);
+  const px0=EW+20,px1=W-16,plotW=px1-px0;
+  const xOf=t=>px0+(((t-t0)%span+span)%span)/span*plotW;
+  const V=Math.max(D.vmax,-D.vmin,0.8);
+  const sc=state.userZoom*Math.min((H/2-28)/V,(EW>0&&(D.E||0)>1e-9?(EW/2-22)/D.E:Infinity));
+  const sy=y=>H/2-y*sc;
+  L={EW,px0,px1,plotW,span,t0,T,sc,sy,xOf};
+  // 分隔线
+  if(EW>0){ctx.strokeStyle='#242b33';ctx.beginPath();ctx.moveTo(EW+.5,6);ctx.lineTo(EW+.5,H-6);ctx.stroke();}
+  // ---- 网格 ----
+  ctx.font='10px '+MONO;
+  const vr=(H/2-28)/sc,step=niceStep(46/sc);
+  ctx.textAlign='left';ctx.textBaseline='middle';
+  for(let v=Math.ceil(-vr/step)*step;v<=vr+1e-9;v+=step){
+    if(Math.abs(v)<step*0.5)continue;
+    const Y=sy(v);
+    ctx.strokeStyle='#1b2129';ctx.beginPath();ctx.moveTo(px0,Y);ctx.lineTo(px1,Y);ctx.stroke();
+    ctx.fillStyle='#5a6470';ctx.fillText(fmtAxis(v),px0+4,Y-1);
+  }
+  ctx.strokeStyle='#2c3540';ctx.beginPath();ctx.moveTo(px0,sy(0));ctx.lineTo(px1,sy(0));ctx.stroke();
+  ctx.fillStyle='#6b7683';ctx.fillText('0',px0+4,sy(0)-1);
+  for(let q=0;q<=8;q++){
+    const X=px0+q*plotW/8,main=q%2===0;
+    ctx.strokeStyle=main?'#262f39':'#1b2129';
+    ctx.beginPath();ctx.moveTo(X,10);ctx.lineTo(X,H-14);ctx.stroke();
+    if(main){
+      ctx.fillStyle='#5a6470';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+      ctx.fillText(tickLabel(t0+q*T/2),X,H-4);
+      ctx.textAlign='left';ctx.textBaseline='middle';
+    }
+  }
+  // ---- 静态曲线 ----
+  if(md==='expand'){
+    strokePts(ctx,D.rawCurve,xOf,sy,{c:C.raw,w:1,d:[4,4]},Math.max((D.vmax-D.vmin)*0.45,1e-6));
+    strokePts(ctx,D.approxCurve,xOf,sy,{c:C.ink,w:1.6},Infinity);
+  }else{
+    strokePts(ctx,D.curve,xOf,sy,{c:C.ink,w:1.8},Infinity);
+  }
+  // ---- 分量叠加 / 单看 ----
+  const t0w=t0,spanw=span;
+  if(state.overlay[md]&&state.soloRef==null){
+    if(md==='expand'){
+      for(const it of D.items)strokeFn(ctx,t=>it.R*Math.sin(it.n*D.omega*t+it.phi),t0w,spanw,xOf,sy,colorOf(it.colorIdx),0.30,1);
+    }else{
+      const om=D.omega0,wave=D.wave;
+      for(const c of D.comps)if(c.on)strokeFn(ctx,t=>waveVal(c,t,om,wave),t0w,spanw,xOf,sy,colorOf(c.colorIdx),0.28,1);
+    }
+  }
+  if(state.soloRef!=null){
+    const cp=findComp(md,D,state.soloRef);
+    if(cp)strokeFn(ctx,cp.f,t0w,spanw,xOf,sy,cp.color,1,2.2);
+  }
+  // ---- 扫描描画段 ----
+  const f=D.evalF,a=Math.max(state.traceStart,state.t-span);
+  const nSeg=Math.max(2,Math.min(900,Math.ceil((state.t-a)/span*720)));
+  ctx.beginPath();
+  for(let i=0;i<=nSeg;i++){
+    const tt=a+(state.t-a)*i/nSeg,X=xOf(tt),Y=sy(f(tt));
+    i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);
+  }
+  ctx.strokeStyle=C.accent;ctx.lineWidth=2;ctx.stroke();
+  const tx=xOf(state.t),tyv=f(state.t),ty=sy(tyv);
+  ctx.save();ctx.setLineDash([3,5]);ctx.strokeStyle='rgba(233,169,78,.28)';
+  ctx.beginPath();ctx.moveTo(tx,10);ctx.lineTo(tx,H-14);ctx.stroke();ctx.restore();
+  // ---- 旋转圆链 ----
+  let end=null;
+  if(md!=='prod'&&D.chain&&D.chain.length){
+    end=drawChain(ctx,D,EW,sc,sy);
+    if(end)pushTrail(end.x,end.y);
+    if(end){
+      const ex=EW/2+end.x*sc,ey=sy(end.y);
+      ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle='rgba(233,169,78,.5)';
+      ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(tx,ty);ctx.stroke();ctx.restore();
+      glowDot(ctx,ex,ey,C.accent,3.4);
+    }
+  }
+  glowDot(ctx,tx,ty,C.accent,3);
+  // ---- 暗角与标签 ----
+  const vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.42,W/2,H/2,Math.max(W,H)*0.72);
+  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.20)');
+  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#5a6470';ctx.font='10px '+MONO;ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  ctx.fillText(MODE_TXT[md],12,18);
+  if(EW>0){ctx.textAlign='center';ctx.fillText('旋转圆链 · EPICYCLES',EW/2,H-6);}
+  updateReadout(D,tyv);
+}
+function updateReadout(D,val){
+  roT.textContent=state.t.toFixed(2);
+  roPh.textContent=(((state.t*D.omega)%TAU+TAU)%TAU).toFixed(2);
+  roF.textContent=(val!=null?val:D.evalF(state.t)).toFixed(3);
+  roFL.textContent=state.mode==='expand'?'S':'g';
+  roTb.textContent=fmt(D.Tbase);
+  if(state.mode==='expand'&&D.rawFn){
+    roF2Wrap.style.display='';
+    const v=D.rawFn(state.t);
+    roF2.textContent=isFinite(v)?v.toFixed(3):'—';
+  }else roF2Wrap.style.display='none';
+}
+
+/* ================= 动画循环 ================= */
+let lastT=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-lastT)/1000);lastT=now;
+  const D=curD();
+  if(state.playing&&D){
+    const span=2*D.Tbase,dtm=dt*state.speed*D.Tbase;
+    const ph0=((state.t%span)+span)%span;
+    state.t+=dtm;
+    const ph1=((state.t%span)+span)%span;
+    if(ph1<ph0||dtm>=span)state.traceStart=state.t;
+  }
+  drawScene();
+  requestAnimationFrame(frame);
+}
+
+/* ================= 交互绑定 ================= */
+function switchMode(m){
+  if(state.mode===m)return;
+  state.mode=m;
+  $$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  $('#p1').hidden=m!=='expand';$('#p2').hidden=m!=='sum';$('#p3').hidden=m!=='prod';
+  state.soloRef=state.hoverRef=null;state.trail.length=0;state.userZoom=1;
+  state.traceStart=state.t;
+  ovChk.checked=state.overlay[m];
+  renderFormula();renderStrip();
+}
+ $$('.tab').forEach(b=>b.onclick=()=>switchMode(b.dataset.m));
+
+// 模式 Ⅰ
+const debouncedAnalyze=debounce(()=>tryAnalyze(false),450);
+exprIn.addEventListener('input',()=>{srcInfo.hidden=true;showErr(err1,'');debouncedAnalyze();});
+exprIn.addEventListener('keydown',e=>{if(e.key==='Enter')tryAnalyze(true);});
+periodIn.addEventListener('input',()=>{
+  try{const T=parseNum(periodIn.value);omegaOut.textContent=fmt(TAU/T);}catch(e){}
+  debouncedAnalyze();
+});
+periodIn.addEventListener('keydown',e=>{if(e.key==='Enter')tryAnalyze(true);});
+expandBtn.onclick=()=>tryAnalyze(true);
+nRange.addEventListener('input',()=>{
+  nOut.textContent=nRange.value;
+  if(state.tab1){state.tab1.N=+nRange.value;rebuildTab1();}
+});
+ $$('.chip').forEach(b=>b.onclick=()=>{exprIn.value=b.dataset.x;srcInfo.hidden=true;tryAnalyze(true);});
+
+// 播放 / 速度 / 相位 / 视图
+function syncPlay(){icPlay.hidden=state.playing;icPause.hidden=!state.playing;playBtn.classList.toggle('on',state.playing);}
+playBtn.onclick=()=>{state.playing=!state.playing;syncPlay();};
+spdRange.addEventListener('input',()=>{state.speed=+spdRange.value;spdVal.textContent=state.speed.toFixed(2);});
+ $('#phReset').onclick=()=>{if(L){state.t=L.t0;state.traceStart=state.t;state.trail.length=0;}};
+ $('#zoomReset').onclick=()=>{state.userZoom=1;};
+ovChk.addEventListener('change',()=>{state.overlay[state.mode]=ovChk.checked;});
+wrap.addEventListener('wheel',e=>{
+  e.preventDefault();
+  state.userZoom=clamp(state.userZoom*Math.exp(-e.deltaY*0.0012),0.15,40);
+},{passive:false});
+wrap.addEventListener('dblclick',()=>{state.userZoom=1;});
+
+// 波形区拖动回放
+let scrub=null;
+cv.addEventListener('pointerdown',e=>{
+  if(!L||e.offsetX<L.px0-8||e.offsetX>L.px1+8)return;
+  cv.setPointerCapture(e.pointerId);
+  scrub={was:state.playing};
+  state.playing=false;syncPlay();
+  setTFromX(e.offsetX);
+});
+cv.addEventListener('pointermove',e=>{if(scrub)setTFromX(e.offsetX);});
+const endScrub=()=>{if(scrub){state.playing=scrub.was;scrub=null;syncPlay();}};
+cv.addEventListener('pointerup',endScrub);
+cv.addEventListener('pointercancel',endScrub);
+function setTFromX(x){
+  if(!L)return;
+  const q=clamp((x-L.px0)/L.plotW,0,1),tm=L.t0+q*L.span;
+  const k=Math.round((state.t-tm)/L.span);
+  state.t=tm+k*L.span;
+  state.traceStart=state.t;
+  state.trail.length=0;
+}
+
+// 公式项：悬停高亮 / 点击单看
+formulaEl.addEventListener('mouseover',e=>{
+  const t=e.target.closest('.term');
+  state.hoverRef=t&&t.dataset.ref!=null?+t.dataset.ref:null;
+});
+formulaEl.addEventListener('mouseout',e=>{if(e.target.closest('.term'))state.hoverRef=null;});
+formulaEl.addEventListener('click',e=>{
+  if(e.target.closest('#moreTerms')){state.showAllTerms=!state.showAllTerms;renderFormula();return;}
+  const t=e.target.closest('.term');
+  if(t&&t.dataset.ref!=null)toggleSolo(+t.dataset.ref);
+});
+function toggleSolo(ref){
+  state.soloRef=state.soloRef===ref?null:ref;
+  renderFormula();renderStrip();
+}
+stripEl.addEventListener('click',e=>{
+  const c=e.target.closest('.scard');
+  if(c&&c.dataset.ref!=null)toggleSolo(+c.dataset.ref);
+});
+
+// 模式 Ⅱ / Ⅲ 编辑器
+function renderRows(which){
+  const st=state[which],el=$('#rows'+(which==='sum'?'2':'3'));
+  el.innerHTML=st.comps.map((c,i)=>
+    `<div class="crow" data-i="${i}">`+
+    `<span class="dot" style="background:${colorOf(c.colorIdx)}"></span>`+
+    `<input class="num" data-f="n" value="${fmtN(c.n)}" placeholder="n" spellcheck="false">`+
+    `<input class="num" data-f="A" value="${fmt(c.A)}" placeholder="A" spellcheck="false">`+
+    `<input class="num" data-f="phi" value="${fmt(c.phi)}" placeholder="φ" spellcheck="false">`+
+    `<button class="ib eye${c.on?'':' off'}" title="启用 / 停用">${EYE}</button>`+
+    `<button class="ib del" title="删除">${XX}</button></div>`).join('')
+    ||'<div class="emptyRow">（空 · 点击下方「新建」）</div>';
+}
+function attachEditor(rootId,which){
+  const root=$('#'+rootId),errEl=which==='sum'?err2:err3;
+  root.addEventListener('input',e=>{
+    const inp=e.target.closest('input.num');
+    if(!inp)return;
+    const row=inp.closest('.crow');
+    if(!row)return;
+    const c=state[which].comps[+row.dataset.i];
+    if(!c)return;
+    let v;
+    try{v=parseNum(inp.value);}
+    catch(err){inp.classList.add('bad');return;}
+    if(inp.dataset.f==='n'&&!(v>0)){inp.classList.add('bad');showErr(errEl,'倍频 n 需为正数');return;}
+    inp.classList.remove('bad');showErr(errEl,'');
+    c[inp.dataset.f]=v;
+    rebuildData(which);
+  });
+  root.addEventListener('click',e=>{
+    const row=e.target.closest('.crow');
+    if(!row)return;
+    const i=+row.dataset.i,c=state[which].comps[i];
+    if(!c)return;
+    if(e.target.closest('.eye')){
+      c.on=!c.on;
+      e.target.closest('.eye').classList.toggle('off',!c.on);
+      rebuildData(which);
+    }else if(e.target.closest('.del')){
+      state[which].comps.splice(i,1);
+      renderRows(which);rebuildData(which);
+    }
+  });
+}
+function addComp(which){
+  const st=state[which];
+  let n=1;
+  if(st.comps.length)n=Math.floor(Math.max(...st.comps.map(c=>c.n)))+1; // 自动接续倍频
+  st.comps.push({n,A:0,phi:0,on:true,colorIdx:state.nextColor++});
+  renderRows(which);rebuildData(which);
+}
+ $('#add2').onclick=()=>addComp('sum');
+ $('#add3').onclick=()=>addComp('prod');
+ $('#refill2').onclick=()=>{state.sum.comps.forEach((c,i)=>c.n=i+1);renderRows('sum');rebuildData('sum');};
+ $('#refill3').onclick=()=>{state.prod.comps.forEach((c,i)=>c.n=i+1);renderRows('prod');rebuildData('prod');};
+ $$('#waveSeg2 button').forEach(b=>b.onclick=()=>{
+  state.sum.wave=b.dataset.w;
+  $$('#waveSeg2 button').forEach(x=>x.classList.toggle('on',x===b));
+  rebuildData('sum');
+});
+ $$('#waveSeg3 button').forEach(b=>b.onclick=()=>{
+  state.prod.wave=b.dataset.w;
+  $$('#waveSeg3 button').forEach(x=>x.classList.toggle('on',x===b));
+  rebuildData('prod');
+});
+function bindOmega(id,which){
+  const errEl=which==='sum'?err2:err3;
+  $('#'+id).addEventListener('input',e=>{
+    try{
+      const v=parseNum(e.target.value);
+      if(!(v>0))throw 0;
+      state[which].omega0=v;
+      e.target.classList.remove('bad');showErr(errEl,'');
+      rebuildData(which);
+    }catch(_){e.target.classList.add('bad');}
+  });
+}
+bindOmega('om2','sum');bindOmega('om3','prod');
+ $('#anaProd').onclick=analyzeProduct;
+
+/* ================= 启动 ================= */
+renderRows('sum');renderRows('prod');
+attachEditor('p2','sum');attachEditor('p3','prod');
+rebuildData('sum');rebuildData('prod');
+ovChk.checked=state.overlay.expand;
+syncPlay();
+resize();
+new ResizeObserver(resize).observe(wrap);
+tryAnalyze(true);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

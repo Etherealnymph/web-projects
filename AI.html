@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>AI 工具大全</title>
+  <link rel="stylesheet" href="homework3/mystyle.css">
+  <link rel="icon" href="homework3/favicon.ico" type="image/x-icon">
+  <style>
+    /* 页面主容器 */
+    .markdown-body{ max-width:1100px; margin:100px auto 120px; background: rgba(255,255,255,0.02); padding:32px; border-radius:12px; color: #e6f3f2; box-shadow: 0 10px 30px rgba(2,8,12,0.6); }
+    .markdown-body h1, .markdown-body h2, .markdown-body h3{ color: var(--accent); }
+    /* 更大字号，便于阅读 */
+    .markdown-body h1{ font-size: clamp(34px, 5.5vw, 64px); }
+    .markdown-body h2{ font-size: clamp(22px, 3.2vw, 40px); margin-top:18px }
+    .markdown-body h3{ font-size: clamp(18px, 2.6vw, 28px); margin-top:12px }
+    .topbar{ position: fixed; left:0; right:0; top:12px; z-index:1002; display:flex; gap:12px; align-items:center; padding:8px 16px; background: rgba(4,67,57,0.42); backdrop-filter: blur(6px); border-radius:12px; width:fit-content; margin:auto; left:0; right:0 }
+    #bgCanvas, #bgCanvasFallback{ position: fixed; inset:0; z-index:0; pointer-events:none; display:block }
+    main{ position: relative; z-index:1001 }
+    /* 保证 markdown 中的外链在深色背景下可见 */
+    .markdown-body a{ color: var(--accent); }
+
+    /* 简化后的链接列表 */
+    .link-list{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:12px }
+    .link-item{ padding:12px 14px; border-radius:10px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); box-shadow: 0 6px 18px rgba(2,8,12,0.45); }
+    .link-item a{ font-weight:700; color: #e9fffb; text-decoration:none; font-size:1.12rem }
+    .link-item p{ margin:6px 0 0; color:var(--muted); font-size:1rem }
+  </style>
+</head>
+<body>
+  <main id="content" class="markdown-body">正在加载 AI.md…</main>
+
+  <!-- three.js + 背景脚本（使用工作区内的 three-bg.js） -->
+  <script src="firstweb/public/js/three-bg.js"></script>
+
+  <!-- 客户端 Markdown 渲染（marked），并在渲染前删除指定章节 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    (async function(){
+      const container = document.getElementById('content');
+      const removeTitles = ['仓库亮点','为什么选这个合集','使用指南','贡献指南','避坑提醒','项目进度','联系我'];
+
+      function stripSections(md){
+        const lines = md.split(/\r?\n/);
+        const out = [];
+        let skipping = false;
+        let skipLevel = 0;
+        for(let i=0;i<lines.length;i++){
+          const line = lines[i];
+          const m = line.match(/^(\s{0,3}#{1,6})\s*(.*)$/);
+          if(m){
+            const level = m[1].trim().length;
+            const headingText = m[2].replace(/[*_`~]/g,'').trim();
+            if(skipping){
+              if(level <= skipLevel){ skipping = false; }
+            }
+            if(!skipping){
+              if(removeTitles.some(t=>headingText.indexOf(t)!==-1)){
+                skipping = true; skipLevel = level; continue;
+              }
+            }
+            if(!skipping) out.push(line);
+          } else {
+            if(!skipping) out.push(line);
+          }
+        }
+        return out.join('\n');
+      }
+
+      try{
+        const res = await fetch('AI.md');
+        if(!res.ok) throw new Error('无法加载 AI.md');
+        let md = await res.text();
+        md = stripSections(md);
+        const temp = document.createElement('div');
+        temp.innerHTML = marked.parse(md);
+
+        // 原有的链接提取 & 分组逻辑（与之前一致）
+        container.innerHTML = '';
+        let currentMajor = null;
+
+        function makeMajor(title){
+          const sec = document.createElement('section');
+          const h = document.createElement('h2'); h.innerText = title; sec.appendChild(h);
+          sec._list = document.createElement('ul'); sec._list.className = 'link-list'; sec.appendChild(sec._list);
+          container.appendChild(sec);
+          return sec;
+        }
+
+        function makeSub(sec, title){
+          const div = document.createElement('div');
+          const h = document.createElement('h3'); h.innerText = title; div.appendChild(h);
+          const ul = document.createElement('ul'); ul.className = 'link-list'; div.appendChild(ul);
+          sec.appendChild(div);
+          return ul;
+        }
+
+        let currentSubList = null;
+        let skipNav = false;
+        Array.from(temp.childNodes).forEach(node=>{
+          if(node.nodeType !== 1) return;
+          const tag = node.tagName.toLowerCase();
+          if(skipNav){
+            if(tag === 'h1' || tag === 'h2'){
+              skipNav = false;
+            } else { return; }
+          }
+          if((tag === 'h1' || tag === 'h2') && /目录/.test(node.innerText)){
+            skipNav = true; currentMajor = null; currentSubList = null; return;
+          }
+          if(tag === 'h1' || tag === 'h2'){
+            currentMajor = makeMajor(node.innerText.trim()); currentSubList = null; return;
+          }
+          if(tag === 'h3' || tag === 'h4'){
+            if(!currentMajor) currentMajor = makeMajor('其他');
+            currentSubList = makeSub(currentMajor, node.innerText.trim()); return;
+          }
+          const anchors = Array.from(node.querySelectorAll ? node.querySelectorAll('a') : []);
+          if(anchors.length === 0) return;
+          if(!currentMajor) currentMajor = makeMajor('其他');
+          const targetList = currentSubList || currentMajor._list;
+          if(tag === 'table'){
+            Array.from(node.querySelectorAll('tr')).forEach(tr=>{
+              const a = tr.querySelector('a'); if(!a) return;
+              const href = a.getAttribute('href') || a.href; if(!href) return;
+              const title = a.innerText.trim() || href;
+              const other = Array.from(tr.children).map(td=>td.innerText.trim()).filter(t=>t && !t.includes(title)).join(' · ');
+              const li = document.createElement('li'); li.className = 'link-item';
+              const link = document.createElement('a'); link.href = href; link.innerText = title; link.target='_blank'; link.rel='noopener noreferrer';
+              li.appendChild(link);
+              if(other) { const p = document.createElement('p'); p.innerText = other; li.appendChild(p); }
+              targetList.appendChild(li);
+            });
+            return;
+          }
+          anchors.forEach(a=>{
+            const href = a.getAttribute('href') || a.href; if(!href) return;
+            const title = a.innerText.trim() || href;
+            const desc = a.title || (a.nextSibling && a.nextSibling.textContent && a.nextSibling.textContent.trim()) || '';
+            const li = document.createElement('li'); li.className = 'link-item';
+            const link = document.createElement('a'); link.href = href; link.innerText = title; link.target='_blank'; link.rel='noopener noreferrer';
+            li.appendChild(link);
+            if(desc) { const p = document.createElement('p'); p.innerText = desc; li.appendChild(p); }
+            targetList.appendChild(li);
+          });
+        });
+
+        if(container.children.length === 0) container.innerHTML = temp.innerHTML;
+        setTimeout(()=>{ const bg = document.getElementById('bgCanvas'); if(!bg || bg.width===0) startFallbackBg(); }, 600);
+
+      }catch(e){ container.innerText = '加载失败：' + e.message; }
+
+      // 回退背景（保留原实现）
+      function startFallbackBg(){
+        if(document.getElementById('bgCanvasFallback')) return;
+        const c = document.createElement('canvas'); c.id = 'bgCanvasFallback'; document.body.appendChild(c);
+        const ctx = c.getContext('2d'); let W = c.width = innerWidth, H = c.height = innerHeight;
+        const particles = Array.from({length:420}, ()=>({ x: Math.random()*W, y: Math.random()*H, r: 0.6+Math.random()*2.6, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3, alpha:0.25+Math.random()*0.5 }));
+        function onResize(){ W = c.width = innerWidth; H = c.height = innerHeight; }
+        addEventListener('resize', onResize, {passive:true});
+        let t0 = performance.now(); (function loop(t){ const dt=(t-t0)*0.001; t0=t; ctx.clearRect(0,0,W,H); const g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,'rgba(4,20,30,0.35)'); g.addColorStop(1,'rgba(8,12,20,0.45)'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); ctx.globalCompositeOperation='lighter'; particles.forEach(p=>{ p.x+=p.vx*60*dt; p.y+=p.vy*60*dt; if(p.x<-50)p.x=W+50; if(p.x>W+50)p.x=-50; if(p.y<-50)p.y=H+50; if(p.y>H+50)p.y=-50; const grad=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*8); grad.addColorStop(0, `rgba(127,212,207,${p.alpha})`); grad.addColorStop(1, 'rgba(127,212,207,0)'); ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); }); ctx.globalCompositeOperation='source-over'; requestAnimationFrame(loop); })(t0);
+      }
+    })();
+  </script>
+</body>
+</html>

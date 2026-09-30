@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>半导体器件虚拟实验室 | 动力学与参数解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0e0e11;
+            --bg-card: #18181b;
+            --bg-panel: #1c1c20;
+            --border: #3f3f46;
+            --text-main: #fafafa;
+            --text-muted: #a1a1aa;
+            --accent-cyan: #22d3ee;
+            --accent-amber: #f59e0b;
+            --accent-pink: #ec4899;
+            --accent-green: #4ade80;
+            --accent-red: #ef4444;
+        }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .font-display { font-family: 'Orbitron', sans-serif; }
+        
+        .device-btn {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .device-btn.active {
+            background: linear-gradient(90deg, rgba(34, 211, 238, 0.15), transparent);
+            border-left-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+        .device-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.05);
+            border-left-color: var(--text-muted);
+        }
+
+        .state-btn {
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            transition: all 0.2s;
+            color: var(--text-main);
+            pointer-events: none; /* 状态由滑块自动判定 */
+        }
+        .state-btn.active {
+            background: var(--accent-cyan);
+            color: #000;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.4);
+            font-weight: bold;
+        }
+
+        canvas {
+            background: #050507;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .formula-box {
+            background: rgba(34, 211, 238, 0.05);
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            border-left: 3px solid var(--accent-cyan);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #e0f2fe;
+            font-size: 13px;
+            margin-top: 8px;
+            word-break: break-all;
+        }
+
+        .section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Custom Range Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px var(--accent-cyan);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+    </style>
+</head>
+<body class="h-screen overflow-hidden">
+
+    <div class="flex flex-col h-screen">
+        <header class="flex items-center justify-between px-6 py-3 border-b border-zinc-700 bg-zinc-900/50 backdrop-blur">
+            <div class="flex items-center space-x-3">
+                <div class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></div>
+                <h1 class="font-display text-xl font-bold tracking-wider text-white">SEMICONDUCTOR <span class="text-cyan-400">LAB</span></h1>
+            </div>
+            <div class="text-xs text-zinc-400 font-mono hidden md:block">实时载流子动力学与参数解析引擎 v2.0</div>
+        </header>
+
+        <div class="flex flex-1 overflow-hidden">
+            
+            <!-- Sidebar -->
+            <aside class="w-56 border-r border-zinc-700 bg-zinc-900/30 overflow-y-auto flex-shrink-0">
+                <div class="p-4 text-xs uppercase tracking-widest text-zinc-500 font-mono">Devices</div>
+                <nav id="device-nav" class="flex flex-col"></nav>
+            </aside>
+
+            <!-- Main Visualization -->
+            <main class="flex-1 flex flex-col p-4 overflow-hidden">
+                
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 id="device-name" class="text-2xl font-bold text-white">NPN BJT</h2>
+                        <p id="device-desc-short" class="text-sm text-zinc-400">双极型晶体管</p>
+                    </div>
+                    <div id="state-controls" class="flex space-x-2"></div>
+                </div>
+
+                <!-- Canvas -->
+                <div class="flex-1 flex justify-center items-center bg-black/20 rounded-lg border border-zinc-700 p-4 relative overflow-hidden">
+                    <canvas id="canvas" width="700" height="350"></canvas>
+                    <div id="legend" class="absolute bottom-4 left-4 bg-zinc-900/80 p-2 rounded text-xs font-mono space-y-1 border border-zinc-700">
+                        <div class="flex items-center space-x-2"><div class="w-2 h-2 rounded-full bg-cyan-400"></div><span class="text-white">电子</span></div>
+                        <div class="flex items-center space-x-2"><div class="w-2 h-2 rounded-full bg-pink-500"></div><span class="text-white">空穴</span></div>
+                        <div class="flex items-center space-x-2"><div class="w-2 h-2 rounded-full bg-amber-400"></div><span class="text-white">光子</span></div>
+                    </div>
+                </div>
+
+                <!-- Interactive Controls -->
+                <div class="mt-4 p-4 bg-zinc-900/50 rounded-lg border border-zinc-700 grid grid-cols-3 gap-6" id="control-panel">
+                    <!-- Sliders generated here -->
+                </div>
+
+            </main>
+
+            <!-- Right Panel -->
+            <aside class="w-96 border-l border-zinc-700 bg-zinc-900/30 overflow-y-auto p-4 space-y-4 flex-shrink-0">
+                <div class="info-card p-4">
+                    <h3 class="text-cyan-400 font-bold mb-2 flex items-center"><span class="mr-2">⚙️</span> 功能解析</h3>
+                    <p id="info-function" class="text-sm text-zinc-200 leading-relaxed">...</p>
+                </div>
+
+                <div class="info-card p-4">
+                    <h3 class="text-amber-400 font-bold mb-2 flex items-center"><span class="mr-2">⚡</span> 工作区域状态</h3>
+                    <div class="text-sm font-mono text-amber-400 mb-1" id="info-state-name">Active Region (放大区)</div>
+                    <p id="info-state-desc" class="text-sm text-zinc-200 leading-relaxed">...</p>
+                    <div class="section-title mt-3">核心公式</div>
+                    <div id="info-formula" class="formula-box">...</div>
+                </div>
+
+                <div class="info-card p-4">
+                    <h3 class="text-pink-500 font-bold mb-3 flex items-center"><span class="mr-2">🔬</span> 寄生参数解析</h3>
+                    <div class="mb-3">
+                        <div class="section-title">寄生电容</div>
+                        <p id="info-parasitic-c" class="text-sm text-zinc-200 leading-relaxed">...</p>
+                    </div>
+                    <div>
+                        <div class="section-title">寄生电阻</div>
+                        <p id="info-parasitic-r" class="text-sm text-zinc-200 leading-relaxed">...</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+<script>
+// 全局状态与参数
+let currentDevice = 'NPN_BJT';
+let currentState = 'Active';
+let animationId;
+let particles = [];
+let currentParams = {}; // 保存当前滑块值
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// 器件数据库
+const devices = {
+    NPN_BJT: {
+        name: "NPN BJT", short: "双极型晶体管 (NPN)",
+        type: "BJT",
+        func: "双极型晶体管，由两个PN结组成。主要作为电流控制器件，用于信号放大和开关。基极电流控制集电极电流。",
+        parasiticC: "Cbe (基射电容): 扩散电容为主。Cbc (基集电容): 耗尽层电容，即密勒电容。Ccs (集衬电容)。",
+        parasiticR: "Rb (基极电阻): 基区半导体体电阻。Rc (集电极电阻): 轻掺杂集电区体电阻。Re (发射极电阻): 极小。",
+        states: ["Cutoff", "Active", "Saturation"],
+        sliders: [
+            { id: "Vbe", label: "Vbe (基射电压)", min: 0, max: 0.8, step: 0.01, val: 0.7, unit: "V" },
+            { id: "Vce", label: "Vce (集射电压)", min: 0, max: 5, step: 0.1, val: 3.0, unit: "V" },
+            { id: "W_base", label: "基区宽度 Wb", min: 0.5, max: 3, step: 0.1, val: 1.5, unit: "μm" }
+        ],
+        logic: (p) => {
+            if (p.Vbe < 0.6) return { state: "Cutoff", formula: "Ic ≈ 0, Ib = 0", desc: "发射结反偏或零偏，集电结反偏。基极无电流注入，集电极仅有微小漏电流。" };
+            if (p.Vce > 0.3) return { state: "Active", formula: "Ic = β * Ib\nIe = Ic + Ib", desc: "发射结正偏，集电结反偏。电子从发射极横向注入基区，少量复合，大部分被集电极收集。" };
+            return { state: "Saturation", formula: "Vce(sat) ≈ 0.2V\nIc < β * Ib", desc: "发射结和集电结均正偏。基区充满高浓度电子，器件处于导通状态。" };
+        },
+        draw: drawBJT
+    },
+    PNP_BJT: {
+        name: "PNP BJT", short: "双极型晶体管 (PNP)",
+        type: "BJT",
+        func: "PNP型双极晶体管，与NPN互补。使用空穴作为主要载流子，发射极注入空穴穿过基区到达集电极。",
+        parasiticC: "Ceb, Ccb, Ccs: 与NPN相同，但电压极性相反。",
+        parasiticR: "Rb, Rc, Re: 半导体体电阻，结构同NPN。",
+        states: ["Cutoff", "Active", "Saturation"],
+        sliders: [
+            { id: "Veb", label: "Veb (射基电压)", min: 0, max: 0.8, step: 0.01, val: 0.7, unit: "V" },
+            { id: "Vec", label: "Vec (射集电压)", min: 0, max: 5, step: 0.1, val: 3.0, unit: "V" },
+            { id: "W_base", label: "基区宽度 Wb", min: 0.5, max: 3, step: 0.1, val: 1.5, unit: "μm" }
+        ],
+        logic: (p) => {
+            if (p.Veb < 0.6) return { state: "Cutoff", formula: "Ic ≈ 0, Ib = 0", desc: "发射结反偏或零偏。无空穴注入。" };
+            if (p.Vec > 0.3) return { state: "Active", formula: "Ic = β * Ib", desc: "发射结正偏，集电结反偏。空穴从发射极横向穿过基区到达集电极。" };
+            return { state: "Saturation", formula: "Vec(sat) ≈ 0.2V", desc: "两个结均正偏，空穴充满基区，完全导通。" };
+        },
+        draw: drawBJT
+    },
+    NMOS: {
+        name: "NMOS Transistor", short: "N沟道场效应管",
+        type: "MOSFET",
+        func: "场效应晶体管，电压控制器件。栅极电压产生的电场控制沟道中电子的浓度，用于开关和放大。",
+        parasiticC: "Cgs/Cgd: 栅源/栅漏重叠电容。Cgd即密勒电容。Cds: 漏源衬底结电容。",
+        parasiticR: "Rg (栅极电阻): 多晶硅栅体电阻。Rd/Rs: 漏/源极体电阻。",
+        states: ["Cutoff", "Linear", "Saturation"],
+        sliders: [
+            { id: "Vgs", label: "Vgs (栅源电压)", min: 0, max: 3, step: 0.1, val: 2.0, unit: "V" },
+            { id: "Vds", label: "Vds (漏源电压)", min: 0, max: 3, step: 0.1, val: 2.0, unit: "V" },
+            { id: "L", label: "沟道长度 L", min: 1, max: 4, step: 0.1, val: 2.0, unit: "μm" }
+        ],
+        logic: (p) => {
+            const Vth = 1.0;
+            if (p.Vgs < Vth) return { state: "Cutoff", formula: "Id = 0", desc: "Vgs < Vth，表面无反型层，无导电沟道。" };
+            if (p.Vds < p.Vgs - Vth) return { state: "Linear", formula: "Id = μnCox(W/L)[(Vgs-Vth)Vds - ½Vds²]", desc: "沟道连续，电流随Vds线性增加，类似可变电阻。" };
+            return { state: "Saturation", formula: "Id = ½ μnCox(W/L)(Vgs-Vth)²", desc: "漏端沟道夹断。电流饱和，电子在夹断点被强电场扫入漏极。" };
+        },
+        draw: drawMOSFET
+    },
+    PMOS: {
+        name: "PMOS Transistor", short: "P沟道场效应管",
+        type: "MOSFET",
+        func: "P沟道MOS管，与NMOS互补。使用空穴作为载流子，源极注入空穴穿过沟道到达漏极。",
+        parasiticC: "Cgs/Cgd/Cds: 寄生电容结构同NMOS。",
+        parasiticR: "Rg, Rd, Rs: 体电阻。由于空穴迁移率低于电子，相同尺寸下导通电阻大于NMOS。",
+        states: ["Cutoff", "Linear", "Saturation"],
+        sliders: [
+            { id: "Vsg", label: "Vsg (源栅电压)", min: 0, max: 3, step: 0.1, val: 2.0, unit: "V" },
+            { id: "Vsd", label: "Vsd (源漏电压)", min: 0, max: 3, step: 0.1, val: 2.0, unit: "V" },
+            { id: "L", label: "沟道长度 L", min: 1, max: 4, step: 0.1, val: 2.0, unit: "μm" }
+        ],
+        logic: (p) => {
+            const Vth = 1.0; // |Vth|
+            if (p.Vsg < Vth) return { state: "Cutoff", formula: "Id = 0", desc: "Vsg < |Vth|，无反型层（空穴沟道）。" };
+            if (p.Vsd < p.Vsg - Vth) return { state: "Linear", formula: "Id = μpCox(W/L)[(Vsg-Vth)Vsd - ½Vsd²]", desc: "空穴沟道连续，电流随Vsd线性增加。" };
+            return { state: "Saturation", formula: "Id = ½ μpCox(W/L)(Vsg-Vth)²", desc: "漏端沟道夹断，电流饱和。" };
+        },
+        draw: drawMOSFET
+    },
+    SCR: {
+        name: "SCR (Thyristor)", short: "可控硅整流器",
+        type: "SCR",
+        func: "四层半导体结构(PNPN)，相当于PNP和NPN晶体管的正反馈连接。一旦触发导通，门极失去控制作用。",
+        parasiticC: "Cj2 (中间结电容): 决定dv/dt触发特性。Cga, Cgk: 门极结电容。",
+        parasiticR: "Rg (门极电阻): 影响触发电流。R_spread: 导通区扩展动态电阻。",
+        states: ["Blocking", "Triggering", "Conducting"],
+        sliders: [
+            { id: "Vak", label: "Vak (阳极电压)", min: 0, max: 10, step: 0.1, val: 5.0, unit: "V" },
+            { id: "Ig", label: "Ig (门极触发电流)", min: 0, max: 10, step: 0.1, val: 0.0, unit: "mA" }
+        ],
+        logic: (p) => {
+            if (p.Ig > 5) return { state: "Conducting", formula: "Vak ≈ 1.0V ~ 1.5V\nIa > Ih", desc: "正反馈使内部充满等离子体，器件完全导通。" };
+            if (p.Ig > 0 && p.Vak > 0) return { state: "Triggering", formula: "Ig > Igt", desc: "门极注入电流，形成正反馈回路。" };
+            return { state: "Blocking", formula: "Ia ≈ 0", desc: "中心结J2反偏，阻挡电流通过。" };
+        },
+        draw: drawSCR
+    },
+    TRIAC: {
+        name: "TRIAC", short: "三端双向可控硅",
+        type: "TRIAC",
+        func: "双向可控硅，相当于两个SCR反并联。可在交流正负半周均导通，用于交流调光、调速。",
+        parasiticC: "C_MT1_MT2: 主端子间电容。C_gate_MT1: 门极与主端子间电容。",
+        parasiticR: "R_gate: 门极体电阻。R_on: 导通时动态体电阻。",
+        states: ["Blocking", "Conducting"],
+        sliders: [
+            { id: "Vmt", label: "Vmt (主端子电压)", min: -10, max: 10, step: 0.1, val: 5.0, unit: "V" },
+            { id: "Ig", label: "Ig (门极触发)", min: 0, max: 10, step: 0.1, val: 5.0, unit: "mA" }
+        ],
+        logic: (p) => {
+            if (p.Ig > 5 && Math.abs(p.Vmt) > 0.5) return { state: "Conducting", formula: "V_mt ≈ 1.5V", desc: "门极脉冲触发，内部形成正反馈，双向导通。" };
+            return { state: "Blocking", formula: "I_mt = 0", desc: "电压未达转折且无触发，高阻态。" };
+        },
+        draw: drawTRIAC
+    },
+    Diode: {
+        name: "PN Junction Diode", short: "PN结二极管",
+        type: "Diode",
+        func: "最基础半导体器件，利用单向导电性实现整流、保护。",
+        parasiticC: "Cj (结电容): 耗尽层电容，反向偏置时为主，随Vr增大而减小。",
+        parasiticR: "Rs (串联电阻): 中性区体电阻和接触电阻。",
+        states: ["Reverse", "Forward"],
+        sliders: [
+            { id: "V", label: "外加电压 V", min: -5, max: 1, step: 0.1, val: 0.8, unit: "V" },
+            { id: "W_dep", label: "耗尽层宽度 Wd", min: 0.5, max: 3, step: 0.1, val: 1.0, unit: "μm" }
+        ],
+        logic: (p) => {
+            if (p.V < 0.5) return { state: "Reverse", formula: "Id = -Is (反向饱和)", desc: "反偏或零偏。耗尽层变宽，仅有少数载流子漂移电流。" };
+            return { state: "Forward", formula: "Id = Is * (exp(V / nVt) - 1)", desc: "正偏。耗尽层变窄，多数载流子大量横向穿过结面。" };
+        },
+        draw: drawDiode
+    },
+    PD: {
+        name: "Photodiode", short: "光电二极管",
+        type: "PD",
+        func: "将光信号转换为电信号。工作在反偏状态，光照在耗尽层产生电子-空穴对形成光电流。",
+        parasiticC: "Cj (结电容): 限制光电响应速度。",
+        parasiticR: "Rs (串联电阻): R_sh (分流电阻): 决定暗电流，越大约好。",
+        states: ["Dark", "Illuminated"],
+        sliders: [
+            { id: "Vr", label: "Vr (反向电压)", min: 0, max: 10, step: 0.1, val: 5.0, unit: "V" },
+            { id: "Light", label: "光照强度", min: 0, max: 10, step: 0.1, val: 5.0, unit: "lux" }
+        ],
+        logic: (p) => {
+            if (p.Light < 0.5) return { state: "Dark", formula: "Id = Idark (极小)", desc: "无光照，仅有微小暗电流。" };
+            return { state: "Illuminated", formula: "Iph = R * P", desc: "光子激发电子-空穴对，在电场下横向分离形成光电流。" };
+        },
+        draw: drawPD
+    },
+    MOSCap: {
+        name: "NMOS Capacitor", short: "MOS电容",
+        type: "MOSCap",
+        func: "MOS结构基础单元，栅极电压控制半导体表面电荷状态。",
+        parasiticC: "C_ox (氧化层电容): 固定。C_dep (耗尽层电容): 随栅压变化。",
+        parasiticR: "R_gate (栅极电阻), R_channel (反型层电阻)。",
+        states: ["Accumulation", "Depletion", "Inversion"],
+        sliders: [
+            { id: "Vg", label: "Vg (栅极电压)", min: -2, max: 3, step: 0.1, val: 2.0, unit: "V" }
+        ],
+        logic: (p) => {
+            if (p.Vg < -0.5) return { state: "Accumulation", formula: "C = Cox (Max)", desc: "栅极加负压，表面积累空穴。" };
+            if (p.Vg < 1.0) return { state: "Depletion", formula: "C = (Cox * Cd) / (Cox + Cd)", desc: "栅极加小幅正压，表面耗尽，出现固定负电荷。" };
+            return { state: "Inversion", formula: "Low Freq: C = Cox", desc: "栅极加足够正压，表面出现反型电子层。" };
+        },
+        draw: drawMOSCap
+    },
+    MOSRes: {
+        name: "NMOS Resistor", short: "MOS电阻",
+        type: "MOSRes",
+        func: "利用MOS管工作在线性区作为可调电阻使用。",
+        parasiticC: "C_gs, C_gd: 重叠寄生电容。C_ds: 结电容。",
+        parasiticR: "R_ds_on: 导通电阻，受栅压控制。",
+        states: ["Linear", "Velocity_Sat"],
+        sliders: [
+            { id: "Vds", label: "Vds (漏源电压)", min: 0, max: 5, step: 0.1, val: 1.0, unit: "V" },
+            { id: "L", label: "沟道长度 L", min: 1, max: 5, step: 0.1, val: 2.0, unit: "μm" }
+        ],
+        logic: (p) => {
+            if (p.Vds < 2.0) return { state: "Linear", formula: "R_eq ≈ L / (μnCox*W*(Vgs-Vth))", desc: "电流随电压线性增加，等效为电阻。" };
+            return { state: "Velocity_Sat", formula: "Id ≈ W * Cox * vsat * (Vgs-Vth)", desc: "电场过强，载流子速度饱和，呈非线性电阻。" };
+        },
+        draw: drawMOSRes
+    }
+};
+
+// 粒子系统
+class Particle {
+    constructor(x, y, type, vx, vy) {
+        this.x = x; this.y = y;
+        this.type = type;
+        this.vx = vx; this.vy = vy; // 严格限定横向流动，vy一般为0
+        this.life = 1.0;
+    }
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.type === 'p') this.life -= 0.02;
+    }
+    draw() {
+        ctx.beginPath();
+        let color = this.type === 'e' ? '#22d3ee' : (this.type === 'h' ? '#ec4899' : '#f59e0b');
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 8;
+        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+}
+
+window.onload = () => {
+    setupNav();
+    selectDevice(currentDevice);
+};
+
+function setupNav() {
+    const nav = document.getElementById('device-nav');
+    nav.innerHTML = '';
+    for (const key in devices) {
+        const btn = document.createElement('button');
+        btn.className = 'device-btn text-left px-4 py-3 text-sm font-medium text-white';
+        btn.id = `btn-${key}`;
+        btn.innerHTML = `${devices[key].name}<div class="text-xs text-zinc-500 font-normal">${devices[key].short}</div>`;
+        btn.onclick = () => selectDevice(key);
+        nav.appendChild(btn);
+    }
+}
+
+function selectDevice(key) {
+    currentDevice = key;
+    particles = [];
+    
+    document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`btn-${key}`).classList.add('active');
+
+    document.getElementById('device-name').innerText = devices[key].name;
+    document.getElementById('device-desc-short').innerText = devices[key].short;
+    document.getElementById('info-function').innerText = devices[key].func;
+    document.getElementById('info-parasitic-c').innerText = devices[key].parasiticC;
+    document.getElementById('info-parasitic-r').innerText = devices[key].parasiticR;
+
+    // 生成状态按钮 (只读，由滑块控制)
+    const controls = document.getElementById('state-controls');
+    controls.innerHTML = '';
+    devices[key].states.forEach(state => {
+        const btn = document.createElement('button');
+        btn.className = 'state-btn px-4 py-2 text-sm rounded font-mono';
+        btn.innerText = state;
+        btn.id = `state-${state}`;
+        controls.appendChild(btn);
+    });
+
+    // 生成滑块控件
+    const panel = document.getElementById('control-panel');
+    panel.innerHTML = '';
+    currentParams = {};
+    devices[key].sliders.forEach(s => {
+        currentParams[s.id] = s.val;
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <div class="flex justify-between mb-1">
+                <span class="text-xs text-zinc-400 font-mono">${s.label}</span>
+                <span class="text-xs text-cyan-400 font-mono" id="val-${s.id}">${s.val.toFixed(2)} ${s.unit}</span>
+            </div>
+            <input type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.val}" id="slider-${s.id}" class="w-full">
+        `;
+        panel.appendChild(div);
+        
+        document.getElementById(`slider-${s.id}`).oninput = (e) => {
+            currentParams[s.id] = parseFloat(e.target.value);
+            document.getElementById(`val-${s.id}`).innerText = currentParams[s.id].toFixed(2) + " " + s.unit;
+            updateStateInfo();
+        };
+    });
+
+    updateStateInfo();
+    cancelAnimationFrame(animationId);
+    animate();
+}
+
+function updateStateInfo() {
+    const dev = devices[currentDevice];
+    const result = dev.logic(currentParams);
+    currentState = result.state;
+
+    // 更新状态按钮高亮
+    document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.getElementById(`state-${currentState}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    // 更新右侧面板
+    document.getElementById('info-state-name').innerText = `${currentState} Region`;
+    document.getElementById('info-state-desc').innerText = result.desc;
+    document.getElementById('info-formula').innerText = result.formula;
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    devices[currentDevice].draw();
+    
+    particles = particles.filter(p => p.x > -20 && p.x < canvas.width + 20 && p.y > -20 && p.y < canvas.height + 20 && p.life > 0);
+    particles.forEach(p => { p.update(); p.draw(); });
+    
+    animationId = requestAnimationFrame(animate);
+}
+
+// 通用绘图函数
+function drawRegion(x, y, w, h, color, label) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
+    if(label) {
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.font = 'bold 12px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, x + w/2, y + h/2 + 4);
+    }
+}
+
+function drawTerminal(x, y, label, side='top') {
+    ctx.strokeStyle = '#d4d4d8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    if(side === 'top') {
+        ctx.moveTo(x, y); ctx.lineTo(x, y-20);
+        ctx.rect(x-25, y-38, 50, 18);
+        ctx.fillStyle = '#27272a'; ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px JetBrains Mono'; ctx.textAlign='center';
+        ctx.fillText(label, x, y-25);
+    } else {
+        ctx.moveTo(x, y); ctx.lineTo(x, y+20);
+        ctx.rect(x-25, y+20, 50, 18);
+        ctx.fillStyle = '#27272a'; ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px JetBrains Mono'; ctx.textAlign='center';
+        ctx.fillText(label, x, y+33);
+    }
+    ctx.stroke();
+}
+
+// ==========================================
+// 器件绘制逻辑 (严格横向流动)
+// ==========================================
+
+function drawBJT() {
+    const isNPN = currentDevice === 'NPN_BJT';
+    const termE = isNPN ? 'N (E)' : 'P (E)';
+    const termB = 'P (B)' === 'P (B)' ? (isNPN ? 'P (B)' : 'N (B)') : '';
+    const termC = isNPN ? 'N (C)' : 'P (C)';
+    
+    const colE = isNPN ? 'rgba(34, 211, 238, 0.2)' : 'rgba(236, 72, 153, 0.2)';
+    const colB = isNPN ? 'rgba(236, 72, 153, 0.2)' : 'rgba(34, 211, 238, 0.2)';
+    const colC = isNPN ? 'rgba(34, 211, 238, 0.2)' : 'rgba(236, 72, 153, 0.2)';
+
+    const Wb_scaled = currentParams.W_base * 30; // 基区宽度视觉映射
+    const E_x = 150;
+    const B_x = E_x + 100;
+    const C_x = B_x + Wb_scaled;
+
+    drawRegion(E_x, 100, 100, 200, colE, isNPN ? 'N (E)' : 'P (E)');
+    drawRegion(B_x, 100, Wb_scaled, 200, colB, isNPN ? 'P (B)' : 'N (B)');
+    drawRegion(C_x, 100, 100, 200, colC, isNPN ? 'N (C)' : 'P (C)');
+    
+    drawTerminal(E_x + 50, 100, isNPN ? 'Emitter' : 'Emitter', 'top');
+    drawTerminal(B_x + Wb_scaled/2, 100, 'Base', 'top');
+    drawTerminal(C_x + 50, 100, 'Collector', 'top');
+
+    const carrierType = isNPN ? 'e' : 'h';
+    const Vbe = isNPN ? currentParams.Vbe : currentParams.Veb;
+    const Vce = isNPN ? currentParams.Vce : currentParams.Vec;
+    
+    // 发射极向基极注入
+    if (Vbe > 0.6 && Math.random() < Vbe * 0.5) {
+        particles.push(new Particle(E_x + 100, 150 + Math.random() * 100, carrierType, 1 + Vbe, 0));
+    }
+    // 穿越基区到达集电极
+    if (currentState === 'Active' || currentState === 'Saturation') {
+        if (Math.random() < 0.4) {
+            particles.push(new Particle(B_x, 150 + Math.random() * 100, carrierType, 2 + Vce*0.5, 0));
+        }
+    }
+}
+
+function drawMOSFET() {
+    const isNMOS = currentDevice === 'NMOS';
+    const subType = isNMOS ? 'P-Substrate' : 'N-Substrate';
+    const sdType = isNMOS ? 'N+ S' : 'P+ S';
+    const carrierType = isNMOS ? 'e' : 'h';
+    
+    const colSub = isNMOS ? 'rgba(100, 100, 100, 0.3)' : 'rgba(100, 100, 100, 0.3)';
+    const colSD = isNMOS ? 'rgba(34, 211, 238, 0.4)' : 'rgba(236, 72, 153, 0.4)';
+    
+    const L_scaled = currentParams.L * 30; // 沟道长度视觉映射
+    const S_x = 150;
+    const D_x = S_x + 100 + L_scaled;
+
+    drawRegion(S_x, 150, 100, 150, colSD, sdType);
+    drawRegion(D_x, 150, 100, 150, colSD, isNMOS ? 'N+ D' : 'P+ D');
+    drawRegion(S_x, 150, D_x - S_x + 100, 150, colSub, subType);
+    
+    // 氧化层和栅极
+    const oxX = S_x + 100;
+    const oxW = D_x - (S_x + 100);
+    drawRegion(oxX, 130, oxW, 20, 'rgba(245, 158, 11, 0.5)', '');
+    drawRegion(oxX, 90, oxW, 40, 'rgba(200, 200, 200, 0.2)', 'Poly Gate');
+    
+    drawTerminal(S_x + 50, 150, 'Source', 'top');
+    drawTerminal(D_x + 50, 150, 'Drain', 'top');
+    drawTerminal(oxX + oxW/2, 90, 'Gate', 'top');
+    drawTerminal(S_x + 50, 300, 'Body', 'bottom');
+
+    const Vgs = isNMOS ? currentParams.Vgs : currentParams.Vsg;
+    const Vds = isNMOS ? currentParams.Vds : currentParams.Vsd;
+    const Vth = 1.0;
+
+    if (Vgs > Vth) {
+        // 沟道形成
+        ctx.fillStyle = isNMOS ? 'rgba(34, 211, 238, 0.3)' : 'rgba(236, 72, 153, 0.3)';
+        ctx.fillRect(oxX, 145, oxW, 10);
+        
+        if (currentState === 'Linear' || currentState === 'Saturation') {
+            // 横向流动的载流子
+            if (Math.random() < Vgs * 0.4) {
+                particles.push(new Particle(S_x + 100, 150, carrierType, 1.5 + Vds * 0.8, 0));
+            }
+            
+            if (currentState === 'Saturation') {
+                // 夹断区可视化
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.3)';
+                ctx.fillRect(D_x - 15, 145, 15, 10);
+            }
+        }
+    }
+}
+
+function drawSCR() {
+    drawRegion(100, 100, 150, 200, 'rgba(34, 211, 238, 0.2)', 'P (Anode)');
+    drawRegion(250, 100, 150, 200, 'rgba(236, 72, 153, 0.2)', 'N');
+    drawRegion(400, 100, 150, 200, 'rgba(34, 211, 238, 0.2)', 'P (Gate)');
+    drawRegion(550, 100, 100, 200, 'rgba(236, 72, 153, 0.2)', 'N (Cathode)');
+
+    drawTerminal(175, 100, 'Anode', 'top');
+    drawTerminal(475, 100, 'Gate', 'top');
+    drawTerminal(600, 100, 'Cathode', 'top');
+
+    if (currentState === 'Conducting') {
+        // 横向流动的电子和空穴等离子体
+        for(let i=0; i<3; i++) {
+            if(Math.random() < 0.8) {
+                let y = 130 + Math.random() * 140;
+                particles.push(new Particle(100, y, 'e', 2, 0));
+                particles.push(new Particle(650, y, 'h', -2, 0));
+            }
+        }
+    } else if (currentState === 'Triggering') {
+        if (Math.random() < 0.3) {
+            particles.push(new Particle(475, 100, 'e', 0, 2)); // Gate current
+            particles.push(new Particle(100, 150, 'h', 1, 0));
+        }
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.fillRect(390, 100, 20, 200);
+    } else {
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.fillRect(390, 100, 20, 200);
+    }
+}
+
+function drawTRIAC() {
+    // 简化结构：两个反并联的SCR区块
+    ctx.strokeStyle = '#52525b'; ctx.lineWidth = 2;
+    drawRegion(150, 100, 200, 200, 'rgba(34, 211, 238, 0.15)', 'SCR 1');
+    drawRegion(350, 100, 200, 200, 'rgba(236, 72, 153, 0.15)', 'SCR 2');
+    ctx.strokeRect(150, 100, 200, 200);
+    ctx.strokeRect(350, 100, 200, 200);
+    
+    drawTerminal(150, 100, 'MT1', 'top');
+    drawTerminal(550, 100, 'MT2', 'top');
+    drawTerminal(350, 100, 'Gate', 'top');
+
+    if (currentState === 'Conducting') {
+        const dir = currentParams.Vmt > 0 ? 1 : -1;
+        if (Math.random() < 0.5) {
+            let y = 130 + Math.random() * 140;
+            if (dir > 0) {
+                particles.push(new Particle(150, y, 'e', 3, 0));
+            } else {
+                particles.push(new Particle(550, y, 'e', -3, 0));
+            }
+        }
+    }
+}
+
+function drawDiode() {
+    drawRegion(200, 100, 150, 200, 'rgba(236, 72, 153, 0.3)', 'P (Anode)');
+    drawRegion(350, 100, 150, 200, 'rgba(34, 211, 238, 0.3)', 'N (Cathode)');
+    
+    drawTerminal(275, 100, 'Anode', 'top');
+    drawTerminal(425, 100, 'Cathode', 'top');
+
+    // 耗尽层宽度
+    const Wd_scaled = currentParams.W_dep * 15;
+    const depX = 350 - Wd_scaled/2;
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(depX, 100, Wd_scaled, 200);
+
+    if (currentState === 'Forward') {
+        // 横向流动
+        if (Math.random() < currentParams.V * 0.8) {
+            let y = 130 + Math.random() * 140;
+            particles.push(new Particle(200, y, 'h', 2, 0)); // 空穴向右
+            particles.push(new Particle(500, y, 'e', -2, 0)); // 电子向左
+        }
+    } else {
+        // 少数载流子漂移
+        if (Math.random() < 0.05) {
+            let y = 130 + Math.random() * 140;
+            particles.push(new Particle(200, y, 'e', 1, 0));
+            particles.push(new Particle(500, y, 'h', -1, 0));
+        }
+    }
+}
+
+function drawPD() {
+    drawRegion(200, 100, 150, 200, 'rgba(236, 72, 153, 0.3)', 'P');
+    drawRegion(350, 100, 150, 200, 'rgba(34, 211, 238, 0.3)', 'N');
+    
+    drawTerminal(275, 100, 'Cathode', 'top');
+    drawTerminal(425, 100, 'Anode', 'top');
+
+    // 耗尽层
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(340, 100, 20, 200);
+
+    if (currentState === 'Illuminated') {
+        // 光子下落
+        if (Math.random() < currentParams.Light * 0.2) {
+            let x = 320 + Math.random() * 60;
+            particles.push(new Particle(x, 20, 'p', 0, 3));
+        }
+        // 产生电子-空穴对，并在耗尽层电场下横向分离
+        if (Math.random() < currentParams.Light * 0.3) {
+            let y = 130 + Math.random() * 140;
+            particles.push(new Particle(350, y, 'e', 2, 0)); // 电子向N区漂移
+            particles.push(new Particle(350, y, 'h', -2, 0)); // 空穴向P区漂移
+        }
+    }
+}
+
+function drawMOSCap() {
+    drawRegion(100, 150, 500, 150, 'rgba(100, 100, 100, 0.3)', 'P-Type Semiconductor');
+    drawRegion(100, 130, 500, 20, 'rgba(245, 158, 11, 0.5)', 'Oxide (SiO2)');
+    drawRegion(100, 90, 500, 40, 'rgba(200, 200, 200, 0.2)', 'Metal (Gate)');
+    
+    drawTerminal(350, 90, 'Gate', 'top');
+    drawTerminal(350, 300, 'Body', 'bottom');
+
+    if (currentState === 'Accumulation') {
+        if (Math.random() < 0.5) {
+            let x = 100 + Math.random() * 500;
+            particles.push(new Particle(x, 145, 'h', 0, -1)); // 空穴聚集到表面
+        }
+    } else if (currentState === 'Depletion') {
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.3)';
+        ctx.fillRect(100, 150, 500, 40);
+        // 固定负电荷
+        ctx.fillStyle = '#ef4444';
+        for(let x=110; x<600; x+=30) {
+            ctx.beginPath(); ctx.arc(x, 170, 3, 0, Math.PI*2); ctx.fill();
+        }
+    } else {
+        if (Math.random() < 0.5) {
+            let x = 100 + Math.random() * 500;
+            particles.push(new Particle(x, 145, 'e', 0, 1)); // 反型层电子
+        }
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.3)';
+        ctx.fillRect(100, 160, 500, 30);
+    }
+}
+
+function drawMOSRes() {
+    const L_scaled = currentParams.L * 30;
+    const S_x = 100;
+    const D_x = S_x + 100 + L_scaled;
+
+    drawRegion(S_x, 150, 100, 150, 'rgba(34, 211, 238, 0.4)', 'N+ T1');
+    drawRegion(D_x, 150, 100, 150, 'rgba(34, 211, 238, 0.4)', 'N+ T2');
+    drawRegion(S_x, 150, D_x - S_x + 100, 150, 'rgba(100, 100, 100, 0.3)', 'P-Substrate');
+    
+    const oxX = S_x + 100;
+    const oxW = D_x - (S_x + 100);
+    drawRegion(oxX, 130, oxW, 20, 'rgba(245, 158, 11, 0.5)', 'Oxide');
+    drawRegion(oxX, 90, oxW, 40, 'rgba(200, 200, 200, 0.2)', 'Gate (Vctrl)');
+    
+    drawTerminal(S_x + 50, 150, 'T1', 'top');
+    drawTerminal(D_x + 50, 150, 'T2', 'top');
+    drawTerminal(oxX + oxW/2, 90, 'Gate', 'top');
+
+    // 沟道
+    ctx.fillStyle = 'rgba(34, 211, 238, 0.4)';
+    ctx.fillRect(oxX, 145, oxW, 10);
+
+    if (Math.random() < 0.6) {
+        // 横向流动，速度受Vds控制
+        let speed = currentState === 'Linear' ? 1 + currentParams.Vds * 0.5 : 3;
+        particles.push(new Particle(S_x + 100, 150, 'e', speed, 0));
+    }
+    
+    if (currentState === 'Velocity_Sat') {
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.3)';
+        ctx.beginPath(); ctx.arc(D_x, 150, 20, 0, Math.PI*2); ctx.fill();
+    }
+}
+</script>
+</body>
+</html>

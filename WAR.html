@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>铁血战线 - 战争模拟</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;700;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c08;--bg2:#131710;--panel:#171c12;--border:#2a3220;
+  --text:#d4cfc0;--dim:#7a7665;--accent:#c8a832;--accent2:#a88a20;
+  --danger:#b83020;--danger2:#d44030;--success:#3a8a30;--success2:#50b040;
+  --info:#3a7ab0;--card:#1a1f14;--card2:#222a18;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC','Rajdhani',sans-serif;overflow:hidden;height:100vh;width:100vw;user-select:none;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* 开始界面 */
+#startScreen{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);}
+#startScreen canvas{position:absolute;inset:0;z-index:0;}
+.start-content{position:relative;z-index:1;text-align:center;}
+.start-content h1{font-family:'Rajdhani','Noto Sans SC',sans-serif;font-size:clamp(48px,8vw,96px);font-weight:700;color:var(--accent);letter-spacing:8px;line-height:1;text-shadow:0 0 40px rgba(200,168,50,0.3);}
+.start-content .subtitle{font-size:clamp(14px,2vw,20px);color:var(--dim);letter-spacing:12px;margin-top:8px;font-weight:300;}
+.start-content .divider{width:200px;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);margin:32px auto;}
+.start-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0c08;border:none;padding:16px 64px;font-size:20px;font-weight:700;font-family:inherit;letter-spacing:4px;cursor:pointer;transition:all .3s;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);}
+.start-btn:hover{transform:scale(1.05);box-shadow:0 0 30px rgba(200,168,50,0.4);}
+.start-hint{margin-top:24px;color:var(--dim);font-size:13px;letter-spacing:2px;}
+
+/* 主界面布局 */
+#gameUI{display:none;height:100vh;width:100vw;flex-direction:column;}
+#topBar{height:48px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:16px;flex-shrink:0;z-index:10;}
+.top-section{display:flex;align-items:center;gap:8px;}
+.top-label{color:var(--dim);font-size:11px;letter-spacing:1px;}
+.top-value{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:18px;color:var(--accent);}
+.top-value.danger{color:var(--danger2);}
+.top-value.success{color:var(--success2);}
+.top-divider{width:1px;height:28px;background:var(--border);}
+.level-badge{background:var(--card2);border:1px solid var(--accent2);padding:2px 10px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;color:var(--accent);}
+.exp-bar-wrap{width:120px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden;}
+.exp-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .5s;border-radius:3px;}
+.top-spacer{flex:1;}
+.top-btn{background:none;border:1px solid var(--border);color:var(--dim);padding:4px 12px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;}
+.top-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+#mainArea{flex:1;display:flex;overflow:hidden;position:relative;}
+#canvasWrap{flex:1;position:relative;background:#0d0f0a;}
+#gameCanvas{width:100%;height:100%;display:block;}
+#canvasOverlay{position:absolute;inset:0;pointer-events:none;}
+.canvas-hint{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(10,12,8,0.85);border:1px solid var(--border);padding:6px 16px;font-size:12px;color:var(--dim);letter-spacing:1px;}
+
+/* 侧边面板 */
+#sidePanel{width:300px;background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+.panel-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.panel-tab{flex:1;padding:10px 4px;text-align:center;font-size:12px;letter-spacing:1px;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+.panel-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(200,168,50,0.05);}
+.panel-tab:hover{color:var(--text);}
+.panel-content{flex:1;overflow-y:auto;padding:12px;}
+.panel-page{display:none;}
+.panel-page.active{display:block;}
+
+/* 兵种卡片 */
+.unit-card{background:var(--card);border:1px solid var(--border);padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;position:relative;}
+.unit-card:hover{border-color:var(--accent);background:var(--card2);}
+.unit-card.selected{border-color:var(--accent);box-shadow:0 0 12px rgba(200,168,50,0.15);}
+.unit-card.locked{opacity:0.4;pointer-events:none;}
+.unit-card .uc-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.unit-card .uc-icon{width:36px;height:36px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.unit-card .uc-name{font-weight:700;font-size:14px;}
+.unit-card .uc-cost{margin-left:auto;font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--accent);font-size:14px;}
+.unit-card .uc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:11px;color:var(--dim);}
+.unit-card .uc-stats span{color:var(--text);font-weight:600;}
+.unit-card .uc-lock{position:absolute;top:8px;right:8px;font-size:10px;color:var(--danger);background:rgba(184,48,32,0.15);padding:1px 6px;border-radius:2px;}
+
+/* 防御设施卡片 */
+.def-card{background:var(--card);border:1px solid var(--border);padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.def-card:hover{border-color:var(--accent);background:var(--card2);}
+.def-card.selected{border-color:var(--accent);box-shadow:0 0 12px rgba(200,168,50,0.15);}
+.def-card.locked{opacity:0.4;pointer-events:none;}
+.def-card .dc-top{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.def-card .dc-icon{width:36px;height:36px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.def-card .dc-name{font-weight:700;font-size:14px;}
+.def-card .dc-cost{margin-left:auto;font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--accent);font-size:14px;}
+.def-card .dc-desc{font-size:11px;color:var(--dim);margin-bottom:6px;line-height:1.5;}
+
+/* 装备卡片 */
+.equip-card{background:var(--card);border:1px solid var(--border);padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.equip-card:hover{border-color:var(--accent);background:var(--card2);}
+.equip-card.equipped{border-color:var(--success);box-shadow:0 0 12px rgba(58,138,48,0.15);}
+.equip-card .eq-top{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.equip-card .eq-icon{width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.equip-card .eq-name{font-weight:700;font-size:13px;}
+.equip-card .eq-lv{margin-left:auto;font-size:11px;color:var(--dim);}
+.equip-card .eq-bonus{font-size:11px;color:var(--success2);margin-bottom:4px;}
+.equip-card .eq-cost{font-size:12px;color:var(--accent);font-family:'Rajdhani',sans-serif;font-weight:600;}
+
+/* 晋级/升级面板 */
+.rank-card{background:var(--card);border:1px solid var(--border);padding:16px;margin-bottom:12px;}
+.rank-card h3{font-size:14px;color:var(--accent);margin-bottom:10px;letter-spacing:1px;}
+.rank-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.rank-info .ri{font-size:12px;color:var(--dim);}
+.rank-info .ri span{color:var(--text);font-weight:600;}
+.upgrade-btn{width:100%;padding:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0c08;border:none;font-family:inherit;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);}
+.upgrade-btn:hover{transform:scale(1.02);box-shadow:0 0 20px rgba(200,168,50,0.3);}
+.upgrade-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.unlock-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg2);border:1px solid var(--border);margin-bottom:6px;}
+.unlock-item .ui-name{flex:1;font-size:13px;font-weight:600;}
+.unlock-item .ui-cost{font-size:13px;color:var(--accent);font-family:'Rajdhani',sans-serif;font-weight:700;}
+.unlock-item .ui-btn{padding:4px 12px;font-size:11px;background:none;border:1px solid var(--accent2);color:var(--accent);cursor:pointer;font-family:inherit;transition:all .2s;}
+.unlock-item .ui-btn:hover{background:var(--accent);color:#0a0c08;}
+.unlock-item.unlocked{opacity:0.5;}
+.unlock-item.unlocked .ui-btn{display:none;}
+.unlock-item.unlocked::after{content:'已解锁';color:var(--success2);font-size:11px;}
+
+/* 底部操作栏 */
+#bottomBar{height:56px;background:var(--panel);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:12px;flex-shrink:0;z-index:10;}
+.wave-btn{padding:8px 32px;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .2s;border:none;}
+.wave-btn.start{background:linear-gradient(135deg,var(--success),var(--success2));color:#fff;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);}
+.wave-btn.start:hover{box-shadow:0 0 20px rgba(58,138,48,0.4);transform:scale(1.03);}
+.wave-btn.speed{background:none;border:1px solid var(--border);color:var(--dim);padding:8px 16px;}
+.wave-btn.speed:hover{border-color:var(--info);color:var(--info);}
+.wave-btn.speed.active{border-color:var(--info);color:var(--info);background:rgba(58,122,176,0.1);}
+
+/* 弹窗 */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.show{display:flex;}
+.modal-box{background:var(--panel);border:1px solid var(--accent2);padding:32px;max-width:440px;width:90%;text-align:center;animation:modalIn .3s ease-out;}
+@keyframes modalIn{from{transform:scale(0.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+.modal-box h2{font-family:'Rajdhani',sans-serif;font-size:28px;color:var(--accent);margin-bottom:8px;letter-spacing:2px;}
+.modal-box p{color:var(--dim);font-size:14px;margin-bottom:20px;line-height:1.6;}
+.modal-box .rewards{display:flex;justify-content:center;gap:24px;margin-bottom:20px;}
+.modal-box .reward-item{text-align:center;}
+.modal-box .reward-item .rv{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;color:var(--accent);}
+.modal-box .reward-item .rl{font-size:11px;color:var(--dim);}
+.modal-btn{padding:10px 40px;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0a0c08;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);transition:all .2s;}
+.modal-btn:hover{transform:scale(1.03);}
+.modal-btn.danger{background:linear-gradient(135deg,var(--danger),var(--danger2));color:#fff;}
+
+/* 提示消息 */
+.toast-container{position:fixed;top:60px;right:20px;z-index:600;display:flex;flex-direction:column;gap:8px;}
+.toast{padding:10px 20px;font-size:13px;animation:toastIn .3s ease-out,toastOut .3s ease-in 2.2s forwards;border-left:3px solid var(--accent);background:rgba(23,28,18,0.95);backdrop-filter:blur(8px);}
+.toast.error{border-left-color:var(--danger);}
+.toast.success{border-left-color:var(--success);}
+@keyframes toastIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+@keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateX(50px);}}
+
+/* 选中单位信息浮窗 */
+#unitInfoFloat{position:absolute;z-index:20;background:rgba(23,28,18,0.95);border:1px solid var(--accent2);padding:10px 14px;pointer-events:none;display:none;min-width:160px;backdrop-filter:blur(8px);}
+#unitInfoFloat .uif-name{font-weight:700;font-size:13px;margin-bottom:4px;}
+#unitInfoFloat .uif-hp{font-size:11px;color:var(--dim);margin-bottom:2px;}
+#unitInfoFloat .uif-hp-bar{width:100%;height:4px;background:var(--bg);border-radius:2px;overflow:hidden;margin-bottom:6px;}
+#unitInfoFloat .uif-hp-fill{height:100%;background:var(--success2);transition:width .2s;}
+#unitInfoFloat .uif-stats{font-size:11px;color:var(--dim);line-height:1.6;}
+#unitInfoFloat .uif-stats span{color:var(--text);font-weight:600;}
+#unitInfoFloat .uif-sell{margin-top:6px;font-size:11px;color:var(--accent);cursor:pointer;pointer-events:all;}
+#unitInfoFloat .uif-sell:hover{text-decoration:underline;}
+
+/* 响应式 */
+@media(max-width:900px){
+  #sidePanel{width:240px;}
+  .unit-card .uc-stats{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:700px){
+  #mainArea{flex-direction:column;}
+  #sidePanel{width:100%;height:200px;border-left:none;border-top:1px solid var(--border);}
+}
+</style>
+</head>
+<body>
+
+<!-- 开始界面 -->
+<div id="startScreen">
+  <canvas id="bgCanvas"></canvas>
+  <div class="start-content">
+    <h1>IRON FRONT</h1>
+    <div class="subtitle">铁 血 战 线</div>
+    <div class="divider"></div>
+    <button class="start-btn" onclick="startGame()">进入战场</button>
+    <div class="start-hint">部署兵种 / 建造防线 / 抵御入侵</div>
+  </div>
+</div>
+
+<!-- 游戏主界面 -->
+<div id="gameUI">
+  <!-- 顶部信息栏 -->
+  <div id="topBar">
+    <div class="top-section">
+      <div class="level-badge" id="levelBadge">Lv.1</div>
+      <div class="exp-bar-wrap"><div class="exp-bar-fill" id="expBar" style="width:0%"></div></div>
+    </div>
+    <div class="top-divider"></div>
+    <div class="top-section"><span class="top-label">军费</span><span class="top-value" id="goldVal">500</span></div>
+    <div class="top-divider"></div>
+    <div class="top-section"><span class="top-label">波次</span><span class="top-value" id="waveVal">0/10</span></div>
+    <div class="top-divider"></div>
+    <div class="top-section"><span class="top-label">基地</span><span class="top-value success" id="baseHpVal">100</span></div>
+    <div class="top-divider"></div>
+    <div class="top-section"><span class="top-label">击杀</span><span class="top-value" id="killVal">0</span></div>
+    <div class="top-spacer"></div>
+    <button class="top-btn" onclick="showHelp()"><i class="fas fa-question-circle"></i> 帮助</button>
+  </div>
+
+  <!-- 主区域 -->
+  <div id="mainArea">
+    <!-- 战场画布 -->
+    <div id="canvasWrap">
+      <canvas id="gameCanvas"></canvas>
+      <div id="canvasOverlay">
+        <div class="canvas-hint" id="canvasHint">选择兵种或设施后点击战场部署</div>
+        <div id="unitInfoFloat">
+          <div class="uif-name"></div>
+          <div class="uif-hp"></div>
+          <div class="uif-hp-bar"><div class="uif-hp-fill"></div></div>
+          <div class="uif-stats"></div>
+          <div class="uif-sell" onclick="sellSelected()">点击出售 (返还50%)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 侧边面板 -->
+    <div id="sidePanel">
+      <div class="panel-tabs">
+        <div class="panel-tab active" data-tab="units"><i class="fas fa-chess-knight"></i> 兵种</div>
+        <div class="panel-tab" data-tab="defense"><i class="fas fa-shield-halved"></i> 防御</div>
+        <div class="panel-tab" data-tab="equip"><i class="fas fa-gem"></i> 装备</div>
+        <div class="panel-tab" data-tab="rank"><i class="fas fa-star"></i> 晋级</div>
+      </div>
+      <div class="panel-content">
+        <div class="panel-page active" id="page-units"></div>
+        <div class="panel-page" id="page-defense"></div>
+        <div class="panel-page" id="page-equip"></div>
+        <div class="panel-page" id="page-rank"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部操作栏 -->
+  <div id="bottomBar">
+    <button class="wave-btn start" id="waveBtn" onclick="startWave()">发动进攻</button>
+    <button class="wave-btn speed" id="speedBtn" onclick="toggleSpeed()">1x</button>
+    <button class="wave-btn speed" onclick="resetGame()">重置</button>
+  </div>
+</div>
+
+<!-- 波次结算弹窗 -->
+<div class="modal-overlay" id="waveModal">
+  <div class="modal-box">
+    <h2 id="wmTitle">波次完成</h2>
+    <p id="wmDesc">成功抵御了敌军进攻</p>
+    <div class="rewards" id="wmRewards"></div>
+    <button class="modal-btn" id="wmBtn" onclick="closeWaveModal()">继续</button>
+  </div>
+</div>
+
+<!-- 游戏结束弹窗 -->
+<div class="modal-overlay" id="gameOverModal">
+  <div class="modal-box">
+    <h2 id="goTitle" style="color:var(--danger2)">基地沦陷</h2>
+    <p id="goDesc">你的基地被敌军摧毁了</p>
+    <div class="rewards" id="goStats"></div>
+    <button class="modal-btn danger" onclick="resetGame()">重新开始</button>
+  </div>
+</div>
+
+<!-- 帮助弹窗 -->
+<div class="modal-overlay" id="helpModal" onclick="this.classList.remove('show')">
+  <div class="modal-box" style="text-align:left;max-width:520px;" onclick="event.stopPropagation()">
+    <h2 style="text-align:center;margin-bottom:16px;">作战指南</h2>
+    <div style="font-size:13px;color:var(--dim);line-height:2;">
+      <p><span style="color:var(--accent);font-weight:700;">基本操作：</span>在右侧面板选择兵种或防御设施，然后点击战场空地部署。</p>
+      <p><span style="color:var(--accent);font-weight:700;">战斗机制：</span>敌军从右侧沿路径入侵，你的单位自动攻击射程内的敌人。</p>
+      <p><span style="color:var(--accent);font-weight:700;">兵种特性：</span>步兵近战肉盾、弓手远程输出、骑兵高伤突进、法师群体控制。</p>
+      <p><span style="color:var(--accent);font-weight:700;">防御设施：</span>箭塔远程打击、城墙阻挡敌人、炮塔范围伤害、陷阱减速敌人。</p>
+      <p><span style="color:var(--accent);font-weight:700;">装备系统：</span>购买装备全局增强所有单位属性，可升级强化。</p>
+      <p><span style="color:var(--accent);font-weight:700;">晋级系统：</span>积累经验升级，解锁更强大的兵种和设施。晋级需要消耗军费。</p>
+      <p><span style="color:var(--accent);font-weight:700;">经济来源：</span>每波结束获得奖励，击杀敌人获得额外军费。</p>
+      <p><span style="color:var(--danger);font-weight:700;">注意：</span>不要让敌人到达左侧基地！基地生命归零则游戏结束。</p>
+    </div>
+    <div style="text-align:center;margin-top:16px;">
+      <button class="modal-btn" onclick="document.getElementById('helpModal').classList.remove('show')">了解</button>
+    </div>
+  </div>
+</div>
+
+<!-- 提示消息容器 -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ============ 游戏配置 ============
+const TILE = 50;
+const COLS = 16, ROWS = 10;
+const CW = COLS * TILE, CH = ROWS * TILE;
+
+// 路径节点（列，行）
+const PATH_NODES = [[15,2],[12,2],[12,4],[8,4],[8,2],[4,2],[4,6],[8,6],[8,8],[4,8],[4,9],[0,9]];
+// 计算路径格子
+function computePathCells(){
+  const cells = [];
+  for(let i=0;i<PATH_NODES.length-1;i++){
+    let [c1,r1]=PATH_NODES[i],[c2,r2]=PATH_NODES[i+1];
+    if(c1===c2){
+      let mn=Math.min(r1,r2),mx=Math.max(r1,r2);
+      for(let r=mn;r<=mx;r++) cells.push([c1,r]);
+    } else {
+      let mn=Math.min(c1,c2),mx=Math.max(c1,c2);
+      for(let c=mn;c<=mx;c++) cells.push([c,r1]);
+    }
+  }
+  return cells;
+}
+const PATH_CELLS = computePathCells();
+const PATH_SET = new Set(PATH_CELLS.map(([c,r])=>`${c},${r}`));
+
+// 路径中心点序列（用于敌人移动）
+function computePathPoints(){
+  return PATH_NODES.map(([c,r])=>({x:c*TILE+TILE/2, y:r*TILE+TILE/2}));
+}
+const PATH_POINTS = computePathPoints();
+
+// ============ 数据定义 ============
+const UNIT_TYPES = {
+  infantry: {name:'步兵',icon:'fa-person-rifle',color:'#4a8c3f',hp:120,atk:15,range:1.2,speed:0,cost:50,desc:'近战肉盾',unlockLv:1},
+  archer:   {name:'弓手',icon:'fa-bullseye',color:'#3a7ab0',hp:60,atk:25,range:4,speed:0,cost:80,desc:'远程输出',unlockLv:1},
+  cavalry:  {name:'骑兵',icon:'fa-horse',color:'#b07830',hp:100,atk:35,range:1.5,speed:0,cost:120,desc:'高伤突进',unlockLv:2},
+  mage:     {name:'法师',icon:'fa-hat-wizard',color:'#7a3ab0',hp:50,atk:20,range:3.5,speed:0,cost:150,desc:'群体控制',splash:1.5,unlockLv:3},
+  shield:   {name:'盾卫',icon:'fa-shield',color:'#5a8a5a',hp:250,atk:10,range:1.2,speed:0,cost:100,desc:'重甲坦克',unlockLv:4},
+  sniper:   {name:'狙击手',icon:'fa-crosshairs',color:'#b04040',hp:40,atk:60,range:7,speed:0,cost:200,desc:'超远狙击',unlockLv:5},
+};
+
+const DEF_TYPES = {
+  arrow_tower: {name:'箭塔',icon:'fa-tower-observation',color:'#5a7a5a',hp:200,atk:20,range:4.5,speed:0,cost:100,desc:'远程箭矢攻击',unlockLv:1},
+  wall:       {name:'城墙',icon:'fa-border-all',color:'#6a6a5a',hp:600,atk:0,range:0,speed:0,cost:60,desc:'阻挡敌人前进',unlockLv:1,blocker:true},
+  cannon:     {name:'炮塔',icon:'fa-bomb',color:'#8a5a3a',hp:150,atk:40,range:3.5,speed:0,cost:180,desc:'范围爆炸伤害',splash:1.8,unlockLv:3},
+  trap:       {name:'陷阱',icon:'fa-land-mine-on',color:'#5a5a6a',hp:30,atk:0,range:0,speed:0,cost:40,desc:'减速经过的敌人',unlockLv:2,slow:0.5},
+};
+
+const EQUIP_TYPES = {
+  sword:  {name:'精钢之刃',icon:'fa-sword',color:'#aaa',bonus:'atk',value:5,cost:100,desc:'攻击力+5',maxLv:5},
+  armor:  {name:'合金护甲',icon:'fa-vest-patches',color:'#5a8a8a',bonus:'hp',value:30,cost:120,desc:'生命值+30',maxLv:5},
+  boots:  {name:'疾风之靴',icon:'fa-shoe-prints',color:'#8a8a3a',bonus:'range',value:0.3,cost:80,desc:'射程+0.3',maxLv:5},
+  medal:  {name:'荣誉勋章',icon:'fa-medal',color:'#b08a30',bonus:'atk',value:8,cost:200,desc:'攻击力+8',maxLv:3},
+  flag:   {name:'战旗',icon:'fa-flag',color:'#b04040',bonus:'hp',value:50,cost:250,desc:'生命值+50',maxLv:3},
+};
+
+// 晋级配置
+const RANK_CONFIG = [
+  {lv:1,name:'列兵',expReq:0,bonusText:'无'},
+  {lv:2,name:'下士',expReq:100,bonusText:'解锁骑兵、陷阱'},
+  {lv:3,name:'中士',expReq:300,bonusText:'解锁法师、炮塔'},
+  {lv:4,name:'上士',expReq:600,bonusText:'解锁盾卫'},
+  {lv:5,name:'少尉',expReq:1000,bonusText:'解锁狙击手'},
+  {lv:6,name:'中尉',expReq:1500,bonusText:'全兵种攻击+15%'},
+  {lv:7,name:'上尉',expReq:2200,bonusText:'全兵种生命+20%'},
+  {lv:8,name:'少校',expReq:3000,bonusText:'全兵种射程+10%'},
+  {lv:9,name:'中校',expReq:4000,bonusText:'全兵种攻击+25%'},
+  {lv:10,name:'上校',expReq:5500,bonusText:'终极形态：全属性+30%'},
+];
+
+// 敌人类型
+const ENEMY_TYPES = {
+  grunt:  {name:'步兵',color:'#8a3030',hp:60,atk:5,speed:1.2,reward:10,size:10},
+  runner: {name:'侦察兵',color:'#8a6030',hp:35,atk:3,speed:2.2,reward:15,size:8},
+  heavy:  {name:'重装兵',color:'#5a2a5a',hp:200,atk:8,speed:0.7,reward:25,size:13},
+  scout:  {name:'摩托兵',color:'#8a7a30',hp:50,atk:4,speed:2.8,reward:20,size:9},
+  tank:   {name:'装甲车',color:'#4a4a4a',hp:500,atk:15,speed:0.5,reward:50,size:16},
+  boss:   {name:'指挥官',color:'#b02020',hp:1200,atk:25,speed:0.6,reward:150,size:18},
+};
+
+// 波次配置（10波一循环，之后难度递增）
+function getWaveEnemies(waveNum){
+  const cycle = ((waveNum-1) % 10) + 1;
+  const mult = 1 + Math.floor((waveNum-1)/10) * 0.5; // 每10波增强50%
+  const waves = {
+    1: [{type:'grunt',count:6,interval:60}],
+    2: [{type:'grunt',count:8,interval:50},{type:'runner',count:3,interval:40}],
+    3: [{type:'grunt',count:5,interval:50},{type:'heavy',count:2,interval:80}],
+    4: [{type:'runner',count:8,interval:35},{type:'grunt',count:5,interval:45}],
+    5: [{type:'heavy',count:4,interval:70},{type:'grunt',count:6,interval:40}],  // BOSS波
+    6: [{type:'scout',count:6,interval:30},{type:'runner',count:5,interval:35}],
+    7: [{type:'heavy',count:3,interval:60},{type:'scout',count:5,interval:35},{type:'grunt',count:5,interval:40}],
+    8: [{type:'runner',count:10,interval:25},{type:'scout',count:5,interval:30}],
+    9: [{type:'heavy',count:5,interval:55},{type:'scout',count:5,interval:30},{type:'runner',count:5,interval:30}],
+    10:[{type:'tank',count:2,interval:100},{type:'heavy',count:4,interval:50},{type:'boss',count:1,interval:120}],
+  };
+  const cfg = waves[cycle] || waves[10];
+  return cfg.map(g=>({...g, hpMult:mult}));
+}
+
+// ============ 游戏状态 ============
+let G = {};
+function initState(){
+  G = {
+    gold: 500,
+    level: 1,
+    exp: 0,
+    wave: 0,
+    baseHp: 100,
+    maxBaseHp: 100,
+    kills: 0,
+    totalKills: 0,
+    speed: 1,
+    state: 'prep', // prep, battle, over
+    units: [],     // 己方单位
+    enemies: [],   // 敌方单位
+    projectiles: [],
+    effects: [],
+    selectedType: null, // {kind:'unit'|'def', type:'infantry'}
+    placedUnits: new Map(), // "c,r" -> unit
+    selectedPlaced: null,  // 点击已放置单位
+    equipment: {},  // type -> level
+    waveEnemies: [],
+    spawnQueue: [],
+    spawnTimer: 0,
+    animFrame: 0,
+    mouseCol: -1,
+    mouseRow: -1,
+    pathCells: PATH_CELLS,
+    pathSet: PATH_SET,
+  };
+}
+
+// ============ 工具函数 ============
+function dist(a,b){return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,mn,mx){return Math.max(mn,Math.min(mx,v));}
+function rng(a,b){return a+Math.random()*(b-a);}
+function rngInt(a,b){return Math.floor(rng(a,b+1));}
+
+function getRankBonus(){
+  let atkM=1,hpM=1,rangeM=1;
+  if(G.level>=6) atkM+=0.15;
+  if(G.level>=7) hpM+=0.20;
+  if(G.level>=8) rangeM+=0.10;
+  if(G.level>=9) atkM+=0.25;
+  if(G.level>=10){atkM+=0.30;hpM+=0.30;rangeM+=0.30;}
+  return {atkM,hpM,rangeM};
+}
+
+function getEquipBonus(){
+  let atk=0,hp=0,range=0;
+  for(let [k,lv] of Object.entries(G.equipment)){
+    if(lv>0 && EQUIP_TYPES[k]){
+      const eq=EQUIP_TYPES[k];
+      if(eq.bonus==='atk') atk+=eq.value*lv;
+      if(eq.bonus==='hp') hp+=eq.value*lv;
+      if(eq.bonus==='range') range+=eq.value*lv;
+    }
+  }
+  return {atk,hp,range};
+}
+
+function applyBonuses(base, type){
+  const rb=getRankBonus(), eb=getEquipBonus();
+  let hp=base.hp*rb.hpM+eb.hp;
+  let atk=base.atk*rb.atkM+eb.atk;
+  let range=base.range*rb.rangeM+eb.range;
+  return {...base, hp:Math.round(hp), maxHp:Math.round(hp), atk:Math.round(atk), range:Math.round(range*10)/10};
+}
+
+function canAfford(cost){return G.gold>=cost;}
+function isUnlocked(typeKey){
+  const t = UNIT_TYPES[typeKey] || DEF_TYPES[typeKey];
+  return t && G.level >= t.unlockLv;
+}
+
+// ============ 提示系统 ============
+function showToast(msg, type=''){
+  const c=document.getElementById('toastContainer');
+  const d=document.createElement('div');
+  d.className='toast '+type;
+  d.textContent=msg;
+  c.appendChild(d);
+  setTimeout(()=>d.remove(),2600);
+}
+
+// ============ 开始界面动画 ============
+function initBgAnim(){
+  const cv=document.getElementById('bgCanvas');
+  const ctx=cv.getContext('2d');
+  let w,h,particles=[];
+  function resize(){w=cv.width=window.innerWidth;h=cv.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<80;i++){
+    particles.push({x:rng(0,w),y:rng(0,h),vx:rng(-0.3,0.3),vy:rng(-0.5,-0.1),size:rng(1,3),alpha:rng(0.2,0.6)});
+  }
+  function draw(){
+    ctx.fillStyle='rgba(10,12,8,0.15)';
+    ctx.fillRect(0,0,w,h);
+    particles.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.y<-10){p.y=h+10;p.x=rng(0,w);}
+      if(p.x<-10)p.x=w+10;if(p.x>w+10)p.x=-10;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fillStyle=`rgba(200,168,50,${p.alpha})`;
+      ctx.fill();
+    });
+    // 底部雾气
+    const grd=ctx.createLinearGradient(0,h-120,0,h);
+    grd.addColorStop(0,'rgba(10,12,8,0)');
+    grd.addColorStop(1,'rgba(30,40,20,0.3)');
+    ctx.fillStyle=grd;
+    ctx.fillRect(0,h-120,w,120);
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ============ 画布初始化 ============
+let canvas, ctx;
+function initCanvas(){
+  canvas=document.getElementById('gameCanvas');
+  ctx=canvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize',resizeCanvas);
+}
+function resizeCanvas(){
+  const wrap=document.getElementById('canvasWrap');
+  canvas.width=CW;
+  canvas.height=CH;
+  canvas.style.width='100%';
+  canvas.style.height='100%';
+  canvas.style.objectFit='contain';
+  canvas.style.objectPosition='center center';
+}
+
+// ============ 鼠标/触摸处理 ============
+function getCanvasPos(e){
+  const rect=canvas.getBoundingClientRect();
+  const scaleX=CW/rect.width, scaleY=CH/rect.height;
+  let cx,cy;
+  if(e.touches){
+    cx=(e.touches[0].clientX-rect.left)*scaleX;
+    cy=(e.touches[0].clientY-rect.top)*scaleY;
+  } else {
+    cx=(e.clientX-rect.left)*scaleX;
+    cy=(e.clientY-rect.top)*scaleY;
+  }
+  return {x:cx,y:cy,col:Math.floor(cx/TILE),row:Math.floor(cy/TILE)};
+}
+
+canvas && canvas.addEventListener('mousemove', e=>{
+  const p=getCanvasPos(e);
+  G.mouseCol=p.col;G.mouseRow=p.row;
+  // 浮窗
+  const key=`${p.col},${p.row}`;
+  if(G.placedUnits.has(key) && !G.selectedType){
+    const u=G.placedUnits.get(key);
+    showUnitInfoFloat(u, e.clientX, e.clientY);
+  } else {
+    hideUnitInfoFloat();
+  }
+});
+
+function setupCanvasEvents(){
+  canvas.addEventListener('mousemove', e=>{
+    const p=getCanvasPos(e);
+    G.mouseCol=p.col;G.mouseRow=p.row;
+    const key=`${p.col},${p.row}`;
+    if(G.placedUnits.has(key) && !G.selectedType){
+      showUnitInfoFloat(G.placedUnits.get(key), e.clientX, e.clientY);
+    } else {
+      hideUnitInfoFloat();
+    }
+  });
+  canvas.addEventListener('mouseleave', ()=>{G.mouseCol=-1;G.mouseRow=-1;hideUnitInfoFloat();});
+  canvas.addEventListener('click', e=>{
+    const p=getCanvasPos(e);
+    handleCanvasClick(p.col, p.row);
+  });
+  canvas.addEventListener('touchstart', e=>{
+    e.preventDefault();
+    const p=getCanvasPos(e);
+    handleCanvasClick(p.col, p.row);
+  },{passive:false});
+}
+
+function showUnitInfoFloat(u, mx, my){
+  const f=document.getElementById('unitInfoFloat');
+  const wrap=document.getElementById('canvasWrap');
+  const wr=wrap.getBoundingClientRect();
+  f.style.display='block';
+  f.style.left=(mx-wr.left+16)+'px';
+  f.style.top=(my-wr.top-20)+'px';
+  f.querySelector('.uif-name').textContent=u.name+(u.isDef?' (设施)':'');
+  f.querySelector('.uif-hp').textContent=`生命: ${Math.round(u.hp)} / ${u.maxHp}`;
+  f.querySelector('.uif-hp-fill').style.width=(u.hp/u.maxHp*100)+'%';
+  f.querySelector('.uif-hp-fill').style.background=u.hp/u.maxHp>0.5?'var(--success2)':'var(--danger2)';
+  let st=`<span>攻击:</span> ${u.atk}　<span>射程:</span> ${u.range.toFixed(1)}`;
+  if(u.splash) st+=`　<span>溅射:</span> ${u.splash}`;
+  if(u.slow) st+=`　<span>减速:</span> ${Math.round(u.slow*100)}%`;
+  f.querySelector('.uif-stats').innerHTML=st;
+  G.selectedPlaced=u;
+}
+function hideUnitInfoFloat(){
+  document.getElementById('unitInfoFloat').style.display='none';
+  G.selectedPlaced=null;
+}
+
+function sellSelected(){
+  if(!G.selectedPlaced)return;
+  const u=G.selectedPlaced;
+  const refund=Math.floor(u.baseCost*0.5);
+  G.gold+=refund;
+  const key=`${u.col},${u.row}`;
+  G.placedUnits.delete(key);
+  G.units=G.units.filter(x=>x!==u);
+  hideUnitInfoFloat();
+  showToast(`出售${u.name}，返还 ${refund} 军费`,'success');
+  updateUI();
+}
+
+function handleCanvasClick(col, row){
+  if(col<0||col>=COLS||row<0||row>=ROWS)return;
+  const key=`${col},${row}`;
+
+  // 有选中类型 -> 放置
+  if(G.selectedType){
+    if(G.pathSet.has(key)){
+      showToast('不能在路径上部署','error');return;
+    }
+    if(G.placedUnits.has(key)){
+      showToast('该位置已有单位','error');return;
+    }
+    const {kind, type} = G.selectedType;
+    const base = kind==='unit' ? UNIT_TYPES[type] : DEF_TYPES[type];
+    if(!base)return;
+    if(!canAfford(base.cost)){
+      showToast('军费不足','error');return;
+    }
+    const stats = applyBonuses(base, type);
+    const unit = {
+      ...stats,
+      type, name:base.name, icon:base.icon, color:base.color,
+      col, row,
+      x: col*TILE+TILE/2,
+      y: row*TILE+TILE/2,
+      hp: stats.maxHp,
+      cooldown: 0,
+      baseCost: base.cost,
+      isDef: kind==='def',
+      splash: base.splash||0,
+      slow: base.slow||0,
+      blocker: base.blocker||false,
+      animPhase: Math.random()*Math.PI*2,
+    };
+    G.units.push(unit);
+    G.placedUnits.set(key, unit);
+    G.gold -= base.cost;
+    showToast(`部署 ${base.name} 成功`,'success');
+    updateUI();
+    return;
+  }
+
+  // 没有选中类型 -> 选中/取消已放置单位
+  // (已在 mousemove 中处理浮窗显示)
+}
+
+// ============ 游戏逻辑 ============
+function startWave(){
+  if(G.state==='battle'){showToast('战斗进行中','error');return;}
+  G.wave++;
+  G.state='battle';
+  G.kills=0;
+  const cfg = getWaveEnemies(G.wave);
+  G.spawnQueue=[];
+  cfg.forEach(group=>{
+    for(let i=0;i<group.count;i++){
+      G.spawnQueue.push({type:group.type, delay:group.interval, hpMult:group.hpMult});
+    }
+  });
+  G.spawnTimer=0;
+  document.getElementById('waveBtn').textContent='战斗中...';
+  document.getElementById('waveBtn').disabled=true;
+  document.getElementById('canvasHint').textContent='战斗进行中，注意防线';
+  updateUI();
+}
+
+function spawnEnemy(info){
+  const base = ENEMY_TYPES[info.type];
+  const mult = info.hpMult || 1;
+  const e = {
+    ...base,
+    type: info.type,
+    hp: Math.round(base.hp * mult),
+    maxHp: Math.round(base.hp * mult),
+    x: PATH_POINTS[0].x,
+    y: PATH_POINTS[0].y,
+    pathIdx: 0,
+    pathProgress: 0,
+    speed: base.speed,
+    baseSpeed: base.speed,
+    slowTimer: 0,
+    animPhase: Math.random()*Math.PI*2,
+    dead: false,
+  };
+  G.enemies.push(e);
+}
+
+function updateEnemies(dt){
+  for(let i=G.enemies.length-1;i>=0;i--){
+    const e=G.enemies[i];
+    if(e.dead){G.enemies.splice(i,1);continue;}
+
+    // 减速处理
+    if(e.slowTimer>0){
+      e.slowTimer-=dt;
+      e.speed=e.baseSpeed*0.5;
+    } else {
+      e.speed=e.baseSpeed;
+    }
+
+    // 沿路径移动
+    if(e.pathIdx < PATH_POINTS.length-1){
+      const target=PATH_POINTS[e.pathIdx+1];
+      const dx=target.x-e.x, dy=target.y-e.y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      const moveSpd = e.speed * TILE * 0.02 * dt;
+      if(d <= moveSpd){
+        e.x=target.x;e.y=target.y;
+        e.pathIdx++;
+      } else {
+        e.x += dx/d*moveSpd;
+        e.y += dy/d*moveSpd;
+      }
+    }
+
+    // 到达终点
+    if(e.pathIdx >= PATH_POINTS.length-1){
+      G.baseHp -= e.atk;
+      e.dead=true;
+      G.enemies.splice(i,1);
+      addEffect(e.x,e.y,'hit','#ff3030');
+      if(G.baseHp<=0){
+        G.baseHp=0;
+        gameOver();
+      }
+      updateUI();
+    }
+  }
+}
+
+function updateUnits(dt){
+  for(const u of G.units){
+    if(u.hp<=0)continue;
+    u.animPhase+=dt*0.05;
+
+    // 攻击冷却
+    if(u.cooldown>0){u.cooldown-=dt;continue;}
+    if(u.atk<=0 || u.range<=0)continue;
+
+    // 找最近敌人
+    let target=null, minD=Infinity;
+    for(const e of G.enemies){
+      if(e.dead)continue;
+      const d=dist(u,e);
+      const rangePx=u.range*TILE;
+      if(d<=rangePx && d<minD){minD=d;target=e;}
+    }
+    if(!target)continue;
+
+    // 攻击
+    u.cooldown=30; // 约0.5秒冷却
+    if(u.splash>0){
+      // 溅射攻击 - 发射到目标位置
+      G.projectiles.push({
+        x:u.x, y:u.y-8, tx:target.x, ty:target.y,
+        speed:5, atk:u.atk, splash:u.splash*TILE, color:u.color,
+        type:'splash',
+      });
+    } else {
+      // 单体攻击
+      G.projectiles.push({
+        x:u.x, y:u.y-8, tx:target.x, ty:target.y,
+        speed:6, atk:u.atk, target, color:u.color,
+        type:'single',
+      });
+    }
+  }
+
+  // 清除死亡单位
+  for(let i=G.units.length-1;i>=0;i--){
+    if(G.units[i].hp<=0){
+      const u=G.units[i];
+      const key=`${u.col},${u.row}`;
+      G.placedUnits.delete(key);
+      addEffect(u.x,u.y,'death','#ffaa30');
+      G.units.splice(i,1);
+    }
+  }
+}
+
+function updateProjectiles(dt){
+  for(let i=G.projectiles.length-1;i>=0;i--){
+    const p=G.projectiles[i];
+    const dx=p.tx-p.x, dy=p.ty-p.y;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    const spd=p.speed*dt;
+
+    if(d<=spd+2){
+      // 命中
+      if(p.type==='splash'){
+        // 范围伤害
+        for(const e of G.enemies){
+          if(!e.dead && dist(e,{x:p.tx,y:p.ty})<=p.splash){
+            damageEnemy(e, p.atk);
+          }
+        }
+        addEffect(p.tx,p.ty,'explosion',p.color);
+      } else if(p.type==='single'){
+        if(p.target && !p.target.dead){
+          damageEnemy(p.target, p.atk);
+          addEffect(p.tx,p.ty,'hit',p.color);
+        }
+      }
+      G.projectiles.splice(i,1);
+    } else {
+      p.x+=dx/d*spd;
+      p.y+=dy/d*spd;
+    }
+  }
+}
+
+function damageEnemy(e, dmg){
+  e.hp-=dmg;
+  if(e.hp<=0 && !e.dead){
+    e.dead=true;
+    G.gold+=e.reward;
+    G.kills++;
+    G.totalKills++;
+    G.exp+=Math.ceil(e.reward*0.5);
+    addEffect(e.x,e.y,'kill','#ffcc00');
+    checkLevelUp();
+    updateUI();
+  }
+}
+
+function updateTraps(dt){
+  for(const u of G.units){
+    if(u.slow>0 && u.hp>0){
+      for(const e of G.enemies){
+        if(!e.dead && dist(u,e)<TILE*0.8){
+          e.slowTimer=60; // 减速持续约1秒
+        }
+      }
+    }
+    // 城墙阻挡 - 不做额外处理，因为敌人沿路径走不会撞墙
+    // 城墙主要是放在路径上... 等等，城墙不能放在路径上
+    // 城墙改为：敌人经过相邻格子时受到微量伤害（嘲讽/拉扯效果简化为增加攻击频率）
+  }
+}
+
+function updateEffects(dt){
+  for(let i=G.effects.length-1;i>=0;i--){
+    const e=G.effects[i];
+    e.life-=dt;
+    if(e.life<=0) G.effects.splice(i,1);
+  }
+}
+
+function addEffect(x,y,type,color){
+  const particles=[];
+  const count = type==='explosion'?20 : type==='kill'?12 : type==='death'?15 : 6;
+  for(let i=0;i<count;i++){
+    const angle=rng(0,Math.PI*2);
+    const speed=rng(0.5, type==='explosion'?3:2);
+    particles.push({
+      x,y,
+      vx:Math.cos(angle)*speed,
+      vy:Math.sin(angle)*speed,
+      size:rng(1,type==='explosion'?4:3),
+      alpha:1,
+    });
+  }
+  G.effects.push({x,y,type,color,particles,life:type==='death'?40:25,maxLife:type==='death'?40:25});
+}
+
+function checkWaveEnd(){
+  if(G.state!=='battle')return;
+  if(G.spawnQueue.length>0)return;
+  if(G.enemies.length>0)return;
+  // 波次结束
+  G.state='prep';
+  const reward = 80 + G.wave * 20 + G.kills * 5;
+  const expReward = 30 + G.wave * 10;
+  G.gold += reward;
+  G.exp += expReward;
+  checkLevelUp();
+
+  // 检查是否每5波恢复基地
+  if(G.wave % 5 === 0){
+    const heal = 20;
+    G.baseHp = Math.min(G.maxBaseHp, G.baseHp + heal);
+  }
+
+  // 显示结算弹窗
+  showWaveModal(reward, expReward, G.kills);
+  document.getElementById('waveBtn').textContent='发动进攻';
+  document.getElementById('waveBtn').disabled=false;
+  document.getElementById('canvasHint').textContent='选择兵种或设施后点击战场部署';
+  updateUI();
+}
+
+function checkLevelUp(){
+  const cfg = RANK_CONFIG;
+  for(let i=cfg.length-1;i>=0;i--){
+    if(G.exp >= cfg[i].expReq && G.level < cfg[i].lv){
+      G.level = cfg[i].lv;
+      showToast(`晋级为 ${cfg[i].name}！${cfg[i].bonusText}`,'success');
+      break;
+    }
+  }
+  // 超过最高级的经验继续累积但不升级
+}
+
+function gameOver(){
+  G.state='over';
+  const modal=document.getElementById('gameOverModal');
+  document.getElementById('goStats').innerHTML=`
+    <div class="reward-item"><div class="rv">${G.wave}</div><div class="rl">抵达波次</div></div>
+    <div class="reward-item"><div class="rv">${G.totalKills}</div><div class="rl">总击杀数</div></div>
+    <div class="reward-item"><div class="rv">${G.level}</div><div class="rl">最终军衔</div></div>
+  `;
+  modal.classList.add('show');
+}
+
+function showWaveModal(gold, exp, kills){
+  const modal=document.getElementById('waveModal');
+  const isBoss = G.wave%5===0;
+  document.getElementById('wmTitle').textContent=isBoss?'BOSS波次完成':'波次完成';
+  document.getElementById('wmDesc').textContent=`成功抵御第 ${G.wave} 波敌军进攻${isBoss?'，获得额外补给':''}`;
+  let rewardHtml=`
+    <div class="reward-item"><div class="rv">+${gold}</div><div class="rl">军费</div></div>
+    <div class="reward-item"><div class="rv">+${exp}</div><div class="rl">经验</div></div>
+    <div class="reward-item"><div class="rv">${kills}</div><div class="rl">击杀</div></div>
+  `;
+  if(isBoss) rewardHtml+=`<div class="reward-item"><div class="rv" style="color:var(--success2)">+20</div><div class="rl">基地修复</div></div>`;
+  document.getElementById('wmRewards').innerHTML=rewardHtml;
+  modal.classList.add('show');
+}
+
+function closeWaveModal(){
+  document.getElementById('waveModal').classList.remove('show');
+}
+
+// ============ 渲染 ============
+function render(){
+  ctx.clearRect(0,0,CW,CH);
+  drawBackground();
+  drawPath();
+  drawPlacementPreview();
+  drawUnits();
+  drawEnemies();
+  drawProjectiles();
+  drawEffects();
+  drawBaseMarker();
+}
+
+function drawBackground(){
+  // 地面
+  ctx.fillStyle='#141a0e';
+  ctx.fillRect(0,0,CW,CH);
+  // 网格
+  ctx.strokeStyle='rgba(42,50,32,0.4)';
+  ctx.lineWidth=0.5;
+  for(let c=0;c<=COLS;c++){
+    ctx.beginPath();ctx.moveTo(c*TILE,0);ctx.lineTo(c*TILE,CH);ctx.stroke();
+  }
+  for(let r=0;r<=ROWS;r++){
+    ctx.beginPath();ctx.moveTo(0,r*TILE);ctx.lineTo(CW,r*TILE);ctx.stroke();
+  }
+  // 随机地面纹理点
+  ctx.fillStyle='rgba(30,40,20,0.5)';
+  for(let i=0;i<60;i++){
+    const x=(i*137.5)%CW, y=(i*251.3)%CH;
+    ctx.fillRect(x,y,2,2);
+  }
+}
+
+function drawPath(){
+  // 路径底色
+  ctx.fillStyle='#2a2418';
+  PATH_CELLS.forEach(([c,r])=>{
+    ctx.fillRect(c*TILE+1,r*TILE+1,TILE-2,TILE-2);
+  });
+  // 路径边线
+  ctx.strokeStyle='rgba(80,70,50,0.3)';
+  ctx.lineWidth=1;
+  PATH_CELLS.forEach(([c,r])=>{
+    ctx.strokeRect(c*TILE+1,r*TILE+1,TILE-2,TILE-2);
+  });
+  // 路径方向指示（小箭头）
+  ctx.fillStyle='rgba(120,100,60,0.15)';
+  for(let i=0;i<PATH_POINTS.length-1;i++){
+    const p=PATH_POINTS[i], q=PATH_POINTS[i+1];
+    const mx=(p.x+q.x)/2, my=(p.y+q.y)/2;
+    const angle=Math.atan2(q.y-p.y,q.x-p.x);
+    ctx.save();
+    ctx.translate(mx,my);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(8,0);ctx.lineTo(-4,-5);ctx.lineTo(-4,5);ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawPlacementPreview(){
+  if(!G.selectedType || G.mouseCol<0)return;
+  const c=G.mouseCol, r=G.mouseRow;
+  if(c<0||c>=COLS||r<0||r>=ROWS)return;
+  const key=`${c},${r}`;
+  const onPath=G.pathSet.has(key);
+  const occupied=G.placedUnits.has(key);
+  const valid=!onPath&&!occupied;
+
+  ctx.globalAlpha=0.4;
+  ctx.fillStyle=valid?'rgba(58,138,48,0.5)':'rgba(184,48,32,0.5)';
+  ctx.fillRect(c*TILE,r*TILE,TILE,TILE);
+
+  // 射程预览
+  if(valid){
+    const base = G.selectedType.kind==='unit'?UNIT_TYPES[G.selectedType.type]:DEF_TYPES[G.selectedType.type];
+    if(base && base.range>0){
+      const stats=applyBonuses(base,G.selectedType.type);
+      ctx.globalAlpha=0.1;
+      ctx.fillStyle='#c8a832';
+      ctx.beginPath();
+      ctx.arc(c*TILE+TILE/2, r*TILE+TILE/2, stats.range*TILE, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha=0.3;
+      ctx.strokeStyle='#c8a832';
+      ctx.lineWidth=1;
+      ctx.stroke();
+    }
+  }
+  ctx.globalAlpha=1;
+}
+
+function drawUnits(){
+  for(const u of G.units){
+    if(u.hp<=0)continue;
+    const x=u.x, y=u.y;
+    const bob=Math.sin(u.animPhase)*2;
+
+    // 底座
+    ctx.fillStyle='rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(x, y+TILE*0.35, TILE*0.35, TILE*0.12, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // 主体
+    if(u.isDef){
+      // 防御设施 - 方形底座
+      ctx.fillStyle=u.color;
+      ctx.fillRect(x-TILE*0.3, y-TILE*0.3+bob, TILE*0.6, TILE*0.6);
+      ctx.strokeStyle='rgba(255,255,255,0.2)';
+      ctx.lineWidth=1;
+      ctx.strokeRect(x-TILE*0.3, y-TILE*0.3+bob, TILE*0.6, TILE*0.6);
+      // 设施标识
+      ctx.fillStyle='rgba(255,255,255,0.6)';
+      ctx.font='bold 14px Rajdhani';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      const symbols={arrow_tower:'↑',wall:'=',cannon:'●',trap:'✦'};
+      ctx.fillText(symbols[u.type]||'?', x, y+bob);
+    } else {
+      // 兵种 - 圆形
+      ctx.fillStyle=u.color;
+      ctx.beginPath();
+      ctx.arc(x, y-TILE*0.05+bob, TILE*0.28, 0, Math.PI*2);
+      ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,0.2)';
+      ctx.lineWidth=1.5;
+      ctx.stroke();
+      // 兵种标识
+      ctx.fillStyle='rgba(255,255,255,0.7)';
+      ctx.font='bold 12px Rajdhani';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      const symbols={infantry:'I',archer:'A',cavalry:'C',mage:'M',shield:'S',sniper:'N'};
+      ctx.fillText(symbols[u.type]||'?', x, y-TILE*0.05+bob);
+    }
+
+    // 血条
+    if(u.hp<u.maxHp){
+      const bw=TILE*0.6, bh=3;
+      const bx=x-bw/2, by=y-TILE*0.4+bob;
+      ctx.fillStyle='rgba(0,0,0,0.5)';
+      ctx.fillRect(bx,by,bw,bh);
+      const hpRatio=clamp(u.hp/u.maxHp,0,1);
+      ctx.fillStyle=hpRatio>0.5?'#50b040':'#d44030';
+      ctx.fillRect(bx,by,bw*hpRatio,bh);
+    }
+  }
+}
+
+function drawEnemies(){
+  for(const e of G.enemies){
+    if(e.dead)continue;
+    const x=e.x, y=e.y;
+    const bob=Math.sin(e.animPhase+G.animFrame*0.05)*1.5;
+    e.animPhase+=0.02;
+
+    // 阴影
+    ctx.fillStyle='rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(x, y+e.size*0.6, e.size*0.7, e.size*0.25, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // 主体
+    ctx.fillStyle=e.color;
+    ctx.beginPath();
+    ctx.arc(x, y+bob, e.size, 0, Math.PI*2);
+    ctx.fill();
+
+    // 边框
+    ctx.strokeStyle='rgba(255,255,255,0.15)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+
+    // 减速效果
+    if(e.slowTimer>0){
+      ctx.strokeStyle='rgba(100,150,255,0.5)';
+      ctx.lineWidth=2;
+      ctx.beginPath();
+      ctx.arc(x, y+bob, e.size+3, 0, Math.PI*2);
+      ctx.stroke();
+    }
+
+    // 血条
+    const bw=e.size*2.2, bh=3;
+    const bx=x-bw/2, by=y-e.size-6+bob;
+    ctx.fillStyle='rgba(0,0,0,0.5)';
+    ctx.fillRect(bx,by,bw,bh);
+    const hpRatio=clamp(e.hp/e.maxHp,0,1);
+    ctx.fillStyle=hpRatio>0.5?'#d04030':'#ff6040';
+    ctx.fillRect(bx,by,bw*hpRatio,bh);
+
+    // BOSS标识
+    if(e.type==='boss'){
+      ctx.fillStyle='#ffcc00';
+      ctx.font='bold 10px Rajdhani';
+      ctx.textAlign='center';
+      ctx.fillText('BOSS', x, by-4);
+    }
+  }
+}
+
+function drawProjectiles(){
+  for(const p of G.projectiles){
+    ctx.fillStyle=p.color||'#ffcc00';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+    ctx.fill();
+    // 拖尾
+    ctx.fillStyle=`rgba(255,200,50,0.3)`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 5, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function drawEffects(){
+  for(const e of G.effects){
+    const t=1-e.life/e.maxLife;
+    for(const p of e.particles){
+      p.x+=p.vx;
+      p.y+=p.vy;
+      p.vy+=0.03; // 重力
+      p.alpha=clamp(1-t*1.5,0,1);
+      if(p.alpha<=0)continue;
+      ctx.globalAlpha=p.alpha;
+      ctx.fillStyle=e.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, Math.max(0.5,p.size*(1-t*0.5)), 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+}
+
+function drawBaseMarker(){
+  // 基地标记（路径终点附近）
+  const bx=PATH_POINTS[PATH_POINTS.length-1].x;
+  const by=PATH_POINTS[PATH_POINTS.length-1].y;
+  ctx.fillStyle='rgba(58,138,48,0.15)';
+  ctx.beginPath();
+  ctx.arc(bx, by, TILE*0.8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle='rgba(58,138,48,0.4)';
+  ctx.lineWidth=2;
+  ctx.setLineDash([4,4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(58,138,48,0.6)';
+  ctx.font='bold 10px Noto Sans SC';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('基地', bx, by);
+}
+
+// ============ UI 更新 ============
+function updateUI(){
+  document.getElementById('goldVal').textContent=G.gold;
+  document.getElementById('waveVal').textContent=`${G.wave}/${10+Math.floor(G.wave/10)*10}`;
+  document.getElementById('baseHpVal').textContent=Math.max(0,Math.round(G.baseHp));
+  document.getElementById('baseHpVal').className='top-value '+(G.baseHp>30?'success':'danger');
+  document.getElementById('killVal').textContent=G.totalKills;
+  document.getElementById('levelBadge').textContent=`Lv.${G.level} ${RANK_CONFIG[G.level-1]?.name||''}`;
+
+  // 经验条
+  const curExp=RANK_CONFIG[G.level-1]?.expReq||0;
+  const nextExp=RANK_CONFIG[G.level]?.expReq||curExp+1000;
+  const expRange=nextExp-curExp;
+  const expProgress=expRange>0?clamp((G.exp-curExp)/expRange*100,0,100):100;
+  document.getElementById('expBar').style.width=expProgress+'%';
+
+  // 更新面板
+  renderUnitsPanel();
+  renderDefensePanel();
+  renderEquipPanel();
+  renderRankPanel();
+}
+
+function renderUnitsPanel(){
+  const page=document.getElementById('page-units');
+  let html='';
+  for(const [key, base] of Object.entries(UNIT_TYPES)){
+    const unlocked=isUnlocked(key);
+    const stats=applyBonuses(base,key);
+    const selected=G.selectedType && G.selectedType.kind==='unit' && G.selectedType.type===key;
+    const affordable=canAfford(base.cost);
+    html+=`<div class="unit-card ${selected?'selected':''} ${unlocked?'':'locked'}" onclick="selectType('unit','${key}')">
+      ${unlocked?'':`<span class="uc-lock">Lv.${base.unlockLv}解锁</span>`}
+      <div class="uc-top">
+        <div class="uc-icon" style="background:${base.color}22;color:${base.color}"><i class="fas ${base.icon}"></i></div>
+        <div class="uc-name">${base.name}</div>
+        <div class="uc-cost" style="color:${affordable?'var(--accent)':'var(--danger)'}">${base.cost}</div>
+      </div>
+      <div class="uc-stats">
+        <div>生命 <span>${stats.maxHp}</span></div>
+        <div>攻击 <span>${stats.atk}</span></div>
+        <div>射程 <span>${stats.range}</span></div>
+      </div>
+      <div style="font-size:10px;color:var(--dim);margin-top:4px;">${base.desc}</div>
+    </div>`;
+  }
+  page.innerHTML=html;
+}
+
+function renderDefensePanel(){
+  const page=document.getElementById('page-defense');
+  let html='';
+  for(const [key, base] of Object.entries(DEF_TYPES)){
+    const unlocked=isUnlocked(key);
+    const selected=G.selectedType && G.selectedType.kind==='def' && G.selectedType.type===key;
+    const affordable=canAfford(base.cost);
+    html+=`<div class="def-card ${selected?'selected':''} ${unlocked?'':'locked'}" onclick="selectType('def','${key}')">
+      ${unlocked?'':`<span class="uc-lock">Lv.${base.unlockLv}解锁</span>`}
+      <div class="dc-top">
+        <div class="dc-icon" style="background:${base.color}22;color:${base.color}"><i class="fas ${base.icon}"></i></div>
+        <div class="dc-name">${base.name}</div>
+        <div class="dc-cost" style="color:${affordable?'var(--accent)':'var(--danger)'}">${base.cost}</div>
+      </div>
+      <div class="dc-desc">${base.desc}</div>
+      ${base.hp?`<div style="font-size:11px;color:var(--dim);">耐久: ${applyBonuses(base,key).maxHp}${base.atk?` | 攻击: ${applyBonuses(base,key).atk}`:''}${base.range?` | 射程: ${applyBonuses(base,key).range}`:''}</div>`:''}
+    </div>`;
+  }
+  page.innerHTML=html;
+}
+
+function renderEquipPanel(){
+  const page=document.getElementById('page-equip');
+  let html='';
+  for(const [key, eq] of Object.entries(EQUIP_TYPES)){
+    const lv=G.equipment[key]||0;
+    const isMax=lv>=eq.maxLv;
+    const upgCost=Math.floor(eq.cost*(1+lv*0.6));
+    const affordable=canAfford(upgCost);
+    const totalBonus=eq.value*lv;
+    const nextBonus=eq.value*(lv+1);
+    html+=`<div class="equip-card ${lv>0?'equipped':''}">
+      <div class="eq-top">
+        <div class="eq-icon" style="background:${eq.color}22;color:${eq.color}"><i class="fas ${eq.icon}"></i></div>
+        <div class="eq-name">${eq.name}</div>
+        <div class="eq-lv">${lv>0?`Lv.${lv}/${eq.maxLv}`:'未装备'}</div>
+      </div>
+      <div class="eq-bonus">${eq.desc}${lv>0?` (当前+${totalBonus})`:''}</div>
+      ${!isMax?`<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+        <span class="eq-cost">升级: ${upgCost} 军费${lv>0?` → +${nextBonus}`:''}</span>
+        <button class="ui-btn" style="padding:3px 10px;font-size:11px;background:none;border:1px solid ${affordable?'var(--accent2)':'var(--border)'};color:${affordable?'var(--accent)':'var(--dim)'};cursor:${affordable?'pointer':'not-allowed'};font-family:inherit;" 
+          onclick="upgradeEquip('${key}')" ${affordable?'':'disabled'}>${lv>0?'升级':'装备'}</button>
+      </div>`:`<div style="font-size:11px;color:var(--accent);margin-top:4px;">已满级</div>`}
+    </div>`;
+  }
+  page.innerHTML=html;
+}
+
+function renderRankPanel(){
+  const page=document.getElementById('page-rank');
+  const cur=RANK_CONFIG[G.level-1]||RANK_CONFIG[0];
+  const next=RANK_CONFIG[G.level];
+  const canRankUp=next && G.exp>=next.expReq && G.gold>=next.expReq*0.5;
+
+  let html=`<div class="rank-card">
+    <h3><i class="fas fa-medal" style="color:var(--accent);margin-right:6px;"></i>当前军衔: ${cur.name}</h3>
+    <div class="rank-info">
+      <div class="ri">等级 <span>Lv.${G.level}</span></div>
+      <div class="ri">经验 <span>${G.exp}</span></div>
+      <div class="ri">击杀 <span>${G.totalKills}</span></div>
+      <div class="ri">波次 <span>${G.wave}</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--success2);margin-bottom:8px;">当前加成: ${cur.bonusText}</div>
+  `;
+
+  if(next){
+    const rankCost=Math.floor(next.expReq*0.5);
+    html+=`<div style="font-size:12px;color:var(--dim);margin-bottom:8px;">下一军衔: <span style="color:var(--accent);font-weight:700;">${next.name}</span> (需要 ${next.expReq} 经验 + ${rankCost} 军费)</div>`;
+    html+=`<div style="font-size:12px;color:var(--dim);margin-bottom:12px;">加成: ${next.bonusText}</div>`;
+    html+=`<button class="upgrade-btn" onclick="rankUp()" ${canRankUp?'':'disabled'}>${canRankUp?'申请晋级':'条件不足'}</button>`;
+  } else {
+    html+=`<div style="font-size:13px;color:var(--accent);text-align:center;padding:8px;">已达最高军衔</div>`;
+  }
+  html+=`</div>`;
+
+  // 解锁列表
+  html+=`<div class="rank-card"><h3><i class="fas fa-lock-open" style="color:var(--accent);margin-right:6px;"></i>解锁进度</h3>`;
+  const allItems=[...Object.entries(UNIT_TYPES).map(([k,v])=>({key:k,...v,kind:'兵种'})),...Object.entries(DEF_TYPES).map(([k,v])=>({key:k,...v,kind:'设施'}))];
+  allItems.sort((a,b)=>a.unlockLv-b.unlockLv);
+  for(const item of allItems){
+    const unlocked=G.level>=item.unlockLv;
+    html+=`<div class="unlock-item ${unlocked?'unlocked':''}">
+      <span class="ui-name" style="color:${unlocked?'var(--dim)':'var(--text)'}">${item.kind} - ${item.name}</span>
+      <span class="ui-cost">Lv.${item.unlockLv}</span>
+    </div>`;
+  }
+  html+=`</div>`;
+
+  page.innerHTML=html;
+}
+
+// ============ 玩家操作 ============
+function selectType(kind, type){
+  if(!isUnlocked(type)){
+    showToast('尚未解锁该单位','error');return;
+  }
+  if(G.selectedType && G.selectedType.kind===kind && G.selectedType.type===type){
+    G.selectedType=null; // 取消选择
+  } else {
+    G.selectedType={kind, type};
+  }
+  updateUI();
+}
+
+function upgradeEquip(key){
+  const eq=EQUIP_TYPES[key];
+  if(!eq)return;
+  const lv=G.equipment[key]||0;
+  if(lv>=eq.maxLv){showToast('已达满级','error');return;}
+  const cost=Math.floor(eq.cost*(1+lv*0.6));
+  if(!canAfford(cost)){showToast('军费不足','error');return;}
+  G.gold-=cost;
+  G.equipment[key]=lv+1;
+  // 更新已放置单位的属性
+  refreshUnitStats();
+  showToast(`${eq.name} 升级到 Lv.${lv+1}`,'success');
+  updateUI();
+}
+
+function refreshUnitStats(){
+  for(const u of G.units){
+    const base = u.isDef ? DEF_TYPES[u.type] : UNIT_TYPES[u.type];
+    if(!base)continue;
+    const stats=applyBonuses(base,u.type);
+    const hpRatio=u.hp/u.maxHp;
+    u.maxHp=stats.maxHp;
+    u.hp=Math.round(stats.maxHp*hpRatio);
+    u.atk=stats.atk;
+    u.range=stats.range;
+  }
+}
+
+function rankUp(){
+  const next=RANK_CONFIG[G.level];
+  if(!next)return;
+  const cost=Math.floor(next.expReq*0.5);
+  if(G.exp<next.expReq||!canAfford(cost)){
+    showToast('条件不足','error');return;
+  }
+  G.exp-=next.expReq;
+  G.gold-=cost;
+  G.level=next.lv;
+  refreshUnitStats();
+  showToast(`恭喜晋级为 ${next.name}！`,'success');
+  // 晋级奖励
+  G.gold+=100;
+  showToast('获得晋级奖励: +100 军费','success');
+  updateUI();
+}
+
+function toggleSpeed(){
+  G.speed = G.speed===1?2:G.speed===2?3:1;
+  document.getElementById('speedBtn').textContent=G.speed+'x';
+  document.getElementById('speedBtn').classList.toggle('active',G.speed>1);
+}
+
+function showHelp(){
+  document.getElementById('helpModal').classList.add('show');
+}
+
+function resetGame(){
+  document.getElementById('gameOverModal').classList.remove('show');
+  document.getElementById('waveModal').classList.remove('show');
+  initState();
+  updateUI();
+  document.getElementById('waveBtn').textContent='发动进攻';
+  document.getElementById('waveBtn').disabled=false;
+  document.getElementById('speedBtn').textContent='1x';
+  document.getElementById('speedBtn').classList.remove('active');
+  document.getElementById('canvasHint').textContent='选择兵种或设施后点击战场部署';
+  G.selectedType=null;
+}
+
+// ============ 面板标签切换 ============
+function setupTabs(){
+  document.querySelectorAll('.panel-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.panel-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.panel-page').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('page-'+tab.dataset.tab).classList.add('active');
+    });
+  });
+}
+
+// ============ 主循环 ============
+let lastTime=0;
+function gameLoop(timestamp){
+  if(!lastTime)lastTime=timestamp;
+  let dt=Math.min((timestamp-lastTime)/16.67, 3); // 标准化到60fps
+  lastTime=timestamp;
+  G.animFrame++;
+
+  const sDt=dt*G.speed;
+
+  if(G.state==='battle'){
+    // 生成敌人
+    if(G.spawnQueue.length>0){
+      G.spawnTimer+=sDt;
+      while(G.spawnQueue.length>0 && G.spawnTimer>=G.spawnQueue[0].delay){
+        G.spawnTimer-=G.spawnQueue[0].delay;
+        spawnEnemy(G.spawnQueue.shift());
+      }
+    }
+    updateEnemies(sDt);
+    updateUnits(sDt);
+    updateProjectiles(sDt);
+    updateTraps(sDt);
+    checkWaveEnd();
+  }
+
+  updateEffects(sDt);
+  render();
+  requestAnimationFrame(gameLoop);
+}
+
+// ============ 启动 ============
+function startGame(){
+  document.getElementById('startScreen').style.display='none';
+  document.getElementById('gameUI').style.display='flex';
+  initState();
+  initCanvas();
+  setupCanvasEvents();
+  setupTabs();
+  updateUI();
+  requestAnimationFrame(gameLoop);
+}
+
+// 开始界面背景动画
+initBgAnim();
+</script>
+</body>
+</html>

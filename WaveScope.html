@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Oscilloscope</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-body: #0a0a0f;
+    --bg-display: #050510;
+    --border: #1e1e2e;
+    --accent: #00e05a;
+    --text-primary: #e0e8f0;
+    --text-secondary: #6a7080;
+    --text-measure: #00ffaa;
+    --btn-text: #a0a8b8;
+    --warning: #ffaa00;
+    --ch1-color: #00ff64;
+    --ch2-color: #ff6a00;
+    --fft-color: #00ccff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg-body);
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+    padding: 16px;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -30%; left: -10%;
+    width: 60%; height: 60%;
+    background: radial-gradient(ellipse, rgba(0,224,90,0.03) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .oscilloscope {
+    width: 1000px;
+    max-width: 98vw;
+    background: linear-gradient(165deg, #16161f 0%, #0e0e16 40%, #0a0a12 100%);
+    border-radius: 16px;
+    border: 1px solid #222236;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.8), 0 20px 60px rgba(0,0,0,0.6), 0 0 120px rgba(0,224,90,0.02), inset 0 1px 0 rgba(255,255,255,0.03);
+    overflow: hidden;
+  }
+  .brand-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 20px;
+    background: linear-gradient(90deg, #0c0c14, #111120, #0c0c14);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px; color: var(--text-secondary);
+    letter-spacing: 3px; text-transform: uppercase;
+  }
+  .brand-name span { color: var(--accent); }
+  .brand-model {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; color: #3a3a50; letter-spacing: 2px;
+  }
+  .measure-bar {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .status-badge {
+    display: flex; align-items: center; gap: 6px;
+    padding: 3px 12px; border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px; font-weight: 600; letter-spacing: 2px;
+    transition: all 0.3s;
+  }
+  .status-badge.run {
+    background: rgba(0,224,90,0.12); color: var(--accent);
+    border: 1px solid rgba(0,224,90,0.25);
+  }
+  .status-badge.run .dot {
+    background: var(--accent); box-shadow: 0 0 8px var(--accent);
+    animation: pd 1.2s ease-in-out infinite;
+  }
+  .status-badge.stop {
+    background: rgba(255,170,0,0.1); color: var(--warning);
+    border: 1px solid rgba(255,170,0,0.2);
+  }
+  .status-badge.stop .dot {
+    background: var(--warning); box-shadow: 0 0 6px var(--warning); animation: none;
+  }
+  @keyframes pd { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .measure-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+  .measure-item {
+    display: flex; align-items: center; gap: 5px;
+    padding: 3px 10px;
+    background: rgba(0,255,170,0.04);
+    border: 1px solid rgba(0,255,170,0.08);
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace; font-size: 12px;
+  }
+  .measure-label { color: var(--text-secondary); font-size: 10px; letter-spacing: 1px; }
+  .measure-value { color: var(--text-measure); font-size: 14px; font-weight: 500; min-width: 70px; text-align: right; }
+  .scale-display {
+    display: flex; align-items: center; gap: 8px;
+    margin-left: auto;
+    font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text-secondary);
+  }
+  .scale-tag {
+    padding: 2px 8px;
+    background: rgba(0,224,90,0.06);
+    border: 1px solid rgba(0,224,90,0.12);
+    border-radius: 3px; color: var(--accent); font-size: 12px; letter-spacing: .5px;
+  }
+  .mode-tag {
+    padding: 2px 8px;
+    background: rgba(0,204,255,0.08);
+    border: 1px solid rgba(0,204,255,0.18);
+    border-radius: 3px; color: var(--fft-color); font-size: 12px; letter-spacing: .5px;
+  }
+  .display-wrapper {
+    position: relative; margin: 8px 12px;
+    border-radius: 6px; overflow: hidden;
+    border: 1px solid #1a1a2a;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 0 1px rgba(0,224,90,0.1);
+  }
+  .display-wrapper::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg,rgba(0,224,90,0.01) 0%,transparent 3%,transparent 97%,rgba(0,224,90,0.01) 100%),
+                linear-gradient(90deg,rgba(0,224,90,0.01) 0%,transparent 3%,transparent 97%,rgba(0,224,90,0.01) 100%);
+    pointer-events: none; z-index: 2;
+  }
+  .display-wrapper::after {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
+    pointer-events: none; z-index: 3;
+  }
+  #scopeCanvas { display: block; width: 100%; background: var(--bg-display); }
+  .ch-labels {
+    position: absolute; top: 8px; left: 58px;
+    display: flex; flex-direction: column; gap: 4px;
+    z-index: 4; pointer-events: none;
+  }
+  .ch-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; padding: 1px 6px; border-radius: 2px;
+    letter-spacing: 1px; transition: opacity .3s;
+  }
+  .ch-label.ch1 { background: rgba(0,255,100,0.15); color: var(--ch1-color); border-left: 2px solid var(--ch1-color); }
+  .ch-label.ch2 { background: rgba(255,106,0,0.12); color: var(--ch2-color); border-left: 2px solid var(--ch2-color); }
+  .ch-label.hidden-ch { opacity: 0.15; }
+  .trigger-indicator {
+    position: absolute; right: 10px; top: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; color: #ffdd00;
+    background: rgba(255,221,0,0.08);
+    border: 1px solid rgba(255,221,0,0.15);
+    padding: 2px 6px; border-radius: 2px;
+    z-index: 4; pointer-events: none; letter-spacing: 1px;
+    transition: opacity .3s;
+  }
+  .controls-area {
+    background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.35));
+    border-top: 1px solid var(--border);
+    padding: 10px 16px 14px;
+  }
+  .channel-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 10px; padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .channel-row-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; color: #3a3a50;
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-right: 4px; user-select: none; flex-shrink: 0;
+  }
+  .ch-toggle-btn {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px; letter-spacing: 1.5px;
+    padding: 7px 16px; border-radius: 6px;
+    border: 1px solid; cursor: pointer;
+    transition: all .2s; user-select: none;
+    position: relative; overflow: hidden; min-width: 120px;
+  }
+  .ch-toggle-btn::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 1px; background: linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);
+  }
+  .ch-toggle-btn.ch1-btn {
+    background: linear-gradient(180deg, rgba(0,255,100,0.06), rgba(0,255,100,0.02));
+    border-color: rgba(0,255,100,0.15); color: var(--ch1-color);
+  }
+  .ch-toggle-btn.ch1-btn:hover {
+    background: linear-gradient(180deg, rgba(0,255,100,0.12), rgba(0,255,100,0.05));
+    border-color: rgba(0,255,100,0.3);
+  }
+  .ch-toggle-btn.ch1-btn.active {
+    background: linear-gradient(180deg, rgba(0,255,100,0.15), rgba(0,255,100,0.06));
+    border-color: rgba(0,255,100,0.45);
+    box-shadow: 0 0 16px rgba(0,255,100,0.08), inset 0 0 12px rgba(0,255,100,0.04);
+  }
+  .ch-toggle-btn.ch1-btn.off {
+    background: linear-gradient(180deg, #14141e, #101018);
+    border-color: #222236; color: #3a3a50;
+  }
+  .ch-toggle-btn.ch2-btn {
+    background: linear-gradient(180deg, rgba(255,106,0,0.06), rgba(255,106,0,0.02));
+    border-color: rgba(255,106,0,0.15); color: var(--ch2-color);
+  }
+  .ch-toggle-btn.ch2-btn:hover {
+    background: linear-gradient(180deg, rgba(255,106,0,0.12), rgba(255,106,0,0.05));
+    border-color: rgba(255,106,0,0.3);
+  }
+  .ch-toggle-btn.ch2-btn.active {
+    background: linear-gradient(180deg, rgba(255,106,0,0.15), rgba(255,106,0,0.06));
+    border-color: rgba(255,106,0,0.45);
+    box-shadow: 0 0 16px rgba(255,106,0,0.08), inset 0 0 12px rgba(255,106,0,0.04);
+  }
+  .ch-toggle-btn.ch2-btn.off {
+    background: linear-gradient(180deg, #14141e, #101018);
+    border-color: #222236; color: #3a3a50;
+  }
+  .ch-led { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; transition: all .25s; }
+  .ch1-btn .ch-led { background: var(--ch1-color); box-shadow: 0 0 6px var(--ch1-color); }
+  .ch2-btn .ch-led { background: var(--ch2-color); box-shadow: 0 0 6px var(--ch2-color); }
+  .ch-toggle-btn.off .ch-led { background: #2a2a3e !important; box-shadow: none !important; }
+  .ch-param-display { font-size: 10px; color: var(--text-secondary); margin-left: auto; letter-spacing: .5px; transition: color .2s; }
+  .ch-toggle-btn.off .ch-param-display { color: #2a2a3e; }
+  .func-row { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .btn-group { display: flex; gap: 6px; align-items: center; }
+  .btn-group-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; color: #3a3a50;
+    letter-spacing: 2px; text-transform: uppercase;
+    writing-mode: vertical-lr; transform: rotate(180deg);
+    margin-right: 4px; user-select: none;
+  }
+  .scope-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px; font-weight: 500; letter-spacing: 1.5px;
+    padding: 8px 18px; border: 1px solid #2a2a3e; border-radius: 6px;
+    background: linear-gradient(180deg, #1e1e30, #18182a);
+    color: var(--btn-text); cursor: pointer;
+    transition: all .15s; position: relative; overflow: hidden;
+    user-select: none; min-width: 56px; text-align: center;
+  }
+  .scope-btn::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 1px; background: linear-gradient(90deg,transparent,rgba(255,255,255,0.05),transparent);
+  }
+  .scope-btn:hover { background: linear-gradient(180deg,#282840,#202038); border-color: #3a3a55; color: var(--text-primary); }
+  .scope-btn:active { transform: translateY(1px); background: linear-gradient(180deg,#161626,#121220); box-shadow: inset 0 2px 6px rgba(0,0,0,0.4); }
+  .scope-btn.primary { background: linear-gradient(180deg,#0a3a1e,#063018); border-color: rgba(0,224,90,0.3); color: var(--accent); }
+  .scope-btn.primary:hover { background: linear-gradient(180deg,#0e4a28,#0a3a1e); border-color: rgba(0,224,90,0.5); box-shadow: 0 0 20px rgba(0,224,90,0.1); }
+  .scope-btn.stop-btn { background: linear-gradient(180deg,#3a2a0a,#2a1e06); border-color: rgba(255,170,0,0.3); color: var(--warning); }
+  .scope-btn.stop-btn:hover { background: linear-gradient(180deg,#4a3410,#3a2a0a); border-color: rgba(255,170,0,0.5); box-shadow: 0 0 20px rgba(255,170,0,0.08); }
+  .scope-btn.auto-btn { background: linear-gradient(180deg,#1a1a38,#14142c); border-color: rgba(100,100,255,0.25); color: #8888ff; }
+  .scope-btn.auto-btn:hover { background: linear-gradient(180deg,#242448,#1a1a38); border-color: rgba(100,100,255,0.4); box-shadow: 0 0 20px rgba(100,100,255,0.08); }
+  .scope-btn.danger { background: linear-gradient(180deg,#2a0a0a,#1e0606); border-color: rgba(255,60,60,0.25); color: #ff5555; }
+  .scope-btn.danger:hover { background: linear-gradient(180deg,#3a1010,#2a0a0a); border-color: rgba(255,60,60,0.4); }
+  .scope-btn.fft-btn { background: linear-gradient(180deg,#0a2a3a,#062030); border-color: rgba(0,204,255,0.25); color: var(--fft-color); }
+  .scope-btn.fft-btn:hover { background: linear-gradient(180deg,#0e3a4a,#0a2a3a); border-color: rgba(0,204,255,0.4); box-shadow: 0 0 20px rgba(0,204,255,0.08); }
+  .scope-btn.fft-btn.active {
+    background: linear-gradient(180deg,#0a3a4a,#063040);
+    border-color: rgba(0,204,255,0.55);
+    box-shadow: 0 0 24px rgba(0,204,255,0.12), inset 0 0 12px rgba(0,204,255,0.05);
+    color: #fff;
+  }
+  .scope-btn.ch2-style { border-color: rgba(255,106,0,0.25); color: #ff6a00; }
+  .scope-btn.ch2-style:hover { border-color: rgba(255,106,0,0.4); }
+  .group-divider { width: 1px; height: 30px; background: linear-gradient(180deg,transparent,#2a2a3e,transparent); margin: 0 6px; }
+  .footer-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 20px 10px;
+    font-family: 'Share Tech Mono', monospace; font-size: 10px;
+    color: #2a2a3e; letter-spacing: 1px;
+  }
+  .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    font-family: 'Share Tech Mono', monospace; font-size: 12px;
+    padding: 10px 18px; border-radius: 6px;
+    background: #1a1a28; border: 1px solid #2a2a3e;
+    color: var(--text-primary); box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    animation: tin .3s ease, tout .3s ease 1.7s forwards; letter-spacing: .5px;
+  }
+  .toast.success { border-color: rgba(0,224,90,0.3); color: var(--accent); }
+  .toast.warn { border-color: rgba(255,170,0,0.3); color: var(--warning); }
+  .toast.info { border-color: rgba(255,106,0,0.3); color: var(--ch2-color); }
+  .toast.fft-toast { border-color: rgba(0,204,255,0.3); color: var(--fft-color); }
+  @keyframes tin { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+  @keyframes tout { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(30px)} }
+  .wave-panel, .ch2-wave-panel {
+    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+    margin-bottom: 8px; background: #16161f;
+    border: 1px solid #2a2a3e; border-radius: 8px;
+    padding: 8px; display: none; gap: 4px;
+    box-shadow: 0 -8px 30px rgba(0,0,0,0.5); z-index: 10;
+  }
+  .wave-panel.show, .ch2-wave-panel.show { display: flex; }
+  .wave-opt, .ch2-wave-opt {
+    font-family: 'Share Tech Mono', monospace; font-size: 11px;
+    padding: 5px 12px; border-radius: 4px;
+    background: transparent; border: 1px solid transparent;
+    color: var(--text-secondary); cursor: pointer; transition: all .15s; letter-spacing: 1px;
+  }
+  .wave-opt:hover, .ch2-wave-opt:hover { background: #1e1e30; color: var(--text-primary); border-color: #2a2a3e; }
+  .wave-opt.active { background: rgba(0,224,90,0.1); color: var(--accent); border-color: rgba(0,224,90,0.25); }
+  .ch2-wave-opt.active { background: rgba(255,106,0,0.1); color: var(--ch2-color); border-color: rgba(255,106,0,0.25); }
+  .auto-wrapper { position: relative; }
+  @media (max-width:700px) {
+    .measure-bar{gap:4px;padding:6px 10px} .measure-item{padding:2px 6px}
+    .measure-value{font-size:12px;min-width:55px} .scale-display{display:none}
+    .scope-btn{padding:7px 10px;font-size:11px;min-width:40px}
+    .func-row{gap:4px} .btn-group-label{display:none}
+    .brand-model{display:none} .ch-toggle-btn{min-width:80px;padding:6px 8px;font-size:11px}
+    .ch-param-display{display:none} .channel-row-label{display:none}
+    .group-divider{margin:0 3px}
+  }
+  @media (prefers-reduced-motion:reduce) { .status-badge.run .dot{animation:none} .toast{animation:none} }
+</style>
+</head>
+<body>
+
+<div class="oscilloscope">
+  <div class="brand-bar">
+    <div class="brand-name"><span>WAVE</span>SCOPE</div>
+    <div class="brand-model">DS-2000 DIGITAL STORAGE OSCILLOSCOPE</div>
+  </div>
+
+  <div class="measure-bar">
+    <div class="status-badge run" id="statusBadge">
+      <div class="dot"></div>
+      <span id="statusText">RUN</span>
+    </div>
+    <div class="measure-divider"></div>
+    <div class="measure-item">
+      <span class="measure-label" id="mL1">Vpp</span>
+      <span class="measure-value" id="mV1">0.00V</span>
+    </div>
+    <div class="measure-item">
+      <span class="measure-label" id="mL2">FREQ</span>
+      <span class="measure-value" id="mV2">0.0Hz</span>
+    </div>
+    <div class="measure-item">
+      <span class="measure-label" id="mL3">Vrms</span>
+      <span class="measure-value" id="mV3">0.00V</span>
+    </div>
+    <div class="measure-item">
+      <span class="measure-label" id="mL4">PERIOD</span>
+      <span class="measure-value" id="mV4">0.0ms</span>
+    </div>
+    <div class="scale-display">
+      <span class="scale-tag" id="vScaleTag">1V/div</span>
+      <span class="scale-tag" id="tScaleTag">5ms/div</span>
+      <span class="mode-tag" id="modeTag" style="display:none">FFT</span>
+    </div>
+  </div>
+
+  <div class="display-wrapper">
+    <canvas id="scopeCanvas"></canvas>
+    <div class="ch-labels">
+      <div class="ch-label ch1" id="ch1Label">CH1</div>
+      <div class="ch-label ch2" id="ch2Label">CH2</div>
+    </div>
+    <div class="trigger-indicator" id="triggerInd">T: 0.0V</div>
+  </div>
+
+  <div class="controls-area">
+    <div class="channel-row">
+      <span class="channel-row-label">CHANNEL</span>
+      <button class="ch-toggle-btn ch1-btn active" id="ch1Toggle" aria-label="切换通道1">
+        <span class="ch-led"></span>
+        <span id="ch1ToggleText">CH1 ON</span>
+        <span class="ch-param-display" id="ch1Param">SINE 100Hz 2.5V</span>
+      </button>
+      <button class="ch-toggle-btn ch2-btn active" id="ch2Toggle" aria-label="切换通道2">
+        <span class="ch-led"></span>
+        <span id="ch2ToggleText">CH2 ON</span>
+        <span class="ch-param-display" id="ch2Param">SINE 250Hz 1.2V</span>
+      </button>
+    </div>
+    <div class="func-row">
+      <div class="btn-group">
+        <span class="btn-group-label">RUN</span>
+        <button class="scope-btn stop-btn" id="btnStop" aria-label="停止/运行">STOP</button>
+        <button class="scope-btn danger" id="btnClr" aria-label="清除">CLR</button>
+      </div>
+      <div class="group-divider"></div>
+      <div class="btn-group">
+        <span class="btn-group-label">TIME</span>
+        <button class="scope-btn" id="btnTMinus" aria-label="减时基">T-</button>
+        <button class="scope-btn" id="btnTPlus" aria-label="增时基">T+</button>
+      </div>
+      <div class="group-divider"></div>
+      <div class="btn-group">
+        <span class="btn-group-label">VOLT</span>
+        <button class="scope-btn" id="btnVMinus" aria-label="减电压">V-</button>
+        <button class="scope-btn" id="btnVPlus" aria-label="增电压">V+</button>
+      </div>
+      <div class="group-divider"></div>
+      <div class="btn-group auto-wrapper">
+        <button class="scope-btn auto-btn" id="btnAuto" aria-label="CH1波形">AUTO</button>
+        <div class="wave-panel" id="wavePanel">
+          <button class="wave-opt active" data-wave="sine">SINE</button>
+          <button class="wave-opt" data-wave="square">SQUARE</button>
+          <button class="wave-opt" data-wave="triangle">TRI</button>
+          <button class="wave-opt" data-wave="sawtooth">SAW</button>
+          <button class="wave-opt" data-wave="noise">NOISE</button>
+          <button class="wave-opt" data-wave="none">NONE</button>
+        </div>
+      </div>
+      <div class="btn-group auto-wrapper">
+        <button class="scope-btn ch2-style" id="btnCh2Wave" aria-label="CH2波形">CH2</button>
+        <div class="ch2-wave-panel" id="ch2WavePanel">
+          <button class="ch2-wave-opt active" data-wave="sine">SINE</button>
+          <button class="ch2-wave-opt" data-wave="square">SQUARE</button>
+          <button class="ch2-wave-opt" data-wave="triangle">TRI</button>
+          <button class="ch2-wave-opt" data-wave="sawtooth">SAW</button>
+          <button class="ch2-wave-opt" data-wave="noise">NOISE</button>
+        </div>
+      </div>
+      <div class="group-divider"></div>
+      <div class="btn-group">
+        <button class="scope-btn fft-btn" id="btnFFT" aria-label="频谱分析">FFT</button>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bar">
+    <span>SAMPLE RATE: 1GSa/s</span>
+    <span>RECORD LENGTH: 10Kpts</span>
+    <span>2CH 100MHz</span>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ===== 常量 =====
+const AXIS_L = 48;   // 纵轴刻度区宽度
+const AXIS_B = 24;   // 横轴刻度区高度
+const FFT_N = 512;   // FFT采样点数
+const tScales = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100];
+const vScales = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10];
+
+// ===== 状态 =====
+const state = {
+  running: true,
+  mode: 'wave',       // 'wave' | 'spectrum'
+  ch1Enabled: true,
+  ch2Enabled: true,
+  ch1Wave: 'sine',
+  ch2Wave: 'sine',
+  vScale: 1,
+  tScale: 5,
+  triggerLevel: 0,
+  timeOffset: 0,
+  ch1Amp: 2.5, ch1Freq: 100,
+  ch2Amp: 1.2, ch2Freq: 250,
+  noiseBuf: [],
+  cleared: false,
+  // 频谱缓存
+  specCh1: null, specCh2: null,
+  specYMax: 1, specFs: 10240, specRes: 20
+};
+
+// 初始化噪声缓冲
+for (let i = 0; i < 2000; i++) state.noiseBuf.push((Math.random() - 0.5) * 2);
+
+// ===== Canvas =====
+const canvas = document.getElementById('scopeCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const w = canvas.parentElement.clientWidth;
+  const h = Math.min(w * 0.52, 400);
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.height = h + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// 绘图区域（去掉坐标轴占用的空间）
+function plotR(w, h) {
+  return { x: AXIS_L, y: 2, w: w - AXIS_L - 2, h: h - AXIS_B - 4 };
+}
+
+// ===== 波形生成 =====
+function genWave(type, x, freq, amp, time) {
+  const t = x + time;
+  const w = 2 * Math.PI * freq / 1000;
+  switch (type) {
+    case 'sine': return amp * Math.sin(w * t);
+    case 'square': return amp * (Math.sin(w * t) >= 0 ? 1 : -1);
+    case 'triangle': return amp * (2 / Math.PI) * Math.asin(Math.sin(w * t));
+    case 'sawtooth': { const p = (w * t) / (2 * Math.PI); return amp * 2 * (p - Math.floor(p + 0.5)); }
+    case 'noise': { const i = Math.abs(Math.floor(t * 10)) % state.noiseBuf.length; return amp * state.noiseBuf[i]; }
+    default: return 0;
+  }
+}
+
+// ===== FFT（Cooley-Tukey 基2） =====
+function fft(re, im) {
+  const n = re.length;
+  // 位反转
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) {
+      [re[i], re[j]] = [re[j], re[i]];
+      [im[i], im[j]] = [im[j], im[i]];
+    }
+  }
+  // 蝶形
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = -2 * Math.PI / len;
+    const wR = Math.cos(ang), wI = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let cR = 1, cI = 0;
+      for (let j = 0; j < len / 2; j++) {
+        const uR = re[i+j], uI = im[i+j];
+        const vR = re[i+j+len/2]*cR - im[i+j+len/2]*cI;
+        const vI = re[i+j+len/2]*cI + im[i+j+len/2]*cR;
+        re[i+j] = uR + vR; im[i+j] = uI + vI;
+        re[i+j+len/2] = uR - vR; im[i+j+len/2] = uI - vI;
+        const nr = cR*wR - cI*wI; cI = cR*wI + cI*wR; cR = nr;
+      }
+    }
+  }
+}
+
+// 计算单通道幅度谱
+function computeSpectrum(waveType, freq, amp) {
+  const n = FFT_N;
+  const totalTime = state.tScale * 10; // ms
+  const re = new Float64Array(n);
+  const im = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    re[i] = genWave(waveType, (i / n) * totalTime, freq, amp, 0);
+  }
+  fft(re, im);
+  const halfN = n / 2;
+  const mag = new Float64Array(halfN);
+  for (let i = 0; i < halfN; i++) {
+    mag[i] = Math.sqrt(re[i]*re[i] + im[i]*im[i]) / n * 2;
+  }
+  // 加入微弱底噪让频谱更真实
+  let maxM = 0;
+  for (let i = 1; i < halfN; i++) if (mag[i] > maxM) maxM = mag[i];
+  const noiseFloor = maxM * 0.008;
+  for (let i = 1; i < halfN; i++) mag[i] += Math.random() * noiseFloor;
+  return mag;
+}
+
+// 找峰值
+function findPeak(mag) {
+  let pi = 0, pv = 0;
+  for (let i = 1; i < mag.length; i++) {
+    if (mag[i] > pv) { pv = mag[i]; pi = i; }
+  }
+  return { idx: pi, val: pv };
+}
+
+// ===== 辅助函数 =====
+function niceNum(range) {
+  if (range <= 0) return 1;
+  const exp = Math.floor(Math.log10(range));
+  const frac = range / Math.pow(10, exp);
+  let nice;
+  if (frac <= 1) nice = 1;
+  else if (frac <= 2) nice = 2;
+  else if (frac <= 5) nice = 5;
+  else nice = 10;
+  return nice * Math.pow(10, exp);
+}
+
+function fmtFreq(hz) {
+  if (hz >= 1000000) return (hz / 1000000).toFixed(1) + 'M';
+  if (hz >= 1000) return (hz / 1000).toFixed(hz >= 10000 ? 0 : 1) + 'k';
+  return hz.toFixed(hz >= 100 ? 0 : 1);
+}
+
+function fmtVolt(v) {
+  const a = Math.abs(v);
+  if (a >= 100) return v.toFixed(0);
+  if (a >= 1) return v.toFixed(1);
+  if (a >= 0.001) return (v * 1000).toFixed(a >= 0.01 ? 0 : 1);
+  return (v * 1000000).toFixed(0);
+}
+
+function fmtMag(v) {
+  if (v >= 1) return v.toFixed(2) + 'V';
+  if (v >= 0.001) return (v * 1000).toFixed(1) + 'mV';
+  return (v * 1000000).toFixed(0) + 'uV';
+}
+
+// ===== 绘制：网格 =====
+function drawGrid(p) {
+  const dx = 10, dy = 8;
+  const cw = p.w / dx, ch = p.h / dy;
+  // 次级网格
+  ctx.strokeStyle = 'rgba(0,255,100,0.04)';
+  ctx.lineWidth = 0.5;
+  const sub = 5;
+  for (let i = 0; i <= dx * sub; i++) {
+    const x = p.x + (i / sub) * cw;
+    ctx.beginPath(); ctx.moveTo(x, p.y); ctx.lineTo(x, p.y + p.h); ctx.stroke();
+  }
+  for (let j = 0; j <= dy * sub; j++) {
+    const y = p.y + (j / sub) * ch;
+    ctx.beginPath(); ctx.moveTo(p.x, y); ctx.lineTo(p.x + p.w, y); ctx.stroke();
+  }
+  // 主网格
+  ctx.strokeStyle = 'rgba(0,255,100,0.1)';
+  ctx.lineWidth = 0.8;
+  for (let i = 0; i <= dx; i++) {
+    const x = p.x + i * cw;
+    ctx.beginPath(); ctx.moveTo(x, p.y); ctx.lineTo(x, p.y + p.h); ctx.stroke();
+  }
+  for (let j = 0; j <= dy; j++) {
+    const y = p.y + j * ch;
+    ctx.beginPath(); ctx.moveTo(p.x, y); ctx.lineTo(p.x + p.w, y); ctx.stroke();
+  }
+  // 中心十字
+  ctx.strokeStyle = 'rgba(0,255,100,0.22)';
+  ctx.lineWidth = 1;
+  const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+  ctx.beginPath(); ctx.moveTo(p.x, cy); ctx.lineTo(p.x + p.w, cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, p.y); ctx.lineTo(cx, p.y + p.h); ctx.stroke();
+  // 刻度标记
+  ctx.strokeStyle = 'rgba(0,255,100,0.3)';
+  const tk = 4;
+  for (let i = 0; i <= dx; i++) {
+    const x = p.x + i * cw;
+    ctx.beginPath(); ctx.moveTo(x, cy-tk); ctx.lineTo(x, cy+tk); ctx.stroke();
+  }
+  for (let j = 0; j <= dy; j++) {
+    const y = p.y + j * ch;
+    ctx.beginPath(); ctx.moveTo(cx-tk, y); ctx.lineTo(cx+tk, y); ctx.stroke();
+  }
+}
+
+// ===== 绘制：纵轴（波形模式） =====
+function drawYAxisWave(p) {
+  const dy = 8;
+  const ch = p.h / dy;
+  const vPerDiv = state.vScale;
+  ctx.font = '10px "Share Tech Mono"';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (let j = 0; j <= dy; j++) {
+    const y = p.y + j * ch;
+    const v = (dy / 2 - j) * vPerDiv;
+    const txt = fmtVolt(v) + 'V';
+    ctx.fillStyle = j === dy / 2 ? 'rgba(0,255,100,0.5)' : 'rgba(0,255,100,0.28)';
+    ctx.fillText(txt, AXIS_L - 5, y);
+  }
+}
+
+// ===== 绘制：纵轴（频谱模式） =====
+function drawYAxisSpectrum(p, yMax) {
+  const dy = 8;
+  const ch = p.h / dy;
+  const perDiv = yMax / dy;
+  ctx.font = '10px "Share Tech Mono"';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (let j = 0; j <= dy; j++) {
+    const y = p.y + j * ch;
+    const v = (dy - j) * perDiv;
+    ctx.fillStyle = 'rgba(0,204,255,0.35)';
+    ctx.fillText(fmtMag(v), AXIS_L - 5, y);
+  }
+}
+
+// ===== 绘制：横轴（波形模式） =====
+function drawXAxisWave(p) {
+  const dx = 10;
+  const cw = p.w / dx;
+  const tPerDiv = state.tScale;
+  const y0 = p.y + p.h;
+  ctx.font = '9px "Share Tech Mono"';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  for (let i = 0; i <= dx; i++) {
+    const x = p.x + i * cw;
+    const t = (i - dx / 2) * tPerDiv;
+    let txt;
+    if (t === 0) txt = '0';
+    else if (Math.abs(t) >= 1000) txt = (t / 1000).toFixed(1) + 's';
+    else if (Math.abs(t) >= 1) txt = t.toFixed(t === Math.floor(t) ? 0 : 1) + 'ms';
+    else txt = (t * 1000).toFixed(0) + 'us';
+    ctx.fillStyle = i === dx / 2 ? 'rgba(0,255,100,0.5)' : 'rgba(0,255,100,0.28)';
+    ctx.fillText(txt, x, y0 + 4);
+  }
+}
+
+// ===== 绘制：横轴（频谱模式） =====
+function drawXAxisSpectrum(p, fs) {
+  const dx = 10;
+  const cw = p.w / dx;
+  const maxF = fs / 2;
+  const fPerDiv = maxF / dx;
+  const y0 = p.y + p.h;
+  ctx.font = '9px "Share Tech Mono"';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  for (let i = 0; i <= dx; i++) {
+    const x = p.x + i * cw;
+    const f = i * fPerDiv;
+    ctx.fillStyle = 'rgba(0,204,255,0.35)';
+    ctx.fillText(fmtFreq(f) + 'Hz', x, y0 + 4);
+  }
+}
+
+// ===== 绘制：触发电平 =====
+function drawTrigger(p) {
+  const cy = p.y + p.h / 2;
+  const vpp = state.vScale / (p.h / 8);
+  const ty = cy - (state.triggerLevel / vpp);
+  if (ty < p.y || ty > p.y + p.h) return;
+  ctx.strokeStyle = 'rgba(255,221,0,0.35)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath(); ctx.moveTo(p.x, ty); ctx.lineTo(p.x + p.w, ty); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(255,221,0,0.6)';
+  ctx.beginPath();
+  ctx.moveTo(p.x + p.w - 2, ty);
+  ctx.lineTo(p.x + p.w - 10, ty - 5);
+  ctx.lineTo(p.x + p.w - 10, ty + 5);
+  ctx.closePath(); ctx.fill();
+}
+
+// ===== 绘制：波形 =====
+function drawWave(p, color, glow, waveType, amp, freq, time) {
+  if (waveType === 'none') return;
+  const cy = p.y + p.h / 2;
+  const ppv = (p.h / 8) / state.vScale;
+  const totalT = state.tScale * 10;
+  // 发光层
+  ctx.save();
+  ctx.shadowColor = glow; ctx.shadowBlur = 14;
+  ctx.strokeStyle = glow; ctx.lineWidth = 3.5; ctx.globalAlpha = 0.22;
+  ctx.beginPath();
+  for (let px = 0; px < p.w; px++) {
+    const t = (px / p.w) * totalT;
+    const v = genWave(waveType, t, freq, amp, time);
+    const y = cy - v * ppv;
+    px === 0 ? ctx.moveTo(p.x + px, y) : ctx.lineTo(p.x + px, y);
+  }
+  ctx.stroke(); ctx.restore();
+  // 主线
+  ctx.strokeStyle = color; ctx.lineWidth = 1.8;
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (let px = 0; px < p.w; px++) {
+    const t = (px / p.w) * totalT;
+    const v = genWave(waveType, t, freq, amp, time);
+    const y = cy - v * ppv;
+    px === 0 ? ctx.moveTo(p.x + px, y) : ctx.lineTo(p.x + px, y);
+  }
+  ctx.stroke();
+}
+
+// ===== 绘制：频谱 =====
+function drawSpectrumCh(p, mag, yMax, color, glow, fillColor) {
+  const n = mag.length;
+  // 填充区域
+  ctx.beginPath();
+  ctx.moveTo(p.x, p.y + p.h);
+  for (let i = 0; i < n; i++) {
+    const x = p.x + (i / n) * p.w;
+    const val = Math.min(mag[i], yMax);
+    const y = p.y + p.h - (val / yMax) * p.h;
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(p.x + p.w, p.y + p.h);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, p.y, 0, p.y + p.h);
+  grad.addColorStop(0, fillColor);
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  // 顶部线条
+  ctx.save();
+  ctx.shadowColor = glow; ctx.shadowBlur = 8;
+  ctx.strokeStyle = color; ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const x = p.x + (i / n) * p.w;
+    const val = Math.min(mag[i], yMax);
+    const y = p.y + p.h - (val / yMax) * p.h;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke(); ctx.restore();
+  // 峰值标记
+  const pk = findPeak(mag);
+  const pkX = p.x + (pk.idx / n) * p.w;
+  const pkY = p.y + p.h - (Math.min(pk.val, yMax) / yMax) * p.h;
+  // 峰值竖虚线
+  ctx.strokeStyle = color; ctx.lineWidth = 0.6;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath(); ctx.moveTo(pkX, pkY); ctx.lineTo(pkX, p.y + p.h); ctx.stroke();
+  ctx.setLineDash([]);
+  // 峰值点
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(pkX, pkY, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.arc(pkX, pkY, 2, 0, Math.PI * 2); ctx.fill();
+  // 峰值标注
+  const pkFreq = pk.idx * state.specRes;
+  ctx.font = '10px "Share Tech Mono"';
+  ctx.fillStyle = color;
+  ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+  ctx.fillText(fmtFreq(pkFreq) + 'Hz  ' + fmtMag(pk.val), pkX + 6, pkY - 4);
+}
+
+// ===== 暗角 =====
+function drawVignette(w, h) {
+  const grd = ctx.createRadialGradient(w/2, h/2, Math.min(w,h)*0.3, w/2, h/2, Math.max(w,h)*0.7);
+  grd.addColorStop(0, 'rgba(0,0,0,0)');
+  grd.addColorStop(1, 'rgba(0,0,0,0.15)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, w, h);
+}
+
+// ===== 测量值更新 =====
+function chMeasure(waveType, amp, freq) {
+  if (waveType === 'none') return { vpp: 0, freq: 0, vrms: 0, period: 0 };
+  const vpp = waveType === 'noise' ? amp * 2 * 0.6 : amp * 2;
+  let vrms;
+  switch (waveType) {
+    case 'sine': vrms = amp / Math.SQRT2; break;
+    case 'square': vrms = amp; break;
+    case 'triangle': case 'sawtooth': vrms = amp / Math.sqrt(3); break;
+    case 'noise': vrms = amp * 0.577; break;
+    default: vrms = 0;
+  }
+  return { vpp, freq: waveType === 'noise' ? 0 : freq, vrms, period: waveType === 'noise' ? 0 : 1000 / freq };
+}
+
+function updateUI() {
+  const modeTag = document.getElementById('modeTag');
+  const triggerInd = document.getElementById('triggerInd');
+
+  if (state.mode === 'wave') {
+    modeTag.style.display = 'none';
+    triggerInd.style.opacity = '1';
+    // 测量值
+    let m;
+    if (state.ch1Enabled && state.ch1Wave !== 'none') m = chMeasure(state.ch1Wave, state.ch1Amp, state.ch1Freq);
+    else if (state.ch2Enabled && state.ch2Wave !== 'none') m = chMeasure(state.ch2Wave, state.ch2Amp, state.ch2Freq);
+    else m = { vpp: 0, freq: 0, vrms: 0, period: 0 };
+    if (state.cleared) m = { vpp: 0, freq: 0, vrms: 0, period: 0 };
+    document.getElementById('mL1').textContent = 'Vpp';
+    document.getElementById('mV1').textContent = m.vpp.toFixed(2) + 'V';
+    document.getElementById('mL2').textContent = 'FREQ';
+    document.getElementById('mV2').textContent = m.freq.toFixed(1) + 'Hz';
+    document.getElementById('mL3').textContent = 'Vrms';
+    document.getElementById('mV3').textContent = m.vrms.toFixed(2) + 'V';
+    document.getElementById('mL4').textContent = 'PERIOD';
+    document.getElementById('mV4').textContent = m.period.toFixed(1) + 'ms';
+    document.getElementById('vScaleTag').textContent = state.vScale + 'V/div';
+    document.getElementById('vScaleTag').style.display = '';
+    document.getElementById('tScaleTag').textContent = state.tScale + 'ms/div';
+  } else {
+    modeTag.style.display = '';
+    triggerInd.style.opacity = '0';
+    // 频谱测量
+    let pkMag = 0, pkFreq = 0;
+    const activeMag = state.ch1Enabled ? state.specCh1 : state.specCh2;
+    if (activeMag) {
+      const pk = findPeak(activeMag);
+      pkMag = pk.val; pkFreq = pk.idx * state.specRes;
+    }
+    document.getElementById('mL1').textContent = 'PEAK';
+    document.getElementById('mV1').textContent = fmtMag(pkMag);
+    document.getElementById('mL2').textContent = 'FREQ';
+    document.getElementById('mV2').textContent = fmtFreq(pkFreq) + 'Hz';
+    document.getElementById('mL3').textContent = 'RBW';
+    document.getElementById('mV3').textContent = fmtFreq(state.specRes) + 'Hz';
+    document.getElementById('mL4').textContent = 'SPAN';
+    document.getElementById('mV4').textContent = fmtFreq(state.specFs / 2) + 'Hz';
+    document.getElementById('vScaleTag').style.display = 'none';
+    document.getElementById('tScaleTag').textContent = state.tScale + 'ms/div';
+  }
+
+  document.getElementById('triggerInd').textContent = 'T: ' + state.triggerLevel.toFixed(1) + 'V';
+
+  // 通道按钮
+  const c1 = document.getElementById('ch1Toggle');
+  const c2 = document.getElementById('ch2Toggle');
+  c1.classList.toggle('active', state.ch1Enabled);
+  c1.classList.toggle('off', !state.ch1Enabled);
+  c2.classList.toggle('active', state.ch2Enabled);
+  c2.classList.toggle('off', !state.ch2Enabled);
+  document.getElementById('ch1ToggleText').textContent = state.ch1Enabled ? 'CH1 ON' : 'CH1 OFF';
+  document.getElementById('ch2ToggleText').textContent = state.ch2Enabled ? 'CH2 ON' : 'CH2 OFF';
+  document.getElementById('ch1Label').classList.toggle('hidden-ch', !state.ch1Enabled);
+  document.getElementById('ch2Label').classList.toggle('hidden-ch', !state.ch2Enabled);
+  document.getElementById('ch1Param').textContent = state.ch1Enabled ? state.ch1Wave.toUpperCase() + ' ' + state.ch1Freq + 'Hz ' + state.ch1Amp + 'V' : '--';
+  document.getElementById('ch2Param').textContent = state.ch2Enabled ? state.ch2Wave.toUpperCase() + ' ' + state.ch2Freq + 'Hz ' + state.ch2Amp + 'V' : '--';
+
+  // FFT按钮
+  document.getElementById('btnFFT').classList.toggle('active', state.mode === 'spectrum');
+  document.getElementById('btnFFT').textContent = state.mode === 'spectrum' ? 'WAVE' : 'FFT';
+}
+
+// ===== 计算频谱数据 =====
+function refreshSpectrum() {
+  const totalTime = state.tScale * 10; // ms
+  state.specFs = FFT_N / (totalTime / 1000); // Hz
+  state.specRes = state.specFs / FFT_N; // Hz/bin
+  if (state.ch1Enabled && state.ch1Wave !== 'none') {
+    state.specCh1 = computeSpectrum(state.ch1Wave, state.ch1Freq, state.ch1Amp);
+  } else {
+    state.specCh1 = null;
+  }
+  if (state.ch2Enabled && state.ch2Wave !== 'none') {
+    state.specCh2 = computeSpectrum(state.ch2Wave, state.ch2Freq, state.ch2Amp);
+  } else {
+    state.specCh2 = null;
+  }
+  // 计算Y轴最大值
+  let mx = 0.01;
+  if (state.specCh1) { const p = findPeak(state.specCh1); if (p.val > mx) mx = p.val; }
+  if (state.specCh2) { const p = findPeak(state.specCh2); if (p.val > mx) mx = p.val; }
+  state.specYMax = niceNum(mx * 1.2);
+}
+
+// ===== 主渲染 =====
+let lastT = 0;
+function render(ts) {
+  const dt = ts - lastT; lastT = ts;
+  if (state.running) state.timeOffset += dt * 0.1;
+
+  const w = canvas.width / (window.devicePixelRatio || 1);
+  const h = canvas.height / (window.devicePixelRatio || 1);
+  const p = plotR(w, h);
+
+  // 清屏
+  ctx.fillStyle = '#050510';
+  ctx.fillRect(0, 0, w, h);
+
+  // 网格
+  drawGrid(p);
+
+  if (state.mode === 'wave') {
+    // 纵轴刻度
+    drawYAxisWave(p);
+    // 横轴刻度
+    drawXAxisWave(p);
+    // 触发电平
+    drawTrigger(p);
+    // 波形
+    if (!state.cleared) {
+      if (state.ch2Enabled) drawWave(p, '#ff6a00', 'rgba(255,106,0,0.35)', state.ch2Wave, state.ch2Amp, state.ch2Freq, state.timeOffset * 0.7);
+      if (state.ch1Enabled) drawWave(p, '#00ff64', 'rgba(0,255,100,0.4)', state.ch1Wave, state.ch1Amp, state.ch1Freq, state.timeOffset);
+    }
+  } else {
+    // 频谱模式
+    refreshSpectrum();
+    drawYAxisSpectrum(p, state.specYMax);
+    drawXAxisSpectrum(p, state.specFs);
+    // 绘制频谱
+    if (state.specCh2) drawSpectrumCh(p, state.specCh2, state.specYMax, '#ff6a00', 'rgba(255,106,0,0.3)', 'rgba(255,106,0,0.1)');
+    if (state.specCh1) drawSpectrumCh(p, state.specCh1, state.specYMax, '#00ff64', 'rgba(0,255,100,0.35)', 'rgba(0,255,100,0.12)');
+  }
+
+  drawVignette(w, h);
+  updateUI();
+  requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
+
+// ===== 事件处理 =====
+
+// 通道切换
+document.getElementById('ch1Toggle').addEventListener('click', () => {
+  state.ch1Enabled = !state.ch1Enabled;
+  state.cleared = false;
+  showToast(state.ch1Enabled ? 'CH1 已开启' : 'CH1 已关闭', state.ch1Enabled ? 'success' : 'warn');
+});
+document.getElementById('ch2Toggle').addEventListener('click', () => {
+  state.ch2Enabled = !state.ch2Enabled;
+  state.cleared = false;
+  showToast(state.ch2Enabled ? 'CH2 已开启' : 'CH2 已关闭', state.ch2Enabled ? 'info' : 'warn');
+});
+
+// STOP/RUN
+const btnStop = document.getElementById('btnStop');
+const statusBadge = document.getElementById('statusBadge');
+const statusText = document.getElementById('statusText');
+btnStop.addEventListener('click', () => {
+  state.running = !state.running;
+  state.cleared = false;
+  if (state.running) {
+    btnStop.textContent = 'STOP'; btnStop.classList.remove('primary'); btnStop.classList.add('stop-btn');
+    statusBadge.classList.remove('stop'); statusBadge.classList.add('run'); statusText.textContent = 'RUN';
+    showToast('示波器运行中', 'success');
+  } else {
+    btnStop.textContent = 'RUN'; btnStop.classList.remove('stop-btn'); btnStop.classList.add('primary');
+    statusBadge.classList.remove('run'); statusBadge.classList.add('stop'); statusText.textContent = 'STOP';
+    showToast('已停止采集', 'warn');
+  }
+});
+
+// CLR
+document.getElementById('btnClr').addEventListener('click', () => {
+  state.cleared = true;
+  showToast('波形已清除', 'warn');
+  setTimeout(() => { if (state.running) state.cleared = false; }, 100);
+});
+
+// T-/T+
+document.getElementById('btnTMinus').addEventListener('click', () => {
+  const i = tScales.indexOf(state.tScale);
+  if (i > 0) { state.tScale = tScales[i-1]; showToast('时基: ' + state.tScale + 'ms/div', 'success'); }
+  else showToast('已到最小时基', 'warn');
+});
+document.getElementById('btnTPlus').addEventListener('click', () => {
+  const i = tScales.indexOf(state.tScale);
+  if (i < tScales.length-1) { state.tScale = tScales[i+1]; showToast('时基: ' + state.tScale + 'ms/div', 'success'); }
+  else showToast('已到最大时基', 'warn');
+});
+
+// V-/V+
+document.getElementById('btnVMinus').addEventListener('click', () => {
+  if (state.mode !== 'wave') { showToast('频谱模式下不可调电压', 'warn'); return; }
+  const i = vScales.indexOf(state.vScale);
+  if (i > 0) { state.vScale = vScales[i-1]; showToast('电压: ' + state.vScale + 'V/div', 'success'); }
+  else showToast('已到最小刻度', 'warn');
+});
+document.getElementById('btnVPlus').addEventListener('click', () => {
+  if (state.mode !== 'wave') { showToast('频谱模式下不可调电压', 'warn'); return; }
+  const i = vScales.indexOf(state.vScale);
+  if (i < vScales.length-1) { state.vScale = vScales[i+1]; showToast('电压: ' + state.vScale + 'V/div', 'success'); }
+  else showToast('已到最大刻度', 'warn');
+});
+
+// FFT 按钮
+document.getElementById('btnFFT').addEventListener('click', () => {
+  state.mode = state.mode === 'wave' ? 'spectrum' : 'wave';
+  state.cleared = false;
+  if (state.mode === 'spectrum') {
+    showToast('频谱模式 — T± 调节频率范围', 'fft-toast');
+  } else {
+    showToast('波形模式', 'success');
+  }
+});
+
+// AUTO - CH1波形
+const wavePanel = document.getElementById('wavePanel');
+document.getElementById('btnAuto').addEventListener('click', (e) => { e.stopPropagation(); wavePanel.classList.toggle('show'); });
+document.querySelectorAll('#wavePanel .wave-opt').forEach(opt => {
+  opt.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('#wavePanel .wave-opt').forEach(o => o.classList.remove('active'));
+    opt.classList.add('active');
+    state.ch1Wave = opt.dataset.wave; state.cleared = false;
+    wavePanel.classList.remove('show');
+    switch (state.ch1Wave) {
+      case 'sine': state.ch1Amp=2.5; state.ch1Freq=100; break;
+      case 'square': state.ch1Amp=2.0; state.ch1Freq=60; break;
+      case 'triangle': state.ch1Amp=3.0; state.ch1Freq=80; break;
+      case 'sawtooth': state.ch1Amp=2.2; state.ch1Freq=120; break;
+      case 'noise': state.ch1Amp=2.8; state.ch1Freq=200; break;
+    }
+    if (!state.ch1Enabled) state.ch1Enabled = true;
+    showToast('CH1: ' + opt.textContent, 'success');
+  });
+});
+
+// CH2波形
+const ch2WP = document.getElementById('ch2WavePanel');
+document.getElementById('btnCh2Wave').addEventListener('click', (e) => { e.stopPropagation(); ch2WP.classList.toggle('show'); });
+document.querySelectorAll('#ch2WavePanel .ch2-wave-opt').forEach(opt => {
+  opt.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('#ch2WavePanel .ch2-wave-opt').forEach(o => o.classList.remove('active'));
+    opt.classList.add('active');
+    state.ch2Wave = opt.dataset.wave; state.cleared = false;
+    ch2WP.classList.remove('show');
+    switch (state.ch2Wave) {
+      case 'sine': state.ch2Amp=1.2; state.ch2Freq=250; break;
+      case 'square': state.ch2Amp=1.0; state.ch2Freq=150; break;
+      case 'triangle': state.ch2Amp=1.5; state.ch2Freq=200; break;
+      case 'sawtooth': state.ch2Amp=1.3; state.ch2Freq=180; break;
+      case 'noise': state.ch2Amp=1.6; state.ch2Freq=300; break;
+    }
+    if (!state.ch2Enabled) state.ch2Enabled = true;
+    showToast('CH2: ' + opt.textContent, 'info');
+  });
+});
+
+document.addEventListener('click', () => { wavePanel.classList.remove('show'); ch2WP.classList.remove('show'); });
+
+// 键盘
+document.addEventListener('keydown', (e) => {
+  switch (e.key.toLowerCase()) {
+    case ' ': e.preventDefault(); btnStop.click(); break;
+    case 'c': document.getElementById('btnClr').click(); break;
+    case 'arrowleft': document.getElementById('btnTMinus').click(); break;
+    case 'arrowright': document.getElementById('btnTPlus').click(); break;
+    case 'arrowdown': e.preventDefault(); document.getElementById('btnVMinus').click(); break;
+    case 'arrowup': e.preventDefault(); document.getElementById('btnVPlus').click(); break;
+    case 'a': document.getElementById('btnAuto').click(); break;
+    case '1': document.getElementById('ch1Toggle').click(); break;
+    case '2': document.getElementById('ch2Toggle').click(); break;
+    case 'f': document.getElementById('btnFFT').click(); break;
+  }
+});
+
+// 触发电平拖拽
+let dragTrig = false;
+canvas.addEventListener('mousedown', (e) => {
+  const r = canvas.getBoundingClientRect();
+  if (e.clientX - r.left > r.width * 0.85 && state.mode === 'wave') {
+    dragTrig = true; canvas.style.cursor = 'ns-resize';
+  }
+});
+canvas.addEventListener('mousemove', (e) => {
+  if (!dragTrig) {
+    const r = canvas.getBoundingClientRect();
+    canvas.style.cursor = (state.mode === 'wave' && e.clientX - r.left > r.width * 0.85) ? 'ns-resize' : 'crosshair';
+    return;
+  }
+  const r = canvas.getBoundingClientRect();
+  const y = e.clientY - r.top;
+  const h = r.height;
+  const vpp = state.vScale / ((h - AXIS_B - 4) / 8);
+  state.triggerLevel = -((y - 2 - (h - AXIS_B - 4) / 2) * vpp);
+  state.triggerLevel = Math.round(state.triggerLevel * 10) / 10;
+});
+document.addEventListener('mouseup', () => { dragTrig = false; });
+
+// Toast
+function showToast(msg, type = 'success') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { if (t.parentElement) t.remove(); }, 2200);
+}
+
+setTimeout(() => showToast('空格=RUN/STOP | 1/2=通道 | F=频谱 | 方向键=刻度', 'success'), 500);
+</script>
+</body>
+</html>

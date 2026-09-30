@@ -1,0 +1,304 @@
+<html>
+<meta charset="UTF-8">
+<head>
+<!-- External CSS file -->
+<link rel = "stylesheet" href = "mystyle.css">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+
+<body id="body" style="background-color: #000000">
+    <div id="top-controls" style="position:sticky;top:0;z-index:1000;padding:10px 12px;background:rgba(4,67,57,0.6);backdrop-filter:blur(6px);text-align:center">
+        <button type="button" data-i18n="vintage"; onclick="setVintage()" style="margin:4px;padding:8px 12px;border-radius:6px;border:none;cursor:pointer;background-color:#d0bfa0">古色</button>
+        <button type="button" data-i18n="white"; onclick="setWhite()" style="margin:4px;padding:8px 12px;border-radius:6px;border:none;cursor:pointer;background-color:#ffffff">白色</button>
+        <button type="button" data-i18n="black"; onclick="setBlack()" style="margin:4px;padding:8px 12px;border-radius:6px;border:none;cursor:pointer;background-color:#000000;color:#ffffff">黑色</button>
+        <button type="button" data-i18n="chinese"; onclick="setLang('zh')" style="margin:4px;padding:8px 12px;border-radius:6px;border:none;cursor:pointer">中文</button>
+        <button type="button" data-i18n="english"; onclick="setLang('en')" style="margin:4px;padding:8px 12px;border-radius:6px;border:none;cursor:pointer">English</button>
+        <button type="button" data-i18n="turn_on_light"; onclick="document.getElementById('body').style.background = '#ffffff'" style="margin:4px;padding:8px 12px;border-radius:6px;border:none;cursor:pointer">开灯</button>
+        <button type="button" data-i18n="turn_off_light"; onclick="document.getElementById('body').style.background = ''" style="margin:4px;padding:8px 12px;border-radius:6px;border:none;cursor:pointer">关灯</button>
+    </div>
+
+<h1 data-i18n="page_title" style="text-align: center; color:#a3cfcd; font-size:50px">AI大全集锦</h1>
+<hr />
+<h2 data-i18n="section_domestic" style="text-align: center; color:#82a0aa; font-family:arial; font-size:40px">国内AI集锦</h2>
+<div style="text-align: center; margin-bottom: 20px;">
+    <button type="button" style="background-color: #4CAF50; 
+    color: white; 
+    padding: 10px 20px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer;"
+    data-i18n="Hidden"; 
+    onclick='document.getElementById("internal-1").classList.add("hidden");
+    document.getElementById("internal-2").classList.add("hidden");'>
+    隐藏
+    </button>
+    <button type="button" style="background-color: #4CAF50; 
+    color: white; 
+    padding: 10px 20px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer;"
+    data-i18n="Show"; 
+    onclick='document.getElementById("internal-1").classList.remove("hidden"); 
+    document.getElementById("internal-2").classList.remove("hidden");'>
+    显示
+    </button>
+</div>
+
+<div class="ai-grid hidden" id = "internal-1">
+    <a href="https://www.doubao.com/chat" target="_blank">
+    <img data-src="https://img1.dancihu.com/2024-01-09/afd5db08-1988-c334-02ac-831bf91e0463.png" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" class="lazy-img" loading="lazy" alt="豆包">
+    <p data-i18n="doubao_title">豆包</p>
+    <p data-i18n="doubao_desc">日常闲聊<br>情感陪伴<br>生活化问答</p>
+    </a>
+
+    <a href="https://www.qianwen.com/" target="_blank">
+    <img data-src="https://ts3.tc.mm.bing.net/th/id/OIP-C.KgYRABrOrO5Fi-DIkSGFhgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" class="lazy-img" loading="lazy" alt="千问">
+    <p data-i18n="qianwen_title">千问</p>
+    <p data-i18n="qianwen_desc">办公自动化<br>电商运营<br>企业服务</p>
+    </a>
+
+    <a href="https://yuanbao.tencent.com/chat" target="_blank">
+    <img data-src="https://www.tudingai.com/wp-content/uploads/2025/02/1740577494-%E8%85%BE%E8%AE%AF%E5%85%83%E5%AE%9D.png" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" class="lazy-img" loading="lazy" alt="元宝">
+    <p data-i18n="yuanbao_title">元宝</p>
+    <p data-i18n="yuanbao_desc">微信生态协作<br>社交内容创作</p>
+    </a>
+
+    <a href="https://yiyan.baidu.com/" target="_blank">
+    <img data-src="https://www.tudingai.com/wp-content/uploads/2023/04/Snipaste_2023-04-14_01-50-55.jpg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" class="lazy-img" loading="lazy" alt="文心">
+    <p data-i18n="wenxin_title">文心</p>
+    <p data-i18n="wenxin_desc">知识问答<br>多模态创作<br>行业解决方案</p>
+    </a>
+
+</div>
+<br/>
+
+<div class="ai-grid hidden" id = "internal-2">
+    <a href="https://chat.deepseek.com/" target="_blank">
+    <img data-src="https://img3.runjiapp.com/duoteimg/dtnew_softup_img/202504/20250417134716_18507.png" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" class="lazy-img" loading="lazy" alt="Deepseek">
+    <p>Deepseek</p>
+    <p>理工推理<br>代码开发<br>金融量化</p>
+    </a>
+
+    <a href="https://www.kimi.com/" target="_blank">
+    <img data-src="https://ts1.tc.mm.bing.net/th/id/R-C.69c45a95b18f66ae30e06442f0b04980?rik=ZK%2bC5vGp%2fHyS4Q&riu=http%3a%2f%2fwww.ailookme.com%2fwp-content%2fuploads%2f2024%2f05%2fKimi-LOGO.jpg&ehk=00zniC3p8rTuawQqmjwk8XgJARhb%2bd8yDPrKx8rE%2bvI%3d&risl=&pid=ImgRaw&r=0" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" class="lazy-img" loading="lazy" alt="Kimi">
+    <p>Kimi</p>
+    <p>长文本处理<br>信息整合</p>
+    </a>
+
+    <a href="https://www.bigmodel.cn/" target="_blank">
+    <img data-src="https://biemoyu.com/wp-content/uploads/2024/06/1dbed-chatglm.cn.png" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" class="lazy-img" loading="lazy" alt="智谱 GLM">
+    <p>智谱 GLM</p>
+    <p>逻辑推理<br>学术写作<br>企业级服务</p>
+    </a>
+
+    <a href="https://xinghuo.xfyun.cn/desk" target="_blank">
+    <img data-src="https://ts1.tc.mm.bing.net/th/id/OIP-C.fFeddIL4wvv7CRUWIJzYLQAAAA?rs=1&pid=ImgDetMain&o=7&rm=3" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" class="lazy-img" loading="lazy" alt="讯飞星火">
+    <p>讯飞星火</p>
+    <p>语音交互<br>教育学习<br>医疗 / 工业场景</p>
+    </a>
+
+</div>
+<br/>
+
+<hr/>
+<h2 data-i18n="section_foreign" style="text-align: center; color:#82a0aa; font-family:arial; font-size:40px">国外AI集锦</h2>
+<div style="text-align: center; margin-bottom: 20px;">
+    <button type="button" style="background-color: #4CAF50; 
+    color: white; 
+    padding: 10px 20px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer;" 
+    data-i18n="Hidden"; 
+    onclick='document.getElementById("external").classList.add("hidden")'>
+    隐藏
+    </button>
+    <button type="button" style="background-color: #4CAF50; 
+    color: white; 
+    padding: 10px 20px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer;" 
+    data-i18n="Show"; 
+    onclick='document.getElementById("external").classList.remove("hidden")'>
+    显示
+    </button>
+</div>
+<div class="ai-grid hidden" id = "external">
+    <a href="https://chat.openai.com" target="_blank">
+    <img data-src="https://ts3.tc.mm.bing.net/th/id/OIP-C.trE6pDtUHHqDMddpeKL5oAHaEK?rs=1&pid=ImgDetMain&o=7&rm=3" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" class="lazy-img" loading="lazy" alt="ChatGPT">
+    <p data-i18n="chatgpt_title">ChatGPT</p>
+    <p data-i18n="chatgpt_desc">通用对话<br>创意生成<br>代码开发<br>企业办公</p>
+    </a>
+
+    <a href="https://www.anthropic.com" target="_blank">
+    <img data-src="https://ts3.tc.mm.bing.net/th/id/OIP-C.YPmkfrfrcq6HO1wiTtaAzgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" class="lazy-img" loading="lazy" alt="Claude">
+    <p data-i18n="claude_title">Claude</p>
+    <p data-i18n="claude_desc">长文本深度分析<br>企业级安全合规<br>创意写作</p>
+    </a>
+
+    <a href="https://gemini.google.com" target="_blank">
+    <img data-src="https://www.btdigi.cn/wp-content/uploads/2025/01/1735866987-faviconV2.png" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" class="lazy-img" loading="lazy" alt="Gemini">
+    <p data-i18n="gemini_title">Gemini</p>
+    <p data-i18n="gemini_desc">多模态交互<br>科学计算<br>实时信息检索</p>
+    </a>
+
+    <a href="https://grok.x.ai" target="_blank">
+    <img data-src="https://ts1.tc.mm.bing.net/th/id/OIP-C.oeRUyAfJYv-bsL2HpPYL0AAAAA?rs=1&pid=ImgDetMain&o=7&rm=3" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" class="lazy-img" loading="lazy" alt="Grok">
+    <p data-i18n="grok_title">Grok</p>
+    <p data-i18n="grok_desc">实时信息获取<br>风格化对话<br>科技领域讨论</p>
+    </a>
+</div>
+<br/>
+<hr/>
+<p id="warn" style="background-color:#044319" data-i18n="warn">请注意科学上网</p>
+<p id="author" style="text-align: center; background-color:#044319" data-i18n="author">吕毅云应用作业</p>
+
+<!-- scripts: background and i18n -->
+<script>
+    const translations = {
+        zh: {
+            page_title: 'AI大全集锦',
+            section_domestic: '国内AI集锦',
+            section_foreign: '国外AI集锦',
+            doubao_title: '豆包',
+            doubao_desc: '日常闲聊<br>情感陪伴<br>生活化问答',
+            qianwen_title: '千问',
+            qianwen_desc: '办公自动化<br>电商运营<br>企业服务',
+            yuanbao_title: '元宝',
+            yuanbao_desc: '微信生态协作<br>社交内容创作',
+            wenxin_title: '文心',
+            wenxin_desc: '知识问答<br>多模态创作<br>行业解决方案',
+            chatgpt_title: 'ChatGPT',
+            chatgpt_desc: '通用对话<br>创意生成<br>代码开发<br>企业办公',
+            claude_title: 'Claude',
+            claude_desc: '长文本深度分析<br>企业级安全合规<br>创意写作',
+            gemini_title: 'Gemini',
+            gemini_desc: '多模态交互<br>科学计算<br>实时信息检索',
+            grok_title: 'Grok',
+            grok_desc: '实时信息获取<br>风格化对话<br>科技领域讨论',
+            warn: '请注意科学上网',
+            author: '吕毅云应用作业',
+            Hidden: '隐藏',
+            Show: '显示',
+            vintage: '古色',
+            white: '白色',
+            black: '黑色',
+            chinese: '中文',
+            english: 'English',
+            turn_on_light: '开灯',
+            turn_off_light: '关灯'
+        },
+        en: {
+            page_title: 'AI Collection',
+            section_domestic: 'Domestic AI',
+            section_foreign: 'International AI',
+            doubao_title: 'Doubao',
+            doubao_desc: 'Casual chat<br>Emotional companion<br>Everyday Q&A',
+            qianwen_title: 'Qianwen',
+            qianwen_desc: 'Office automation<br>E-commerce operations<br>Enterprise services',
+            yuanbao_title: 'Yuanbao',
+            yuanbao_desc: 'WeChat collaboration<br>Social content creation',
+            wenxin_title: 'Wenxin',
+            wenxin_desc: 'Knowledge Q&A<br>Multimodal creation<br>Industry solutions',
+            chatgpt_title: 'ChatGPT',
+            chatgpt_desc: 'General chat<br>Creative generation<br>Code development<br>Enterprise',
+            claude_title: 'Claude',
+            claude_desc: 'Long-form analysis<br>Enterprise safety & compliance<br>Creative writing',
+            gemini_title: 'Gemini',
+            gemini_desc: 'Multimodal interaction<br>Scientific computing<br>Realtime search',
+            grok_title: 'Grok',
+            grok_desc: 'Realtime info<br>Stylized conversation<br>Tech discussion',
+            warn: 'Note: geo-restricted content may require a proxy',
+            author: 'Alone(LvYi) — Cloud App Homework',
+            Hidden: 'Hidden',
+            Show: 'Show',
+            vintage: 'Vintage',
+            white: 'White',
+            black: 'Black',
+            chinese: '中文',
+            english: 'English',
+            turn_on_light: 'On',
+            turn_off_light: 'Off'
+        }
+    };
+
+    function setLang(lang){
+        document.querySelectorAll('[data-i18n]').forEach(el=>{
+            const key = el.dataset.i18n;
+            const txt = translations[lang] && translations[lang][key];
+            if(!txt) return;
+            // preserve existing element markup for multi-line descriptions
+            if(el.tagName.toLowerCase() === 'p') el.innerHTML = txt;
+            else el.innerText = txt;
+        });
+    }
+
+    function setVintage(){
+        document.getElementById('body').style.background = '#d0bfa0';
+    }
+    function setWhite(){
+        document.getElementById('body').style.background = '#ffffff';
+    }
+    function setBlack(){
+        document.getElementById('body').style.background = '#000000';
+    }
+
+    // initialize default language
+    setLang('zh');
+</script>
+
+<script>
+(function(){
+    function loadImage(img){
+        if(!img.dataset || !img.dataset.src) return;
+        img.onload = () => img.classList.add('loaded');
+        img.src = img.dataset.src;
+        delete img.dataset.src;
+    }
+
+    // Observe sections and load their images when near viewport
+    const sections = document.querySelectorAll('.ai-grid');
+    const sectionObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting){
+                const sec = entry.target;
+                sec.classList.remove('hidden');
+                sec.querySelectorAll('img.lazy-img').forEach(img => loadImage(img));
+                obs.unobserve(sec);
+            }
+        });
+    }, {root:null, rootMargin: '200px', threshold: 0.01});
+
+    sections.forEach(s => sectionObserver.observe(s));
+
+    // Preload images shortly before they enter (for smoother UX)
+    const preloadObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting){
+                entry.target.querySelectorAll('img.lazy-img').forEach(img=>{
+                    if(img.dataset && img.dataset.src){
+                        const p = new Image();
+                        p.src = img.dataset.src;
+                    }
+                });
+                obs.unobserve(entry.target);
+            }
+        });
+    }, {root:null, rootMargin: '600px', threshold: 0});
+
+    sections.forEach(s => preloadObserver.observe(s));
+
+    // Fallback: in browsers without IntersectionObserver, load everything
+    if(!('IntersectionObserver' in window)){
+        document.querySelectorAll('img.lazy-img').forEach(img => { if(img.dataset && img.dataset.src) img.src = img.dataset.src; });
+        document.querySelectorAll('.ai-grid.hidden').forEach(el => el.classList.remove('hidden'));
+    }
+
+})();
+</script>
+
+<!-- Homework1 -->
+</body>
+</html>

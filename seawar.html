@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>怒海争锋 · SEAWAR — 海域领地战</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#05080e;color:#dbe8f2;
+    font-family:"Segoe UI",system-ui,"Microsoft YaHei",sans-serif;user-select:none;-webkit-tap-highlight-color:transparent}
+  #stage{position:fixed;inset:0}
+  canvas{position:absolute;inset:0;display:block}
+  #game{width:100%;height:100%}
+  #cvFog,#cvUI{pointer-events:none}
+  #hud{position:absolute;inset:0;pointer-events:none;font-size:12px;letter-spacing:.3px}
+  .panel{background:linear-gradient(180deg,rgba(9,18,30,.86),rgba(6,12,22,.78));
+    border:1px solid rgba(96,180,240,.22);border-radius:8px;backdrop-filter:blur(6px);
+    box-shadow:0 6px 26px rgba(0,0,0,.45)}
+  #chips{position:absolute;top:10px;left:12px;display:flex;gap:8px;flex-wrap:wrap;max-width:70vw}
+  .chip{display:flex;align-items:center;gap:7px;padding:6px 10px 6px 8px;border-radius:8px;
+    background:linear-gradient(180deg,rgba(9,18,30,.9),rgba(6,12,22,.82));
+    border:1px solid rgba(96,180,240,.18);min-width:118px}
+  .chip .dot{width:9px;height:9px;border-radius:2px;box-shadow:0 0 10px currentColor}
+  .chip .nm{font-weight:600;font-size:12px;opacity:.95}
+  .chip .sub{font-size:11px;opacity:.62}
+  .chip.me{border-color:rgba(120,235,180,.55);box-shadow:0 0 0 1px rgba(120,235,180,.15),0 0 18px rgba(80,230,160,.12)}
+  .chip.dead{filter:grayscale(1);opacity:.4}
+  #tools{position:absolute;top:10px;right:12px;display:flex;gap:6px;pointer-events:auto}
+  #tools button{pointer-events:auto;cursor:pointer;color:#cfe6f7;font:600 12px/1 inherit;
+    padding:8px 11px;border-radius:8px;border:1px solid rgba(96,180,240,.25);
+    background:linear-gradient(180deg,rgba(14,26,42,.92),rgba(8,14,26,.86))}
+  #tools button:hover{border-color:rgba(150,225,255,.6);color:#fff}
+  #tools button.on{border-color:rgba(120,235,180,.7);color:#a9ffd2}
+  #hint{position:absolute;left:12px;bottom:12px;padding:9px 12px;border-radius:8px;line-height:1.7;
+    background:linear-gradient(180deg,rgba(9,18,30,.86),rgba(6,12,22,.78));
+    border:1px solid rgba(96,180,240,.18);max-width:330px}
+  #hint b{color:#8fd6ff;font-weight:600}
+  #hint kbd{display:inline-block;min-width:16px;text-align:center;padding:1px 5px;border-radius:4px;
+    background:rgba(140,200,240,.14);border:1px solid rgba(140,200,240,.25);font:600 11px inherit;color:#cfe9ff}
+  #info{position:absolute;right:12px;bottom:12px;padding:9px 12px;border-radius:8px;min-width:186px;line-height:1.65}
+  #info .row{display:flex;justify-content:space-between;gap:14px}
+  #info .k{opacity:.6}
+  #info .v{font-weight:600;font-variant-numeric:tabular-nums}
+  #ticker{position:absolute;left:50%;transform:translateX(-50%);bottom:88px;display:flex;flex-direction:column;
+    align-items:center;gap:4px}
+  .tick{padding:4px 10px;border-radius:6px;background:rgba(6,12,22,.7);border:1px solid rgba(96,180,240,.16);
+    animation:fadeup 3.4s ease forwards;font-size:12px}
+  @keyframes fadeup{0%{opacity:0;transform:translateY(8px)}12%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-10px)}}
+  #menu{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(1200px 700px at 50% 40%,rgba(10,26,44,.72),rgba(3,6,12,.94));
+    pointer-events:auto;backdrop-filter:blur(3px)}
+  #card{width:min(660px,92vw);padding:26px 28px 22px;border-radius:14px;
+    background:linear-gradient(180deg,rgba(10,20,34,.96),rgba(5,10,18,.94));
+    border:1px solid rgba(96,180,240,.24);box-shadow:0 24px 70px rgba(0,0,0,.6)}
+  #card h1{font-size:30px;letter-spacing:3px;font-weight:800;
+    background:linear-gradient(90deg,#8fe3ff,#c9f7ff 40%,#7effc0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  #card .tag{margin-top:6px;opacity:.62;font-size:12.5px;letter-spacing:.6px}
+  #card .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 20px}
+  #card .box{padding:12px 13px;border-radius:10px;background:rgba(140,200,240,.055);border:1px solid rgba(96,180,240,.14);line-height:1.75;font-size:12.5px}
+  #card .box h3{font-size:12.5px;color:#8fd6ff;letter-spacing:1px;margin-bottom:6px;font-weight:700}
+  #card .box ul{list-style:none}
+  #card .box li:before{content:"▸ ";opacity:.5}
+  #opts{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:16px}
+  .seg{display:flex;border-radius:9px;overflow:hidden;border:1px solid rgba(96,180,240,.22)}
+  .seg button{cursor:pointer;font:600 12px/1 inherit;color:#a8c4d8;background:rgba(10,20,34,.7);border:0;padding:9px 14px}
+  .seg button.on{background:linear-gradient(180deg,rgba(60,170,220,.35),rgba(30,110,160,.3));color:#e8faff}
+  #seedRow{display:flex;align-items:center;gap:8px;font-size:12px;opacity:.85}
+  #seedRow input{width:104px;background:rgba(5,10,18,.9);border:1px solid rgba(96,180,240,.25);color:#cfe9ff;
+    border-radius:7px;padding:7px 9px;font:12px inherit}
+  #go{cursor:pointer;width:100%;padding:14px;border-radius:10px;border:1px solid rgba(120,235,180,.45);
+    background:linear-gradient(180deg,rgba(40,190,130,.32),rgba(18,110,80,.32));color:#dcfff0;
+    font:800 15px/1 inherit;letter-spacing:4px}
+  #go:hover{background:linear-gradient(180deg,rgba(50,220,150,.44),rgba(20,130,92,.4));color:#fff}
+  #menu .foot{margin-top:12px;font-size:11px;opacity:.4;text-align:center;line-height:1.6}
+  #over{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    background:radial-gradient(900px 600px at 50% 45%,rgba(8,18,32,.72),rgba(2,4,9,.95));pointer-events:auto}
+  #over .panel{padding:26px 34px;text-align:center;border-radius:14px}
+  #over h2{font-size:30px;letter-spacing:5px;margin-bottom:8px}
+  #over .sub{opacity:.7;font-size:13px;line-height:1.9;margin-bottom:18px}
+  #over .btns{display:flex;gap:10px}
+  #over button{cursor:pointer;font:700 13px/1 inherit;padding:12px 20px;border-radius:9px;color:#dcf3ff;
+    border:1px solid rgba(96,180,240,.3);background:linear-gradient(180deg,rgba(16,32,52,.95),rgba(8,16,28,.9))}
+  #over button:hover{border-color:rgba(150,225,255,.7);color:#fff}
+  #fps{position:absolute;left:12px;top:56px;font-size:10.5px;opacity:.35;font-variant-numeric:tabular-nums}
+  .aim{mix-blend-mode:screen}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="cvFog"></canvas>
+  <canvas id="game"></canvas>
+  <canvas id="cvUI"></canvas>
+  <div id="hud">
+    <div id="chips"></div>
+    <div id="fps"></div>
+    <div id="tools">
+      <button id="btPause">暂停 ⏸</button>
+      <button id="btAuto" class="on">自动开火</button>
+      <button id="btSound">音效 ♪</button>
+      <button id="btHelp">玩法</button>
+    </div>
+    <div id="hint" class="panel">
+      <div><b>拖拽</b> 己方岛屿 → 目标岛 = 派兵夺取（相邻 1:1，远程 50% 折损）</div>
+      <div><b>点击</b> 岛屿 = 查看；<b>滚轮</b> 缩放，<b>中键/右键拖动</b> 平移</div>
+      <div><b>F 键 / 空格</b> = 旗舰下海亲自操船（<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动，<kbd>鼠左</kbd> 开炮，<kbd>鼠右</kbd> 鱼雷）</div>
+      <div><b>U</b> = 升级当前岛（产兵提速）；<b>H</b> = 帮助</div>
+    </div>
+    <div id="info" class="panel"></div>
+    <div id="ticker"></div>
+  </div>
+  <div id="menu">
+    <div id="card">
+      <h1>怒海争锋</h1>
+      <div class="tag">SEAWAR &nbsp;·&nbsp; 海域领地战 &nbsp;—&nbsp; 灵感来自 Kiomet 的节点扩张 与 MK48 的舰炮海战</div>
+      <div class="cols">
+        <div class="box">
+          <h3>核心循环</h3>
+          <ul>
+            <li>港口自动产兵与收入</li>
+            <li>拖拽派兵，兵线沿线自动交战</li>
+            <li>占岛 → 收益更高 → 更强舰队</li>
+            <li>相邻转移无损，远程增援折损 50%</li>
+          </ul>
+        </div>
+        <div class="box">
+          <h3>战场细节</h3>
+          <ul>
+            <li>舰炮有射界与转向速度，会互相绕行</li>
+            <li>潜艇发射鱼雷，对主力舰伤害翻倍</li>
+            <li>旗舰可亲自下场：机动、集火、抢岛</li>
+            <li>战争迷雾 + 灯塔开图，视野即情报</li>
+          </ul>
+        </div>
+      </div>
+      <div id="opts">
+        <div class="seg" id="segDiff">
+          <button data-d="0">新兵</button>
+          <button data-d="1" class="on">老练</button>
+          <button data-d="2">名将</button>
+        </div>
+        <div id="seedRow"><span>海域种子</span><input id="seed" value="" placeholder="随机"><span id="reseed" style="cursor:pointer;text-decoration:underline;opacity:.8">重掷</span></div>
+      </div>
+      <button id="go">出&nbsp;海</button>
+      <div class="foot">纯前端单文件 · Canvas 2D · 无外部依赖 &nbsp;|&nbsp; 失败即失去全部港口，占领 65% 海域即制海</div>
+    </div>
+  </div>
+  <div id="over"><div class="panel">
+    <h2 id="ovTitle">制海权达成</h2>
+    <div class="sub" id="ovSub"></div>
+    <div class="btns" style="justify-content:center">
+      <button id="ovAgain">再来一局</button>
+      <button id="ovMenu">返回菜单</button>
+    </div>
+  </div></div>
+</div>
+<script>
+"use strict";
+/* =========================================================================
+   怒海争锋 SEAWAR — 单文件网页游戏
+   领地扩张(Kiomet 式节点经济) + 实时海战表现(MK48 式舰炮/鱼雷/旗舰操控)
+   ========================================================================= */
+
+/* ------------------------------ 常量 ------------------------------ */
+const TAU = Math.PI*2;
+const MAPW = 1780, MAPH = 1180;
+const NODE_N = 28;
+const KINDS = {
+  port:      {name:'港口',  r:42, rate:1.75, vision:300, max:260, hue:0.52},
+  farm:      {name:'渔场',  r:33, rate:2.20, vision:230, max:210, hue:0.44},
+  fort:      {name:'要塞',  r:38, rate:1.15, vision:290, max:340, hue:0.02},
+  lighthouse:{name:'灯塔',  r:28, rate:0.95, vision:560, max:150, hue:0.13},
+};
+const RATIO_NEAR = 1.0, RATIO_FAR = 0.5;
+const SPEED_BASE = 88, SPEED_SLOW = 320;     // 舰队航速 v = SPEED_BASE - troops/SPEED_SLOW
+const HP_PER_TROOP = 6, SHIP_HP = 46, SHIP_CAP = 240, SHIP_PX = 15;
+const GROW_CAP = 420;
+const FOG_CELL = 16;
+const DIFFS = [
+  {name:'新兵', aggr:0.72, econ:0.75, think:[3.4,5.2], hold:1.7},
+  {name:'老练', aggr:0.95, econ:1.00, think:[2.2,3.8], hold:1.35},
+  {name:'名将', aggr:1.20, econ:1.28, think:[1.4,2.6], hold:1.05},
+];
+const FCOL = ['#4fd2ff','#ff6b6b','#c07bff','#ffc24a','#5ef0b0','#ff8fd0'];
+
+/* ------------------------------ 工具 ------------------------------ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
+const lerp=(a,b,t)=>a+(b-a)*t;
+const dist2=(ax,ay,bx,by)=>{const dx=bx-ax,dy=by-ay;return dx*dx+dy*dy};
+const dist=(ax,ay,bx,by)=>Math.sqrt(dist2(ax,ay,bx,by));
+const norm=a=>{while(a>Math.PI)a-=TAU;while(a<-Math.PI)a+=TAU;return a};
+const angLerp=(a,b,m)=>{const d=norm(b-a);return a+clamp(d,-m,m)};
+function polyArea(p){let s=0;for(let i=0;i<p.length;i++){const q=p[(i+1)%p.length];s+=p[i][0]*q[1]-q[0]*p[i][1]}return s/2}
+function shuffle(arr,rnd){for(let i=arr.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));const t=arr[i];arr[i]=arr[j];arr[j]=t}return arr}
+
+/* ------------------------------ 画布 ------------------------------ */
+const cvGame=document.getElementById('game'), ctxG=cvGame.getContext('2d');
+const cvFog=document.getElementById('cvFog');
+const ctxUI=document.getElementById('cvUI').getContext('2d');
+const view={W:0,H:0,DPR:1};
+const cam={x:0,y:0,z:0.8,tz:0.8};
+function resetCanvas(){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  view.DPR=dpr; view.W=window.innerWidth; view.H=window.innerHeight;
+  for(const c of [cvGame, cvFog, document.getElementById('cvUI')]){
+    c.width=Math.round(view.W*dpr); c.height=Math.round(view.H*dpr);
+    c.style.width=view.W+'px'; c.style.height=view.H+'px';
+  }
+  ctxG.setTransform(dpr,0,0,dpr,0,0);
+  ctxUI.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener('resize',()=>{resetCanvas();layoutFog();drawFog()});
+
+const w2sx=x=>(x-cam.x)*cam.z+view.W/2;
+const w2sy=y=>(y-cam.y)*cam.z+view.H/2;
+const s2wx=x=>(x-view.W/2)/cam.z+cam.x;
+const s2wy=y=>(y-view.H/2)/cam.z+cam.y;
+function camRect(pad){pad=pad||0;const hw=view.W/2/cam.z+pad,hh=view.H/2/cam.z+pad;return {x0:cam.x-hw,x1:cam.x+hw,y0:cam.y-hh,y1:cam.y+hh}}
+function focusOn(x,y,pad){const z=clamp(Math.min(view.W,view.H)/(2*(pad||340)),0.34,1.35);cam.x=x;cam.y=y;cam.z=z;cam.tz=z}
+
+/* ------------------------------ 战争迷雾画布 ------------------------------ */
+let fogCv=null,fogCtx=null,fogS=1;
+function layoutFog(){
+  fogS=1/FOG_CELL;
+  fogCv=document.createElement('canvas');
+  fogCv.width=Math.ceil(MAPW*fogS); fogCv.height=Math.ceil(MAPH*fogS);
+  fogCtx=fogCv.getContext('2d');
+}
+function drawFog(){
+  if(!fogCtx)return;
+  const f=fogCtx, F=game.fogOf(game.me), s=fogS;
+  f.setTransform(1,0,0,1,0,0);
+  f.globalCompositeOperation='source-over';
+  f.fillStyle='#02050999';
+  f.fillRect(0,0,fogCv.width,fogCv.height);
+  if(!F){return}
+  f.globalCompositeOperation='destination-out';
+  // 已探索(暗)/当前可见(亮) 双层挖洞
+  for(let gy=0;gy<fogCv.height;gy++){
+    for(let gx=0;gx<fogCv.width;gx++){
+      const v=F.explored[gy*fogCv.width+gx];
+      if(!v)continue;
+      f.globalAlpha = v>=2?1:0.62;
+      f.fillRect(gx,gy,1,1);
+    }
+  }
+  f.globalAlpha=1;
+  f.globalCompositeOperation='source-over';
+}
+
+/* ------------------------------ 音效 ------------------------------ */
+const Snd={ctx:null,on:true,
+  init(){if(this.ctx)return;try{this.ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){this.ctx=null}},
+  blip(freq,dur,type,vol,slide){
+    if(!this.on||!this.ctx)return;
+    const c=this.ctx,t=c.currentTime;
+    const o=c.createOscillator(),g=c.createGain();
+    o.type=type||'sine'; o.frequency.setValueAtTime(freq,t);
+    if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,slide),t+dur);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(vol||0.09,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.02);
+  },
+  shot(vol){this.blip(190+Math.random()*60,0.09,'square',(vol||0.05)*0.5,70)},
+  boom(vol){this.blip(90+Math.random()*40,0.42,'sawtooth',(vol||0.1)*0.7,32)},
+  torp(){this.blip(340,0.35,'sine',0.05,120)},
+  cap(){this.blip(520,0.30,'triangle',0.09,880)},
+  lose(){this.blip(240,0.5,'triangle',0.09,90)},
+  click(){this.blip(660,0.05,'square',0.035)}
+};
+
+/* ------------------------------ 游戏状态 ------------------------------ */
+const game={
+  phase:'menu', seed:0, rnd:null, time:0,
+  nodes:[], edges:[], fleets:[], ships:[], bullets:[], parts:[], texts:[],
+  factions:[], me:0, diff:1, winner:-1, paused:false, autoFire:true,
+  drag:null, hover:null, sel:null, flagship:null, autoRun:false, stats:{battles:0},
+};
+const F = ()=>game.factions;
+const nodeAt=i=>game.nodes[i];
+function fogOf(fi){const f=game.factions[fi];return f?f.fog:null}
+
+function factionPortCount(fi){let n=0;for(const n2 of game.nodes)if(n2.owner===fi)n++;return n}
+function factionShipTotal(fi){
+  let t=0;for(const n of game.nodes)if(n.owner===fi)t+=n.troops;
+  for(const f of game.fleets)if(f.owner===fi)t+=f.troops;
+  if(game.flagship&&game.flagship.owner===fi)t+=game.flagship.troops;
+  return t;
+}
+
+/* ------------------------------ 地图生成 ------------------------------ */
+function makeIslandPoly(rnd,r,irr,seedAng){
+  const pts=[];
+  const n=9+Math.floor(rnd()*4);
+  const p1=rnd()*TAU,p2=rnd()*TAU;
+  for(let i=0;i<n;i++){
+    const a=seedAng+i/n*TAU;
+    const k=1+irr*(Math.sin(a*2+p1)*0.55+Math.sin(a*3.3+p2)*0.30+ (rnd()-0.5)*0.34);
+    pts.push([Math.cos(a)*r*k,Math.sin(a)*r*k]);
+  }
+  return pts;
+}
+function newFog(){
+  const w=Math.ceil(MAPW/FOG_CELL),h=Math.ceil(MAPH/FOG_CELL);
+  return {w:w,h:h,explored:new Uint8Array(w*h),stampT:99};
+}
+function genMap(seed){
+  const rnd=mulberry32(seed);
+  game.rnd=rnd; game.nodes=[]; game.edges=[]; game.fleets=[]; game.ships=[];
+  game.bullets=[]; game.parts=[]; game.texts=[]; game.flagship=null;
+  game.sel=null; game.winner=-1; game.paused=false; game.time=0; game.stats.battles=0;
+
+  /* --- 1. 撒点 --- */
+  const pts=[];
+  let tries=0;
+  while(pts.length<NODE_N && tries<9000){
+    tries++;
+    const x=70+rnd()*(MAPW-140), y=70+rnd()*(MAPH-140);
+    let ok=true;
+    for(const p of pts){ if(dist2(x,y,p.x,p.y)<215*215){ok=false;break} }
+    if(ok)pts.push({x:x,y:y});
+  }
+  pts.sort(()=>rnd()-0.5);
+
+  /* --- 2. 类型 --- */
+  const kinds=new Array(pts.length).fill('farm');
+  const tmpD=[];
+  for(let i=0;i<pts.length;i++){tmpD.length=0;for(let j=0;j<pts.length;j++)if(i!==j)tmpD.push([dist2(pts[i].x,pts[i].y,pts[j].x,pts[j].y),j]);tmpD.sort((a,b)=>a[0]-b[0]);pts[i].nb=tmpD.slice(0,3).map(a=>a[1])}
+  const farIdx=pts.map((p,i)=>[Math.hypot(p.x-MAPW/2,p.y-MAPH/2),i]).sort((a,b)=>b[0]-a[0]).slice(0,3).map(a=>a[1]);
+  for(const i of farIdx)kinds[i]='lighthouse';
+  const rest=shuffle(pts.map((p,i)=>i).filter(i=>kinds[i]!=='lighthouse'),rnd);
+  let np=0;
+  for(const i of rest){ if(np<7){kinds[i]='port';np++} }
+  for(let k=0;k<4;k++){const i=rest[rest.length-1-k];if(i!==undefined)kinds[i]='fort'}
+
+  /* --- 3. 节点 --- */
+  for(let i=0;i<pts.length;i++){
+    const k=kinds[i],K=KINDS[k];
+    const r=K.r*(0.9+rnd()*0.35);
+    const p=pts[i];
+    game.nodes.push({
+      id:i,x:p.x,y:p.y,kind:k,name:K.name+(i+1),
+      r:r, rate:K.rate, max:K.max, vision:K.vision,
+      poly:makeIslandPoly(rnd,r*1.62,0.26,rnd()*TAU),
+      beach:makeIslandPoly(rnd,r*2.02,0.20,rnd()*TAU),
+      trees:[], depth:0, edgeDepth:new Float32Array(64).fill(0),
+      owner:-1, troops:0, hp:80, hpMax:80, cap:60,
+      grow:rnd()*1.5, level:0, nb:[], ang:0, flashT:0, rippleT:rnd()*4,
+    });
+    const n=game.nodes[i];
+    const nt=Math.floor(rnd()*7);
+    for(let t=0;t<nt;t++){
+      const a=rnd()*TAU, rr=r*(0.25+rnd()*0.62);
+      n.trees.push({x:Math.cos(a)*rr,y:Math.sin(a)*rr,s:8+rnd()*10,h:rnd()*0.5});
+    }
+  }
+
+  /* --- 4. 海路连线（kNN + 连通性修复） --- */
+  const eset=new Set(), edges=[];
+  const addEdge=(i,j)=>{
+    if(i===j)return; const key=i<j?i+'-'+j:j+'-'+i;
+    if(eset.has(key))return; eset.add(key);
+    const d=dist(game.nodes[i].x,game.nodes[i].y,game.nodes[j].x,game.nodes[j].y);
+    const e={a:i,b:j,len:d,mid:null,curve:(rnd()-0.5)*0.34};
+    e.mid={x:(game.nodes[i].x+game.nodes[j].x)/2,y:(game.nodes[i].y+game.nodes[j].y)/2};
+    edges.push(e);
+  };
+  for(let i=0;i<game.nodes.length;i++){
+    const cand=[];
+    for(let j=0;j<game.nodes.length;j++)if(i!==j)cand.push([dist2(game.nodes[i].x,game.nodes[i].y,game.nodes[j].x,game.nodes[j].y),j]);
+    cand.sort((a,b)=>a[0]-b[0]);
+    let made=0, maxE=2+Math.floor(rnd()*2);
+    for(const c of cand){
+      if(made>=maxE)break;
+      if(game.nodes[i].nb.includes(c[1]))continue;
+      if(c[0]>430*430)break;
+      game.nodes[i].nb.push(c[1]); game.nodes[c[1]].nb.push(i);
+      addEdge(i,c[1]); made++;
+    }
+  }
+  // 保证连通
+  for(let guard=0;guard<12;guard++){
+    const comp=new Int16Array(game.nodes.length).fill(-1); let nc=0;
+    for(let s=0;s<game.nodes.length;s++){
+      if(comp[s]>=0)continue;
+      const q=[s];comp[s]=nc;
+      while(q.length){const v=q.pop();for(const w of game.nodes[v].nb)if(comp[w]<0){comp[w]=nc;q.push(w)}}
+      nc++;
+    }
+    if(nc<=1)break;
+    let best=null;
+    for(let i=0;i<game.nodes.length;i++)for(let j=0;j<game.nodes.length;j++){
+      if(comp[i]===comp[j])continue;
+      const d=dist2(game.nodes[i].x,game.nodes[i].y,game.nodes[j].x,game.nodes[j].y);
+      if(!best||d<best.d)best={d:d,i:i,j:j};
+    }
+    if(!best)break;
+    game.nodes[best.i].nb.push(best.j); game.nodes[best.j].nb.push(best.i);
+    addEdge(best.i,best.j);
+  }
+  // 灯塔降为单线：更孤立
+  for(const n of game.nodes){
+    if(n.kind!=='lighthouse'||n.nb.length<=1)continue;
+    n.nb.sort((a,b)=>dist2(n.x,n.y,game.nodes[a].x,game.nodes[a].y)-dist2(n.x,n.y,game.nodes[b].x,game.nodes[b].y));
+    const keep=n.nb[0];
+    for(const o of n.nb.slice(1)){
+      const k=Math.min(o,n.id)+'-'+Math.max(o,n.id);
+      eset.delete(k);
+      const oi=game.nodes[o].nb.indexOf(n.id); if(oi>=0)game.nodes[o].nb.splice(oi,1);
+    }
+    n.nb=[keep];
+  }
+  game.edges=edges.filter(e=>eset.has(Math.min(e.a,e.b)+'-'+Math.max(e.a,e.b)));
+  // 每岛朝向最近海路边界的角度（码头方向）
+  for(const n of game.nodes){
+    if(!n.nb.length){n.ang=rnd()*TAU;continue}
+    let bx=0,by=0;
+    for(const j of n.nb){const o=game.nodes[j];bx+=o.x-n.x;by+=o.y-n.y}
+    n.ang=Math.atan2(by,bx);
+  }
+
+  /* --- 5. 岛屿高度场 --- */
+  buildDepths(rnd);
+
+  /* --- 6. 势力与开局 --- */
+  const starts=pickStarts(rnd);
+  game.factions=[];
+  const names=['蓝鳍舰队','赤狐海团','紫电同盟','金鹰商团'];
+  for(let i=0;i<4;i++){
+    const s=starts[i];
+    game.factions.push({
+      id:i,name:names[i],color:FCOL[i],ai:i!==0,alive:true,
+      fog:newFog(),ships:0,portCount:0,nextThink:1+rnd()*2,mode:'expand',
+      launchT:0,
+    });
+    const n=game.nodes[s];
+    n.owner=i; n.troops=n.kind==='fort'?95:75;
+    n.hp=n.hpMax=n.troops*HP_PER_TROOP;
+    // 开局各带一个相邻附属岛
+    let bestJ=-1,bd=1e9;
+    for(const j of n.nb){
+      const o=game.nodes[j];
+      const d=dist(n.x,n.y,o.x,o.y);
+      if(d<bd){bd=d;bestJ=j}
+    }
+    if(bestJ>=0&&game.nodes[bestJ].owner<0){
+      const o=game.nodes[bestJ];
+      o.owner=i; o.troops=34; o.hp=o.hpMax=o.troops*HP_PER_TROOP;
+    }
+  }
+  // 中立守军
+  for(const n of game.nodes){
+    if(n.owner>=0)continue;
+    let base=0;
+    if(n.kind==='lighthouse')base=52;
+    else if(n.kind==='port')base=46;
+    else if(n.kind==='fort')base=78;
+    else base=34;
+    n.troops=Math.round(base*(0.8+rnd()*0.6));
+    n.hp=n.hpMax=n.troops*HP_PER_TROOP;
+    n.pawn=-1; // 中立无主
+  }
+  game.me=0;
+  game.totalNodes=game.nodes.length;
+  // 初始相机
+  const pn=game.nodes[starts[0]];
+  let mx=pn.x,my=pn.y,mr=340;
+  for(const j of pn.nb){const o=game.nodes[j];mx=(mx+o.x)/2;my=(my+o.y)/2;mr=Math.max(mr,dist(pn.x,pn.y,o.x,o.y)*1.5)}
+  focusOn(mx,my,mr*0.78);
+  cam.tz=cam.z;
+  for(const f of F())stampVision(f,true);
+  drawFog();
+  spawnGarrisonShips();
+}
+function pickStarts(rnd){
+  const n=game.nodes.length, chosen=[];
+  let first=-1,bd=1e9;
+  for(let i=0;i<n;i++){
+    const x=game.nodes[i].x,y=game.nodes[i].y;
+    const cx=Math.abs(x-MAPW/2)/MAPW+Math.abs(y-MAPH/2)/MAPH;
+    if(cx<bd){bd=cx;first=i}
+  }
+  chosen.push(first);
+  while(chosen.length<4){
+    let best=-1,bv=-1;
+    for(let i=0;i<n;i++){
+      if(chosen.includes(i))continue;
+      let mind=1e9;
+      for(const c of chosen)mind=Math.min(mind,dist2(game.nodes[i].x,game.nodes[i].y,game.nodes[c].x,game.nodes[c].y));
+      if(mind>bv){bv=mind;best=i}
+    }
+    chosen.push(best);
+  }
+  return chosen;
+}
+function buildDepths(rnd){
+  const cx=MAPW/2,cy=MAPH/2;
+  for(const n of game.nodes){
+    let mind=1e9;
+    for(const j of n.nb)mind=Math.min(mind,dist(n.x,n.y,game.nodes[j].x,game.nodes[j].y));
+    if(mind>1e8)mind=300;
+    const dl=dist(n.x,n.y,cx,cy)/(Math.hypot(MAPW,MAPH)/2);
+    const dir=Math.atan2(n.y-cy,n.x-cx);
+    for(let i=0;i<8;i++){
+      const w=Math.exp(-Math.pow(norm(i/8*TAU-dir),2)/(2*0.55*0.55));
+      n.edgeDepth[i]=clamp((dl*1.15+ (1-min_1(mind/300,1))*0.55+ w*0.5+rnd()*0.1)*3.2,0.4,9);
+    }
+    n.edgeDepth.set(n.edgeDepth); // 定型
+    n.depth=2.2;
+    n.seaAngle=dir;
+  }
+}
+function min_1(a,b){return a<b?a:b}
+
+/* ------------------------------ 视野 ------------------------------ */
+function stampCircle(f,x,y,rad,val){
+  const g=f.fog, s=1/FOG_CELL;
+  const cx=x*s, cy=y*s, r=rad*s;
+  const x0=Math.max(0,Math.floor(cx-r)),x1=Math.min(g.w-1,Math.ceil(cx+r));
+  const y0=Math.max(0,Math.floor(cy-r)),y1=Math.min(g.h-1,Math.ceil(cy+r));
+  const r2=r*r;
+  for(let gy=y0;gy<=y1;gy++){
+    for(let gx=x0;gx<=x1;gx++){
+      const dx=gx+0.5-cx,dy=gy+0.5-cy;
+      if(dx*dx+dy*dy<=r2){
+        const k=gy*g.w+gx;
+        if(g.explored[k]<val)g.explored[k]=val;
+      }
+    }
+  }
+}
+function stampVision(f,full){
+  const g=f.fog;
+  if(full)g.explored.fill(0);
+  const seen=[];
+  for(const n of game.nodes){
+    if(n.owner===f.id){
+      stampCircle(f,n.x,n.y,n.vision+(full?40:0),2);
+      seen.push(n);
+      for(const j of n.nb){const o=game.nodes[j];stampCircle(f,o.x,o.y,Math.max(120,o.vision*0.72),2);o.exploredBy=o.exploredBy||{};o.exploredBy[f.id]=1}
+    }
+  }
+  for(const fl of game.fleets){
+    if(fl.owner===f.id)stampCircle(f,fl.x,fl.y,250,2);
+    else if(exploredAt(f,fl.x,fl.y))stampCircle(f,fl.x,fl.y,90,1);
+  }
+  if(game.flagship&&game.flagship.owner===f.id)stampCircle(f,game.flagship.x,game.flagship.y,380,2);
+  // 已探索水域保持最低亮度
+  if(!full){
+    for(const e of game.edges){
+      const A=game.nodes[e.a],B=game.nodes[e.b];
+      if(!(A.owner===f.id||B.owner===f.id))continue;
+      stampCircle(f,e.mid.x,e.mid.y,e.len*0.34,1);
+    }
+  }
+}
+function exploredAt(f,x,y){
+  const g=f.fog,s=1/FOG_CELL;
+  const gx=Math.floor(x*s),gy=Math.floor(y*s);
+  if(gx<0||gy<0||gx>=g.w||gy>=g.h)return 0;
+  return g.explored[gy*g.w+gx];
+}
+function visibleAt(x,y){ return exploredAt(F()[game.me],x,y)>=2 }
+function nodeVisible(n,fi){
+  const f=F()[fi===undefined?game.me:fi];
+  if(!f)return false;
+  if(n.owner===fi)return true;
+  return exploredAt(f,n.x,n.y)>=2;
+}
+function ownerColor(i){
+  if(i<0)return '#8fa4b4';
+  return F()[i]?F()[i].color:'#8fa4b4';
+}
+
+/* ------------------------------ 舰队与舰船 ------------------------------ */
+const KIND_KIND=['bb','ca','cl','dd','de','tb','pt'];
+const KIND_CN=['战列舰','重巡洋舰','轻巡洋舰','驱逐舰','护航舰','鱼雷艇','巡逻艇'];
+function shipKindForTroop(t){
+  if(t>=150)return 0; if(t>=100)return 1; if(t>=64)return 2; if(t>=36)return 3;
+  if(t>=18)return 4; if(t>=8)return 5; return 6;
+}
+function shipForTroop(t,owner,seed){
+  const k=shipKindForTroop(t);
+  const r=mulberry32((seed||1)*2654435761+t);
+  const frac=(r()*0.6+0.7);
+  const len=[62,52,44,34,26,20,15][k]*frac;
+  const beam=[13,11.5,10,8.5,7,5.4,4.2][k]*frac;
+  const dmg=[10,7.4,5.6,4.2,3.1,2.3,1.7][k];
+  const range=[430,410,370,330,300,270,240][k];
+  const reload=[3.6,3.1,2.7,2.2,1.9,1.5,1.15][k];
+  const turretN=[[3,3],[2,2],[2,1],[1,1],[1,1],[1,0],[1,0]][k];
+  let hull='hull', torpedo=false;
+  if(k>=5){hull='sub'; torpedo=true}
+  if(k<=1&&r()<0.42){hull='carrier'}
+  const turn=[0.30,0.36,0.44,0.56,0.66,0.80,0.92][k];
+  return {kind:k,name:KIND_CN[k]+(hull==='sub'?'·潜艇':(hull==='carrier'?'·航母':'')),hull:hull,
+    len:len,beam:beam,dmg:dmg,range:range,reload:reload,turretN:turretN,torpedo:torpedo,
+    turn:turn,speed:[52,56,60,66,70,76,82][k],hp:0,maxHp:0,turrets:[],
+    x:0,y:0,ang:0,ct:r()*reload,torpCt:r()*4,phase:r()*TAU,wake:[],dead:false,hitT:0};
+}
+function fillShipTurrets(sh){
+  sh.turrets=[];
+  const fwd=sh.turretN[0],aft=sh.turretN[1];
+  for(let i=0;i<fwd;i++){const t=(i+0.5)/fwd;sh.turrets.push({x:(0.06+t*0.40)*sh.len,ang:0,rel:0,scale:1-t*0.28,fire:0})}
+  for(let i=0;i<aft;i++){const t=aft===1?0.5:(i+0.5)/aft;sh.turrets.push({x:-(0.10+t*0.30)*sh.len,ang:Math.PI,rel:0,scale:1-t*0.25,fire:0})}
+}
+function spawnFleet(owner,troops,from,to,x,y){
+  if(troops<1)return null;
+  const fl={owner:owner,troops:troops,path:[from,to],pi:0,
+    x:x,y:y,ang:Math.atan2(game.nodes[to].y-game.nodes[from].y,game.nodes[to].x-game.nodes[from].x),
+    speed:0,ships:[],targetNode:to,combat:null,id:(game.fleetId=(game.fleetId||0)+1),
+    delay:0.45, hitT:0};
+  const maxHp=troops*HP_PER_TROOP;
+  const n=clamp(Math.ceil(troops/SHIP_PX),1,SHIP_CAP);
+  for(let i=0;i<n;i++){
+    const s=shipForTroop(troops,owner,fl.id*97+i);
+    s.hp=s.maxHp=Math.max(14,maxHp/n); fillShipTurrets(s);
+    const a=Math.random()*TAU, rr=Math.random()*Math.sqrt(n)*10;
+    s.x=x+Math.cos(a)*rr; s.y=y+Math.sin(a)*rr; s.ang=fl.ang;
+    fl.ships.push(s); game.ships.push(s);
+  }
+  game.fleets.push(fl); game.stats.battles+=0;
+  return fl;
+}
+function mergeFleetIntoNode(fl,n){
+  const before=n.troops;
+  n.troops=Math.min(GROW_CAP,n.troops+fl.troops);
+  n.hp=Math.min(n.hpMax,n.troops*HP_PER_TROOP);
+  fl.dead=true;
+  for(const s of fl.ships)s.dead=true;
+  game.texts.push({x:n.x,y:n.y-30,t:1.1,color:ownerColor(fl.owner),text:'+'+Math.round(fl.troops)});
+}
+function distributeLoss(fl,amount){
+  if(fl.troops<=0||amount<=0)return;
+  let tot=0;for(const s of fl.ships)tot+=s.hp;
+  if(tot<=0)return;
+  const k=Math.min(1,amount/tot);
+  for(const s of fl.ships){
+    s.hp-=s.hp*k*(0.75+Math.random()*0.5); s.hitT=0.25;
+    if(s.hp<=0){s.dead=true;explode(s.x,s.y,Math.random()<0.4?22:12)}
+  }
+  fl.ships=fl.ships.filter(s=>!s.dead);
+}
+function fleetLoss(fl,hpAmount){
+  const t=hpAmount/HP_PER_TROOP;
+  const before=fl.troops;
+  fl.troops=Math.max(0,fl.troops-t);
+  distributeLoss(fl,hpAmount);
+  if(fl.troops<=0.5){
+    for(const s of fl.ships){s.dead=true;explode(s.x,s.y,20)}
+    fl.ships=[];fl.dead=true;
+  }
+  return before-fl.troops;
+}
+function spawnGarrisonShips(){
+  for(const n of game.nodes){
+    if(n.owner<0)continue;
+    const want=clamp(Math.ceil(n.troops/SHIP_PX),1,SHIP_CAP);
+    n.ships=[];
+    const dir=n.ang;
+    for(let i=0;i<want;i++){
+      const s=shipForTroop(n.troops,n.owner,(n.id+1)*131+i*7);
+      s.hp=s.maxHp=Math.max(14,(n.troops*HP_PER_TROOP)/want); fillShipTurrets(s);
+      const a=dir+(Math.random()-0.5)*2.4, rr=n.r*0.5+Math.random()*n.r*1.25;
+      s.x=n.x+Math.cos(a)*rr; s.y=n.y+Math.sin(a)*rr; s.ang=dir+(Math.random()-0.5)*1.2;
+      n.ships.push(s); game.ships.push(s);
+    }
+  }
+}
+function syncNodeShips(n,dt){
+  if(n.owner<0){ n.ships=n.ships||[]; return }
+  n.ships=n.ships.filter(s=>!s.dead);
+  const want=clamp(Math.ceil(n.troops/SHIP_PX),1,SHIP_CAP);
+  const hpEach=Math.max(14,(n.troops*HP_PER_TROOP)/Math.max(1,want));
+  let guard=0;
+  while(n.ships.length<want&&n.ships.length<SHIP_CAP&&guard++<SHIP_CAP){
+    const s=shipForTroop(n.troops,n.owner,(n.id+1)*977+n.ships.length*13+Math.floor(game.time*7));
+    s.hp=s.maxHp=hpEach; fillShipTurrets(s);
+    const a=n.ang+Math.PI+(Math.random()-0.5)*2.0, rr=n.r*1.5+Math.random()*n.r*0.6;
+    s.x=n.x+Math.cos(a)*rr; s.y=n.y+Math.sin(a)*rr; s.ang=n.ang;
+    s.spawnT=0.7; n.ships.push(s); game.ships.push(s);
+  }
+  while(n.ships.length>want&&n.ships.length>1){
+    const s=n.ships.pop(); s.dead=true; explode(s.x,s.y,8);
+  }
+  // 同步血量
+  for(const s of n.ships){
+    if(s.hp<s.maxHp)s.hp=Math.min(s.maxHp,s.hp+dt*hpEach*0.22);
+  }
+  // 锚地巡航
+  for(const s of n.ships){
+    if(s.spawnT>0)s.spawnT-=dt;
+    const orbit=Math.max(n.r*1.5,s.len*1.4);
+    const ta=s.ang;
+    s.ang=angLerp(s.ang,ta,dt*0.4);
+    s.x=n.x+Math.cos(a0(s,t))*(orbit+Math.sin(game.time*0.5+s.phase)*4);
+    s.y=n.y+Math.sin(a0(s,t))*(orbit+Math.cos(game.time*0.43+s.phase)*4);
+  }
+}
+function a0(s,t){ return s.phase + t*0.06*(1+s.phase%2*0.5) }
+
+/* ------------------------------ 战斗 ------------------------------ */
+function explode(x,y,n,big){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*TAU, sp=(big?90:40)*(0.3+Math.random());
+    game.parts.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:0.35+Math.random()*0.5,
+      max:0.85,col:Math.random()<0.5?'#ffd27a':'#ff8a3d',r:1+Math.random()*2.6,kind:'spark'});
+  }
+  game.parts.push({x:x,y:y,vx:0,vy:0,life:0.30,max:0.30,col:'#ffe9b0',r:big?26:14,kind:'flash'});
+}
+function splash(x,y,n){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*TAU, sp=20+Math.random()*45;
+    game.parts.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:0.3+Math.random()*0.4,max:0.7,
+      col:'#bfe6ff',r:1+Math.random()*2,kind:'drop'});
+  }
+}
+function fireBullet(sh,owner,ang,speed,dmg,life,type){
+  const c=Math.cos(sh.ang),si=Math.sin(sh.ang);
+  const bx=sh.x+c*sh.len*0.3, by=sh.y+si*sh.len*0.3;
+  game.bullets.push({x:bx,y:by,vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed,
+    life:life||1.4,max:life||1.4,dmg:dmg,owner:owner,type:type||'shell',r:type==='torp'?3.2:1.6});
+}
+function updateShipsCombat(dt){
+  // 1) 舰队状态与移动
+  for(const fl of game.fleets){
+    if(fl.dead)continue;
+    fl.hitT=Math.max(0,fl.hitT-dt);
+    if(fl.delay>0){fl.delay-=dt}
+    // 遭遇战判定
+    if(!fl.combat){
+      let best=null,bd=1e9;
+      for(const o of game.fleets){
+        if(o===fl||o.dead||o.owner===fl.owner)continue;
+        const d=dist(fl.x,fl.y,o.x,o.y);
+        if(d<Math.max(190,fl.ships.length*6)&&d<bd){bd=d;best=o}
+      }
+      if(best){fl.combat=best;best.combat=best.combat||fl;game.stats.battles++;}
+    }
+    const spd=Math.max(16,SPEED_BASE-fl.troops/SPEED_SLOW);
+    fl.speed=spd;
+    if(fl.combat&&!fl.combat.dead){
+      const o=fl.combat;
+      const d=dist(fl.x,fl.y,o.x,o.y);
+      const want=Math.max(50,fl.ships.length*3+30);
+      let a=Math.atan2(o.y-fl.y,o.x-fl.x);
+      if(d<want-12)a+=Math.PI*0.85; else if(d<want+10)a+=Math.PI*0.25*(fl.id%2?1:-1);
+      // 绕行侧移
+      const tgt=game.nodes[fl.targetNode];
+      if(d>want+14) a=Math.atan2(o.y-fl.y,o.x-fl.x);
+      fl.ang=angLerp(fl.ang,a,dt*1.1);
+      fl.x+=Math.cos(fl.ang)*spd*dt; fl.y+=Math.sin(fl.ang)*spd*dt;
+      if(!o.combat)o.combat=fl;
+    }else{
+      const tgt=game.nodes[fl.path[fl.pi+1]];
+      const from=game.nodes[fl.path[fl.pi]];
+      if(!tgt){mergeFleetIntoNode(fl,from); continue}
+      const ta=Math.atan2(tgt.y-fl.y,tgt.x-fl.x);
+      fl.ang=angLerp(fl.ang,ta,dt*1.8);
+      const arriveR=tgt.r*1.5;
+      fl.x+=Math.cos(fl.ang)*spd*dt; fl.y+=Math.sin(fl.ang)*spd*dt;
+      // 航线进度
+      if(dist(fl.x,fl.y,from.x,from.y)>dist(tgt.x,tgt.y,from.x,from.y)*0.9){fl.pi++}
+      if(dist(fl.x,fl.y,tgt.x,tgt.y)<arriveR){
+        if(fl.pi+1>=fl.path.length-1){
+          arriveFleet(fl,tgt); continue;
+        } else { fl.pi++ }
+      }
+      fl.speed=spd;
+    }
+    // 队形：把船摆在舰队中心后方
+    const n=fl.ships.length;
+    const off=Math.min(120,n*4.6);
+    let i=0;
+    for(const s of fl.ships){
+      if(s.dead)continue;
+      const t=n>1?i/(n-1)-0.5:0;
+      const px=Math.cos(fl.ang+Math.PI/2)*t*Math.min(46,6+n*1.5)+Math.cos(fl.ang+Math.PI)*(-t*off*0.5);
+      const py=Math.sin(fl.ang+Math.PI/2)*t*Math.min(46,6+n*1.5)+Math.sin(fl.ang+Math.PI)*(-t*off*0.5);
+      const tx=fl.x+px,ty=fl.y+py;
+      s.x+=(tx-s.x)*Math.min(1,dt*3.1); s.y+=(ty-s.y)*Math.min(1,dt*3.1);
+      s.ang=angLerp(s.ang,fl.ang,dt*2.0);
+      if(Math.random()<dt*2.4){ s.wake.push({x:s.x,y:s.y,t:1.4,max:1.4}); if(s.wake.length>10)s.wake.shift() }
+      for(const w of s.wake)w.t-=dt;
+      while(s.wake.length&&s.wake[0].t<=0)s.wake.shift();
+      i++;
+    }
+    // 拖尾舰船清理
+    fl.ships=fl.ships.filter(s=>!s.dead);
+  }
+  game.fleets=game.fleets.filter(f=>!f.dead&&f.ships.length>0||(!f.dead&&f.troops>0));
+  // 解除结束的战斗
+  for(const fl of game.fleets){
+    if(fl.combat&&(fl.combat.dead||fl.combat.ships.length===0||dist(fl.x,fl.y,fl.combat.x,fl.combat.y)>460))fl.combat=null;
+  }
+  // 2) 炮击
+  for(const fl of game.fleets){
+    if(fl.dead||fl.delay>0)continue;
+    for(const s of fl.ships){
+      if(s.dead)continue;
+      if(s.hitT>0)s.hitT-=dt;
+      let tgt=null,bd=1e9;
+      for(const o of game.fleets){
+        if(o===fl||o.dead||o.owner===fl.owner)continue;
+        for(const os of o.ships){
+          if(os.dead)continue;
+          const d=dist(s.x,s.y,os.x,os.y);
+          if(d<s.range&&d<bd){bd=d;tgt=os}
+        }
+      }
+      updateShipGuns(s,tgt,dt,fl);
+    }
+  }
+}
+function updateShipGuns(s,tgt,dt,fl){
+  let aim=tgt?Math.atan2(tgt.y-s.y,tgt.x-s.x):s.ang;
+  const canFire=tgt&&dist(s.x,s.y,tgt.x,tgt.y)<s.range*0.98;
+  let ok=0;
+  for(const t of s.turrets){
+    if(t.fire>0)t.fire-=dt;
+    const local=norm(aim-s.ang);
+    const reach=t.x>=0?1.15:1.45;
+    let want=clamp(local,-reach,reach);
+    const prev=t.rel;
+    t.rel=angLerp(t.rel,want,dt*(t.x>=0?1.9:1.5));
+    t.ang=s.ang+t.rel;
+    if(canFire&&Math.abs(norm(t.ang-aim))<0.14){
+      if(t.fire<=0){
+        t.fire=s.reload*(0.9+Math.random()*0.2);
+        const a=t.ang+(Math.random()-0.5)*0.045;
+        fireBullet(s,s._owner===undefined?-9:s._owner,a,330,s.dmg,1.5,'shell');
+        // 修正：owner 由上层赋值
+        const b=game.bullets[game.bullets.length-1]; b.owner=fl?fl.owner:s.owner;
+        b.dmg=s.dmg; b.fromShip=s;
+        muzzle(s,t);
+      }
+      ok++;
+    }
+  }
+  if(canFire&&s.torpedo){
+    s.torpCt-=dt;
+    if(s.torpCt<=0&&dist(s.x,s.y,tgt.x,tgt.y)<300&&Math.abs(norm(s.ang-aim))<1.2){
+      s.torpCt=4.2;
+      const a=s.ang+(Math.random()-0.5)*0.18;
+      game.bullets.push({x:s.x,y:s.y,vx:Math.cos(a)*150,vy:Math.sin(a)*150,life:2.6,max:2.6,
+        dmg:s.dmg*2.6,owner:fl?fl.owner:s.owner,type:'torp',r:3.4,ang:a,fromShip:s});
+      Snd.torp();
+    }
+  }
+}
+function muzzle(s,t){
+  game.parts.push({x:s.x+Math.cos(t.ang)*s.len*0.32,y:s.y+Math.sin(t.ang)*s.len*0.32,vx:0,vy:0,
+    life:0.09,max:0.09,col:'#fff3c4',r:5,kind:'flash'});
+  Snd.shot(0.5);
+}
+function arriveFleet(fl,n){
+  if(n.owner===fl.owner){
+    mergeFleetIntoNode(fl,n); Snd.cap(); return;
+  }
+  // 战斗结算
+  const ratio = fl.path.length<=2 ? 1 : RATIO_FAR;
+  if(ratio<1){ fl.troops=Math.max(1,fl.troops*ratio); }
+  const def=n.troops;
+  game.stats.battles++;
+  if(fl.troops>def){
+    const surv=fl.troops-def;
+    const old=n.owner;
+    n.owner=fl.owner; n.troops=Math.round(surv); n.flashT=1.2;
+    for(const s of n.ships){if(s)s.dead=true}
+    n.ships=[]; spawnGarrisonShipsFor(n);
+    fl.dead=true; for(const s of fl.ships)s.dead=true;
+    explode(n.x,n.y,26,true); Snd.cap();
+    if(old>=0&&F()[old]&&factionPortCount(old)===0){F()[old].alive=false;onFactionDead(old)}
+    pushTick((old<0?'占领 ':'夺取 ')+ownerName(fl.owner)+' → '+n.name);
+    checkVictory();
+    Snd.boom(1);
+  }else{
+    n.troops=Math.max(1,def-fl.troops);
+    n.hp=n.troops*HP_PER_TROOP; n.flashT=1.0;
+    explode(fl.x,fl.y,20,true); Snd.boom(0.8);
+    splash(fl.x,fl.y,14);
+    fl.dead=true; for(const s of fl.ships)s.dead=true;
+  }
+  stampVision(F()[fl.owner]);
+}
+function spawnGarrisonShipsFor(n){
+  const want=clamp(Math.ceil(n.troops/SHIP_PX),1,SHIP_CAP);
+  const dir=n.ang;
+  for(let i=0;i<want;i++){
+    const s=shipForTroop(n.troops,n.owner,(n.id+1)*617+i*3);
+    s.hp=s.maxHp=Math.max(14,(n.troops*HP_PER_TROOP)/want); fillShipTurrets(s);
+    const a=dir+(Math.random()-0.5)*2.4, rr=n.r*0.5+Math.random()*n.r*1.25;
+    s.x=n.x+Math.cos(a)*rr; s.y=n.y+Math.sin(a)*rr; s.ang=dir;
+    n.ships.push(s); game.ships.push(s);
+  }
+}
+function updateBullets(dt){
+  const bs=game.bullets;
+  for(let i=bs.length-1;i>=0;i--){
+    const b=bs[i];
+    b.life-=dt;
+    if(b.life<=0){ if(b.type==='torp')splash(b.x,b.y,5); bs.splice(i,1); continue }
+    const arr=b.type==='torp'?0.55:1;
+    b.x+=b.vx*dt*arr; b.y+=b.vy*dt*arr;
+    if(b.type==='torp')b.ang=Math.atan2(b.vy,b.vx);
+    if(b.x<0||b.y<0||b.x>MAPW||b.y>MAPH){bs.splice(i,1);continue}
+    // 命中舰队舰船
+    let hit=null;
+    for(const fl of game.fleets){
+      if(fl.dead||fl.owner===b.owner)continue;
+      for(const s of fl.ships){
+        if(s.dead)continue;
+        const rr=b.type==='torp'?18:(s.len*0.45);
+        if(dist2(b.x,b.y,s.x,s.y)<rr*rr){hit={ship:s,fleet:fl};break}
+      }
+      if(hit)break;
+    }
+    // 旗舰
+    if(!hit&&game.flagship&&!game.flagship.dead&&game.flagship.owner!==b.owner){
+      const f=game.flagship;
+      if(dist2(b.x,b.y,f.x,f.y)<26*26)hit={flag:true};
+    }
+    if(hit){
+      if(hit.ship){
+        const mult=(b.type==='torp'&&hit.ship.kind<=3)?2.0:1;
+        hit.ship.hp-=b.dmg*mult; hit.ship.hitT=0.3;
+        if(hit.ship.hp<=0){
+          hit.ship.dead=true; explode(hit.ship.x,hit.ship.y,14,true); Snd.boom(0.5);
+          const fl=hit.fleet;
+          const loss=1; // 单位换算在外层
+          fl.troops=Math.max(0,fl.troops-fl.troops/fl.ships.length);
+        }else if(b.type!=='shell'){
+          explode(b.x,b.y,6);
+        } else {
+          game.parts.push({x:b.x,y:b.y,vx:0,vy:0,life:0.18,max:0.18,col:'#fff0c0',r:4,kind:'flash'});
+        }
+      }else if(hit.flag){
+        damageFlagship(b.dmg*(b.type==='torp'?1.6:1),b.owner,b.x,b.y);
+      }
+      if(b.type==='torp')explode(b.x,b.y,10,true);
+      bs.splice(i,1);
+      // 舰队全灭
+      continue;
+    }
+    if(b.type==='torp'&&Math.random()<dt*8){
+      game.parts.push({x:b.x,y:b.y,vx:-b.vx*0.05,vy:-b.vy*0.05,life:0.5,max:0.5,col:'#cfeaff',r:1.4,kind:'drop'});
+    }
+  }
+  // 全灭舰队结算
+  for(const fl of game.fleets){
+    if(fl.dead)continue;
+    fl.ships=fl.ships.filter(s=>!s.dead);
+    if(fl.ships.length===0){fl.dead=true; game.parts.push({x:fl.x,y:fl.y,vx:0,vy:0,life:0.4,max:0.4,col:'#ffcf8a',r:22,kind:'flash'})}
+    else{
+      // 血量与兵力挂钩
+      let hp=0;for(const s of fl.ships)hp+=s.hp;
+      const want=Math.max(1,hp/HP_PER_TROOP);
+      if(fl.troops>want)fl.troops=want;
+    }
+  }
+  game.fleets=game.fleets.filter(f=>!f.dead);
+}
+function damageFlagship(dmg,byOwner,x,y){
+  const f=game.flagship; if(!f||f.dead)return;
+  f.hp-=dmg; f.hitT=0.3;
+  explode(x,y,7);
+  if(f.hp<=0){
+    f.dead=true;
+    explode(f.x,f.y,40,true); Snd.boom(1.2);
+    pushTick('旗舰被击沉！');
+    splash(f.x,f.y,26);
+  }
+}
+
+/* ------------------------------ 岛屿更新 ------------------------------ */
+function updateNodes(dt){
+  for(const n of game.nodes){
+    n.flashT=Math.max(0,n.flashT-dt*1.6);
+    n.rippleT+=dt;
+    if(n.owner<0){
+      // 中立缓慢回血
+      const def=n.troops;
+      const regen=n.kind==='fort'?0.9:n.kind==='lighthouse'?0.5:0.6;
+      if(n.troops<n.max){ n.troops=Math.min(n.max,n.troops+regen*dt); n.hp=n.troops*HP_PER_TROOP }
+      continue;
+    }
+    const cap = n.max*(1+n.level*0.55);
+    const inc = n.rate*(1+n.level*0.5)*(1+ (n.kind==='port'?0.15:0)) * F()[n.owner].econ;
+    if(n.troops<cap){
+      n.grow+=inc*dt;
+      if(n.grow>=1){
+        const add=Math.floor(n.grow); n.grow-=add;
+        n.troops=Math.min(cap,n.troops+add);
+      }
+    }
+    n.hpMax=n.troops*HP_PER_TROOP;
+    if(n.hp<n.hpMax)n.hp=Math.min(n.hpMax,n.hp+n.hpMax*0.06*dt);
+    syncNodeShips(n,dt);
+  }
+  // 舰队舰船清理
+  game.ships=game.ships.filter(s=>!s.dead);
+}
+function updateParticles(dt){
+  for(let i=game.parts.length-1;i>=0;i--){
+    const p=game.parts[i]; p.life-=dt;
+    if(p.life<=0){game.parts.splice(i,1);continue}
+    if(p.kind!=='flash'){
+      p.x+=p.vx*dt; p.y+=p.vy*dt; p.vx*=0.94; p.vy*=0.94;
+    }
+  }
+  for(let i=game.texts.length-1;i>=0;i--){
+    const t=game.texts[i]; t.t-=dt; t.y-=dt*22;
+    if(t.t<=0)game.texts.splice(i,1);
+  }
+}
+
+/* ------------------------------ 玩家操作 ------------------------------ */
+function nodeAtWorld(x,y){
+  let best=null,bd=1e9;
+  for(const n of game.nodes){
+    const d=dist(x,y,n.x,n.y);
+    const rr=Math.max(n.r*2.1,52);
+    if(d<rr&&d<bd&&nodeVisible(n)){bd=d;best=n}
+  }
+  return best;
+}
+function fleetAtWorld(x,y){
+  let best=null,bd=1e9;
+  for(const f of game.fleets){
+    if(f.owner===game.me)continue;
+    const d=dist(x,y,f.x,f.y);
+    if(d<70&&d<bd&&visibleAt(f.x,f.y)){bd=d;best=f}
+  }
+  return best;
+}
+let pathCache={};
+function findPath(a,b){
+  if(a===b)return null;
+  const key=a+'>'+b;
+  if(pathCache[key]!==undefined)return pathCache[key];
+  const prev=new Int16Array(game.nodes.length).fill(-1);
+  const vis=new Uint8Array(game.nodes.length);
+  const q=[a];vis[a]=1;let found=false;
+  while(q.length){
+    const v=q.shift();
+    if(v===b){found=true;break}
+    for(const w of game.nodes[v].nb){
+      if(vis[w])continue; vis[w]=1; prev[w]=v; q.push(w);
+    }
+  }
+  if(!found){pathCache[key]=null;return null}
+  const path=[b];let cur=b;
+  while(cur!==a){cur=prev[cur];if(cur<0)return null;path.push(cur)}
+  path.reverse();
+  pathCache[key]=path;
+  return path;
+}
+function playerSend(src,dst){
+  if(!src||!dst||src.owner!==game.me)return;
+  if(src.troops<4)return;
+  const send=Math.floor(src.troops*0.6);
+  if(send<2)return;
+  const path=findPath(src.id,dst.id);
+  if(!path){pushTick('没有可用的海路');return}
+  src.troops=Math.max(2,src.troops-send);
+  src.hp=Math.min(src.hp,src.troops*HP_PER_TROOP);
+  src.grow=0;
+  const fl=spawnFleet(game.me,send,src.id,dst.id,src.x,src.y);
+  fl.path=path;
+  if(path.length>2){
+    pushTick('远程增援：'+send+' 舰 折损 50%');
+  }
+  Snd.click();
+  stampVision(F()[game.me]);
+}
+function pushTick(text){
+  const el=document.getElementById('ticker');
+  const d=document.createElement('div'); d.className='tick'; d.textContent=text;
+  el.appendChild(d);
+  setTimeout(()=>{if(d.parentNode)d.parentNode.removeChild(d)},3500);
+  while(el.children.length>4)el.removeChild(el.firstChild);
+}
+function launchedFlagship(){
+  const fl=game.flagship;
+  if(fl&&!fl.dead){ dockFlagship(); return }
+  // 找一个最强的己方岛
+  let best=null;
+  for(const n of game.nodes)if(n.owner===game.me&&(!best||n.troops>best.troops))best=n;
+  if(!best){pushTick('已无港口可出海');return}
+  const troops=Math.min(120,Math.max(40,Math.floor(best.troops*0.5)));
+  if(best.troops-troops<8){pushTick('兵力不足，无法出海');return}
+  best.troops-=troops; best.grow=0;
+  game.flagship={owner:game.me,x:best.x,y:best.y,ang:best.ang,troops:troops,
+    hp:troops*HP_PER_TROOP*1.6,maxHp:troops*HP_PER_TROOP*1.6,
+    vx:0,vy:0,kind:0,hitT:0,torpCt:0,ship:null};
+  const s=shipForTroop(200,game.me,999); fillShipTurrets(s);
+  s.torpedo=true; s.kind=0; s.name='旗舰·战列舰';
+  game.flagship.ship=s;
+  pushTick('旗舰出海！亲自操舵');
+  Snd.cap();
+  cam.tz=Math.min(1.5,cam.z*1.15);
+}
+function dockFlagship(){
+  const fl=game.flagship;
+  if(!fl||fl.dead){game.flagship=null;return}
+  let best=null,bd=1e9;
+  for(const n of game.nodes)if(n.owner===game.me){
+    const d=dist(fl.x,fl.y,n.x,n.y); if(d<bd){bd=d;best=n}
+  }
+  if(best){
+    best.troops=Math.min(GROW_CAP,best.troops+fl.troops);
+    game.texts.push({x:best.x,y:best.y-30,t:1.2,color:ownerColor(game.me),text:'旗舰归队 +'+Math.round(fl.troops)});
+  }
+  game.flagship=null;
+  pushTick('旗舰已归港');
+}
+function updateFlagship(dt){
+  const f=game.flagship; if(!f)return;
+  if(f.dead){game.flagship=null;return}
+  f.hitT=Math.max(0,f.hitT-dt);
+  const k=Keys;
+  let ax=0,ay=0;
+  if(k['w']||k['arrowup'])ay-=1;
+  if(k['s']||k['arrowdown'])ay+=1;
+  if(k['a']||k['arrowleft'])ax-=1;
+  if(k['d']||k['arrowright'])ax+=1;
+  const l=Math.hypot(ax,ay)||1; ax/=l; ay/=l;
+  const accel=210, maxSpd=190;
+  f.vx+=ax*accel*dt; f.vy+=ay*accel*dt;
+  f.vx*=Math.pow(0.12,dt); f.vy*=Math.pow(0.12,dt);
+  const sp=Math.hypot(f.vx,f.vy);
+  if(sp>maxSpd){f.vx*=maxSpd/sp;f.vy*=maxSpd/sp}
+  f.x=clamp(f.x+f.vx*dt,40,MAPW-40); f.y=clamp(f.y+f.vy*dt,40,MAPH-40);
+  const ma=Math.atan2(Mouse.wy-f.y,Mouse.wx-f.x);
+  f.ang=angLerp(f.ang,ma,dt*4.5);
+  // 武器
+  const sh=f.ship; sh.x=f.x; sh.y=f.y; sh.ang=f.ang; sh.owner=game.me;
+  const tgtPoint={x:Mouse.wx,y:Mouse.wy};
+  let autoT=null,ad=1e9;
+  if(game.autoFire){
+    for(const o of game.fleets){
+      if(o.owner===game.me)continue;
+      for(const s of o.ships){
+        const d=dist(f.x,f.y,s.x,s.y);
+        if(d<520&&d<ad){ad=d;autoT=s}
+      }
+    }
+  }
+  const aim=autoT?Math.atan2(autoT.y-f.y,autoT.x-f.x):ma;
+  sh.dmg=12; sh.reload=0.75; sh.range=520;
+  for(const t of sh.turrets){
+    const local=norm(aim-f.ang);
+    let want=clamp(local,-1.35,1.35);
+    t.rel=angLerp(t.rel,want,dt*3.0);
+    t.ang=f.ang+t.rel;
+    if(t.fire>0)t.fire-=dt;
+    if(t.fire<=0&&Math.abs(norm(t.ang-aim))<0.10){
+      t.fire=sh.reload;
+      const a=t.ang+(Math.random()-0.5)*0.04;
+      game.bullets.push({x:f.x+Math.cos(a)*30,y:f.y+Math.sin(a)*30,vx:Math.cos(a)*400,vy:Math.sin(a)*400,
+        life:1.5,max:1.5,dmg:9,owner:game.me,type:'shell',r:1.7,fromShip:sh});
+      muzzle(sh,t);
+    }
+  }
+  if(sh.torpedo){
+    f.torpCt-=dt;
+    if((Mouse.rdown||k[' '])&&f.torpCt<=0){
+      f.torpCt=2.4;
+      const a=f.ang+(Math.random()-0.5)*0.1;
+      game.bullets.push({x:f.x+Math.cos(a)*24,y:f.y+Math.sin(a)*24,vx:Math.cos(a)*230,vy:Math.sin(a)*230,
+        life:3.0,max:3.0,dmg:26,owner:game.me,type:'torp',r:3.6,ang:a,fromShip:sh});
+      Snd.torp();
+    }
+  }
+  // 撞岛：兵力不足以登陆则弹开
+  for(const n of game.nodes){
+    const d=dist(f.x,f.y,n.x,n.y);
+    if(d<n.r*1.35){
+      if(n.owner!==game.me&&f.troops>n.troops&&n.owner>=0){
+        // 直接强攻
+        f.troops-=n.troops; n.owner=game.me; n.troops=Math.round(f.troops*0.9);
+        pushTick('旗舰强攻占领 '+n.name);
+        n.flashT=1.2; spawnGarrisonShipsFor(n); Snd.cap(); checkVictory();
+      }else if(n.owner!==game.me&&n.owner<0&&f.troops>n.troops){
+        f.troops-=n.troops; n.owner=game.me; n.troops=Math.round(f.troops*0.9);
+        pushTick('旗舰登陆占领 '+n.name);
+        n.flashT=1.2; spawnGarrisonShipsFor(n); Snd.cap(); checkVictory();
+      }
+      // 推开
+      const a=Math.atan2(f.y-n.y,f.x-n.x);
+      f.x=n.x+Math.cos(a)*(n.r*1.35+1); f.y=n.y+Math.sin(a)*(n.r*1.35+1);
+      f.vx*=-0.2; f.vy*=-0.2;
+      break;
+    }
+  }
+  if(Math.random()<dt*20){
+    splash(f.x-Math.cos(f.ang)*34,f.y-Math.sin(f.ang)*34,1);
+  }
+  cam.x=lerp(cam.x,f.x,Math.min(1,dt*5));
+  cam.y=lerp(cam.y,f.y,Math.min(1,dt*5));
+}
+
+/* ------------------------------ AI ------------------------------ */
+function ownerName(i){return i<0?'中立':F()[i]?F()[i].name:'?'}
+function onFactionDead(i){
+  pushTick('⚑ '+F()[i].name+' 已被消灭');
+}
+function aiThink(f,dt){
+  if(!f.ai||!f.alive)return;
+  f.nextThink-=dt;
+  if(f.nextThink>0)return;
+  const D=DIFFS[game.diff];
+  f.nextThink=D.think[0]+Math.random()*(D.think[1]-D.think[0]);
+  const mine=game.nodes.filter(n=>n.owner===f.id);
+  if(!mine.length){return}
+  // 升级
+  if(Math.random()<0.35){
+    let best=null;
+    for(const n of mine)if(n.level<3&&(!best||n.rate*(1+n.level)>best.rate*(1+best.level)))best=n;
+    if(best&&best.level<3)best.level++;
+  }
+  // 威胁判断
+  const threats=[];
+  for(const fl of game.fleets){
+    if(fl.owner===f.id)continue;
+    const n=game.nodes[fl.targetNode];
+    if(n&&n.owner===f.id){
+      threats.push({node:n,amt:fl.troops,eta:dist(fl.x,fl.y,n.x,n.y)/Math.max(20,fl.speed)});
+    }
+  }
+  for(const t of threats){
+    if(t.amt*D.hold>t.node.troops){
+      // 救援
+      const src=mine.filter(n=>n!==t.node)
+        .sort((a,b)=>dist(a.x,a.y,t.node.x,t.node.y)-dist(b.x,b.y,t.node.x,t.node.y))[0];
+      if(src&&src.troops>t.amt*0.6+10){
+        const path=findPath(src.id,t.node.id);
+        if(path){
+          const send=Math.floor(src.troops*0.7);
+          src.troops-=send; src.grow=0;
+          const fl=spawnFleet(f.id,send,src.id,t.node.id,src.x,src.y);
+          if(fl)fl.path=path;
+          return;
+        }
+      }
+    }
+  }
+  // 进攻
+  const T=DIFFS[game.diff];
+  const cands=[];
+  for(const n of mine){
+    if(n.troops<14)continue;
+    const isFrontier=n.nb.some(j=>game.nodes[j].owner!==f.id);
+    if(!isFrontier&&Math.random()>0.25)continue;
+    for(const j of n.nb){
+      const o=game.nodes[j];
+      if(o.owner===f.id)continue;
+      const distFact=1/Math.max(0.4,dist(n.x,n.y,o.x,o.y)/300);
+      const value=(o.kind==='port'?1.5:o.kind==='fort'?1.25:o.kind==='lighthouse'?1.1:1);
+      const frontierBonus=o.nb.filter(k=>game.nodes[k].owner===f.id).length*0.22;
+      const score=(n.troops-o.troops*T.aggro*1.35)*value*(1+frontierBonus)*distFact;
+      if(n.troops>o.troops*T.aggro+6) cands.push({src:n,dst:o,score:score});
+    }
+  }
+  if(cands.length){
+    cands.sort((a,b)=>b.score-a.score);
+    const pick=cands[Math.floor(Math.random()*Math.min(3,cands.length))];
+    const send=Math.floor(pick.src.troops*(0.55+Math.random()*0.3));
+    if(send>=6){
+      pick.src.troops-=send; pick.src.grow=0;
+      const fl=spawnFleet(f.id,send,pick.src.id,pick.dst.id,pick.src.x,pick.src.y);
+      if(fl){ fl.path=[pick.src.id,pick.dst.id]; }
+      return;
+    }
+  }
+  // 后方岛支援前线
+  const rear=mine.filter(n=>n.troops>40&&n.nb.every(j=>game.nodes[j].owner===f.id));
+  if(rear.length){
+    const src=rear.sort((a,b)=>b.troops-a.troops)[0];
+    const front=mine.filter(n=>n.nb.some(j=>game.nodes[j].owner!==f.id))
+      .sort((a,b)=>dist(src.x,src.y,a.x,a.y)-dist(src.x,src.y,b.x,b.y))[0];
+    if(front&&front!==src&&src.troops>45){
+      const path=findPath(src.id,front.id);
+      if(path&&path.length>1){
+        const send=Math.floor(src.troops*0.5);
+        src.troops-=send; src.grow=0;
+        const fl=spawnFleet(f.id,send,src.id,front.id,src.x,src.y);
+        if(fl)fl.path=path;
+      }
+    }
+  }
+}
+
+/* ------------------------------ 胜负 ------------------------------ */
+function checkVictory(){
+  let aliveCount=0;
+  for(const f of F())if(factionPortCount(f.id)>0)f.alive=true,aliveCount++;else f.alive=false;
+  const mineCount=factionPortCount(game.me);
+  if(mineCount===0){ endGame(false,'你的舰队全军覆没'); return }
+  const owned=game.nodes.filter(n=>n.owner===game.me).length;
+  if(owned/game.nodes.length>=0.65){ endGame(true,'制海权已达 65%'); return }
+  if(aliveCount===1&&mineCount>0){ endGame(true,'所有敌对势力已被清除'); return }
+}
+function endGame(win,why){
+  if(game.phase==='over')return;
+  game.phase='over';
+  game.winner=win?game.me:-1;
+  const ov=document.getElementById('over');
+  document.getElementById('ovTitle').textContent=win?'制 海 权 达 成':'舰 队 覆 灭';
+  document.getElementById('ovTitle').style.color=win?'#8dffc4':'#ff8f8f';
+  const own=game.nodes.filter(n=>n.owner===game.me).length;
+  document.getElementById('ovSub').innerHTML=
+    (why||'')+'<br>控制海域 '+own+' / '+game.nodes.length+' &nbsp;·&nbsp; 现存舰船 '+Math.floor(factionShipTotal(game.me))+
+    '<br>交战次数 '+game.stats.battles+' &nbsp;·&nbsp; 用时 '+Math.floor(game.time)+' 秒';
+  ov.style.display='flex';
+  if(win)Snd.cap(); else Snd.lose();
+}
+
+/* ------------------------------ 渲染：世界 ------------------------------ */
+function drawSea(t){
+  const r=camRect(80);
+  ctxG.fillStyle='#05080e';
+  ctxG.fillRect(0,0,view.W,view.H);
+  // 深海渐变
+  const g=ctxG.createRadialGradient(view.W*0.5,view.H*0.42,10,view.W*0.5,view.H*0.5,Math.max(view.W,view.H)*0.78);
+  g.addColorStop(0,'#0a2036'); g.addColorStop(0.55,'#071726'); g.addColorStop(1,'#03080f');
+  ctxG.fillStyle=g; ctxG.fillRect(0,0,view.W,view.H);
+  // 水深色块（大格）
+  ctxG.save();
+  ctxG.globalAlpha=0.5;
+  const gs=170;
+  const x0=Math.floor(r.x0/gs)*gs, y0=Math.floor(r.y0/gs)*gs;
+  for(let x=x0;x<r.x1;x+=gs){
+    for(let y=y0;y<r.y1;y+=gs){
+      const h=Math.sin(x*0.013)*Math.cos(y*0.011)+Math.sin((x+y)*0.004);
+      if(h>0.55){ctxG.fillStyle='rgba(20,66,96,.30)';ctxG.fillRect(w2sx(x),w2sy(y),gs*cam.z+1,gs*cam.z+1)}
+    }
+  }
+  ctxG.restore();
+  // 波纹
+  ctxG.strokeStyle='rgba(120,200,255,.055)'; ctxG.lineWidth=Math.max(1,1.2*cam.z);
+  const wl=120;
+  const wy0=Math.floor(r.y0/wl)*wl;
+  for(let y=wy0;y<r.y1;y+=wl){
+    ctxG.beginPath();
+    for(let x=Math.max(r.x0-200,0);x<Math.min(r.x1+200,MAPW);x+=26){
+      const yy=y+Math.sin(x*0.006+t*0.35)*16+Math.cos(x*0.0031-t*0.22)*10;
+      const sx=w2sx(x),sy=w2sy(yy);
+      if(x<=r.x0-200+1)ctxG.moveTo(sx,sy); else ctxG.lineTo(sx,sy);
+    }
+    ctxG.stroke();
+  }
+  // 地图边界
+  ctxG.strokeStyle='rgba(110,190,255,.16)'; ctxG.lineWidth=2;
+  ctxG.strokeRect(w2sx(0),w2sy(0),MAPW*cam.z,MAPH*cam.z);
+}
+function drawIsland(n,t){
+  const sx=w2sx(n.x),sy=w2sy(n.y),z=cam.z;
+  if(sx<-260||sy<-260||sx>view.W+260||sy>view.H+260)return;
+  const col=ownerColor(n.owner);
+  ctxG.save();
+  ctxG.translate(sx,sy);
+  // 浅海光晕
+  const gl=ctxG.createRadialGradient(0,0,n.r*z*1.4,0,0,n.r*z*3.4);
+  gl.addColorStop(0,'rgba(90,190,255,.16)'); gl.addColorStop(1,'rgba(90,190,255,0)');
+  ctxG.fillStyle=gl; ctxG.beginPath(); ctxG.arc(0,0,n.r*z*3.4,0,TAU); ctxG.fill();
+  // 暗礁环
+  ctxG.beginPath(); ctxG.arc(0,0,n.r*z*2.05,0,TAU); ctxG.fillStyle='rgba(16,44,66,.75)'; ctxG.fill();
+  // 沙滩
+  ctxG.beginPath();
+  for(let i=0;i<n.beach.length;i++){const p=n.beach[i];const x=p[0]*z,y=p[1]*z;i?ctxG.lineTo(x,y):ctxG.moveTo(x,y)}
+  ctxG.closePath(); ctxG.fillStyle='#c8b184'; ctxG.fill();
+  // 陆地
+  ctxG.beginPath();
+  for(let i=0;i<n.poly.length;i++){const p=n.poly[i];const x=p[0]*z,y=p[1]*z;i?ctxG.lineTo(x,y):ctxG.moveTo(x,y)}
+  ctxG.closePath();
+  ctxG.fillStyle='#3f6b45'; ctxG.fill();
+  ctxG.strokeStyle='rgba(10,26,16,.5)'; ctxG.lineWidth=Math.max(1,1.2*z); ctxG.stroke();
+  // 内部高光
+  ctxG.globalAlpha=0.4;
+  ctxG.beginPath();
+  for(let i=0;i<n.poly.length;i++){const p=n.poly[i];const x=p[0]*z*0.62,y=p[1]*z*0.62;i?ctxG.lineTo(x,y):ctxG.moveTo(x,y)}
+  ctxG.closePath(); ctxG.fillStyle='#4d8154'; ctxG.fill();
+  ctxG.globalAlpha=1;
+  // 树/建筑
+  if(z>0.5){
+    for(const tr of n.trees){
+      const x=tr.x*z,y=tr.y*z,s=tr.s*z*0.5;
+      ctxG.fillStyle=tr.h>0.25?'#2c5836':'#356742';
+      ctxG.beginPath(); ctxG.arc(x,y,s,0,TAU); ctxG.fill();
+    }
+  }
+  // 码头
+  const dx=Math.cos(n.ang)*n.r*z*1.85, dy=Math.sin(n.ang)*n.r*z*1.85;
+  ctxG.strokeStyle='#7a6a4e'; ctxG.lineWidth=Math.max(2,3*z);
+  ctxG.beginPath(); ctxG.moveTo(Math.cos(n.ang)*n.r*z*1.3,Math.sin(n.ang)*n.r*z*1.3); ctxG.lineTo(dx,dy); ctxG.stroke();
+  ctxG.fillStyle=col; ctxG.beginPath(); ctxG.arc(dx,dy,Math.max(2,3.4*z),0,TAU); ctxG.fill();
+  // 势力色环
+  if(n.owner>=0){
+    ctxG.strokeStyle=col; ctxG.lineWidth=Math.max(2.5,4.2*z);
+    ctxG.globalAlpha=0.9;
+    ctxG.beginPath(); ctxG.arc(0,0,n.r*z*1.42,0,TAU); ctxG.stroke();
+    ctxG.globalAlpha=0.22;
+    ctxG.beginPath(); ctxG.arc(0,0,n.r*z*1.42,0,TAU);
+    ctxG.strokeStyle=col; ctxG.lineWidth=Math.max(7,13*z); ctxG.stroke();
+    ctxG.globalAlpha=1;
+  }else{
+    ctxG.setLineDash([Math.max(4,7*z),Math.max(4,6*z)]);
+    ctxG.strokeStyle='rgba(190,215,235,.42)'; ctxG.lineWidth=Math.max(1.5,2.4*z);
+    ctxG.beginPath(); ctxG.arc(0,0,n.r*z*1.42,0,TAU); ctxG.stroke();
+    ctxG.setLineDash([]);
+  }
+  // 占领闪光
+  if(n.flashT>0){
+    ctxG.globalAlpha=n.flashT*0.55;
+    ctxG.fillStyle='#fff'; ctxG.beginPath(); ctxG.arc(0,0,n.r*z*2.2,0,TAU); ctxG.fill();
+    ctxG.globalAlpha=1;
+  }
+  // 类型标记
+  if(z>0.42){
+    ctxG.fillStyle='rgba(225,240,255,.85)';
+    ctxG.font='600 '+Math.round(clamp(11*z,8,13))+'px "Segoe UI",Microsoft YaHei,sans-serif';
+    ctxG.textAlign='center'; ctxG.textBaseline='middle';
+    const mark={port:'⚓',farm:'❋',fort:'▲',lighthouse:'✷'}[n.kind]||'·';
+    ctxG.globalAlpha=0.75;
+    ctxG.fillText(mark,0,-n.r*z*2.15);
+    ctxG.globalAlpha=1;
+  }
+  ctxG.restore();
+  if(!visibleAt(n.x,n.y))return;
+  // 驻军数字 + 血条
+  const fs=Math.round(clamp(17*z,11,26));
+  ctxG.font='700 '+fs+'px "Segoe UI",Microsoft YaHei,sans-serif';
+  ctxG.textAlign='center'; ctxG.textBaseline='middle';
+  const label=String(Math.round(n.troops));
+  ctxG.lineWidth=Math.max(2.5,3.6*z); ctxG.strokeStyle='rgba(2,8,14,.85)';
+  ctxG.strokeText(label,sx,sy-n.r*z*3.0);
+  ctxG.fillStyle=n.owner<0?'#e6eef6':col;
+  ctxG.fillText(label,sx,sy-n.r*z*3.0);
+  if(n.owner>=0&&n.hp<n.hpMax-0.5){
+    const w=Math.max(30,n.r*z*2.4), h=Math.max(2.5,4*z);
+    const yy=sy+n.r*z*2.35;
+    ctxG.fillStyle='rgba(4,10,18,.8)'; ctxG.fillRect(sx-w/2,yy,w,h);
+    ctxG.fillStyle=col; ctxG.fillRect(sx-w/2,yy,w*clamp(n.hp/n.hpMax,0,1),h);
+  }
+  if(game.sel===n){
+    ctxG.strokeStyle='rgba(160,240,255,.9)'; ctxG.lineWidth=2;
+    ctxG.setLineDash([6,5]);
+    ctxG.beginPath(); ctxG.arc(sx,sy,n.r*z*2.5+4+Math.sin(game.time*4)*2,0,TAU); ctxG.stroke();
+    ctxG.setLineDash([]);
+  }
+}
+function drawEdge(e,t){
+  const A=game.nodes[e.a],B=game.nodes[e.b];
+  const vA=visibleAt(A.x,A.y),vB=visibleAt(B.x,B.y);
+  if(!vA&&!vB)return;
+  const x1=w2sx(A.x),y1=w2sy(A.y),x2=w2sx(B.x),y2=w2sy(B.y);
+  const mx=(x1+x2)/2,my=(y1+y2)/2;
+  const nx=-(y2-y1),ny=(x2-x1),l=Math.hypot(nx,ny)||1;
+  const cx=mx+nx/l*e.curve*Math.hypot(x2-x1,y2-y1)*0.5;
+  const cy=my+ny/l*e.curve*Math.hypot(x2-x1,y2-y1)*0.5;
+  const same=A.owner>=0&&A.owner===B.owner;
+  ctxG.save();
+  ctxG.beginPath(); ctxG.moveTo(x1,y1); ctxG.quadraticCurveTo(cx,cy,x2,y2);
+  if(same){
+    ctxG.strokeStyle=ownerColor(A.owner);
+    ctxG.globalAlpha=0.30; ctxG.lineWidth=Math.max(3,7*cam.z); ctxG.stroke();
+    ctxG.globalAlpha=0.85; ctxG.lineWidth=Math.max(1.2,2*cam.z); ctxG.stroke();
+    // 流动光点表示兵力输送
+    const ph=(t*0.25+e.a*0.13)%1;
+    const px=quad(x1,cx,x2,ph), py=quad(y1,cy,y2,ph);
+    ctxG.globalAlpha=0.95; ctxG.fillStyle=ownerColor(A.owner);
+    ctxG.beginPath(); ctxG.arc(px,py,Math.max(1.6,2.6*cam.z),0,TAU); ctxG.fill();
+  }else{
+    ctxG.strokeStyle='rgba(150,190,225,.16)';
+    ctxG.setLineDash([Math.max(3,7*cam.z),Math.max(5,11*cam.z)]);
+    ctxG.lineWidth=Math.max(1,1.6*cam.z); ctxG.stroke();
+    ctxG.setLineDash([]);
+  }
+  ctxG.restore();
+}
+function quad(a,b,c,t){const u=1-t;return u*u*a+2*u*t*b+t*t*c}
+function drawFleets(t){
+  for(const fl of game.fleets){
+    const col=ownerColor(fl.owner);
+    const vis=visibleAt(fl.x,fl.y)||fl.owner===game.me;
+    if(!vis)continue;
+    for(const s of fl.ships)drawShip(s,col,fl.owner);
+    // 兵力标签
+    if(cam.z>0.34){
+      const sx=w2sx(fl.x),sy=w2sy(fl.y+Math.max(34,fl.ships.length*4+26));
+      const fs=Math.round(clamp(15*cam.z,10,21));
+      ctxG.font='700 '+fs+'px "Segoe UI",Microsoft YaHei,sans-serif';
+      ctxG.textAlign='center'; ctxG.textBaseline='middle';
+      const label=String(Math.round(fl.troops));
+      ctxG.lineWidth=3; ctxG.strokeStyle='rgba(2,8,14,.85)'; ctxG.strokeText(label,sx,sy);
+      ctxG.fillStyle=col; ctxG.fillText(label,sx,sy);
+    }
+    // 目的地旗标
+    if(fl.owner===game.me){
+      const tgt=game.nodes[fl.targetNode];
+      if(tgt){
+        const t2=((t*0.6)%1);
+        ctxG.strokeStyle=col; ctxG.globalAlpha=0.5;
+        ctxG.beginPath(); ctxG.arc(w2sx(tgt.x),w2sy(tgt.y),tgt.r*cam.z*2.5*t2,0,TAU);
+        ctxG.lineWidth=2; ctxG.stroke(); ctxG.globalAlpha=1;
+        ctxG.setLineDash([4,4]);
+        ctxG.globalAlpha=0.35;
+        ctxG.beginPath(); ctxG.moveTo(w2sx(fl.x),w2sy(fl.y)); ctxG.lineTo(w2sx(tgt.x),w2sy(tgt.y)); ctxG.stroke();
+        ctxG.globalAlpha=1; ctxG.setLineDash([]);
+      }
+    }
+  }
+}
+function drawShip(s,col,owner){
+  const sx=w2sx(s.x),sy=w2sy(s.y),z=cam.z;
+  if(sx<-120||sy<-120||sx>view.W+120||sy>view.H+120)return;
+  const L=s.len*z, B=s.beam*z;
+  if(L<4){ctxG.fillStyle=col;ctxG.fillRect(sx-1,sy-1,2.5,2.5);return}
+  ctxG.save();
+  ctxG.translate(sx,sy);
+  // 尾迹
+  if(z>0.35){
+    ctxG.strokeStyle='rgba(190,232,255,.16)'; ctxG.lineWidth=Math.max(1,L*0.10);
+    for(const w of s.wake){
+      const a=w.t/w.max;
+      ctxG.globalAlpha=a*0.5;
+      ctxG.beginPath(); ctxG.arc(w2sx(w.x)-sx,w2sy(w.y)-sy,Math.max(1,L*0.05),0,TAU); ctxG.stroke();
+    }
+    ctxG.globalAlpha=1;
+  }
+  ctxG.rotate(s.ang);
+  const dark=shade(col,-0.45), mid=shade(col,-0.12);
+  if(s.hull==='sub'){
+    ctxG.fillStyle='rgba(10,20,30,.92)';
+    ctxG.beginPath(); ctxG.ellipse(0,0,L*0.5,B*0.5,0,0,TAU); ctxG.fill();
+    ctxG.strokeStyle=mid; ctxG.lineWidth=Math.max(1,1.4*z); ctxG.stroke();
+    ctxG.fillStyle=mid;
+    ctxG.beginPath(); ctxG.ellipse(L*0.06,0,L*0.13,B*0.34,0,0,TAU); ctxG.fill();
+    if(z>0.55){
+      ctxG.strokeStyle='rgba(150,200,230,.5)';
+      ctxG.beginPath(); ctxG.moveTo(L*0.42,0); ctxG.lineTo(L*0.62,0); ctxG.stroke();
+    }
+  }else if(s.hull==='carrier'){
+    ctxG.fillStyle=dark;
+    ctxG.beginPath();
+    ctxG.moveTo(L*0.5,0); ctxG.lineTo(L*0.30,B*0.42); ctxG.lineTo(-L*0.42,B*0.5);
+    ctxG.lineTo(-L*0.5,0); ctxG.lineTo(-L*0.42,-B*0.5); ctxG.lineTo(L*0.30,-B*0.42);
+    ctxG.closePath(); ctxG.fill();
+    ctxG.fillStyle='#6b7480';
+    ctxG.fillRect(-L*0.42,-B*0.42,L*0.84,B*0.84);
+    ctxG.fillStyle=col; ctxG.globalAlpha=0.85;
+    ctxG.fillRect(-L*0.40,-B*0.09,L*0.78,B*0.18);
+    ctxG.globalAlpha=1;
+    ctxG.fillStyle=mid;
+    ctxG.beginPath(); ctxG.moveTo(-L*0.18,-B*0.5); ctxG.lineTo(L*0.10,-B*0.5); ctxG.lineTo(L*0.10,-B*0.18); ctxG.lineTo(-L*0.18,-B*0.18); ctxG.closePath(); ctxG.fill();
+  }else{
+    // 舰体
+    ctxG.fillStyle=dark;
+    ctxG.beginPath();
+    ctxG.moveTo(L*0.52,0);
+    ctxG.quadraticCurveTo(L*0.36,B*0.30,L*0.10,B*0.44);
+    ctxG.lineTo(-L*0.36,B*0.48);
+    ctxG.quadraticCurveTo(-L*0.52,B*0.40,-L*0.52,B*0.14);
+    ctxG.lineTo(-L*0.52,-B*0.14);
+    ctxG.quadraticCurveTo(-L*0.52,-B*0.40,-L*0.36,-B*0.48);
+    ctxG.lineTo(L*0.10,-B*0.44);
+    ctxG.quadraticCurveTo(L*0.36,-B*0.30,L*0.52,0);
+    ctxG.closePath(); ctxG.fill();
+    // 甲板
+    ctxG.fillStyle=mid;
+    ctxG.beginPath();
+    ctxG.moveTo(L*0.42,0); ctxG.lineTo(L*0.26,B*0.30); ctxG.lineTo(-L*0.34,B*0.32);
+    ctxG.lineTo(-L*0.42,0); ctxG.lineTo(-L*0.34,-B*0.32); ctxG.lineTo(L*0.26,-B*0.30);
+    ctxG.closePath(); ctxG.fill();
+    // 舰桥
+    ctxG.fillStyle=shade(col,0.05);
+    ctxG.fillRect(-L*0.10,-B*0.34,L*0.18,B*0.68);
+  }
+  // 阵营条
+  ctxG.fillStyle=col; ctxG.globalAlpha=0.9;
+  ctxG.fillRect(-L*0.30,-B*0.5,L*0.60,Math.max(1,B*0.16));
+  ctxG.globalAlpha=1;
+  // 炮塔
+  if(z>0.3){
+    for(const t of s.turrets){
+      const r=Math.max(1.6,B*0.30);
+      ctxG.save(); ctxG.translate(t.x*z,0); ctxG.rotate(t.rel);
+      ctxG.fillStyle='#39424e';
+      ctxG.beginPath(); ctxG.arc(0,0,r,0,TAU); ctxG.fill();
+      ctxG.fillStyle='#59636f';
+      ctxG.fillRect(0,-r*0.26,r*2.1+t.scale*r*0.7,r*0.52);
+      ctxG.restore();
+      if(t.fire>0.72*s.reload){
+        ctxG.fillStyle='rgba(255,238,180,.85)';
+        ctxG.save(); ctxG.translate(t.x*z,0); ctxG.rotate(t.rel);
+        ctxG.beginPath(); ctxG.arc(r*2.5,0,r*0.9,0,TAU); ctxG.fill();
+        ctxG.restore();
+      }
+    }
+  }
+  if(s.hitT>0){
+    ctxG.globalAlpha=Math.min(1,s.hitT*3);
+    ctxG.fillStyle='#fff'; ctxG.beginPath(); ctxG.arc(0,0,L*0.4,0,TAU); ctxG.fill();
+    ctxG.globalAlpha=1;
+  }
+  ctxG.restore();
+  // 血条
+  if(z>0.55&&s.hp<s.maxHp){
+    const w=L*0.9,h=Math.max(1.6,2.4*z);
+    ctxG.fillStyle='rgba(4,10,18,.7)'; ctxG.fillRect(sx-w/2,sy-L*0.62,w,h);
+    ctxG.fillStyle=s.hp/s.maxHp>0.4?'#7dffb4':'#ff9a6a';
+    ctxG.fillRect(sx-w/2,sy-L*0.62,w*(s.hp/s.maxHp),h);
+  }
+}
+function shade(hex,amt){
+  const n=parseInt(hex.slice(1),16);
+  let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  if(amt>0){r=r+(255-r)*amt;g=g+(255-g)*amt;b=b+(255-b)*amt}
+  else{r*=(1+amt);g*=(1+amt);b*=(1+amt)}
+  return 'rgb('+Math.round(r)+','+Math.round(g)+','+Math.round(b)+')';
+}
+function drawBullets(){
+  for(const b of game.bullets){
+    const sx=w2sx(b.x),sy=w2sy(b.y);
+    if(sx<-40||sy<-40||sx>view.W+40||sy>view.H+40)continue;
+    if(b.type==='torp'){
+      ctxG.save(); ctxG.translate(sx,sy); ctxG.rotate(b.ang||0);
+      ctxG.fillStyle='#e8f4ff';
+      ctxG.beginPath(); ctxG.ellipse(0,0,Math.max(2,5*cam.z),Math.max(1.4,2.4*cam.z),0,0,TAU); ctxG.fill();
+      ctxG.fillStyle='rgba(180,225,255,.5)';
+      ctxG.beginPath(); ctxG.arc(-6*cam.z,0,2*cam.z,0,TAU); ctxG.fill();
+      ctxG.restore();
+    }else{
+      const a=Math.atan2(b.vy,b.vx);
+      ctxG.strokeStyle=b.owner===game.me?'rgba(255,240,190,.95)':'rgba(255,180,160,.95)';
+      ctxG.lineWidth=Math.max(1,1.8*cam.z);
+      ctxG.beginPath(); ctxG.moveTo(sx,sy);
+      ctxG.lineTo(sx-Math.cos(a)*7*cam.z,sy-Math.sin(a)*7*cam.z); ctxG.stroke();
+    }
+  }
+}
+function drawParticles(){
+  for(const p of game.parts){
+    const a=clamp(p.life/p.max,0,1);
+    const sx=w2sx(p.x),sy=w2sy(p.y);
+    if(p.kind==='flash'){
+      ctxG.globalAlpha=a*0.85;
+      const g=ctxG.createRadialGradient(sx,sy,0,sx,sy,p.r*cam.z);
+      g.addColorStop(0,p.col); g.addColorStop(1,'rgba(255,140,60,0)');
+      ctxG.fillStyle=g;
+      ctxG.beginPath(); ctxG.arc(sx,sy,p.r*cam.z,0,TAU); ctxG.fill();
+    }else{
+      ctxG.globalAlpha=a;
+      ctxG.fillStyle=p.col;
+      ctxG.beginPath(); ctxG.arc(sx,sy,Math.max(0.8,p.r*cam.z),0,TAU); ctxG.fill();
+    }
+  }
+  ctxG.globalAlpha=1;
+}
+function drawFlagship(){
+  const f=game.flagship; if(!f)return;
+  const s=f.ship; s.x=f.x;s.y=f.y;s.ang=f.ang;
+  drawShip(s,ownerColor(f.owner),f.owner);
+  const sx=w2sx(f.x),sy=w2sy(f.y);
+  // 指示三角
+  const bob=Math.sin(game.time*5)*4;
+  ctxG.fillStyle='#8dffc4';
+  ctxG.beginPath();
+  ctxG.moveTo(sx,sy-34+bob); ctxG.lineTo(sx-8,sy-46+bob); ctxG.lineTo(sx+8,sy-46+bob);
+  ctxG.closePath(); ctxG.fill();
+  // 血条
+  const w=64*cam.z+30,h=5;
+  ctxG.fillStyle='rgba(4,10,18,.75)'; ctxG.fillRect(sx-w/2,sy-56+bob,w,h);
+  ctxG.fillStyle=f.hp/f.maxHp>0.35?'#8dffc4':'#ff9a6a';
+  ctxG.fillRect(sx-w/2,sy-56+bob,w*clamp(f.hp/f.maxHp,0,1),h);
+  ctxG.font='600 11px "Segoe UI",Microsoft YaHei,sans-serif';
+  ctxG.textAlign='center'; ctxG.fillStyle='#d6ffe9';
+  ctxG.fillText('旗舰 '+Math.round(f.troops)+' 舰',sx,sy-62+bob);
+}
+function drawTexts(){
+  ctxG.textAlign='center'; ctxG.textBaseline='middle';
+  for(const t of game.texts){
+    ctxG.globalAlpha=clamp(t.t,0,1);
+    ctxG.font='700 15px "Segoe UI",Microsoft YaHei,sans-serif';
+    ctxG.lineWidth=3; ctxG.strokeStyle='rgba(2,8,14,.8)';
+    ctxG.strokeText(t.text,w2sx(t.x),w2sy(t.y));
+    ctxG.fillStyle=t.color; ctxG.fillText(t.text,w2sx(t.x),w2sy(t.y));
+  }
+  ctxG.globalAlpha=1;
+}
+
+/* ------------------------------ 渲染：迷雾与UI层 ------------------------------ */
+function drawFogLayer(){
+  const s=FOG_CELL*cam.z;
+  ctxG.save();
+  ctxG.globalCompositeOperation='source-over';
+  ctxG.globalAlpha=1;
+  const dx=w2sx(0), dy=w2sy(0);
+  ctxG.imageSmoothingEnabled=true;
+  ctxG.drawImage(fogCv,dx-1,dy-1,MAPW*cam.z+2,MAPH*cam.z+2);
+  ctxG.restore();
+}
+function drawUILayer(){
+  ctxUI.clearRect(0,0,view.W,view.H);
+  // 拖拽指示
+  if(game.drag&&game.drag.active){
+    const src=game.drag.src;
+    if(src){
+      const x1=w2sx(src.x),y1=w2sy(src.y);
+      const tgt=game.hover;
+      const x2=tgt?w2sx(tgt.x):w2sx(s2wx(Mouse.x)),y2=tgt?w2sy(tgt.y):w2sy(s2wy(Mouse.y));
+      ctxUI.save();
+      ctxUI.setLineDash([9,7]);
+      ctxUI.strokeStyle=tgt?(tgt.owner===game.me?'rgba(140,255,205,.95)':'rgba(255,170,120,.95)'):'rgba(160,200,225,.5)';
+      ctxUI.lineWidth=2.4;
+      ctxUI.beginPath(); ctxUI.moveTo(x1,y1); ctxUI.lineTo(x2,y2); ctxUI.stroke();
+      ctxUI.setLineDash([]);
+      // 兵力预览
+      const send=Math.floor(src.troops*0.6);
+      const path=tgt?findPath(src.id,tgt.id):null;
+      const ratio=path?(path.length<=2?1:0.5):1;
+      ctxUI.font='700 13px "Segoe UI",Microsoft YaHei,sans-serif';
+      ctxUI.textAlign='center';
+      const midx=(x1+x2)/2, midy=(y1+y2)/2-14;
+      const txt='派遣 '+send+(ratio<1?' (−50%)':'')+' · 抵达 '+Math.floor(send*ratio);
+      ctxUI.lineWidth=3; ctxUI.strokeStyle='rgba(2,8,14,.85)'; ctxUI.strokeText(txt,midx,midy);
+      ctxUI.fillStyle=ratio<1?'#ffce8a':'#a9ffd2'; ctxUI.fillText(txt,midx,midy);
+      if(tgt){
+        const need=Math.ceil(tgt.troops*ratio);
+        const ok=send*ratio>tgt.troops;
+        ctxUI.strokeStyle=ok?'rgba(140,255,205,.9)':'rgba(255,130,110,.9)';
+        ctxUI.lineWidth=3;
+        ctxUI.beginPath(); ctxUI.arc(x2,y2,tgt.r*cam.z*1.6+8,0,TAU); ctxUI.stroke();
+      }
+      ctxUI.restore();
+    }
+  }
+  // 舰队遭遇线
+  for(const fl of game.fleets){
+    if(fl.owner!==game.me||!fl.combat)continue;
+    const o=fl.combat;
+    ctxUI.strokeStyle='rgba(255,120,90,.35)'; ctxUI.lineWidth=1.4;
+    ctxUI.setLineDash([3,6]);
+    ctxUI.beginPath(); ctxUI.moveTo(w2sx(fl.x),w2sy(fl.y)); ctxUI.lineTo(w2sx(o.x),w2sy(o.y)); ctxUI.stroke();
+    ctxUI.setLineDash([]);
+  }
+  // 屏幕边缘敌对来袭提示
+  for(const fl of game.fleets){
+    if(fl.owner===game.me)continue;
+    const n=game.nodes[fl.targetNode];
+    if(!n||n.owner!==game.me)continue;
+    const sx=w2sx(fl.x),sy=w2sy(fl.y);
+    if(sx>20&&sx<view.W-20&&sy>20&&sy<view.H-20)continue;
+    const a=Math.atan2(sy-view.H/2,sx-view.W/2);
+    const rx=view.W/2-40, ry=view.H/2-40;
+    const px=view.W/2+Math.cos(a)*rx*0.94, py=view.H/2+Math.sin(a)*ry*0.94;
+    ctxUI.save(); ctxUI.translate(px,py); ctxUI.rotate(a);
+    ctxUI.fillStyle='rgba(255,110,90,.85)';
+    ctxUI.beginPath(); ctxUI.moveTo(12,0); ctxUI.lineTo(-7,-7); ctxUI.lineTo(-7,7); ctxUI.closePath(); ctxUI.fill();
+    ctxUI.restore();
+  }
+}
+
+/* ------------------------------ HUD ------------------------------ */
+let hudT=0;
+function updateHUD(){
+  const chips=document.getElementById('chips');
+  let html='';
+  for(const f of F()){
+    const pc=factionPortCount(f.id);
+    const st=Math.floor(factionShipTotal(f.id));
+    html+='<div class="chip'+(f.id===game.me?' me':'')+(pc===0?' dead':'')+'">'+
+      '<span class="dot" style="background:'+f.color+';color:'+f.color+'"></span>'+
+      '<span><span class="nm">'+f.name+(f.id===game.me?' (你)':'')+'</span><br>'+
+      '<span class="sub">海域 '+pc+' · 舰船 '+st+'</span></span></div>';
+  }
+  if(chips.dataset.h!==html){chips.innerHTML=html;chips.dataset.h=html}
+  const n=game.hover||game.sel;
+  const info=document.getElementById('info');
+  let ih='';
+  const own=game.nodes.filter(x=>x.owner===game.me).length;
+  if(n){
+    const vis=visibleAt(n.x,n.y);
+    ih+='<div class="row"><span class="k">'+n.name+'</span><span class="v" style="color:'+ownerColor(n.owner)+'">'+ownerName(n.owner)+'</span></div>';
+    ih+='<div class="row"><span class="k">类型</span><span class="v">'+KINDS[n.kind].name+' · 等级 '+(n.level+1)+'</span></div>';
+    ih+='<div class="row"><span class="k">驻军</span><span class="v">'+(vis?Math.round(n.troops):'?')+'</span></div>';
+    ih+='<div class="row"><span class="k">产兵</span><span class="v">'+(vis?(n.rate*(1+n.level*0.5)).toFixed(2)+'/s':'?')+'</span></div>';
+    ih+='<div class="row"><span class="k">海路</span><span class="v">'+n.nb.length+' 条</span></div>';
+  }else{
+    ih+='<div class="row"><span class="k">海域控制</span><span class="v">'+own+' / '+game.nodes.length+'</span></div>';
+    ih+='<div class="row"><span class="k">胜利条件</span><span class="v">≥65%</span></div>';
+    ih+='<div class="row"><span class="k">时间</span><span class="v">'+Math.floor(game.time)+'s</span></div>';
+  }
+  if(info.dataset.h!==ih){info.innerHTML=ih;info.dataset.h=ih}
+}
+
+/* ------------------------------ 主循环 ------------------------------ */
+const Mouse={x:0,y:0,wx:0,wy:0,rdown:false,down:false,panning:false,panX:0,panY:0,mid:false};
+const Keys={};
+function updateMouseWorld(){Mouse.wx=s2wx(Mouse.x);Mouse.wy=s2wy(Mouse.y)}
+
+let lastT=0, acc=0;
+function frame(ts){
+  const dt=Math.min(0.05,(ts-lastT)/1000||0.016);
+  lastT=ts;
+  if(!game.autoRun){
+    acc+=dt;
+    let steps=0;
+    while(acc>=1/60&&steps<5){ step(1/60); acc-=1/60; steps++ }
+    render(dt);
+    hudT+=dt; if(hudT>0.12){hudT=0;updateHUD()}
+  }
+  requestAnimationFrame(frame);
+}
+function step(dt){
+  if(game.phase!=='playing'&&game.phase!=='over')return;
+  if(game.paused)return;
+  game.time+=dt;
+  updateNodes(dt);
+  for(const f of F())aiThink(f,dt);
+  updateShipsCombat(dt);
+  updateBullets(dt);
+  updateParticles(dt);
+  if(!game.flagship&&!game.panning)updateFlagshipCamera();
+  updateFlagship(dt);
+  // 视野刷新
+  game.visionT=(game.visionT||0)+dt;
+  if(game.visionT>0.25){
+    game.visionT=0;
+    for(const f of F())stampVision(f);
+    drawFog();
+  }
+  // 相机缩放缓动
+  cam.z=lerp(cam.z,cam.tz,Math.min(1,dt*7));
+}
+function updateFlagshipCamera(){
+  if(game.keys)return;
+  const k=Keys;
+  const sp=(k['shift']?560:300)/cam.z*0.6;
+  let dx=0,dy=0;
+  if(k['w']||k['arrowup'])dy-=1;
+  if(k['s']||k['arrowdown'])dy+=1;
+  if(k['a']||k['arrowleft'])dx-=1;
+  if(k['d']||k['arrowright'])dx+=1;
+  if(dx||dy){cam.x+=dx*sp/60;cam.y+=dy*sp/60}
+}
+function render(dt){
+  updateMouseWorld();
+  drawSea(game.time);
+  const r=camRect(120);
+  for(const e of game.edges)drawEdge(e,game.time);
+  for(const n of game.nodes){
+    if(n.x<r.x0-260||n.x>r.x1+260||n.y<r.y0-260||n.y>r.y1+260)continue;
+    drawIsland(n,game.time);
+  }
+  drawFleets(game.time);
+  drawFlagship();
+  drawBullets();
+  drawParticles();
+  drawTexts();
+  drawFogLayer();
+  drawUILayer();
+  // FPS
+  if(game.fpsT===undefined)game.fpsT=0;
+  game.fpsT+=dt; game.fpsN=(game.fpsN||0)+1;
+  if(game.fpsT>0.5){
+    document.getElementById('fps').textContent=
+      Math.round(game.fpsN/game.fpsT)+' fps · 节点 '+game.nodes.length+' · 舰队 '+game.fleets.length+' · 炮弹 '+game.bullets.length;
+    game.fpsT=0;game.fpsN=0;
+  }
+}
+
+/* ------------------------------ 输入 ------------------------------ */
+function bindInput(){
+  const stage=document.getElementById('stage');
+  stage.addEventListener('contextmenu',e=>e.preventDefault());
+  stage.addEventListener('mousemove',e=>{
+    Mouse.x=e.clientX; Mouse.y=e.clientY; updateMouseWorld();
+    if(Mouse.panning){
+      cam.x-=(e.clientX-Mouse.panX)/cam.z;
+      cam.y-=(e.clientY-Mouse.panY)/cam.z;
+      Mouse.panX=e.clientX; Mouse.panY=e.clientY;
+      return;
+    }
+    if(game.drag&&game.drag.active){
+      const n=nodeAtWorld(Mouse.wx,Mouse.wy);
+      game.hover=n;
+    }else if(!game.flagship){
+      game.hover=nodeAtWorld(Mouse.wx,Mouse.wy);
+    }
+  });
+  stage.addEventListener('mousedown',e=>{
+    Snd.init();
+    Mouse.x=e.clientX;Mouse.y=e.clientY;updateMouseWorld();
+    if(e.button===1||(e.button===2&&!game.flagship&&game.phase==='playing')){
+      if(e.button===1){Mouse.panning=true;Mouse.panX=e.clientX;Mouse.panY=e.clientY;e.preventDefault();return}
+    }
+    if(e.button===2){Mouse.rdown=true; if(game.flagship)return;}
+    if(e.button===0&&game.phase==='playing'&&!game.flagship){
+      const n=nodeAtWorld(Mouse.wx,Mouse.wy);
+      if(n&&n.owner===game.me){
+        game.drag={active:true,src:n,sx:e.clientX,sy:e.clientY};
+        game.sel=n;
+      }else{
+        game.sel=n||game.sel;
+        if(!n)game.drag={active:false,src:null};
+      }
+    }
+  });
+  window.addEventListener('mouseup',e=>{
+    if(e.button===1){Mouse.panning=false}
+    if(e.button===2){Mouse.rdown=false}
+    if(e.button===0){
+      if(game.drag&&game.drag.active){
+        const src=game.drag.src;
+        const tgt=nodeAtWorld(Mouse.wx,Mouse.wy);
+        const moved=Math.hypot(e.clientX-(game.drag.sx||0),e.clientY-(game.drag.sy||0));
+        if(tgt&&tgt!==src&&moved>6){
+          playerSend(src,tgt);
+        }else if(tgt){
+          game.sel=tgt;
+        }
+        game.drag={active:false,src:null};
+      }
+    }
+  });
+  stage.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const before={x:s2wx(e.clientX),y:s2wy(e.clientY)};
+    const f=Math.exp(-e.deltaY*0.0012);
+    cam.tz=clamp(cam.tz*f,0.26,2.0);
+    cam.z=cam.tz;
+    const after={x:s2wx(e.clientX),y:s2wy(e.clientY)};
+    cam.x+=before.x-after.x; cam.y+=before.y-after.y;
+    updateMouseWorld();
+  },{passive:false});
+  window.addEventListener('keydown',e=>{
+    const k=e.key.toLowerCase();
+    Keys[k]=true; if(e.shiftKey)Keys['shift']=true;
+    if(k===' '&&game.phase==='playing'){e.preventDefault();launchedFlagship();return}
+    if(k==='f'&&game.phase==='playing'){launchedFlagship();return}
+    if(k==='u'&&game.sel&&game.sel.owner===game.me){
+      if(game.sel.level<3){game.sel.level++;pushTick(game.sel.name+' 升级至 Lv'+(game.sel.level+1));Snd.cap()}
+      return;
+    }
+    if(k==='p'){togglePause();return}
+    if(k==='escape'){game.sel=null;    document.getElementById('over').style.display=game.phase==='over'?'flex':'none';
+      return}
+    if(k==='h'){alertHelp();return}
+  });
+  window.addEventListener('keyup',e=>{Keys[e.key.toLowerCase()]=false;if(!e.shiftKey)Keys['shift']=false});
+  window.addEventListener('blur',()=>{for(const k in Keys)Keys[k]=false;Mouse.rdown=false;Mouse.panning=false});
+  document.getElementById('btPause').onclick=togglePause;
+  document.getElementById('btAuto').onclick=function(){
+    game.autoFire=!game.autoFire; this.classList.toggle('on',game.autoFire);
+  };
+  document.getElementById('btSound').onclick=function(){
+    Snd.init(); Snd.on=!Snd.on; this.classList.toggle('on',Snd.on); this.textContent=Snd.on?'音效 ♪':'音效 ✕';
+  };
+  document.getElementById('btHelp').onclick=alertHelp;
+}
+function togglePause(){
+  game.paused=!game.paused;
+  const b=document.getElementById('btPause');
+  b.textContent=game.paused?'继续 ▶':'暂停 ⏸';
+  b.classList.toggle('on',game.paused);
+}
+function alertHelp(){
+  pushTick('拖拽己方岛派兵 · F 出海亲自操船 · U 升级 · 滚轮缩放');
+  pushTick('远程增援折损 50%，相邻 1:1 —— 尽量沿己方海域推进');
+  pushTick('港口产兵最快，要塞守军最厚，灯塔能开很大的图');
+}
+
+/* ------------------------------ 启动 ------------------------------ */
+function startGame(){
+  document.getElementById('menu').style.display='none';
+  document.getElementById('over').style.display='none';
+  document.getElementById('ticker').innerHTML='';
+  resetCanvas(); layoutFog();
+  genMap(game.seed);
+  game.phase='playing';
+  game.paused=false;
+  document.getElementById('btPause').textContent='暂停 ⏸';
+  pushTick('目标：控制 65% 海域 · 拖动己方岛屿派兵');
+  Snd.init();
+}
+function buildMenu(){
+  const seg=document.getElementById('segDiff');
+  seg.querySelectorAll('button').forEach(b=>{
+    b.onclick=()=>{seg.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+      game.diff=parseInt(b.dataset.d,10); Snd.click();};
+  });
+  const seedEl=document.getElementById('seed');
+  document.getElementById('reseed').onclick=()=>{seedEl.value=Math.floor(Math.random()*1e6);Snd.click()};
+  seedEl.value=Math.floor(Math.random()*1e6);
+  document.getElementById('go').onclick=()=>{
+    const v=parseInt(seedEl.value,10);
+    game.seed=isFinite(v)?v:Math.floor(Math.random()*1e6);
+    startGame();
+  };
+  document.getElementById('ovAgain').onclick=()=>{game.seed=Math.floor(Math.random()*1e6);startGame()};
+  document.getElementById('ovMenu').onclick=()=>{
+    document.getElementById('over').style.display='none';
+    document.getElementById('menu').style.display='flex';
+    game.phase='menu';
+  };
+}
+
+/* ------------------------------ 自动化测试 ------------------------------ */
+function autotest(){
+  const Q=new URLSearchParams(location.search);
+  const steps=parseInt(Q.get('steps')||'9000',10);
+  const log=[];
+  resetCanvas(); layoutFog();
+  game.seed=parseInt(Q.get('seed')||'12345',10);
+  genMap(game.seed);
+  game.phase='playing'; game.autoRun=true; game.diff=parseInt(Q.get('diff')||'1',10);
+  // 让玩家也交给 AI（临时接管）
+  F()[0].ai=true;
+  let maxShips=0,bad=0;
+  const t0=performance.now();
+  for(let i=0;i<steps;i++){
+    step(1/60);
+    for(const s of game.ships)if(!isFinite(s.x)||!isFinite(s.y))bad++;
+    for(const f of game.fleets)if(!isFinite(f.x)||!isFinite(f.troops))bad++;
+    for(const n of game.nodes)if(!isFinite(n.troops))bad++;
+    maxShips=Math.max(maxShips,game.ships.length);
+    if(game.phase==='over')break;
+  }
+  const dt=(performance.now()-t0)/1000;
+  const owners={};
+  for(const n of game.nodes)owners[n.owner]=(owners[n.owner]||0)+1;
+  const res={
+    ok:bad===0&&game.nodes.length>10&&game.edges.length>=game.nodes.length-1,
+    seed:game.seed, steps:steps, simTime:+game.time.toFixed(1), wallSec:+dt.toFixed(2),
+    badValues:bad,
+    nodes:game.nodes.length, edges:game.edges.length,
+    fleets:game.fleets.length, ships:game.ships.length, maxShips:maxShips, bullets:game.bullets.length,
+    battles:game.stats.battles,
+    owners:owners,
+    phase:game.phase,
+    winner:game.winner,
+    factionShips:F().map(f=>Math.floor(factionShipTotal(f.id))),
+  };
+  // 连通性检查
+  const vis=new Uint8Array(game.nodes.length); const q=[0]; vis[0]=1;
+  while(q.length){const v=q.pop();for(const w of game.nodes[v].nb)if(!vis[w]){vis[w]=1;q.push(w)}}
+  res.connected=Array.from(vis).every(v=>v===1);
+  res.ok=res.ok&&res.connected;
+  // 渲染冒烟测试
+  try{ render(0.016); res.renderOk=true }catch(err){ res.renderOk=false; res.renderErr=String(err) }
+  res.ok=res.ok&&res.renderOk;
+  console.log('SEAWAR_AUTOTEST '+JSON.stringify(res));
+  document.title='AUTOTEST '+(res.ok?'PASS':'FAIL');
+  return res;
+}
+
+/* ------------------------------ boot ------------------------------ */
+buildMenu();
+bindInput();
+resetCanvas();
+layoutFog();
+game.seed=parseInt(new URLSearchParams(location.search).get('seed')||'0',10)||Math.floor(Math.random()*1e6);
+genMap(game.seed);
+cam.z=cam.tz;
+requestAnimationFrame(ts=>{lastT=ts;frame(ts)});
+if(new URLSearchParams(location.search).has('autotest')){
+  document.getElementById('menu').style.display='none';
+  autotest();
+}
+window.SEAWAR={game:game,autotest:autotest,start:startGame,genMap:genMap};
+</script>
+</body>
+</html>

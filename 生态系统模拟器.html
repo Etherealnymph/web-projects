@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoSphere — 生态系统模拟器</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+:root {
+  --bg-deep: #060E08;
+  --bg-main: #0B1A0F;
+  --bg-card: rgba(14,32,18,0.88);
+  --forest: #3CB371;
+  --ocean: #2E8BC0;
+  --earth: #C8956C;
+  --accent: #E07A3A;
+  --text: #E4EFE6;
+  --text-muted: #7FA882;
+  --border: rgba(60,179,113,0.18);
+  --glow: rgba(60,179,113,0.25);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito Sans',sans-serif;background:var(--bg-deep);color:var(--text);overflow-x:hidden;}
+h1,h2,h3,h4,h5,h6{font-family:'Quicksand',sans-serif;}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg-deep)}
+::-webkit-scrollbar-thumb{background:var(--forest);border-radius:3px}
+.bg-nature{
+  background:
+    radial-gradient(ellipse at 15% 30%,rgba(60,179,113,.07) 0%,transparent 55%),
+    radial-gradient(ellipse at 85% 70%,rgba(46,139,192,.05) 0%,transparent 55%),
+    radial-gradient(ellipse at 50% 90%,rgba(200,149,108,.04) 0%,transparent 50%),
+    linear-gradient(175deg,#060E08 0%,#0B1A0F 40%,#081510 100%);
+}
+.glass{background:var(--bg-card);backdrop-filter:blur(18px);border:1px solid var(--border);border-radius:14px;}
+#scene-box{width:100%;height:560px;border-radius:16px;overflow:hidden;position:relative;background:#060E08;}
+#scene-box canvas{display:block}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;background:rgba(60,179,113,.18);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--forest);cursor:pointer;box-shadow:0 0 8px var(--glow)}
+.eco-btn{padding:7px 18px;border-radius:22px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .3s;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14px}
+.eco-btn.active{background:rgba(60,179,113,.16);border-color:var(--forest);color:var(--forest);box-shadow:0 0 18px rgba(60,179,113,.12)}
+.eco-btn:hover{border-color:var(--forest);color:var(--text)}
+.play-btn{width:42px;height:42px;border-radius:50%;border:2px solid var(--forest);background:rgba(60,179,113,.12);color:var(--forest);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .3s}
+.play-btn:hover{background:rgba(60,179,113,.28);transform:scale(1.08)}
+.spd-btn{padding:3px 12px;border-radius:14px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:12px;font-weight:700;transition:all .3s;font-family:'Quicksand'}
+.spd-btn.active{background:rgba(60,179,113,.14);border-color:var(--forest);color:var(--forest)}
+.data-val{font-family:'Quicksand';font-size:26px;font-weight:700;line-height:1}
+.data-lbl{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.2px;font-weight:600}
+.overlay{position:absolute;z-index:10;pointer-events:auto}
+.nav-link{position:relative;padding:6px 0;color:var(--text-muted);text-decoration:none;font-weight:500;font-size:14px;transition:color .3s}
+.nav-link:hover,.nav-link.active{color:var(--forest)}
+.nav-link::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--forest);transition:width .3s}
+.nav-link:hover::after,.nav-link.active::after{width:100%}
+.section-title{font-weight:700;font-size:20px;display:flex;align-items:center;gap:8px}
+.section-title i{color:var(--forest);font-size:16px}
+.species-card{transition:all .3s;cursor:pointer}
+.species-card:hover{transform:translateY(-3px);border-color:var(--forest);box-shadow:0 8px 30px rgba(60,179,113,.1)}
+.toast-box{position:fixed;bottom:24px;right:24px;padding:12px 22px;border-radius:12px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);font-size:13px;z-index:9999;transform:translateY(80px);opacity:0;transition:all .4s ease;backdrop-filter:blur(16px)}
+.toast-box.show{transform:translateY(0);opacity:1}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
+.anim-in{animation:fadeInUp .7s ease forwards}
+@media(max-width:1024px){#scene-box{height:380px}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body class="bg-nature min-h-screen">
+
+<!-- 导航 -->
+<header class="fixed top-0 left-0 w-full z-50 glass" style="border-radius:0;border-left:0;border-right:0;border-top:0">
+  <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,var(--forest),#1B7A42)">
+        <i class="fas fa-leaf text-white text-sm"></i>
+      </div>
+      <span class="font-bold text-lg" style="font-family:Quicksand;color:var(--text)">EcoSphere</span>
+    </div>
+    <nav class="hidden md:flex items-center gap-6">
+      <a href="#hero" class="nav-link active">全景</a>
+      <a href="#dashboard" class="nav-link">数据</a>
+      <a href="#foodweb" class="nav-link">食物网</a>
+      <a href="#species" class="nav-link">物种</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <button id="reset-btn" class="eco-btn text-xs" title="重置模拟"><i class="fas fa-rotate-right mr-1"></i>重置</button>
+    </div>
+  </div>
+</header>
+
+<main class="pt-16">
+  <!-- 首屏：3D全景 -->
+  <section id="hero" class="relative px-4 md:px-8 pt-6">
+    <div class="max-w-7xl mx-auto">
+      <!-- 标题区 -->
+      <div class="mb-4 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-bold mb-1" style="font-family:Quicksand">生态系统模拟器</h1>
+          <p class="text-sm" style="color:var(--text-muted)">调节环境参数，观察种群动态与食物链关系的实时变化</p>
+        </div>
+        <!-- 生态系统切换 -->
+        <div class="flex gap-2" id="biome-btns">
+          <button class="eco-btn active" data-biome="forest"><i class="fas fa-tree mr-1"></i>温带森林</button>
+          <button class="eco-btn" data-biome="ocean"><i class="fas fa-water mr-1"></i>近海生态</button>
+          <button class="eco-btn" data-biome="grassland"><i class="fas fa-sun mr-1"></i>热带草原</button>
+        </div>
+      </div>
+
+      <!-- 3D场景 + 浮动面板 -->
+      <div id="scene-box" class="relative">
+        <!-- 左下：关键指标 -->
+        <div class="overlay bottom-4 left-4 glass p-4 flex gap-6" style="border-radius:14px">
+          <div class="text-center"><div class="data-lbl">物种数</div><div class="data-val" style="color:var(--forest)" id="d-species">6</div></div>
+          <div class="text-center"><div class="data-lbl">总种群</div><div class="data-val" style="color:var(--ocean)" id="d-total">1,360</div></div>
+          <div class="text-center"><div class="data-lbl">多样性指数</div><div class="data-val" style="color:var(--earth)" id="d-diversity">0.82</div></div>
+          <div class="text-center"><div class="data-lbl">生态平衡</div><div class="data-val" style="color:var(--forest)" id="d-balance">稳定</div></div>
+        </div>
+        <!-- 右上：环境控制 -->
+        <div class="overlay top-4 right-4 glass p-5 w-64" style="border-radius:14px">
+          <h3 class="text-sm font-bold mb-3 flex items-center gap-2" style="font-family:Quicksand"><i class="fas fa-sliders" style="color:var(--forest)"></i>环境因子</h3>
+          <div class="mb-3">
+            <div class="flex justify-between text-xs mb-1"><span style="color:var(--text-muted)">温度</span><span id="v-temp" class="font-bold">25°C</span></div>
+            <input type="range" id="sl-temp" min="-10" max="45" value="25">
+          </div>
+          <div class="mb-3">
+            <div class="flex justify-between text-xs mb-1"><span style="color:var(--text-muted)">降水量</span><span id="v-rain" class="font-bold">60%</span></div>
+            <input type="range" id="sl-rain" min="0" max="100" value="60">
+          </div>
+          <div class="mb-4">
+            <div class="flex justify-between text-xs mb-1"><span style="color:var(--text-muted)">资源量</span><span id="v-res" class="font-bold">70%</span></div>
+            <input type="range" id="sl-res" min="0" max="100" value="70">
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="play-btn" id="play-btn"><i class="fas fa-pause"></i></button>
+            <div class="flex gap-1 ml-2">
+              <button class="spd-btn active" data-speed="1">1x</button>
+              <button class="spd-btn" data-speed="2">2x</button>
+              <button class="spd-btn" data-speed="4">4x</button>
+            </div>
+            <div class="ml-auto text-xs" style="color:var(--text-muted)"><span id="d-time">T=0</span></div>
+          </div>
+        </div>
+        <!-- 左上角提示 -->
+        <div class="overlay top-4 left-4 glass px-3 py-2 text-xs flex items-center gap-2" style="color:var(--text-muted);border-radius:10px">
+          <i class="fas fa-hand-pointer"></i>拖拽旋转 · 滚轮缩放
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 数据仪表板 -->
+  <section id="dashboard" class="px-4 md:px-8 mt-8">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <!-- 种群动态图表 -->
+      <div class="lg:col-span-3 glass p-5">
+        <div class="section-title mb-4"><i class="fas fa-chart-line"></i><span>种群动态</span></div>
+        <div style="height:320px;position:relative">
+          <canvas id="pop-chart"></canvas>
+        </div>
+      </div>
+      <!-- 食物网 -->
+      <div id="foodweb" class="lg:col-span-2 glass p-5">
+        <div class="section-title mb-4"><i class="fas fa-project-diagram"></i><span>食物网</span></div>
+        <canvas id="fw-canvas" style="width:100%;height:320px;border-radius:10px;cursor:pointer"></canvas>
+        <div class="mt-3 flex flex-wrap gap-2" id="fw-legend"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 物种详情 -->
+  <section id="species" class="px-4 md:px-8 mt-8 pb-12">
+    <div class="max-w-7xl mx-auto">
+      <div class="section-title mb-4"><i class="fas fa-paw"></i><span>物种观察</span></div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3" id="species-grid"></div>
+    </div>
+  </section>
+</main>
+
+<!-- 页脚 -->
+<footer class="glass" style="border-radius:0;border-left:0;border-right:0;border-bottom:0">
+  <div class="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs" style="color:var(--text-muted)">
+    <div class="flex items-center gap-2">
+      <i class="fas fa-leaf" style="color:var(--forest)"></i>
+      <span>EcoSphere 生态系统模拟器 — 面向生物学教育与环保意识培养</span>
+    </div>
+    <div>基于 Lotka-Volterra 种群动力学模型 · Three.js 实时渲染</div>
+  </div>
+</footer>
+
+<div class="toast-box" id="toast"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ==================== 数据定义 ==================== */
+const BIOMES = {
+  forest: {
+    name: '温带森林',
+    fog: 0x0d1f10, bg: 0x0a1810, groundColor: 0x2a5a24, fogDensity: 0.025,
+    ambientColor: 0x2a4a2a, ambientIntensity: 0.5,
+    dirColor: 0xffe8cc, dirIntensity: 0.9, dirPos: [8,15,5],
+    particleColor: 0x88ff99,
+    species: [
+      { id:'plant', name:'草本植物', level:0, color:'#4CAF50', pop:1000, r:0.08, K:2000, icon:'fa-seedling' },
+      { id:'rabbit', name:'野兔',    level:1, color:'#FF9800', pop:200,  r:0.06, K:500,  icon:'fa-rabbit' },
+      { id:'deer',   name:'梅花鹿',  level:1, color:'#A1887F', pop:80,   r:0.035, K:200, icon:'fa-horse' },
+      { id:'fox',    name:'赤狐',    level:2, color:'#FF5722', pop:30,   r:0.025, K:80,  icon:'fa-dog' },
+      { id:'snake',  name:'锦蛇',    level:2, color:'#AB47BC', pop:40,   r:0.028, K:100, icon:'fa-worm' },
+      { id:'eagle',  name:'苍鹰',    level:3, color:'#78909C', pop:10,   r:0.012, K:30,  icon:'fa-dove' },
+    ],
+    links: [
+      { from:'plant', to:'rabbit' }, { from:'plant', to:'deer' },
+      { from:'rabbit', to:'fox' }, { from:'rabbit', to:'snake' },
+      { from:'rabbit', to:'eagle' }, { from:'snake', to:'eagle' }, { from:'fox', to:'eagle' },
+    ]
+  },
+  ocean: {
+    name: '近海生态',
+    fog: 0x061828, bg: 0x041220, groundColor: 0x0a3050, fogDensity: 0.02,
+    ambientColor: 0x1a3a5a, ambientIntensity: 0.45,
+    dirColor: 0xaaccff, dirIntensity: 0.7, dirPos: [5,12,8],
+    particleColor: 0x44aaff,
+    species: [
+      { id:'phyto',  name:'浮游植物', level:0, color:'#26A69A', pop:2000, r:0.1, K:4000, icon:'fa-bacterium' },
+      { id:'shrimp', name:'磷虾',     level:1, color:'#EF5350', pop:500,  r:0.07, K:1200, icon:'fa-shrimp' },
+      { id:'sfish',  name:'沙丁鱼',   level:1, color:'#42A5F5', pop:400,  r:0.06, K:1000, icon:'fa-fish' },
+      { id:'tuna',   name:'金枪鱼',   level:2, color:'#1E88E5', pop:60,   r:0.022, K:150, icon:'fa-fish-fins' },
+      { id:'dolphin',name:'海豚',     level:2, color:'#90A4AE', pop:25,   r:0.018, K:60,  icon:'fa-otter' },
+      { id:'shark',  name:'大白鲨',   level:3, color:'#546E7A', pop:8,    r:0.01,  K:20,  icon:'fa-fish' },
+    ],
+    links: [
+      { from:'phyto', to:'shrimp' }, { from:'phyto', to:'sfish' },
+      { from:'shrimp', to:'sfish' }, { from:'sfish', to:'tuna' },
+      { from:'sfish', to:'dolphin' }, { from:'tuna', to:'shark' }, { from:'dolphin', to:'shark' },
+    ]
+  },
+  grassland: {
+    name: '热带草原',
+    fog: 0x1a1808, bg: 0x14120a, groundColor: 0x6B8E23, fogDensity: 0.018,
+    ambientColor: 0x4a3a1a, ambientIntensity: 0.55,
+    dirColor: 0xffd699, dirIntensity: 1.0, dirPos: [10,18,3],
+    particleColor: 0xffcc66,
+    species: [
+      { id:'grass',  name:'热带牧草', level:0, color:'#8BC34A', pop:3000, r:0.09, K:5000, icon:'fa-wheat-awn' },
+      { id:'gnu',    name:'角马',     level:1, color:'#6D4C41', pop:300,  r:0.05, K:800,  icon:'fa-cow' },
+      { id:'antelope',name:'羚羊',    level:1, color:'#FFB74D', pop:250,  r:0.055, K:600, icon:'fa-horse' },
+      { id:'cheetah',name:'猎豹',     level:2, color:'#FDD835', pop:20,   r:0.02, K:50,  icon:'fa-cat' },
+      { id:'hyena',  name:'斑鬣狗',   level:2, color:'#8D6E63', pop:25,   r:0.022, K:60,  icon:'fa-dog' },
+      { id:'lion',   name:'非洲狮',   level:3, color:'#D4A574', pop:12,   r:0.013, K:30,  icon:'fa-shield-cat' },
+    ],
+    links: [
+      { from:'grass', to:'gnu' }, { from:'grass', to:'antelope' },
+      { from:'gnu', to:'cheetah' }, { from:'gnu', to:'hyena' }, { from:'gnu', to:'lion' },
+      { from:'antelope', to:'cheetah' }, { from:'antelope', to:'lion' }, { from:'hyena', to:'lion' },
+    ]
+  }
+};
+
+/* ==================== 状态 ==================== */
+let currentBiome = 'forest';
+let simRunning = true;
+let simSpeed = 1;
+let simTime = 0;
+let temperature = 25, rainfall = 60, resources = 70;
+let pops = {}; // 当前种群数 { id: number }
+let popHistory = {}; // { id: [number] }
+const MAX_HISTORY = 80;
+let scene3d, camera3d, renderer3d, controls3d;
+let sceneObjects = [];
+let particleSystem = null;
+let fwHover = null; // 食物网悬停的物种ID
+let fwFlowParticles = [];
+
+/* ==================== 工具 ==================== */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+/* ==================== 初始化种群 ==================== */
+function initBiome(key) {
+  const b = BIOMES[key];
+  pops = {}; popHistory = {};
+  b.species.forEach(s => {
+    pops[s.id] = s.pop;
+    popHistory[s.id] = [s.pop];
+  });
+}
+initBiome(currentBiome);
+
+/* ==================== 模拟引擎 ==================== */
+function envFactor() {
+  // 温度舒适度（20-30最佳），降水和资源的乘数效应
+  const tempOpt = 1 - Math.pow((temperature - 25) / 30, 2);
+  const tFact = clamp(tempOpt, 0.1, 1.2);
+  const rFact = 0.3 + 0.7 * (rainfall / 100);
+  const resFact = 0.3 + 0.7 * (resources / 100);
+  return tFact * rFact * resFact;
+}
+
+function stepSimulation() {
+  const b = BIOMES[currentBiome];
+  const ef = envFactor();
+  const dt = 0.15;
+  const newPops = {};
+
+  b.species.forEach(sp => {
+    let P = pops[sp.id];
+    // 增长项
+    let growth = sp.r * P * (1 - P / (sp.K * ef)) * dt;
+    // 捕食消耗：被谁吃
+    const eatenBy = b.links.filter(l => l.from === sp.id);
+    let loss = 0;
+    eatenBy.forEach(l => {
+      const predatorPop = pops[l.to] || 0;
+      loss += 0.0003 * predatorPop * P * dt;
+    });
+    // 捕食获益：吃什么
+    const eats = b.links.filter(l => l.to === sp.id);
+    let gain = 0;
+    eats.forEach(l => {
+      const preyPop = pops[l.from] || 0;
+      gain += 0.00015 * preyPop * P * dt;
+    });
+
+    let newP = P + growth - loss + gain;
+    // 自然死亡（顶级捕食者额外死亡率）
+    if (sp.level === 3) newP -= P * 0.008 * dt;
+    // 环境压力
+    if (ef < 0.5) newP -= P * (0.5 - ef) * 0.1 * dt;
+
+    newPops[sp.id] = clamp(Math.round(newP), 1, sp.K * 3);
+  });
+
+  // 更新
+  Object.assign(pops, newPops);
+  b.species.forEach(s => {
+    if (!popHistory[s.id]) popHistory[s.id] = [];
+    popHistory[s.id].push(pops[s.id]);
+    if (popHistory[s.id].length > MAX_HISTORY) popHistory[s.id].shift();
+  });
+  simTime++;
+}
+
+/* ==================== UI 更新 ==================== */
+function updateStats() {
+  const b = BIOMES[currentBiome];
+  const total = b.species.reduce((s, sp) => s + pops[sp.id], 0);
+  document.getElementById('d-species').textContent = b.species.length;
+  document.getElementById('d-total').textContent = total.toLocaleString();
+  document.getElementById('d-time').textContent = `T=${simTime}`;
+
+  // Shannon多样性指数
+  let H = 0;
+  b.species.forEach(sp => {
+    const p = pops[sp.id] / total;
+    if (p > 0) H -= p * Math.log(p);
+  });
+  const Hmax = Math.log(b.species.length);
+  const evenness = Hmax > 0 ? (H / Hmax).toFixed(2) : '0.00';
+  document.getElementById('d-diversity').textContent = evenness;
+
+  // 生态平衡评估
+  const ef = envFactor();
+  let bal = '稳定';
+  if (ef < 0.4) bal = '危机';
+  else if (ef < 0.6) bal = '紧张';
+  else if (ef > 0.9) bal = '繁荣';
+  document.getElementById('d-balance').textContent = bal;
+  const balEl = document.getElementById('d-balance');
+  balEl.style.color = bal === '稳定' || bal === '繁荣' ? 'var(--forest)' : bal === '危机' ? 'var(--accent)' : 'var(--earth)';
+}
+
+function renderSpeciesCards() {
+  const b = BIOMES[currentBiome];
+  const grid = document.getElementById('species-grid');
+  grid.innerHTML = '';
+  b.species.forEach(sp => {
+    const prev = popHistory[sp.id] && popHistory[sp.id].length > 2 ? popHistory[sp.id][popHistory[sp.id].length - 2] : sp.pop;
+    const curr = pops[sp.id];
+    const trend = curr > prev ? 'up' : curr < prev ? 'down' : 'stable';
+    const trendIcon = trend === 'up' ? 'fa-arrow-trend-up' : trend === 'down' ? 'fa-arrow-trend-down' : 'fa-minus';
+    const trendColor = trend === 'up' ? '#4CAF50' : trend === 'down' ? '#FF5252' : '#888';
+    const levelNames = ['生产者','初级消费者','次级消费者','顶级消费者'];
+
+    const card = document.createElement('div');
+    card.className = 'species-card glass p-4';
+    card.innerHTML = `
+      <div class="flex items-center gap-2 mb-2">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm" style="background:${sp.color}22;color:${sp.color}"><i class="fas ${sp.icon}"></i></div>
+        <div class="text-xs font-bold" style="color:var(--text-muted)">${levelNames[sp.level]}</div>
+      </div>
+      <div class="font-bold text-sm mb-1" style="font-family:Quicksand">${sp.name}</div>
+      <div class="flex items-end justify-between">
+        <div class="data-val text-xl" style="color:${sp.color}">${curr.toLocaleString()}</div>
+        <i class="fas ${trendIcon} text-xs" style="color:${trendColor}"></i>
+      </div>
+    `;
+    card.addEventListener('mouseenter', () => { fwHover = sp.id; });
+    card.addEventListener('mouseleave', () => { fwHover = null; });
+    grid.appendChild(card);
+  });
+}
+
+/* ==================== Chart.js ==================== */
+let popChart = null;
+function initChart() {
+  const ctx = document.getElementById('pop-chart').getContext('2d');
+  if (popChart) popChart.destroy();
+  const b = BIOMES[currentBiome];
+  const datasets = b.species.map(sp => ({
+    label: sp.name,
+    data: [...(popHistory[sp.id] || [])],
+    borderColor: sp.color,
+    backgroundColor: sp.color + '18',
+    borderWidth: 2,
+    pointRadius: 0,
+    tension: 0.4,
+    fill: sp.level === 0,
+  }));
+  popChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: Array.from({length: MAX_HISTORY}, (_,i) => ''), datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 0 },
+      plugins: {
+        legend: { position:'top', labels: { color:'#7FA882', font:{family:'Quicksand',size:11}, boxWidth:12, padding:10 } },
+        tooltip: { mode:'index', intersect:false, backgroundColor:'rgba(14,32,18,0.95)', titleColor:'#E4EFE6', bodyColor:'#7FA882', borderColor:'rgba(60,179,113,0.3)', borderWidth:1 }
+      },
+      scales: {
+        x: { display:false },
+        y: { grid:{color:'rgba(60,179,113,0.08)'}, ticks:{color:'#7FA882',font:{size:10}}, beginAtZero:true }
+      },
+      interaction: { mode:'nearest', axis:'x', intersect:false }
+    }
+  });
+}
+
+function updateChart() {
+  if (!popChart) return;
+  const b = BIOMES[currentBiome];
+  b.species.forEach((sp, i) => {
+    if (popChart.data.datasets[i]) {
+      popChart.data.datasets[i].data = [...(popHistory[sp.id] || [])];
+    }
+  });
+  const len = popHistory[b.species[0]?.id]?.length || 0;
+  popChart.data.labels = Array.from({length: len}, () => '');
+  popChart.update('none');
+}
+
+/* ==================== 食物网 Canvas ==================== */
+let fwCanvas, fwCtx;
+function initFoodWeb() {
+  fwCanvas = document.getElementById('fw-canvas');
+  const rect = fwCanvas.getBoundingClientRect();
+  fwCanvas.width = rect.width * 2;
+  fwCanvas.height = rect.height * 2;
+  fwCtx = fwCanvas.getContext('2d');
+  fwCtx.scale(2, 2);
+  fwFlowParticles = [];
+  // 初始化流动粒子
+  const b = BIOMES[currentBiome];
+  b.links.forEach((_, i) => {
+    for (let j = 0; j < 3; j++) {
+      fwFlowParticles.push({ linkIdx: i, t: Math.random(), speed: 0.003 + Math.random() * 0.004 });
+    }
+  });
+  renderFwLegend();
+}
+
+function renderFwLegend() {
+  const b = BIOMES[currentBiome];
+  const el = document.getElementById('fw-legend');
+  el.innerHTML = '';
+  const levelNames = ['生产者','初级消费者','次级消费者','顶级消费者'];
+  const levelColors = ['#4CAF50','#FF9800','#FF5722','#78909C'];
+  [0,1,2,3].forEach(lv => {
+    const sp = b.species.filter(s => s.level === lv);
+    if (sp.length === 0) return;
+    const div = document.createElement('div');
+    div.className = 'flex items-center gap-1 text-xs px-2 py-1 rounded-full';
+    div.style.cssText = `background:${levelColors[lv]}15;color:${levelColors[lv]};border:1px solid ${levelColors[lv]}30`;
+    div.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:${levelColors[lv]};display:inline-block"></span>${levelNames[lv]}`;
+    el.appendChild(div);
+  });
+}
+
+function getNodePositions() {
+  const b = BIOMES[currentBiome];
+  const rect = fwCanvas.getBoundingClientRect();
+  const w = rect.width, h = rect.height;
+  const padX = 55, padY = 35;
+  const levels = [0,1,2,3];
+  const positions = {};
+  levels.forEach(lv => {
+    const sps = b.species.filter(s => s.level === lv);
+    const y = h - padY - lv * ((h - padY * 2) / 3);
+    const count = sps.length;
+    sps.forEach((sp, i) => {
+      const x = count === 1 ? w / 2 : padX + i * ((w - padX * 2) / (count - 1));
+      positions[sp.id] = { x, y };
+    });
+  });
+  return positions;
+}
+
+function drawFoodWeb() {
+  if (!fwCtx) return;
+  const b = BIOMES[currentBiome];
+  const rect = fwCanvas.getBoundingClientRect();
+  const w = rect.width, h = rect.height;
+  fwCtx.clearRect(0, 0, w, h);
+
+  const positions = getNodePositions();
+
+  // 绘制连接线
+  b.links.forEach((link, li) => {
+    const from = positions[link.from];
+    const to = positions[link.to];
+    if (!from || !to) return;
+
+    const isHighlighted = fwHover === link.from || fwHover === link.to;
+    const midY = (from.y + to.y) / 2;
+    const cpOffset = (from.y - to.y) * 0.3;
+
+    fwCtx.beginPath();
+    fwCtx.moveTo(from.x, from.y);
+    fwCtx.bezierCurveTo(from.x, from.y - cpOffset, to.x, to.y + cpOffset, to.x, to.y);
+    fwCtx.strokeStyle = isHighlighted ? 'rgba(60,179,113,0.6)' : 'rgba(60,179,113,0.15)';
+    fwCtx.lineWidth = isHighlighted ? 2.5 : 1;
+    fwCtx.stroke();
+
+    // 箭头
+    const arrowSize = 5;
+    const angle = Math.atan2(to.y - (to.y + cpOffset), to.x - to.x) * 0.3 + Math.atan2(to.y - from.y, to.x - from.x) * 0.7;
+    const arrX = to.x, arrY = to.y - 14;
+    fwCtx.beginPath();
+    fwCtx.moveTo(arrX, arrY + arrowSize);
+    fwCtx.lineTo(arrX - arrowSize * 0.6, arrY - arrowSize * 0.3);
+    fwCtx.lineTo(arrX + arrowSize * 0.6, arrY - arrowSize * 0.3);
+    fwCtx.closePath();
+    fwCtx.fillStyle = isHighlighted ? 'rgba(60,179,113,0.7)' : 'rgba(60,179,113,0.2)';
+    fwCtx.fill();
+  });
+
+  // 绘制流动粒子
+  fwFlowParticles.forEach(p => {
+    if (p.linkIdx >= b.links.length) return;
+    const link = b.links[p.linkIdx];
+    const from = positions[link.from];
+    const to = positions[link.to];
+    if (!from || !to) return;
+    p.t += p.speed * simSpeed;
+    if (p.t > 1) p.t -= 1;
+    const t = p.t;
+    const cpOffset = (from.y - to.y) * 0.3;
+    const mt = 1 - t;
+    // 贝塞尔曲线上的点
+    const px = mt*mt*mt*from.x + 3*mt*mt*t*from.x + 3*mt*t*t*to.x + t*t*t*to.x;
+    const rawY = mt*mt*mt*from.y + 3*mt*mt*t*(from.y - cpOffset) + 3*mt*t*t*(to.y + cpOffset) + t*t*t*to.y;
+    const py = rawY;
+    const isHighlighted = fwHover === link.from || fwHover === link.to;
+    const alpha = isHighlighted ? 0.9 : 0.35;
+    fwCtx.beginPath();
+    fwCtx.arc(px, py, isHighlighted ? 3 : 2, 0, Math.PI * 2);
+    fwCtx.fillStyle = `rgba(60,179,113,${alpha})`;
+    fwCtx.fill();
+  });
+
+  // 绘制节点
+  b.species.forEach(sp => {
+    const pos = positions[sp.id];
+    if (!pos) return;
+    const isHovered = fwHover === sp.id;
+    const radius = isHovered ? 18 : 14;
+    const pop = pops[sp.id] || 0;
+    const bData = BIOMES[currentBiome];
+    const spData = bData.species.find(s => s.id === sp.id);
+    const maxPop = spData ? spData.K * 2 : 1000;
+    const popRatio = clamp(pop / maxPop, 0, 1);
+
+    // 光晕
+    if (isHovered) {
+      const glow = fwCtx.createRadialGradient(pos.x, pos.y, radius, pos.x, pos.y, radius + 20);
+      glow.addColorStop(0, sp.color + '40');
+      glow.addColorStop(1, sp.color + '00');
+      fwCtx.beginPath();
+      fwCtx.arc(pos.x, pos.y, radius + 20, 0, Math.PI * 2);
+      fwCtx.fillStyle = glow;
+      fwCtx.fill();
+    }
+
+    // 种群比例圆环
+    fwCtx.beginPath();
+    fwCtx.arc(pos.x, pos.y, radius + 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * popRatio);
+    fwCtx.strokeStyle = sp.color + '60';
+    fwCtx.lineWidth = 2;
+    fwCtx.stroke();
+
+    // 主圆
+    fwCtx.beginPath();
+    fwCtx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+    const grad = fwCtx.createRadialGradient(pos.x - 3, pos.y - 3, 2, pos.x, pos.y, radius);
+    grad.addColorStop(0, sp.color);
+    grad.addColorStop(1, sp.color + 'aa');
+    fwCtx.fillStyle = grad;
+    fwCtx.fill();
+    fwCtx.strokeStyle = isHovered ? '#fff' : sp.color + '60';
+    fwCtx.lineWidth = isHovered ? 2 : 1;
+    fwCtx.stroke();
+
+    // 名字
+    fwCtx.font = `${isHovered?'bold ':''}11px Quicksand`;
+    fwCtx.textAlign = 'center';
+    fwCtx.fillStyle = isHovered ? '#fff' : 'rgba(228,239,230,0.75)';
+    fwCtx.fillText(sp.name, pos.x, pos.y + radius + 16);
+
+    // 数量
+    fwCtx.font = 'bold 10px Quicksand';
+    fwCtx.fillStyle = '#fff';
+    fwCtx.fillText(pop.toLocaleString(), pos.x, pos.y + 3);
+  });
+}
+
+// 食物网鼠标交互
+function setupFwInteraction() {
+  const c = document.getElementById('fw-canvas');
+  c.addEventListener('mousemove', (e) => {
+    const rect = c.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const positions = getNodePositions();
+    const b = BIOMES[currentBiome];
+    let found = null;
+    b.species.forEach(sp => {
+      const p = positions[sp.id];
+      if (p && Math.hypot(mx - p.x, my - p.y) < 20) found = sp.id;
+    });
+    fwHover = found;
+  });
+  c.addEventListener('mouseleave', () => { fwHover = null; });
+}
+
+/* ==================== Three.js 3D场景 ==================== */
+function init3D() {
+  const container = document.getElementById('scene-box');
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+
+  scene3d = new THREE.Scene();
+  camera3d = new THREE.PerspectiveCamera(55, w / h, 0.1, 500);
+  camera3d.position.set(20, 18, 25);
+  camera3d.lookAt(0, 0, 0);
+
+  renderer3d = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  renderer3d.setSize(w, h);
+  renderer3d.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer3d.shadowMap.enabled = true;
+  renderer3d.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.appendChild(renderer3d.domElement);
+
+  controls3d = new OrbitControls(camera3d, renderer3d.domElement);
+  controls3d.enableDamping = true;
+  controls3d.dampingFactor = 0.06;
+  controls3d.maxDistance = 60;
+  controls3d.minDistance = 8;
+  controls3d.maxPolarAngle = Math.PI / 2.1;
+
+  buildScene(currentBiome);
+
+  window.addEventListener('resize', () => {
+    const w2 = container.clientWidth;
+    const h2 = container.clientHeight;
+    camera3d.aspect = w2 / h2;
+    camera3d.updateProjectionMatrix();
+    renderer3d.setSize(w2, h2);
+  });
+}
+
+function clearScene() {
+  sceneObjects.forEach(obj => {
+    scene3d.remove(obj);
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {
+      if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+      else obj.material.dispose();
+    }
+  });
+  sceneObjects = [];
+  particleSystem = null;
+}
+
+function buildScene(biomeKey) {
+  clearScene();
+  const b = BIOMES[biomeKey];
+  scene3d.background = new THREE.Color(b.bg);
+  scene3d.fog = new THREE.FogExp2(b.fog, b.fogDensity);
+
+  // 环境光
+  const amb = new THREE.AmbientLight(b.ambientColor, b.ambientIntensity);
+  scene3d.add(amb); sceneObjects.push(amb);
+
+  // 方向光
+  const dir = new THREE.DirectionalLight(b.dirColor, b.dirIntensity);
+  dir.position.set(...b.dirPos);
+  dir.castShadow = true;
+  dir.shadow.mapSize.set(1024, 1024);
+  dir.shadow.camera.near = 1; dir.shadow.camera.far = 60;
+  dir.shadow.camera.left = -30; dir.shadow.camera.right = 30;
+  dir.shadow.camera.top = 30; dir.shadow.camera.bottom = -30;
+  scene3d.add(dir); sceneObjects.push(dir);
+
+  // 地面
+  const groundGeo = new THREE.PlaneGeometry(80, 80, 80, 80);
+  const gPos = groundGeo.attributes.position;
+  for (let i = 0; i < gPos.count; i++) {
+    const x = gPos.getX(i), y = gPos.getY(i);
+    gPos.setZ(i, Math.sin(x * 0.08) * Math.cos(y * 0.08) * 1.5 + Math.sin(x * 0.2 + y * 0.15) * 0.5);
+  }
+  groundGeo.computeVertexNormals();
+  const groundMat = new THREE.MeshLambertMaterial({ color: b.groundColor });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene3d.add(ground); sceneObjects.push(ground);
+
+  // 根据生态系统类型添加特色物体
+  if (biomeKey === 'forest') buildForestObjects();
+  else if (biomeKey === 'ocean') buildOceanObjects();
+  else if (biomeKey === 'grassland') buildGrasslandObjects();
+
+  // 粒子系统（大气粒子）
+  const pCount = 600;
+  const pGeo = new THREE.BufferGeometry();
+  const pPositions = new Float32Array(pCount * 3);
+  const pSizes = new Float32Array(pCount);
+  for (let i = 0; i < pCount; i++) {
+    pPositions[i*3] = (Math.random()-0.5)*70;
+    pPositions[i*3+1] = Math.random()*15+1;
+    pPositions[i*3+2] = (Math.random()-0.5)*70;
+    pSizes[i] = Math.random()*2+0.5;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+  pGeo.setAttribute('size', new THREE.BufferAttribute(pSizes, 1));
+
+  const pMat = new THREE.PointsMaterial({
+    color: b.particleColor, size: 0.2, transparent: true, opacity: 0.5,
+    sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false
+  });
+  particleSystem = new THREE.Points(pGeo, pMat);
+  scene3d.add(particleSystem); sceneObjects.push(particleSystem);
+}
+
+function buildForestObjects() {
+  // 树木
+  const trunkGeo = new THREE.CylinderGeometry(0.12, 0.18, 1.8, 5);
+  const trunkMat = new THREE.MeshLambertMaterial({ color: 0x5D4037 });
+  const leafGeo = new THREE.ConeGeometry(1.0, 2.5, 6);
+  const leafMat = new THREE.MeshLambertMaterial({ color: 0x2E7D32 });
+  const leafMat2 = new THREE.MeshLambertMaterial({ color: 0x388E3C });
+
+  for (let i = 0; i < 100; i++) {
+    const x = (Math.random()-0.5)*65;
+    const z = (Math.random()-0.5)*65;
+    const s = 0.7 + Math.random()*1.0;
+    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+    trunk.position.set(x, 0.9*s, z);
+    trunk.scale.set(s, s, s);
+    trunk.castShadow = true;
+    scene3d.add(trunk); sceneObjects.push(trunk);
+
+    const leaf = new THREE.Mesh(leafGeo, Math.random()>0.5 ? leafMat : leafMat2);
+    leaf.position.set(x, 2.8*s, z);
+    leaf.scale.set(s, s*0.8+0.2, s);
+    leaf.castShadow = true;
+    leaf.userData.phase = Math.random()*Math.PI*2;
+    scene3d.add(leaf); sceneObjects.push(leaf);
+  }
+
+  // 石头
+  const rockGeo = new THREE.DodecahedronGeometry(0.5, 0);
+  const rockMat = new THREE.MeshLambertMaterial({ color: 0x616161 });
+  for (let i = 0; i < 20; i++) {
+    const rock = new THREE.Mesh(rockGeo, rockMat);
+    rock.position.set((Math.random()-0.5)*50, 0.2, (Math.random()-0.5)*50);
+    rock.scale.set(0.3+Math.random()*0.8, 0.2+Math.random()*0.4, 0.3+Math.random()*0.8);
+    rock.rotation.set(Math.random(), Math.random(), Math.random());
+    rock.castShadow = true;
+    scene3d.add(rock); sceneObjects.push(rock);
+  }
+}
+
+function buildOceanObjects() {
+  // 水面
+  const waterGeo = new THREE.PlaneGeometry(80, 80, 60, 60);
+  const waterMat = new THREE.MeshPhongMaterial({
+    color: 0x1565C0, transparent: true, opacity: 0.65,
+    shininess: 100, specular: 0x88bbff, side: THREE.DoubleSide
+  });
+  const water = new THREE.Mesh(waterGeo, waterMat);
+  water.rotation.x = -Math.PI / 2;
+  water.position.y = 1;
+  water.userData.isWater = true;
+  scene3d.add(water); sceneObjects.push(water);
+
+  // 珊瑚
+  const coralColors = [0xFF6F61, 0xFFAB91, 0xF48FB1, 0xCE93D8, 0xFFCC80];
+  for (let i = 0; i < 40; i++) {
+    const r = Math.max(0.15, 0.15 + Math.random()*0.5);
+    const h = Math.max(0.3, 0.3 + Math.random()*1.5);
+    const cGeo = new THREE.CylinderGeometry(r*0.3, r, h, 6);
+    const cMat = new THREE.MeshLambertMaterial({ color: coralColors[i%coralColors.length] });
+    const coral = new THREE.Mesh(cGeo, cMat);
+    coral.position.set((Math.random()-0.5)*50, h/2-0.5, (Math.random()-0.5)*50);
+    coral.castShadow = true;
+    scene3d.add(coral); sceneObjects.push(coral);
+  }
+
+  // 海藻
+  for (let i = 0; i < 25; i++) {
+    const sGeo = new THREE.CylinderGeometry(0.05, 0.08, 2+Math.random()*2, 4);
+    const sMat = new THREE.MeshLambertMaterial({ color: 0x00C853 });
+    const seaweed = new THREE.Mesh(sGeo, sMat);
+    seaweed.position.set((Math.random()-0.5)*55, 0.5+Math.random(), (Math.random()-0.5)*55);
+    seaweed.userData.phase = Math.random()*Math.PI*2;
+    scene3d.add(seaweed); sceneObjects.push(seaweed);
+  }
+}
+
+function buildGrasslandObjects() {
+  // 金合欢树（扁平树冠）
+  const trunkGeo = new THREE.CylinderGeometry(0.15, 0.25, 3, 5);
+  const trunkMat = new THREE.MeshLambertMaterial({ color: 0x5D4037 });
+  const canopyGeo = new THREE.CylinderGeometry(2.5, 2.5, 0.8, 8);
+  const canopyMat = new THREE.MeshLambertMaterial({ color: 0x558B2F });
+
+  for (let i = 0; i < 20; i++) {
+    const x = (Math.random()-0.5)*55;
+    const z = (Math.random()-0.5)*55;
+    const s = 0.6+Math.random()*0.8;
+    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+    trunk.position.set(x, 1.5*s, z); trunk.scale.set(s,s,s);
+    trunk.castShadow = true;
+    scene3d.add(trunk); sceneObjects.push(trunk);
+    const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+    canopy.position.set(x, 3.4*s, z); canopy.scale.set(s,s*0.6,s);
+    canopy.castShadow = true;
+    scene3d.add(canopy); sceneObjects.push(canopy);
+  }
+
+  // 草丛（小圆锥）
+  const grassGeo = new THREE.ConeGeometry(0.3, 0.6, 4);
+  const grassMat = new THREE.MeshLambertMaterial({ color: 0x8BC34A });
+  const grassMat2 = new THREE.MeshLambertMaterial({ color: 0x9CCC65 });
+  for (let i = 0; i < 150; i++) {
+    const g = new THREE.Mesh(grassGeo, Math.random()>0.5?grassMat:grassMat2);
+    g.position.set((Math.random()-0.5)*65, 0.2, (Math.random()-0.5)*65);
+    g.scale.set(0.5+Math.random(), 0.5+Math.random()*1.5, 0.5+Math.random());
+    scene3d.add(g); sceneObjects.push(g);
+  }
+
+  // 岩石
+  const rockGeo = new THREE.DodecahedronGeometry(1, 0);
+  const rockMat = new THREE.MeshLambertMaterial({ color: 0x8D6E63 });
+  for (let i = 0; i < 10; i++) {
+    const rock = new THREE.Mesh(rockGeo, rockMat);
+    rock.position.set((Math.random()-0.5)*50, 0.3, (Math.random()-0.5)*50);
+    rock.scale.set(0.5+Math.random()*1.2, 0.3+Math.random()*0.5, 0.5+Math.random()*1.2);
+    rock.castShadow = true;
+    scene3d.add(rock); sceneObjects.push(rock);
+  }
+}
+
+/* ==================== 动画循环 ==================== */
+let clock = new THREE.Clock();
+let frameCount = 0;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+  const elapsed = clock.getElapsedTime();
+  frameCount++;
+
+  // 控制器更新
+  controls3d.update();
+
+  // 粒子动画
+  if (particleSystem) {
+    const pp = particleSystem.geometry.attributes.position;
+    for (let i = 0; i < pp.count; i++) {
+      let y = pp.getY(i);
+      y += Math.sin(elapsed * 0.5 + i * 0.1) * 0.005;
+      let x = pp.getX(i);
+      x += Math.sin(elapsed * 0.3 + i * 0.05) * 0.003;
+      pp.setY(i, y);
+      pp.setX(i, x);
+    }
+    pp.needsUpdate = true;
+  }
+
+  // 树木/海藻微动
+  sceneObjects.forEach(obj => {
+    if (obj.userData.phase !== undefined) {
+      const p = obj.userData.phase;
+      obj.rotation.z = Math.sin(elapsed * 0.8 + p) * 0.03;
+      obj.rotation.x = Math.cos(elapsed * 0.6 + p) * 0.02;
+    }
+  });
+
+  // 海洋水面波动
+  sceneObjects.forEach(obj => {
+    if (obj.userData.isWater && obj.geometry) {
+      const pos = obj.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i), y = pos.getY(i);
+        pos.setZ(i, Math.sin(x*0.3+elapsed)*0.3 + Math.cos(y*0.2+elapsed*0.7)*0.2);
+      }
+      pos.needsUpdate = true;
+    }
+  });
+
+  // 环境光随温度变化
+  sceneObjects.forEach(obj => {
+    if (obj.isAmbientLight) {
+      // 不处理，保持原样
+    }
+  });
+
+  renderer3d.render(scene3d, camera3d);
+
+  // 绘制食物网（每2帧）
+  if (frameCount % 2 === 0) {
+    drawFoodWeb();
+  }
+}
+
+/* ==================== 事件绑定 ==================== */
+function setupEvents() {
+  // 生态系统切换
+  document.querySelectorAll('[data-biome]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.biome;
+      if (key === currentBiome) return;
+      document.querySelectorAll('[data-biome]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentBiome = key;
+      initBiome(key);
+      buildScene(key);
+      initChart();
+      initFoodWeb();
+      renderSpeciesCards();
+      showToast(`已切换至 ${BIOMES[key].name} 生态系统`);
+    });
+  });
+
+  // 滑块
+  document.getElementById('sl-temp').addEventListener('input', (e) => {
+    temperature = +e.target.value;
+    document.getElementById('v-temp').textContent = temperature + '°C';
+    updateLighting();
+  });
+  document.getElementById('sl-rain').addEventListener('input', (e) => {
+    rainfall = +e.target.value;
+    document.getElementById('v-rain').textContent = rainfall + '%';
+    updateFog();
+  });
+  document.getElementById('sl-res').addEventListener('input', (e) => {
+    resources = +e.target.value;
+    document.getElementById('v-res').textContent = resources + '%';
+  });
+
+  // 播放/暂停
+  document.getElementById('play-btn').addEventListener('click', () => {
+    simRunning = !simRunning;
+    document.getElementById('play-btn').innerHTML = simRunning
+      ? '<i class="fas fa-pause"></i>'
+      : '<i class="fas fa-play"></i>';
+    showToast(simRunning ? '模拟继续' : '模拟暂停');
+  });
+
+  // 速度
+  document.querySelectorAll('[data-speed]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-speed]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      simSpeed = +btn.dataset.speed;
+    });
+  });
+
+  // 重置
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    simTime = 0;
+    temperature = 25; rainfall = 60; resources = 70;
+    document.getElementById('sl-temp').value = 25;
+    document.getElementById('sl-rain').value = 60;
+    document.getElementById('sl-res').value = 70;
+    document.getElementById('v-temp').textContent = '25°C';
+    document.getElementById('v-rain').textContent = '60%';
+    document.getElementById('v-res').textContent = '70%';
+    initBiome(currentBiome);
+    initChart();
+    updateFog();
+    showToast('模拟已重置');
+  });
+
+  // 导航滚动
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+}
+
+function updateLighting() {
+  // 温度影响光照色温
+  const t = (temperature + 10) / 55; // 0-1
+  sceneObjects.forEach(obj => {
+    if (obj.isDirectionalLight) {
+      const r = 1.0;
+      const g = 0.8 + t * 0.15;
+      const b = 0.6 + (1-t) * 0.3;
+      obj.color.setRGB(r, clamp(g,0,1), clamp(b,0,1));
+    }
+  });
+}
+
+function updateFog() {
+  // 降水影响雾浓度
+  const density = 0.01 + (rainfall / 100) * 0.04;
+  if (scene3d.fog) scene3d.fog.density = density;
+}
+
+/* ==================== 模拟循环 ==================== */
+let simAccum = 0;
+function simulationLoop() {
+  if (simRunning) {
+    for (let i = 0; i < simSpeed; i++) {
+      stepSimulation();
+    }
+  }
+}
+setInterval(simulationLoop, 120);
+
+// UI更新循环
+setInterval(() => {
+  updateStats();
+  updateChart();
+  renderSpeciesCards();
+}, 350);
+
+/* ==================== 启动 ==================== */
+function init() {
+  init3D();
+  initChart();
+  initFoodWeb();
+  setupFwInteraction();
+  setupEvents();
+  renderSpeciesCards();
+  updateStats();
+  animate();
+  showToast('欢迎使用 EcoSphere 生态系统模拟器');
+}
+
+// 等待DOM就绪
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光的散射 — 瑞利·米氏·几何</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@300;400;600;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{fontFamily:{sans:['Noto Sans SC','sans-serif'],mono:['JetBrains Mono','monospace']}}}}
+</script>
+<style>
+:root{--bg:#030508;--card:#0b1120;--border:#162040;--accent:#00e6a0;--fg:#edf2f9;--muted:#7a90b5;--dim:#3e5578;--ray:#00e6a0;--mie:#ffaa22;--geo:#ff4466}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:'Noto Sans SC',sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 40% 35%,rgba(0,230,160,.06),transparent 60%),radial-gradient(ellipse 60% 40% at 70% 65%,rgba(255,170,34,.05),transparent 55%),radial-gradient(ellipse 50% 40% at 50% 80%,rgba(255,68,102,.04),transparent 50%),var(--bg)}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);animation:of 20s ease-in-out infinite;opacity:.18}
+.orb-1{width:500px;height:500px;background:var(--ray);top:-10%;left:-5%;animation-delay:0s}
+.orb-2{width:400px;height:400px;background:var(--mie);bottom:-8%;right:-5%;animation-delay:-7s}
+.orb-3{width:300px;height:300px;background:var(--geo);top:50%;left:50%;animation-delay:-13s}
+@keyframes of{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.08)}66%{transform:translate(-30px,35px) scale(.92)}}
+
+.hero-title{font-size:clamp(2.6rem,6.5vw,5.2rem);font-weight:900;line-height:1.05;letter-spacing:-.03em;color:#fff}
+.hero-sub{font-size:clamp(.95rem,1.8vw,1.25rem);font-weight:300;color:var(--muted);margin-top:1.2rem;max-width:620px;line-height:1.8}
+
+.tab-btn{padding:.65rem 1.4rem;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.88rem;cursor:pointer;transition:all .25s;font-family:inherit;font-weight:600;white-space:nowrap}
+.tab-btn:hover{border-color:rgba(255,255,255,.15);color:var(--fg)}
+.tab-btn.active-ray{background:rgba(0,230,160,.1);border-color:var(--ray);color:var(--ray);box-shadow:0 0 24px rgba(0,230,160,.1)}
+.tab-btn.active-mie{background:rgba(255,170,34,.1);border-color:var(--mie);color:var(--mie);box-shadow:0 0 24px rgba(255,170,34,.1)}
+.tab-btn.active-geo{background:rgba(255,68,102,.1);border-color:var(--geo);color:var(--geo);box-shadow:0 0 24px rgba(255,68,102,.1)}
+
+.plot-wrap{background:#060b16;border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative}
+.plot-wrap canvas{display:block;width:100%;height:280px}
+.plot-label{position:absolute;top:10px;left:14px;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;z-index:2}
+
+.param-group{display:flex;flex-direction:column;gap:4px}
+.param-label{font-size:.78rem;color:var(--muted);display:flex;justify-content:space-between}
+.param-label span:last-child{font-family:'JetBrains Mono',monospace;color:var(--fg);font-weight:600}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--border);outline:none}
+input[type=range]:hover{background:#1e3060}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 10px rgba(0,230,160,.3)}
+
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.6rem;transition:border-color .3s}
+.info-card:hover{border-color:rgba(255,255,255,.1)}
+
+.cmp-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.82rem}
+.cmp-table th{background:rgba(255,255,255,.04);padding:.75rem 1rem;text-align:left;font-weight:700;white-space:nowrap;border-bottom:1px solid var(--border);color:var(--fg)}
+.cmp-table td{padding:.65rem 1rem;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:top;color:var(--muted);line-height:1.6}
+.cmp-table tr:hover td{background:rgba(255,255,255,.015)}
+.cmp-table .th-row{font-weight:700;color:var(--fg)!important}
+
+.sec-title{font-size:clamp(1.7rem,3.5vw,2.4rem);font-weight:900;color:#fff;letter-spacing:-.02em}
+
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .65s,transform .65s cubic-bezier(.4,0,.2,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+.badge{display:inline-block;padding:.15rem .6rem;border-radius:5px;font-size:.68rem;font-weight:700}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;margin-top:2rem;padding:.85rem 2rem;border-radius:12px;font-size:.95rem;font-weight:700;border:none;cursor:pointer;background:var(--accent);color:var(--bg);transition:all .3s;font-family:inherit;box-shadow:0 0 30px rgba(0,230,160,.18)}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(0,230,160,.28)}
+
+.sky-canvas-wrap{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--border)}
+.sky-canvas-wrap canvas{display:block;width:100%;height:260px}
+
+@media(max-width:768px){.plot-wrap canvas{height:220px}.sky-canvas-wrap canvas{height:200px}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="relative z-10 text-center px-6">
+    <p class="text-sm tracking-[.2em] uppercase mb-5 font-semibold" style="color:var(--accent);opacity:.65">Light Scattering Physics</p>
+    <h1 class="hero-title">光的散射机制<br><span style="background:linear-gradient(135deg,var(--ray),var(--mie),var(--geo));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">瑞利 · 米氏 · 几何</span></h1>
+    <p class="hero-sub mx-auto">当光遇到微粒，散射行为取决于粒子尺寸与波长的比值。调节参数，直观理解三种散射的本质差异</p>
+    <a href="#simulator" class="cta-btn">开始探索 <i class="fa-solid fa-arrow-down text-sm"></i></a>
+  </div>
+</header>
+
+<main>
+
+<!-- 模拟器 -->
+<section id="simulator" class="max-w-7xl mx-auto px-6 py-24">
+  <h2 class="sec-title mb-3 reveal">交互式散射模拟</h2>
+  <p class="mb-8 reveal" style="color:var(--muted)">选择散射类型，调节粒子参数与入射波长，实时观察散射光场分布与强度变化</p>
+
+  <div class="flex flex-wrap gap-2 mb-6 reveal" id="tabBtns"></div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-5">
+    <div class="lg:col-span-1 reveal">
+      <div class="info-card" id="paramPanel">
+        <h3 class="text-sm font-bold mb-1" id="simTitle" style="color:var(--ray)">瑞利散射</h3>
+        <p class="text-xs mb-4 leading-relaxed" style="color:var(--muted)" id="simDesc">粒子远小于波长，散射强度 ∝ 1/λ⁴，前后对称</p>
+        <div class="flex gap-2 flex-wrap mb-4" id="simTags"></div>
+        <div class="mt-4 flex flex-col gap-5" id="paramSliders"></div>
+        <div class="mt-5 pt-4" style="border-top:1px solid var(--border)">
+          <div class="text-xs font-bold mb-2" style="color:var(--fg)">尺寸参数 x</div>
+          <div class="font-mono text-2xl font-bold" id="xValue" style="color:var(--ray)">0.10</div>
+          <div class="text-xs mt-1" style="color:var(--dim)">x = 2πr / λ</div>
+        </div>
+      </div>
+    </div>
+    <div class="lg:col-span-3 flex flex-col gap-5 reveal">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="plot-wrap">
+          <span class="plot-label" id="lbl2d" style="color:var(--ray)">散射光场 (2D)</span>
+          <canvas id="canvas2d"></canvas>
+        </div>
+        <div class="plot-wrap">
+          <span class="plot-label" id="lblPolar" style="color:var(--ray)">极坐标散射图</span>
+          <canvas id="canvasPolar"></canvas>
+        </div>
+      </div>
+      <div class="plot-wrap">
+        <span class="plot-label" id="lblSpec" style="color:var(--ray)">散射截面 vs 波长</span>
+        <canvas id="canvasSpec"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 天空颜色 -->
+<section id="skySection" class="max-w-7xl mx-auto px-6 pb-24">
+  <h2 class="sec-title mb-3 reveal">为什么天空是蓝色的</h2>
+  <p class="mb-8 reveal" style="color:var(--muted)">瑞利散射强度与波长四次方成反比 — 短波长（蓝紫光）被散射的强度远大于长波长（红光）</p>
+  <div class="sky-canvas-wrap reveal">
+    <canvas id="skyCanvas"></canvas>
+    <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-6 text-xs font-semibold" style="color:rgba(255,255,255,.6)">
+      <span><i class="fa-solid fa-sun mr-1" style="color:#ffcc44"></i>太阳方向（左上）</span>
+      <span><i class="fa-solid fa-eye mr-1"></i>观察方向（各角度）</span>
+    </div>
+  </div>
+</section>
+
+<!-- 对比表格 -->
+<section id="comparison" class="max-w-7xl mx-auto px-6 pb-24">
+  <h2 class="sec-title mb-3 reveal">三种散射对比</h2>
+  <p class="mb-8 reveal" style="color:var(--muted)">从粒子尺寸、适用条件到物理特征，全面梳理三种散射机制</p>
+  <div class="overflow-x-auto rounded-2xl reveal" style="border:1px solid var(--border);background:var(--card)">
+    <table class="cmp-table" id="compTable"></table>
+  </div>
+</section>
+
+<!-- 应用场景 -->
+<section id="applications" class="max-w-7xl mx-auto px-6 pb-32">
+  <h2 class="sec-title mb-3 reveal">生活中的散射现象</h2>
+  <p class="mb-10 reveal" style="color:var(--muted)">三种散射机制在自然界与工程技术中无处不在</p>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 reveal" id="appCards"></div>
+</section>
+
+</main>
+
+<footer class="text-center py-10" style="border-top:1px solid var(--border);color:var(--dim);font-size:.8rem">
+  光的散射机制 —— 瑞利散射 · 米氏散射 · 几何散射 交互式解析
+</footer>
+
+<script>
+/* ============================================================
+   配置
+   ============================================================ */
+const TYPES = {
+  rayleigh: {
+    name:'瑞利散射', color:'#00e6a0', activeClass:'active-ray',
+    desc:'粒子远小于波长（x ≪ 1），散射强度 ∝ 1/λ⁴，前后对称分布',
+    tags:['x ≪ 1','分子/气溶胶','各向同性'],
+    params:[
+      {id:'radius',label:'粒子半径 r',min:1,max:40,step:1,val:10,unit:'nm'},
+      {id:'wavelength',label:'入射波长 λ',min:380,max:780,step:5,val:550,unit:'nm'}
+    ]
+  },
+  mie: {
+    name:'米氏散射', color:'#ffaa22', activeClass:'active-mie',
+    desc:'粒子尺寸与波长相当（x ≈ 1），前向散射增强，出现复杂干涉图样',
+    tags:['x ≈ 1','气溶胶/水滴','前向增强'],
+    params:[
+      {id:'radius',label:'粒子半径 r',min:100,max:2000,step:50,val:500,unit:'nm'},
+      {id:'wavelength',label:'入射波长 λ',min:380,max:780,step:5,val:550,unit:'nm'}
+    ]
+  },
+  geometric: {
+    name:'几何散射', color:'#ff4466', activeClass:'active-geo',
+    desc:'粒子远大于波长（x ≫ 1），光沿直线传播，遵循反射/折射定律',
+    tags:['x ≫ 1','雨滴/冰晶','彩虹/晕'],
+    params:[
+      {id:'radius',label:'粒子半径 r',min:10,max:200,step:5,val:50,unit:'μm'},
+      {id:'wavelength',label:'入射波长 λ',min:380,max:780,step:5,val:550,unit:'nm'}
+    ]
+  }
+};
+
+let currentType = 'rayleigh';
+let paramValues = {};
+
+/* ============================================================
+   数学模型
+   ============================================================ */
+function getSizeParam(r_nm, lambda_nm) {
+  return 2 * Math.PI * r_nm / lambda_nm;
+}
+
+// 瑞利散射强度（归一化）：I ∝ (1 + cos²θ)
+function rayleighIntensity(theta) {
+  return 0.5 * (1 + Math.cos(theta) * Math.cos(theta));
+}
+
+// 米氏散射：用近似模型模拟前向增强 + 侧瓣振荡
+function mieIntensity(theta, x) {
+  // 参数化模型：前向集中度随 x 增大而增强，加振荡
+  const forward = Math.pow(Math.cos(theta / 2), 2 * Math.min(x * 0.4, 8));
+  // 侧向振荡，频率随 x 增大
+  const osc = 1 + 0.35 * Math.sin(x * 1.2) * Math.sin(x * 0.8 * theta);
+  // 后向抑制
+  const back = 1 - 0.6 * Math.pow(Math.max(0, -Math.cos(theta)), Math.min(x * 0.3, 4));
+  const base = 0.5 * (1 + Math.cos(theta) * Math.cos(theta));
+  return Math.max(0.01, base * forward * osc * back);
+}
+
+// 几何散射：极强前向 + 彩虹角凸起
+function geometricIntensity(theta, x) {
+  // 前向尖锐峰
+  const fwd = Math.exp(-theta * theta * 0.3);
+  // 主彩虹角 ≈ 138° → π - 42°
+  const rbAngle = Math.PI - 42 * Math.PI / 180;
+  const rb = 0.6 * Math.exp(-Math.pow(theta - rbAngle, 2) * 80);
+  // 副彩虹角 ≈ 129°
+  const rb2Angle = Math.PI - 51 * Math.PI / 180;
+  const rb2 = 0.2 * Math.exp(-Math.pow(theta - rb2Angle, 2) * 120);
+  // 漫散射底噪
+  const diff = 0.03;
+  return fwd + rb + rb2 + diff;
+}
+
+// 获取散射强度
+function getIntensity(theta, type, x) {
+  switch(type) {
+    case 'rayleigh': return rayleighIntensity(theta);
+    case 'mie': return mieIntensity(theta, x);
+    case 'geometric': return geometricIntensity(theta, x);
+  }
+  return 0;
+}
+
+// 散射截面 vs 波长
+function getCrossSection(lambda_nm, r_nm, type) {
+  const x = getSizeParam(r_nm, lambda_nm);
+  switch(type) {
+    case 'rayleigh':
+      // σ ∝ r⁶/λ⁴ → 归一化
+      return Math.pow(r_nm / 10, 6) / Math.pow(lambda_nm / 550, 4);
+    case 'mie':
+      // 近似：σ ∝ r² · f(x)，f(x) 在 x≈1 附近有峰值
+      const f = x * x / (1 + x * x) * (1 + 0.3 * Math.sin(x * 0.5));
+      return Math.pow(r_nm / 500, 2) * f * 50;
+    case 'geometric':
+      // σ ≈ 2πr² (消光悖论)
+      return Math.pow(r_nm / 50000, 2) * 2 * Math.PI * 50000 * 50000;
+  }
+  return 0;
+}
+
+/* ============================================================
+   Canvas 工具
+   ============================================================ */
+function initCanvas(id) {
+  const c = document.getElementById(id);
+  const dpr = window.devicePixelRatio || 1;
+  const rect = c.getBoundingClientRect();
+  const w = rect.width, h = rect.height;
+  if (w < 10 || h < 10) return null;
+  c.width = w * dpr; c.height = h * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return { ctx, w, h };
+}
+
+function wavelengthToRGB(wl) {
+  let r=0, g=0, b=0;
+  if (wl>=380&&wl<440){r=-(wl-440)/(440-380);b=1}
+  else if(wl>=440&&wl<490){g=(wl-440)/(490-440);b=1}
+  else if(wl>=490&&wl<510){g=1;b=-(wl-510)/(510-490)}
+  else if(wl>=510&&wl<580){r=(wl-510)/(580-510);g=1}
+  else if(wl>=580&&wl<645){r=1;g=-(wl-645)/(645-580)}
+  else if(wl>=645&&wl<=780){r=1}
+  let f=1;
+  if(wl>=380&&wl<420)f=.3+.7*(wl-380)/40;
+  else if(wl>700&&wl<=780)f=.3+.7*(780-wl)/80;
+  return [Math.round(r*f*255),Math.round(g*f*255),Math.round(b*f*255)];
+}
+
+function rgbStr(rgb, a){return a!==undefined?`rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`:`rgb(${rgb[0]},${rgb[1]},${rgb[2]})`}
+
+/* ============================================================
+   2D 散射光场绘制
+   ============================================================ */
+function draw2DField() {
+  const res = initCanvas('canvas2d');
+  if (!res) return;
+  const { ctx, w, h } = res;
+  const p = getParams();
+  const x = getSizeParam(p.radius, p.wavelength);
+  const scRGB = wavelengthToRGB(p.wavelength);
+  const cfg = TYPES[currentType];
+  const cx = w * 0.35, cy = h * 0.5;
+  const maxR = Math.min(w, h) * 0.42;
+
+  // 背景
+  ctx.fillStyle = '#050a14';
+  ctx.fillRect(0, 0, w, h);
+
+  // 用 ImageData 逐像素计算散射光强
+  const dpr = window.devicePixelRatio || 1;
+  const pw = Math.round(w * dpr), ph = Math.round(h * dpr);
+  const imgData = ctx.getImageData(0, 0, pw, ph);
+  const data = imgData.data;
+
+  // 归一化最大强度
+  let maxI = 0;
+  for (let a = 0; a < Math.PI * 2; a += 0.05) {
+    maxI = Math.max(maxI, getIntensity(a, currentType, x));
+  }
+  maxI = Math.max(maxI, 0.01);
+
+  for (let py = 0; py < ph; py++) {
+    for (let px = 0; px < pw; px++) {
+      const rx = px / dpr - cx, ry = py / dpr - cy;
+      const dist = Math.sqrt(rx * rx + ry * ry);
+      if (dist < 6 || dist > maxR) continue;
+      let angle = Math.atan2(ry, rx);
+      if (angle < 0) angle += Math.PI * 2;
+
+      const intensity = getIntensity(angle, currentType, x) / maxI;
+      // 径向衰减
+      const falloff = 1 / (1 + dist * 0.008);
+      const bright = Math.pow(intensity * falloff, 0.65);
+      const alpha = Math.min(1, bright * 1.2);
+
+      const idx = (py * pw + px) * 4;
+      data[idx] = Math.round(scRGB[0] * alpha);
+      data[idx+1] = Math.round(scRGB[1] * alpha);
+      data[idx+2] = Math.round(scRGB[2] * alpha);
+      data[idx+3] = Math.round(alpha * 200);
+    }
+  }
+  ctx.putImageData(imgData, 0, 0);
+
+  // 入射光箭头
+  ctx.save();
+  ctx.strokeStyle = rgbStr(scRGB, 0.7);
+  ctx.lineWidth = 2.5;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(0, cy);
+  ctx.lineTo(cx - 12, cy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  // 箭头头
+  ctx.fillStyle = rgbStr(scRGB, 0.8);
+  ctx.beginPath();
+  ctx.moveTo(cx - 12, cy - 5);
+  ctx.lineTo(cx - 2, cy);
+  ctx.lineTo(cx - 12, cy + 5);
+  ctx.fill();
+  ctx.restore();
+
+  // 粒子
+  const pSize = Math.max(4, Math.min(18, x * 2.5));
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, pSize * 2);
+  grad.addColorStop(0, rgbStr(scRGB, 0.9));
+  grad.addColorStop(0.5, rgbStr(scRGB, 0.3));
+  grad.addColorStop(1, rgbStr(scRGB, 0));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, pSize * 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(cx, cy, Math.max(2, pSize * 0.4), 0, Math.PI * 2);
+  ctx.fill();
+
+  // 标注
+  ctx.fillStyle = 'rgba(255,255,255,.45)';
+  ctx.font = '11px "Noto Sans SC"';
+  ctx.textAlign = 'left';
+  ctx.fillText('入射光 →', 8, cy - 10);
+  ctx.textAlign = 'center';
+  ctx.fillText('粒子', cx, cy + pSize * 2 + 16);
+}
+
+/* ============================================================
+   极坐标散射图
+   ============================================================ */
+function drawPolar() {
+  const res = initCanvas('canvasPolar');
+  if (!res) return;
+  const { ctx, w, h } = res;
+  const p = getParams();
+  const x = getSizeParam(p.radius, p.wavelength);
+  const scRGB = wavelengthToRGB(p.wavelength);
+  const cfg = TYPES[currentType];
+  const cx = w / 2, cy = h / 2;
+  const maxR = Math.min(w, h) * 0.36;
+
+  // 背景
+  ctx.fillStyle = '#050a14';
+  ctx.fillRect(0, 0, w, h);
+
+  // 同心圆网格
+  ctx.strokeStyle = 'rgba(60,90,140,.15)';
+  ctx.lineWidth = 0.5;
+  for (let i = 1; i <= 4; i++) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, maxR * i / 4, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  // 角度线
+  for (let a = 0; a < 360; a += 45) {
+    const rad = a * Math.PI / 180;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(rad) * maxR, cy - Math.sin(rad) * maxR);
+    ctx.stroke();
+  }
+
+  // 角度标签
+  ctx.fillStyle = 'rgba(140,170,210,.4)';
+  ctx.font = '10px "JetBrains Mono"';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const labels = ['0°','45°','90°','135°','180°'];
+  labels.forEach((l, i) => {
+    const a = i * Math.PI / 4;
+    ctx.fillText(l, cx + Math.cos(a) * (maxR + 18), cy - Math.sin(a) * (maxR + 18));
+  });
+
+  // 计算散射强度
+  const N = 360;
+  const vals = [];
+  let maxI = 0;
+  for (let i = 0; i < N; i++) {
+    const theta = i * Math.PI * 2 / N;
+    const v = getIntensity(theta, currentType, x);
+    vals.push(v);
+    if (v > maxI) maxI = v;
+  }
+  maxI = Math.max(maxI, 0.01);
+
+  // 填充区域
+  ctx.beginPath();
+  for (let i = 0; i <= N; i++) {
+    const theta = (i % N) * Math.PI * 2 / N;
+    const r = (vals[i % N] / maxI) * maxR * 0.9;
+    const px = cx + Math.cos(theta) * r;
+    const py = cy - Math.sin(theta) * r;
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  const fillGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+  fillGrad.addColorStop(0, rgbStr(scRGB, 0.25));
+  fillGrad.addColorStop(1, rgbStr(scRGB, 0.05));
+  ctx.fillStyle = fillGrad;
+  ctx.fill();
+
+  // 描边（发光）
+  ctx.save();
+  ctx.shadowColor = cfg.color;
+  ctx.shadowBlur = 12;
+  ctx.strokeStyle = rgbStr(scRGB, 0.6);
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i <= N; i++) {
+    const theta = (i % N) * Math.PI * 2 / N;
+    const r = (vals[i % N] / maxI) * maxR * 0.9;
+    const px = cx + Math.cos(theta) * r;
+    const py = cy - Math.sin(theta) * r;
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.stroke();
+  ctx.restore();
+
+  // 中心点
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 入射方向标注
+  ctx.strokeStyle = rgbStr(scRGB, 0.5);
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  ctx.moveTo(cx - maxR - 10, cy);
+  ctx.lineTo(cx - 8, cy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = rgbStr(scRGB, 0.6);
+  ctx.font = '10px "Noto Sans SC"';
+  ctx.textAlign = 'right';
+  ctx.fillText('入射', cx - maxR - 14, cy + 4);
+}
+
+/* ============================================================
+   散射截面 vs 波长
+   ============================================================ */
+function drawSpectrum() {
+  const res = initCanvas('canvasSpec');
+  if (!res) return;
+  const { ctx, w, h } = res;
+  const p = getParams();
+  const cfg = TYPES[currentType];
+  const pad = { t:36, r:24, b:46, l:60 };
+  const pw = w - pad.l - pad.r;
+  const ph = h - pad.t - pad.b;
+  const wlMin = 380, wlMax = 780;
+
+  // 背景
+  ctx.fillStyle = '#050a14';
+  ctx.fillRect(0, 0, w, h);
+
+  // 计算所有波长的散射截面
+  const N = 200;
+  const vals = [];
+  let maxV = 0;
+  for (let i = 0; i <= N; i++) {
+    const wl = wlMin + (wlMax - wlMin) * i / N;
+    const v = getCrossSection(wl, p.radius, currentType);
+    vals.push({ wl, v });
+    if (v > maxV) maxV = v;
+  }
+  maxV = Math.max(maxV, 1e-10);
+
+  const toX = wl => pad.l + (wl - wlMin) / (wlMax - wlMin) * pw;
+  const toY = v => pad.t + ph - (v / maxV) * ph * 0.9;
+
+  // 可见光谱背景条
+  for (let i = 0; i < pw; i++) {
+    const wl = wlMin + (wlMax - wlMin) * i / pw;
+    const rgb = wavelengthToRGB(wl);
+    ctx.fillStyle = rgbStr(rgb, 0.08);
+    ctx.fillRect(pad.l + i, pad.t, 1, ph);
+  }
+
+  // 网格
+  ctx.strokeStyle = 'rgba(60,90,140,.15)';
+  ctx.lineWidth = 0.5;
+  for (let wl = 400; wl <= 750; wl += 50) {
+    const sx = toX(wl);
+    ctx.beginPath(); ctx.moveTo(sx, pad.t); ctx.lineTo(sx, pad.t + ph); ctx.stroke();
+  }
+  for (let i = 0; i <= 4; i++) {
+    const sy = pad.t + ph * i / 4;
+    ctx.beginPath(); ctx.moveTo(pad.l, sy); ctx.lineTo(pad.l + pw, sy); ctx.stroke();
+  }
+
+  // 坐标轴
+  ctx.strokeStyle = 'rgba(100,150,220,.25)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(pad.l, pad.t, pw, ph);
+
+  // 刻度
+  ctx.fillStyle = 'rgba(140,170,210,.5)';
+  ctx.font = '10px "JetBrains Mono"';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  for (let wl = 400; wl <= 750; wl += 50) {
+    const rgb = wavelengthToRGB(wl);
+    ctx.fillStyle = rgbStr(rgb, 0.7);
+    ctx.fillText(wl + '', toX(wl), pad.t + ph + 8);
+  }
+
+  // 曲线发光
+  ctx.save();
+  ctx.shadowColor = cfg.color;
+  ctx.shadowBlur = 16;
+  ctx.strokeStyle = cfg.color;
+  ctx.lineWidth = 3;
+  ctx.globalAlpha = 0.3;
+  ctx.beginPath();
+  vals.forEach((d, i) => {
+    const px = toX(d.wl), py = toY(d.v);
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  });
+  ctx.stroke();
+  ctx.restore();
+
+  // 曲线实线
+  ctx.strokeStyle = cfg.color;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  vals.forEach((d, i) => {
+    const px = toX(d.wl), py = toY(d.v);
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  });
+  ctx.stroke();
+
+  // 填充
+  ctx.lineTo(toX(vals[vals.length-1].wl), pad.t + ph);
+  ctx.lineTo(toX(vals[0].wl), pad.t + ph);
+  ctx.closePath();
+  const fg = ctx.createLinearGradient(0, pad.t, 0, pad.t + ph);
+  fg.addColorStop(0, rgbStr(wavelengthToRGB(p.wavelength), 0.2));
+  fg.addColorStop(1, rgbStr(wavelengthToRGB(p.wavelength), 0.02));
+  ctx.fillStyle = fg;
+  ctx.fill();
+
+  // 当前波长标记
+  const curX = toX(p.wavelength);
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  ctx.moveTo(curX, pad.t);
+  ctx.lineTo(curX, pad.t + ph);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  const curRGB = wavelengthToRGB(p.wavelength);
+  ctx.fillStyle = rgbStr(curRGB, 0.9);
+  ctx.beginPath();
+  ctx.arc(curX, toY(getCrossSection(p.wavelength, p.radius, currentType)), 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = '10px "Noto Sans SC"';
+  ctx.textAlign = 'center';
+  ctx.fillText('λ=' + p.wavelength + 'nm', curX, pad.t - 8);
+
+  // 轴标签
+  ctx.fillStyle = 'rgba(140,170,210,.4)';
+  ctx.font = '11px "Noto Sans SC"';
+  ctx.textAlign = 'center';
+  ctx.fillText('波长 λ (nm)', pad.l + pw / 2, h - 6);
+  ctx.save();
+  ctx.translate(14, pad.t + ph / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('散射截面 σ (相对值)', 0, 0);
+  ctx.restore();
+}
+
+/* ============================================================
+   天空颜色演示
+   ============================================================ */
+function drawSky() {
+  const res = initCanvas('skyCanvas');
+  if (!res) return;
+  const { ctx, w, h } = res;
+
+  // 天空渐变
+  const skyGrad = ctx.createLinearGradient(0, 0, w * 0.6, h);
+  skyGrad.addColorStop(0, '#0a1530');
+  skyGrad.addColorStop(0.3, '#0d2855');
+  skyGrad.addColorStop(0.6, '#1a4a8a');
+  skyGrad.addColorStop(1, '#3a7ec8');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, w, h);
+
+  // 太阳位置（左上）
+  const sunX = w * 0.12, sunY = h * 0.15;
+  const sunGrad = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, 120);
+  sunGrad.addColorStop(0, 'rgba(255,240,200,.9)');
+  sunGrad.addColorStop(0.15, 'rgba(255,220,150,.5)');
+  sunGrad.addColorStop(0.4, 'rgba(255,180,80,.15)');
+  sunGrad.addColorStop(1, 'rgba(255,150,50,0)');
+  ctx.fillStyle = sunGrad;
+  ctx.fillRect(0, 0, w, h);
+  // 太阳核心
+  ctx.fillStyle = '#fffbe6';
+  ctx.beginPath();
+  ctx.arc(sunX, sunY, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 散射光颜色显示：在不同方向绘制散射颜色
+  const directions = [
+    { angle: 20, label: '20°（近太阳方向）', x: w * 0.45, y: h * 0.2 },
+    { angle: 60, label: '60°', x: w * 0.7, y: h * 0.25 },
+    { angle: 90, label: '90°（侧向）', x: w * 0.85, y: h * 0.5 },
+    { angle: 120, label: '120°', x: w * 0.7, y: h * 0.75 },
+    { angle: 150, label: '150°（背向）', x: w * 0.45, y: h * 0.88 },
+  ];
+
+  directions.forEach(d => {
+    const theta = d.angle * Math.PI / 180;
+    // 瑞利散射：I ∝ (1+cos²θ) / λ⁴
+    // 对不同波长计算相对强度
+    const wavelengths = [430, 480, 530, 580, 630, 680];
+    let rTotal = 0, gTotal = 0, bTotal = 0;
+    wavelengths.forEach(wl => {
+      const factor = (1 + Math.cos(theta) * Math.cos(theta)) / Math.pow(wl / 400, 4);
+      const rgb = wavelengthToRGB(wl);
+      rTotal += rgb[0] * factor;
+      gTotal += rgb[1] * factor;
+      bTotal += rgb[2] * factor;
+    });
+    const maxC = Math.max(rTotal, gTotal, bTotal, 1);
+    const sr = Math.round(rTotal / maxC * 255);
+    const sg = Math.round(gTotal / maxC * 255);
+    const sb = Math.round(bTotal / maxC * 255);
+
+    // 绘制散射光圆
+    const grad2 = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, 40);
+    grad2.addColorStop(0, `rgba(${sr},${sg},${sb},.85)`);
+    grad2.addColorStop(0.6, `rgba(${sr},${sg},${sb},.3)`);
+    grad2.addColorStop(1, `rgba(${sr},${sg},${sb},0)`);
+    ctx.fillStyle = grad2;
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, 40, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 核心亮点
+    ctx.fillStyle = `rgba(${sr},${sg},${sb},.95)`;
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 标签
+    ctx.fillStyle = 'rgba(255,255,255,.6)';
+    ctx.font = '10px "Noto Sans SC"';
+    ctx.textAlign = 'center';
+    ctx.fillText(d.label, d.x, d.y + 52);
+
+    // 从太阳到散射点的淡线
+    ctx.strokeStyle = `rgba(${sr},${sg},${sb},.12)`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(sunX, sunY);
+    ctx.lineTo(d.x, d.y);
+    ctx.stroke();
+  });
+
+  // 底部说明
+  ctx.fillStyle = 'rgba(0,0,0,.4)';
+  ctx.fillRect(0, h - 36, w, 36);
+  ctx.fillStyle = 'rgba(255,255,255,.5)';
+  ctx.font = '11px "Noto Sans SC"';
+  ctx.textAlign = 'center';
+  ctx.fillText('每个光点的颜色 = 该方向上瑞利散射后各波长光的叠加结果', w / 2, h - 14);
+}
+
+/* ============================================================
+   UI 构建
+   ============================================================ */
+function getParams() {
+  const sig = TYPES[currentType];
+  const p = {};
+  sig.params.forEach(pr => { p[pr.id] = paramValues[pr.id] ?? pr.val; });
+  return p;
+}
+
+function buildTabs() {
+  const container = document.getElementById('tabBtns');
+  container.innerHTML = Object.entries(TYPES).map(([k, t]) =>
+    `<button class="tab-btn ${k === currentType ? t.activeClass : ''}" data-type="${k}" onclick="selectType('${k}')">
+      <i class="fa-solid ${k==='rayleigh'?'fa-circle-dot':k==='mie'?'fa-circle-half-stroke':'fa-diamond'} mr-1.5" style="font-size:.8em"></i>${t.name}
+    </button>`
+  ).join('');
+}
+
+function buildParamPanel() {
+  const cfg = TYPES[currentType];
+  const p = getParams();
+  const x = getSizeParam(p.radius, p.wavelength);
+
+  document.getElementById('simTitle').style.color = cfg.color;
+  document.getElementById('simTitle').textContent = cfg.name;
+  document.getElementById('simDesc').textContent = cfg.desc;
+  document.getElementById('lbl2d').style.color = cfg.color;
+  document.getElementById('lblPolar').style.color = cfg.color;
+  document.getElementById('lblSpec').style.color = cfg.color;
+  document.getElementById('xValue').style.color = cfg.color;
+  document.getElementById('xValue').textContent = x.toFixed(2);
+
+  cfg.params.forEach(pr => { if (paramValues[pr.id] === undefined) paramValues[pr.id] = pr.val; });
+
+  document.getElementById('paramSliders').innerHTML = cfg.params.map(pr => {
+    const v = paramValues[pr.id];
+    return `<div class="param-group">
+      <div class="param-label"><span>${pr.label}</span><span id="pv_${pr.id}">${v} ${pr.unit}</span></div>
+      <input type="range" min="${pr.min}" max="${pr.max}" step="${pr.step}" value="${v}"
+        oninput="onParam('${pr.id}',this.value,'${pr.unit}')" id="ps_${pr.id}">
+    </div>`;
+  }).join('');
+
+  document.getElementById('simTags').innerHTML = cfg.tags.map(t =>
+    `<span class="badge" style="background:${cfg.color}12;color:${cfg.color};border:1px solid ${cfg.color}25">${t}</span>`
+  ).join('');
+
+  // 更新滑块拇指颜色
+  document.querySelectorAll('#paramSliders input[type=range]').forEach(inp => {
+    inp.style.setProperty('--thumb-color', cfg.color);
+  });
+  const styleTag = document.getElementById('dynamicThumbStyle') || document.createElement('style');
+  styleTag.id = 'dynamicThumbStyle';
+  styleTag.textContent = `#paramSliders input[type=range]::-webkit-slider-thumb{background:${cfg.color};box-shadow:0 0 10px ${cfg.color}40}`;
+  document.head.appendChild(styleTag);
+}
+
+function buildCompTable() {
+  const keys = ['rayleigh','mie','geometric'];
+  const data = {
+    rayleigh: { size:'r ≪ λ (x < 0.1)', xval:'x ≪ 1', theory:'偶极子近似', pattern:'前后对称 (1+cos²θ)', wldep:'σ ∝ 1/λ⁴ 极强', phase:'无相位变化', example:'N₂/O₂ 分子 (r~0.1nm)', phenom:'蓝天、红日落', app:'大气遥感、天文学' },
+    mie:      { size:'r ≈ λ (0.1 < x < 50)', xval:'x ≈ 1', theory:'精确电磁解', pattern:'前向增强，有侧瓣振荡', wldep:'σ ∝ λ^(-1~2) 中等', phase:'有复杂相位关系', example:'气溶胶/烟雾 (r~0.1-1μm)', phenom:'白云、薄雾', app:'激光雷达、颗粒测量' },
+    geometric:{ size:'r ≫ λ (x > 50)', xval:'x ≫ 1', theory:'射线追踪/衍射', pattern:'极强前向 + 彩虹角凸起', wldep:'σ ≈ 2πr² (弱依赖)', phase:'几何光学相位', example:'雨滴/冰晶 (r>10μm)', phenom:'彩虹、日晕、华', app:'气象光学、光学仪器' }
+  };
+  const rows = [
+    ['粒子尺寸条件','size'],['尺寸参数','xval'],['理论基础','theory'],
+    ['散射角分布','pattern'],['波长依赖性','wldep'],['相位特性','phase'],
+    ['典型粒子','example'],['自然现象','phenom'],['应用领域','app']
+  ];
+  let html = '<thead><tr><th class="th-row" style="min-width:100px">对比维度</th>';
+  keys.forEach(k => { html += `<th style="color:${TYPES[k].color};min-width:140px">${TYPES[k].name}</th>`; });
+  html += '</tr></thead><tbody>';
+  rows.forEach(([label, key]) => {
+    html += `<tr><td class="th-row">${label}</td>`;
+    keys.forEach(k => { html += `<td>${data[k][key]}</td>`; });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('compTable').innerHTML = html;
+}
+
+function buildAppCards() {
+  const cards = [
+    { type:'rayleigh', title:'蓝天与红日落', items:['晴天天空呈蓝色 —— 蓝光散射强度是红光的 5.5 倍','日出日落时阳光穿透更厚的大气层，蓝光被散射殆尽，只剩红光直达观察者','月光下天空偏蓝而非偏红 —— 月光本身偏白，散射后蓝光占优'] },
+    { type:'mie', title:'云雾与霾', items:['云和雾由大水滴组成，所有波长的光被近似等量散射，因此呈白色','霾天气中气溶胶粒子产生米氏散射，天空泛白/灰而非纯蓝','激光在大气中传输时，米氏散射是主要的信号衰减机制'] },
+    { type:'geometric', title:'彩虹与日晕', items:['彩虹来自水滴内部的折射-反射-折射过程，最小偏向角约 138° 形成主虹','日晕是高空冰晶的几何散射，22° 晕对应 60° 冰晶的最小偏向角','华是水滴衍射产生的彩色光环，环大小与水滴尺寸反相关'] }
+  ];
+  document.getElementById('appCards').innerHTML = cards.map(c => {
+    const cfg = TYPES[c.type];
+    return `<div class="info-card">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-3 h-3 rounded-full" style="background:${cfg.color};box-shadow:0 0 12px ${cfg.color}50"></div>
+        <h3 class="font-bold" style="color:${cfg.color}">${c.title}</h3>
+      </div>
+      <ul class="flex flex-col gap-3">
+        ${c.items.map(item => `<li class="text-sm leading-relaxed" style="color:var(--muted)"><span style="color:${cfg.color};margin-right:6px">•</span>${item}</li>`).join('')}
+      </ul>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   交互
+   ============================================================ */
+function selectType(type) {
+  currentType = type;
+  TYPES[type].params.forEach(pr => { paramValues[pr.id] = pr.val; });
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const t = btn.dataset.type;
+    btn.className = 'tab-btn' + (t === type ? ' ' + TYPES[t].activeClass : '');
+  });
+  buildParamPanel();
+  updateAll();
+}
+
+function onParam(id, value, unit) {
+  paramValues[id] = parseFloat(value);
+  const display = document.getElementById('pv_' + id);
+  if (display) display.textContent = value + ' ' + unit;
+  // 更新尺寸参数
+  const p = getParams();
+  const x = getSizeParam(p.radius, p.wavelength);
+  document.getElementById('xValue').textContent = x.toFixed(2);
+  updateAll();
+}
+
+let raf = null;
+function updateAll() {
+  if (raf) cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(() => {
+    draw2DField();
+    drawPolar();
+    drawSpectrum();
+  });
+}
+
+/* ============================================================
+   滚动显示 & 缩放
+   ============================================================ */
+function setupReveal() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+}
+
+let resizeT = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeT);
+  resizeT = setTimeout(() => {
+    updateAll();
+    drawSky();
+  }, 200);
+});
+
+/* ============================================================
+   初始化
+   ============================================================ */
+function init() {
+  buildTabs();
+  buildParamPanel();
+  buildCompTable();
+  buildAppCards();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      updateAll();
+      drawSky();
+      setupReveal();
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

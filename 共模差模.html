@@ -1,0 +1,3382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMC滤波器实验室 — 共模差模信号深度解析</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #0a0e14;
+    --bg-elev: #141a23;
+    --bg-card: #1a2230;
+    --bg-card-hi: #232d3d;
+    --border: #2a3441;
+    --border-hi: #3a4a5e;
+    --fg: #f5f0e8;
+    --fg-muted: #8a96a8;
+    --fg-dim: #5a6678;
+    --dm: #ffaa00;
+    --dm-glow: rgba(255, 170, 0, 0.4);
+    --cm: #00d9a3;
+    --cm-glow: rgba(0, 217, 163, 0.4);
+    --noise: #ff3860;
+    --noise-glow: rgba(255, 56, 96, 0.4);
+    --power: #f5f0e8;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Noto Sans SC', 'Space Grotesk', sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+.font-display { font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* 全局网格背景 */
+.grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(255, 170, 0, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 217, 163, 0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+    mask-image: radial-gradient(ellipse at center, black 0%, transparent 80%);
+}
+
+.scan-line {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cm), transparent);
+    opacity: 0.5;
+    z-index: 1;
+    pointer-events: none;
+    animation: scan 8s linear infinite;
+}
+
+@keyframes scan {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(100vh); }
+}
+
+/* 顶部导航 */
+.nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(20px);
+    background: rgba(10, 14, 20, 0.85);
+    border-bottom: 1px solid var(--border);
+}
+
+.nav-link {
+    color: var(--fg-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+}
+
+.nav-link:hover {
+    color: var(--dm);
+    background: rgba(255, 170, 0, 0.08);
+}
+
+/* Hero区 */
+.hero {
+    position: relative;
+    min-height: 92vh;
+    display: flex;
+    align-items: center;
+    padding: 60px 0;
+    overflow: hidden;
+}
+
+.hero-glow-1 {
+    position: absolute;
+    top: 10%; left: -10%;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, var(--dm-glow) 0%, transparent 70%);
+    filter: blur(80px);
+    z-index: 0;
+    animation: float1 12s ease-in-out infinite;
+}
+
+.hero-glow-2 {
+    position: absolute;
+    bottom: 10%; right: -10%;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, var(--cm-glow) 0%, transparent 70%);
+    filter: blur(90px);
+    z-index: 0;
+    animation: float2 14s ease-in-out infinite;
+}
+
+@keyframes float1 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(40px, 60px); }
+}
+
+@keyframes float2 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-50px, -40px); }
+}
+
+.hero-title {
+    font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+    font-weight: 900;
+    font-size: clamp(48px, 8vw, 112px);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+}
+
+.hero-title .dm-text {
+    color: var(--dm);
+    text-shadow: 0 0 60px var(--dm-glow);
+}
+
+.hero-title .cm-text {
+    color: var(--cm);
+    text-shadow: 0 0 60px var(--cm-glow);
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    color: var(--fg-muted);
+    max-width: 600px;
+    line-height: 1.7;
+}
+
+.tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border: 1px solid var(--border-hi);
+    border-radius: 999px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--fg-muted);
+    background: var(--bg-card);
+}
+
+.tag-pill::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--cm);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--cm);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* 章节标题 */
+.section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--dm);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+}
+
+.section-label::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--dm);
+}
+
+.section-title {
+    font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+    font-weight: 700;
+    font-size: clamp(32px, 4.5vw, 56px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+}
+
+.section-desc {
+    color: var(--fg-muted);
+    font-size: 16px;
+    max-width: 700px;
+}
+
+/* 卡片 */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.card:hover {
+    border-color: var(--border-hi);
+    transform: translateY(-2px);
+}
+
+.card-glow-dm::before, .card-glow-cm::before, .card-glow-noise::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    opacity: 0.8;
+}
+
+.card-glow-dm::before { background: linear-gradient(90deg, transparent, var(--dm), transparent); }
+.card-glow-cm::before { background: linear-gradient(90deg, transparent, var(--cm), transparent); }
+.card-glow-noise::before { background: linear-gradient(90deg, transparent, var(--noise), transparent); }
+
+/* 滑块样式 */
+.slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px; height: 16px;
+    background: var(--dm);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 12px var(--dm-glow);
+    transition: transform 0.15s;
+}
+
+.slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.slider.cm-slider::-webkit-slider-thumb {
+    background: var(--cm);
+    box-shadow: 0 0 12px var(--cm-glow);
+}
+
+.slider.noise-slider::-webkit-slider-thumb {
+    background: var(--noise);
+    box-shadow: 0 0 12px var(--noise-glow);
+}
+
+/* 按钮 */
+.btn {
+    padding: 10px 20px;
+    border: 1px solid var(--border-hi);
+    background: var(--bg-card);
+    color: var(--fg);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+}
+
+.btn:hover {
+    border-color: var(--dm);
+    color: var(--dm);
+    background: rgba(255, 170, 0, 0.05);
+}
+
+.btn-active {
+    background: var(--dm);
+    color: var(--bg);
+    border-color: var(--dm);
+}
+
+.btn-active:hover {
+    background: var(--dm);
+    color: var(--bg);
+}
+
+/* 公式块 */
+.formula {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 14px;
+    color: var(--fg);
+    overflow-x: auto;
+}
+
+.formula .var-dm { color: var(--dm); }
+.formula .var-cm { color: var(--cm); }
+
+/* 数值显示 */
+.metric {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.metric-label {
+    font-size: 11px;
+    color: var(--fg-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.metric-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* 元器件卡片 */
+.component-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.component-card:hover {
+    border-color: var(--border-hi);
+    transform: translateY(-4px);
+}
+
+.component-card .corner-mark {
+    position: absolute;
+    top: 20px; right: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--fg-dim);
+    letter-spacing: 0.15em;
+}
+
+/* 颜色文字 */
+.text-dm { color: var(--dm); }
+.text-cm { color: var(--cm); }
+.text-noise { color: var(--noise); }
+.text-muted { color: var(--fg-muted); }
+.text-dim { color: var(--fg-dim); }
+
+/* 表格 */
+.spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.spec-table th {
+    text-align: left;
+    padding: 10px 12px;
+    background: var(--bg);
+    color: var(--fg-muted);
+    font-weight: 500;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid var(--border);
+}
+
+.spec-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--fg);
+}
+
+.spec-table tr:hover td {
+    background: rgba(255, 170, 0, 0.03);
+}
+
+/* 滚动指示 */
+.scroll-hint {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--fg-dim);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    animation: bob 2s ease-in-out infinite;
+}
+
+@keyframes bob {
+    0%, 100% { transform: translate(-50%, 0); opacity: 0.6; }
+    50% { transform: translate(-50%, 8px); opacity: 1; }
+}
+
+/* Canvas样式 */
+canvas { display: block; }
+
+.canvas-frame {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.canvas-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,170,0,0.02), transparent 40%, transparent 60%, rgba(0,217,163,0.02));
+    pointer-events: none;
+}
+
+/* 高亮文本 */
+.highlight-dm {
+    color: var(--dm);
+    font-weight: 600;
+}
+
+.highlight-cm {
+    color: var(--cm);
+    font-weight: 600;
+}
+
+/* 进度指示器 */
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--dm), var(--cm));
+    border-radius: 3px;
+    transition: width 0.3s;
+}
+
+/* 元器件示意图容器 */
+.component-visual {
+    height: 140px;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-card) 100%);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 锚点偏移 */
+section[id] { scroll-margin-top: 80px; }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--dm); }
+
+/* 仿真器布局 */
+.sim-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    gap: 16px;
+}
+
+@media (max-width: 1200px) {
+    .sim-grid { grid-template-columns: 1fr; }
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--bg-card);
+    border: 1px solid var(--dm);
+    color: var(--fg);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 13px;
+    z-index: 100;
+    transition: transform 0.3s;
+    box-shadow: 0 0 30px var(--dm-glow);
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* 元器件符号样式 */
+.symbol-box {
+    width: 60px; height: 40px;
+    border: 2px solid var(--dm);
+    background: rgba(255, 170, 0, 0.1);
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--dm);
+    font-size: 14px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="scan-line"></div>
+
+<!-- 顶部导航 -->
+<nav class="nav">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <svg width="32" height="32" viewBox="0 0 32 32">
+                <rect x="2" y="6" width="28" height="20" rx="2" fill="none" stroke="#ffaa00" stroke-width="1.5"/>
+                <path d="M 6 16 L 10 16 L 12 10 L 16 22 L 20 12 L 22 16 L 26 16" stroke="#00d9a3" stroke-width="1.5" fill="none"/>
+            </svg>
+            <div>
+                <div class="font-display font-bold text-sm tracking-tight">EMC LAB</div>
+                <div class="text-[10px] text-dim font-mono">v2.0 / SIGNAL INTEGRITY</div>
+            </div>
+        </div>
+        <div class="hidden md:flex items-center gap-1">
+            <a href="#signals" class="nav-link">信号</a>
+            <a href="#noise" class="nav-link">噪声</a>
+            <a href="#components" class="nav-link">元器件</a>
+            <a href="#simulator" class="nav-link">仿真</a>
+            <a href="#design" class="nav-link">设计</a>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="tag-pill">SYSTEM ONLINE</span>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero 区 -->
+<section class="hero">
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+    <div class="max-w-7xl mx-auto px-6 relative z-10 w-full">
+        <div class="grid lg:grid-cols-12 gap-12 items-center">
+            <div class="lg:col-span-7">
+                <div class="tag-pill mb-6">EMC FILTER · INTERACTIVE LAB</div>
+                <h1 class="hero-title mb-8">
+                    <span class="dm-text">共模</span>与<br>
+                    <span class="cm-text">差模</span>的<br>
+                    抑制艺术
+                </h1>
+                <p class="hero-subtitle mb-10">
+                    深入理解电磁兼容滤波器的工作原理。从信号的本质出发，到噪声的传播路径，
+                    再到 X/Y 电容与共模/差模电感的协同抑制 —— 所有理论配以实时可调的电路仿真。
+                </p>
+                <div class="flex flex-wrap gap-3">
+                    <a href="#simulator" class="btn btn-active">▶ 进入仿真器</a>
+                    <a href="#signals" class="btn">从基础概念开始</a>
+                </div>
+                <div class="grid grid-cols-3 gap-4 mt-12 max-w-md">
+                    <div>
+                        <div class="font-mono text-2xl font-bold text-dm">4</div>
+                        <div class="text-[11px] text-dim uppercase tracking-wider">核心元器件</div>
+                    </div>
+                    <div>
+                        <div class="font-mono text-2xl font-bold text-cm">7</div>
+                        <div class="text-[11px] text-dim uppercase tracking-wider">可调参数</div>
+                    </div>
+                    <div>
+                        <div class="font-mono text-2xl font-bold text-noise">∞</div>
+                        <div class="text-[11px] text-dim uppercase tracking-wider">实时仿真</div>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:col-span-5">
+                <div class="canvas-frame" style="aspect-ratio: 1/1;">
+                    <canvas id="heroCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="scroll-hint">SCROLL ↓ TO EXPLORE</div>
+</section>
+
+<!-- 共模差模信号 -->
+<section id="signals" class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="mb-16">
+            <div class="section-label">01 / 信号本质</div>
+            <h2 class="section-title">两种信号 · 两条路径</h2>
+            <p class="section-desc">
+                在任何一对导线（如电源的 L 线和 N 线）上，信号都可以分解为两个正交分量：
+                <span class="highlight-dm">差模信号</span>在两线之间循环流动，
+                <span class="highlight-cm">共模信号</span>则同时同向流过两线、经大地返回。
+            </p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+            <!-- 差模信号 -->
+            <div class="card card-glow-dm p-8">
+                <div class="flex items-start justify-between mb-6">
+                    <div>
+                        <div class="font-mono text-xs text-dm tracking-widest mb-2">DIFFERENTIAL MODE</div>
+                        <h3 class="font-display text-3xl font-bold">差模信号</h3>
+                    </div>
+                    <div class="font-mono text-5xl font-bold text-dm" style="opacity:0.3">DM</div>
+                </div>
+                <p class="text-muted mb-6 text-sm leading-relaxed">
+                    大小相等、方向相反，在两根导线之间形成回路。这是有用信号的存在形式 —— 
+                    电源传输、数据通信都以差模形式携带信息。
+                </p>
+                <div class="formula mb-6">
+                    V<sub>DM</sub> = <span class="var-dm">(V<sub>L</sub> − V<sub>N</sub>) / 2</span>
+                </div>
+                <div class="canvas-frame mb-4" style="height:240px;">
+                    <canvas id="dmSignalCanvas"></canvas>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="metric">
+                        <div class="metric-label">电流方向</div>
+                        <div class="metric-value text-dm text-base">L → N</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">回流路径</div>
+                        <div class="metric-value text-dm text-base">另一根线</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 共模信号 -->
+            <div class="card card-glow-cm p-8">
+                <div class="flex items-start justify-between mb-6">
+                    <div>
+                        <div class="font-mono text-xs text-cm tracking-widest mb-2">COMMON MODE</div>
+                        <h3 class="font-display text-3xl font-bold">共模信号</h3>
+                    </div>
+                    <div class="font-mono text-5xl font-bold text-cm" style="opacity:0.3">CM</div>
+                </div>
+                <p class="text-muted mb-6 text-sm leading-relaxed">
+                    大小相等、方向相同，两根导线同步起伏，通过寄生电容与大地形成回路。
+                    共模信号通常是无用的噪声，是辐射发射的主要来源。
+                </p>
+                <div class="formula mb-6">
+                    V<sub>CM</sub> = <span class="var-cm">(V<sub>L</sub> + V<sub>N</sub>) / 2</span>
+                </div>
+                <div class="canvas-frame mb-4" style="height:240px;">
+                    <canvas id="cmSignalCanvas"></canvas>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="metric">
+                        <div class="metric-label">电流方向</div>
+                        <div class="metric-value text-cm text-base">L & N 同向</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">回流路径</div>
+                        <div class="metric-value text-cm text-base">大地 / PE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 信号分解演示 -->
+        <div class="card mt-6 p-8">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div>
+                    <h3 class="font-display text-2xl font-bold mb-2">信号分解演示</h3>
+                    <p class="text-muted text-sm">任意一对信号都可分解为共模与差模之和</p>
+                </div>
+                <div class="flex gap-2">
+                    <button id="decompPreset1" class="btn btn-active">纯差模</button>
+                    <button id="decompPreset2" class="btn">纯共模</button>
+                    <button id="decompPreset3" class="btn">混合信号</button>
+                </div>
+            </div>
+            <div class="canvas-frame" style="height:360px;">
+                <canvas id="decompCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 噪声类型 -->
+<section id="noise" class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="mb-16">
+            <div class="section-label">02 / 噪声传播</div>
+            <h2 class="section-title">噪声从哪里来 · 到哪里去</h2>
+            <p class="section-desc">
+                开关电源、变频器、数字电路产生的噪声按传播路径分为两类。
+                理解它们的回路，是设计滤波器的第一步。
+            </p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6 mb-6">
+            <!-- 差模噪声 -->
+            <div class="card card-glow-dm p-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-dm" style="box-shadow:0 0 12px var(--dm)"></div>
+                    <span class="font-mono text-xs text-dm tracking-widest">DIFFERENTIAL NOISE</span>
+                </div>
+                <h3 class="font-display text-2xl font-bold mb-3">差模噪声</h3>
+                <p class="text-muted text-sm mb-6">
+                    噪声电流在 L 和 N 之间流动，与有用信号走相同的路径。主要来源于开关管动作时
+                    产生的高频纹波，频率通常在 100kHz ~ 10MHz。
+                </p>
+                <div class="canvas-frame mb-4" style="height:200px;">
+                    <canvas id="dmNoiseCanvas"></canvas>
+                </div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-start gap-3">
+                        <span class="text-dm font-mono text-xs mt-0.5">→</span>
+                        <span class="text-muted"><span class="text-dm font-semibold">来源:</span> 开关管纹波、整流二极管反向恢复</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-dm font-mono text-xs mt-0.5">→</span>
+                        <span class="text-muted"><span class="text-dm font-semibold">路径:</span> L → 负载 → N（同有用信号）</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-dm font-mono text-xs mt-0.5">→</span>
+                        <span class="text-muted"><span class="text-dm font-semibold">危害:</span> 影响同线路设备，传导发射超标</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-dm font-mono text-xs mt-0.5">→</span>
+                        <span class="text-muted"><span class="text-dm font-semibold">抑制:</span> X 电容 + 差模电感</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 共模噪声 -->
+            <div class="card card-glow-cm p-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-cm" style="box-shadow:0 0 12px var(--cm)"></div>
+                    <span class="font-mono text-xs text-cm tracking-widest">COMMON NOISE</span>
+                </div>
+                <h3 class="font-display text-2xl font-bold mb-3">共模噪声</h3>
+                <p class="text-muted text-sm mb-6">
+                    噪声电流同时同向流过 L 和 N，通过寄生电容经大地返回。主要来源于高频开关节点
+                    对地的寄生电容充放电，是辐射发射的元凶。
+                </p>
+                <div class="canvas-frame mb-4" style="height:200px;">
+                    <canvas id="cmNoiseCanvas"></canvas>
+                </div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-start gap-3">
+                        <span class="text-cm font-mono text-xs mt-0.5">→</span>
+                        <span class="text-muted"><span class="text-cm font-semibold">来源:</span> 开关节点对地寄生电容、变压器寄生</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-cm font-mono text-xs mt-0.5">→</span>
+                        <span class="text-muted"><span class="text-cm font-semibold">路径:</span> L/N → 大地 → PE</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-cm font-mono text-xs mt-0.5">→</span>
+                        <span class="text-muted"><span class="text-cm font-semibold">危害:</span> 辐射发射强，易超标，难抑制</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-cm font-mono text-xs mt-0.5">→</span>
+                        <span class="text-muted"><span class="text-cm font-semibold">抑制:</span> Y 电容 + 共模电感</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 频谱对比 -->
+        <div class="card p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="font-display text-xl font-bold mb-1">传导发射频谱</h3>
+                    <p class="text-muted text-sm">标准 CISPR 32 / EN55032 限制曲线对比</p>
+                </div>
+                <div class="flex gap-4 text-xs font-mono">
+                    <span class="flex items-center gap-2"><span class="w-3 h-0.5 bg-dm"></span>差模</span>
+                    <span class="flex items-center gap-2"><span class="w-3 h-0.5 bg-cm"></span>共模</span>
+                    <span class="flex items-center gap-2"><span class="w-3 h-0.5" style="background:#ff4757"></span>限值</span>
+                </div>
+            </div>
+            <div class="canvas-frame" style="height:280px;">
+                <canvas id="spectrumCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 元器件详解 -->
+<section id="components" class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="mb-16">
+            <div class="section-label">03 / 滤波元器件</div>
+            <h2 class="section-title">四员大将 · 各司其职</h2>
+            <p class="section-desc">
+                EMI 滤波器由四类核心元器件组成，分别针对差模/共模信号提供低阻抗旁路或高阻抗阻断。
+                理解它们的物理特性和连接方式，是设计滤波器的基础。
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- X电容 -->
+            <div class="component-card card-glow-dm">
+                <div class="corner-mark">C_X</div>
+                <div class="component-visual">
+                    <canvas id="xCapVisual" width="200" height="120"></canvas>
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="symbol-box">CX</div>
+                    <div>
+                        <h3 class="font-display text-2xl font-bold">X 电容</h3>
+                        <div class="text-xs text-muted font-mono">跨接 L-N · 抑制差模</div>
+                    </div>
+                </div>
+                <p class="text-muted text-sm mb-4">
+                    跨接在火线 L 与零线 N 之间，为差模噪声提供低阻抗旁路。
+                    即使失效也不会导致电击危险，可用较大容量（0.1μF ~ 2.2μF）。
+                </p>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="metric">
+                        <div class="metric-label">安规等级</div>
+                        <div class="metric-value text-dm text-base">X1 / X2</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">耐压</div>
+                        <div class="metric-value text-dm text-base">≥ 2.5kV</div>
+                    </div>
+                </div>
+                <div class="text-xs text-muted leading-relaxed border-t border-[var(--border)] pt-3">
+                    <strong class="text-dm">原理:</strong> 高频下电容阻抗 Z = 1/(jωC) 极小，
+                    差模噪声被"短路"在 L-N 之间，无法传到电源侧。
+                </div>
+            </div>
+
+            <!-- Y电容 -->
+            <div class="component-card card-glow-cm">
+                <div class="corner-mark">C_Y</div>
+                <div class="component-visual">
+                    <canvas id="yCapVisual" width="200" height="120"></canvas>
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="symbol-box" style="border-color:var(--cm);background:rgba(0,217,163,0.1);color:var(--cm)">CY</div>
+                    <div>
+                        <h3 class="font-display text-2xl font-bold">Y 电容</h3>
+                        <div class="text-xs text-muted font-mono">跨接 L/N-PE · 抑制共模</div>
+                    </div>
+                </div>
+                <p class="text-muted text-sm mb-4">
+                    跨接在 L-PE 和 N-PE 之间，为共模噪声提供通往大地的低阻抗回路。
+                    失效会导致电击危险，容量严格受限（≤ 4.7nF）。
+                </p>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="metric">
+                        <div class="metric-label">安规等级</div>
+                        <div class="metric-value text-cm text-base">Y1 / Y2</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">耐压</div>
+                        <div class="metric-value text-cm text-base">≥ 4kV</div>
+                    </div>
+                </div>
+                <div class="text-xs text-muted leading-relaxed border-t border-[var(--border)] pt-3">
+                    <strong class="text-cm">原理:</strong> 共模噪声通过 Y 电容旁路到大地，
+                    避免流向电源线。漏电流限制 = 容量限制（I = 2πfCV）。
+                </div>
+            </div>
+
+            <!-- 共模电感 -->
+            <div class="component-card card-glow-cm">
+                <div class="corner-mark">L_CM</div>
+                <div class="component-visual">
+                    <canvas id="cmChokeVisual" width="200" height="120"></canvas>
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="symbol-box" style="border-color:var(--cm);background:rgba(0,217,163,0.1);color:var(--cm)">CMC</div>
+                    <div>
+                        <h3 class="font-display text-2xl font-bold">共模电感</h3>
+                        <div class="text-xs text-muted font-mono">双绕组 · 仅阻共模</div>
+                    </div>
+                </div>
+                <p class="text-muted text-sm mb-4">
+                    两个绕组在同一磁芯上反向绕制。差模电流产生的磁场相互抵消，不呈现电感；
+                    共模电流产生的磁场叠加，呈现高阻抗，阻断共模噪声。
+                </p>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="metric">
+                        <div class="metric-label">电感量</div>
+                        <div class="metric-value text-cm text-base">1 ~ 50 mH</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">差模电感</div>
+                        <div class="metric-value text-cm text-base">极小</div>
+                    </div>
+                </div>
+                <div class="text-xs text-muted leading-relaxed border-t border-[var(--border)] pt-3">
+                    <strong class="text-cm">原理:</strong> L1、L2 同向绕制，差模电流磁场相反相消，
+                    共模电流磁场同向叠加。是共模抑制的主力，且不影响工频供电。
+                </div>
+            </div>
+
+            <!-- 差模电感 -->
+            <div class="component-card card-glow-dm">
+                <div class="corner-mark">L_DM</div>
+                <div class="component-visual">
+                    <canvas id="dmChokeVisual" width="200" height="120"></canvas>
+                </div>
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="symbol-box">DMC</div>
+                    <div>
+                        <h3 class="font-display text-2xl font-bold">差模电感</h3>
+                        <div class="text-xs text-muted font-mono">单绕组 · 阻差模</div>
+                    </div>
+                </div>
+                <p class="text-muted text-sm mb-4">
+                    单独的电感，串联在 L 或 N 线上。对差模噪声呈现高阻抗，与 X 电容组成 LC 滤波。
+                    由于单独使用会饱和，通常用磁粉芯或开气隙铁芯。
+                </p>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="metric">
+                        <div class="metric-label">电感量</div>
+                        <div class="metric-value text-dm text-base">10 ~ 500 μH</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">饱和电流</div>
+                        <div class="metric-value text-dm text-base">高</div>
+                    </div>
+                </div>
+                <div class="text-xs text-muted leading-relaxed border-t border-[var(--border)] pt-3">
+                    <strong class="text-dm">原理:</strong> 串联在主回路中，与 X 电容形成 π 型低通滤波器，
+                    截止频率远低于开关频率，对高频差模噪声有数十 dB 衰减。
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 交互式仿真器 -->
+<section id="simulator" class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="mb-12">
+            <div class="section-label">04 / 实时电路仿真</div>
+            <h2 class="section-title">EMI 滤波器仿真实验台</h2>
+            <p class="section-desc">
+                调节噪声参数与滤波器元件值，实时观察输入/输出波形、衰减量与频响曲线。
+                所有计算基于二阶 LC 滤波器传递函数。
+            </p>
+        </div>
+
+        <!-- 控制栏 -->
+        <div class="card p-4 mb-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-cm animate-pulse"></span>
+                        <span class="font-mono text-xs text-muted">SIMULATION RUNNING</span>
+                    </div>
+                    <div class="font-mono text-xs text-dim" id="simTimer">T = 0.00 ms</div>
+                </div>
+                <div class="flex gap-2">
+                    <button id="presetLight" class="btn">轻载</button>
+                    <button id="presetStandard" class="btn btn-active">标准</button>
+                    <button id="presetHarsh" class="btn">恶劣</button>
+                    <button id="presetReset" class="btn">重置</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sim-grid">
+            <!-- 参数面板 -->
+            <div class="card p-5 space-y-5">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-display font-bold text-sm tracking-wide">噪声参数</h4>
+                        <span class="font-mono text-[10px] text-dim">NOISE</span>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-muted">差模噪声幅值</span>
+                                <span class="font-mono text-dm" id="dmAmpVal">2.0 V</span>
+                            </div>
+                            <input type="range" id="dmAmp" class="slider" min="0" max="5" step="0.1" value="2.0">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-muted">共模噪声幅值</span>
+                                <span class="font-mono text-cm" id="cmAmpVal">2.0 V</span>
+                            </div>
+                            <input type="range" id="cmAmp" class="slider cm-slider" min="0" max="5" step="0.1" value="2.0">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-muted">噪声频率</span>
+                                <span class="font-mono text-noise" id="noiseFreqVal">500 kHz</span>
+                            </div>
+                            <input type="range" id="noiseFreq" class="slider noise-slider" min="50" max="2000" step="10" value="500">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-muted">工频幅值</span>
+                                <span class="font-mono text-power" id="powerAmpVal">220 V</span>
+                            </div>
+                            <input type="range" id="powerAmp" class="slider" min="0" max="311" step="1" value="220">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-[var(--border)] pt-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-display font-bold text-sm tracking-wide">滤波元件</h4>
+                        <span class="font-mono text-[10px] text-dim">FILTER</span>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-muted">X 电容</span>
+                                <span class="font-mono text-dm" id="xCapVal">1.0 μF</span>
+                            </div>
+                            <input type="range" id="xCap" class="slider" min="0.1" max="4.7" step="0.1" value="1.0">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-muted">Y 电容</span>
+                                <span class="font-mono text-cm" id="yCapVal">4.7 nF</span>
+                            </div>
+                            <input type="range" id="yCap" class="slider cm-slider" min="0.5" max="10" step="0.1" value="4.7">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-muted">共模电感</span>
+                                <span class="font-mono text-cm" id="cmIndVal">10.0 mH</span>
+                            </div>
+                            <input type="range" id="cmInd" class="slider cm-slider" min="1" max="30" step="0.5" value="10">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-muted">差模电感</span>
+                                <span class="font-mono text-dm" id="dmIndVal">100 μH</span>
+                            </div>
+                            <input type="range" id="dmInd" class="slider" min="10" max="500" step="10" value="100">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-muted">负载电阻</span>
+                                <span class="font-mono text-power" id="loadVal">50 Ω</span>
+                            </div>
+                            <input type="range" id="load" class="slider" min="5" max="200" step="5" value="50">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 电路图 -->
+            <div class="card p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-display font-bold text-sm tracking-wide">电路拓扑</h4>
+                    <div class="flex gap-3 text-[10px] font-mono text-dim">
+                        <span>● LIVE</span>
+                        <span id="circuitStatus">FILTER ACTIVE</span>
+                    </div>
+                </div>
+                <div class="canvas-frame" style="height:480px;">
+                    <canvas id="circuitCanvas"></canvas>
+                </div>
+                <div class="grid grid-cols-4 gap-2 mt-3 text-[10px] font-mono">
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-dm"></span>差模路径</div>
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cm"></span>共模路径</div>
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-noise"></span>噪声源</div>
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full" style="background:#f5f0e8"></span>电源</div>
+                </div>
+            </div>
+
+            <!-- 输出指标 -->
+            <div class="card p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="font-display font-bold text-sm tracking-wide">性能指标</h4>
+                    <span class="font-mono text-[10px] text-dim">METRICS</span>
+                </div>
+                
+                <div class="space-y-3 mb-5">
+                    <div class="metric">
+                        <div class="metric-label">差模衰减</div>
+                        <div class="metric-value text-dm" id="dmAttenuation">-42.3 dB</div>
+                        <div class="progress-bar mt-2">
+                            <div class="progress-fill" id="dmProgressBar" style="width:75%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric">
+                        <div class="metric-label">共模衰减</div>
+                        <div class="metric-value text-cm" id="cmAttenuation">-58.7 dB</div>
+                        <div class="progress-bar mt-2">
+                            <div class="progress-fill" id="cmProgressBar" style="width:85%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric">
+                        <div class="metric-label">差模截止频率</div>
+                        <div class="metric-value text-dm" id="dmCutoff">15.9 kHz</div>
+                    </div>
+                    
+                    <div class="metric">
+                        <div class="metric-label">共模截止频率</div>
+                        <div class="metric-value text-cm" id="cmCutoff">7.3 kHz</div>
+                    </div>
+                    
+                    <div class="metric">
+                        <div class="metric-label">Y电容漏电流</div>
+                        <div class="metric-value text-noise" id="leakageCurrent">0.32 mA</div>
+                    </div>
+                </div>
+
+                <div class="border-t border-[var(--border)] pt-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h5 class="font-display font-bold text-xs tracking-wide text-muted">合规检查</h5>
+                    </div>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-muted">Y电容 ≤ 4.7nF</span>
+                            <span id="checkY" class="font-mono text-cm">PASS</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-muted">漏电流 ≤ 0.5mA</span>
+                            <span id="checkLeak" class="font-mono text-cm">PASS</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-muted">衰减 ≥ 40dB</span>
+                            <span id="checkAtt" class="font-mono text-cm">PASS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 波形显示 -->
+        <div class="grid lg:grid-cols-2 gap-4 mt-4">
+            <div class="card p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h4 class="font-display font-bold text-sm">输入端波形</h4>
+                        <p class="text-[10px] text-dim font-mono mt-1">FILTER INPUT · BEFORE</p>
+                    </div>
+                    <div class="flex gap-3 text-[10px] font-mono">
+                        <span class="text-power">— L 线</span>
+                        <span class="text-muted">— N 线</span>
+                    </div>
+                </div>
+                <div class="canvas-frame" style="height:200px;">
+                    <canvas id="inputWaveCanvas"></canvas>
+                </div>
+            </div>
+            <div class="card p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h4 class="font-display font-bold text-sm">输出端波形</h4>
+                        <p class="text-[10px] text-dim font-mono mt-1">FILTER OUTPUT · AFTER</p>
+                    </div>
+                    <div class="flex gap-3 text-[10px] font-mono">
+                        <span class="text-power">— L 线</span>
+                        <span class="text-muted">— N 线</span>
+                    </div>
+                </div>
+                <div class="canvas-frame" style="height:200px;">
+                    <canvas id="outputWaveCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 频率响应 -->
+        <div class="card p-5 mt-4">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <h4 class="font-display font-bold text-sm">滤波器频率响应</h4>
+                    <p class="text-[10px] text-dim font-mono mt-1">TRANSFER FUNCTION · BODE PLOT</p>
+                </div>
+                <div class="flex gap-3 text-[10px] font-mono">
+                    <span class="text-dm">— 差模 |H_DM|</span>
+                    <span class="text-cm">— 共模 |H_CM|</span>
+                    <span class="text-noise">— 当前噪声频率</span>
+                </div>
+            </div>
+            <div class="canvas-frame" style="height:280px;">
+                <canvas id="bodeCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 设计原则 -->
+<section id="design" class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="mb-16">
+            <div class="section-label">05 / 设计准则</div>
+            <h2 class="section-title">让滤波器真正起作用</h2>
+            <p class="section-desc">
+                一个滤波器能否达到仿真预期的效果，不仅取决于元件参数，更取决于布局、接地与安装工艺。
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="card p-7">
+                <div class="font-mono text-3xl font-bold text-dm mb-3" style="opacity:0.4">01</div>
+                <h3 class="font-display text-xl font-bold mb-3">截止频率设计</h3>
+                <p class="text-muted text-sm leading-relaxed mb-4">
+                    滤波器的截止频率应远低于开关频率，通常取开关频率的 1/10。
+                    这样在开关频率处能获得 40dB 以上衰减。
+                </p>
+                <div class="formula text-xs">
+                    f<sub>c</sub> = <span class="var-dm">1 / (2π√(LC))</span>
+                </div>
+            </div>
+
+            <div class="card p-7">
+                <div class="font-mono text-3xl font-bold text-cm mb-3" style="opacity:0.4">02</div>
+                <h3 class="font-display text-xl font-bold mb-3">共模电感方向</h3>
+                <p class="text-muted text-sm leading-relaxed mb-4">
+                    共模电感的两绕组必须正确连接 —— 让负载电流产生的磁场相消，
+                    共模电流产生的磁场相加。接错会立即饱和失效。
+                </p>
+                <div class="formula text-xs">
+                    L<sub>差模等效</sub> ≈ <span class="var-cm">0</span> · L<sub>共模等效</sub> = <span class="var-cm">2L</span>
+                </div>
+            </div>
+
+            <div class="card p-7">
+                <div class="font-mono text-3xl font-bold text-noise mb-3" style="opacity:0.4">03</div>
+                <h3 class="font-display text-xl font-bold mb-3">布局即滤波</h3>
+                <p class="text-muted text-sm leading-relaxed mb-4">
+                    滤波器输入与输出必须物理隔离，避免寄生电容耦合。
+                    元件引脚最短化，Y 电容接地点必须直接连到机壳。
+                </p>
+                <div class="formula text-xs">
+                    Z<sub>寄生</sub> >> Z<sub>滤波器</sub>
+                </div>
+            </div>
+        </div>
+
+        <!-- 元件选型表 -->
+        <div class="card mt-8 p-7">
+            <h3 class="font-display text-xl font-bold mb-4">典型元件选型参考</h3>
+            <table class="spec-table">
+                <thead>
+                    <tr>
+                        <th>应用场景</th>
+                        <th>X 电容</th>
+                        <th>Y 电容</th>
+                        <th>共模电感</th>
+                        <th>差模电感</th>
+                        <th>预期衰减</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>消费电子 (开关电源)</td>
+                        <td class="text-dm font-mono">0.47μF</td>
+                        <td class="text-cm font-mono">2.2nF</td>
+                        <td class="text-cm font-mono">5mH</td>
+                        <td class="text-dm font-mono">47μH</td>
+                        <td class="font-mono">~40dB</td>
+                    </tr>
+                    <tr>
+                        <td>工业变频器</td>
+                        <td class="text-dm font-mono">2.2μF</td>
+                        <td class="text-cm font-mono">4.7nF</td>
+                        <td class="text-cm font-mono">15mH</td>
+                        <td class="text-dm font-mono">220μH</td>
+                        <td class="font-mono">~50dB</td>
+                    </tr>
+                    <tr>
+                        <td>医疗设备</td>
+                        <td class="text-dm font-mono">0.1μF</td>
+                        <td class="text-cm font-mono">≤1nF</td>
+                        <td class="text-cm font-mono">20mH</td>
+                        <td class="text-dm font-mono">100μH</td>
+                        <td class="font-mono">~45dB</td>
+                    </tr>
+                    <tr>
+                        <td>大功率充电机</td>
+                        <td class="text-dm font-mono">4.7μF</td>
+                        <td class="text-cm font-mono">4.7nF × 4</td>
+                        <td class="text-cm font-mono">2×10mH</td>
+                        <td class="text-dm font-mono">3×100μH</td>
+                        <td class="font-mono">~60dB</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- 页脚 -->
+<footer class="py-12 border-t border-[var(--border)] mt-12">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="flex flex-wrap items-center justify-between gap-6">
+            <div class="flex items-center gap-3">
+                <svg width="24" height="24" viewBox="0 0 32 32">
+                    <rect x="2" y="6" width="28" height="20" rx="2" fill="none" stroke="#ffaa00" stroke-width="1.5"/>
+                    <path d="M 6 16 L 10 16 L 12 10 L 16 22 L 20 12 L 22 16 L 26 16" stroke="#00d9a3" stroke-width="1.5" fill="none"/>
+                </svg>
+                <div>
+                    <div class="font-display font-bold text-sm">EMC FILTER LAB</div>
+                    <div class="text-[10px] text-dim font-mono">EDUCATIONAL SIMULATION</div>
+                </div>
+            </div>
+            <div class="text-xs text-dim font-mono">
+                © 2025 · 共模差模信号深度解析 · 基于二阶LC传递函数实时仿真
+            </div>
+        </div>
+    </div>
+</footer>
+
+<div class="toast" id="toast">参数已更新</div>
+
+<script>
+// ============================================================
+// 工具函数
+// ============================================================
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// Canvas高分辨率适配
+function setupCanvas(canvas) {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.max(1, rect.width * dpr);
+    canvas.height = Math.max(1, rect.height * dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    return { ctx, w: rect.width, h: rect.height };
+}
+
+// ============================================================
+// Hero Canvas - 电路示意动画
+// ============================================================
+function drawHero() {
+    const canvas = $('heroCanvas');
+    const { ctx, w, h } = setupCanvas(canvas);
+    let t = 0;
+    
+    function frame() {
+        ctx.clearRect(0, 0, w, h);
+        
+        // 背景网格
+        ctx.strokeStyle = 'rgba(255, 170, 0, 0.04)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= w; i += 20) {
+            ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
+        }
+        for (let i = 0; i <= h; i += 20) {
+            ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke();
+        }
+        
+        const cx = w / 2, cy = h / 2;
+        const radius = Math.min(w, h) * 0.32;
+        
+        // 外圈
+        ctx.strokeStyle = 'rgba(255, 170, 0, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * 1.3, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // 中心电路符号
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.rect(cx - 50, cy - 30, 100, 60);
+        ctx.stroke();
+        
+        // 内部波形
+        ctx.strokeStyle = '#00d9a3';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let x = -45; x <= 45; x += 1) {
+            const y = Math.sin((x + t * 2) * 0.15) * 12;
+            if (x === -45) ctx.moveTo(cx + x, cy + y);
+            else ctx.lineTo(cx + x, cy + y);
+        }
+        ctx.stroke();
+        
+        // 旋转的粒子 - 共模
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2 + t * 0.3;
+            const r = radius * 1.15;
+            const px = cx + Math.cos(angle) * r;
+            const py = cy + Math.sin(angle) * r;
+            ctx.fillStyle = '#00d9a3';
+            ctx.shadowColor = '#00d9a3';
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.arc(px, py, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+        
+        // 反向旋转粒子 - 差模
+        for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2 - t * 0.4;
+            const r = radius * 0.85;
+            const px = cx + Math.cos(angle) * r;
+            const py = cy + Math.sin(angle) * r;
+            ctx.fillStyle = '#ffaa00';
+            ctx.shadowColor = '#ffaa00';
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.arc(px, py, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+        
+        // 连接线
+        ctx.strokeStyle = 'rgba(245, 240, 232, 0.1)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 4; i++) {
+            const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(angle) * 50, cy + Math.sin(angle) * 30);
+            ctx.lineTo(cx + Math.cos(angle) * radius * 0.85, cy + Math.sin(angle) * radius * 0.85);
+            ctx.stroke();
+        }
+        
+        // 角标
+        ctx.fillStyle = 'rgba(255, 170, 0, 0.5)';
+        ctx.font = '10px JetBrains Mono';
+        ctx.fillText('L', 20, 25);
+        ctx.fillText('N', 20, h - 15);
+        ctx.fillText('PE', w - 25, h - 15);
+        
+        t += 0.05;
+        requestAnimationFrame(frame);
+    }
+    frame();
+}
+
+// ============================================================
+// 差模信号动画
+// ============================================================
+function drawDMSignal() {
+    const canvas = $('dmSignalCanvas');
+    const { ctx, w, h } = setupCanvas(canvas);
+    let t = 0;
+    
+    function frame() {
+        ctx.clearRect(0, 0, w, h);
+        
+        // 两根导线
+        const yL = h * 0.35;
+        const yN = h * 0.65;
+        
+        // L线
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#ffaa00';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(0, yL);
+        for (let x = 0; x <= w; x += 2) {
+            const y = yL + Math.sin((x + t) * 0.04) * 15;
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        
+        // N线 (反相)
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#ffaa00';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(0, yN);
+        for (let x = 0; x <= w; x += 2) {
+            const y = yN - Math.sin((x + t) * 0.04) * 15;
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        
+        // 电流方向箭头 L -> N
+        for (let i = 0; i < 4; i++) {
+            const x = (i / 4) * w + (t * 2) % (w / 4);
+            ctx.fillStyle = '#ffaa00';
+            ctx.beginPath();
+            ctx.moveTo(x, yL - 18);
+            ctx.lineTo(x - 6, yL - 25);
+            ctx.lineTo(x + 6, yL - 25);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(x, yN + 18);
+            ctx.lineTo(x + 6, yN + 25);
+            ctx.lineTo(x - 6, yN + 25);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        // 标签
+        ctx.fillStyle = '#ffaa00';
+        ctx.font = 'bold 12px JetBrains Mono';
+        ctx.fillText('L', 5, yL - 5);
+        ctx.fillText('N', 5, yN + 15);
+        
+        ctx.fillStyle = 'rgba(255, 170, 0, 0.5)';
+        ctx.font = '10px JetBrains Mono';
+        ctx.fillText('I →', w - 30, yL - 5);
+        ctx.fillText('← I', w - 30, yN + 15);
+        
+        t += 1.5;
+        requestAnimationFrame(frame);
+    }
+    frame();
+}
+
+// ============================================================
+// 共模信号动画
+// ============================================================
+function drawCMSignal() {
+    const canvas = $('cmSignalCanvas');
+    const { ctx, w, h } = setupCanvas(canvas);
+    let t = 0;
+    
+    function frame() {
+        ctx.clearRect(0, 0, w, h);
+        
+        const yL = h * 0.3;
+        const yN = h * 0.55;
+        const yPE = h * 0.85;
+        
+        // L线
+        ctx.strokeStyle = '#00d9a3';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#00d9a3';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(0, yL);
+        for (let x = 0; x <= w; x += 2) {
+            const y = yL + Math.sin((x + t) * 0.04) * 15;
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        
+        // N线 (同相)
+        ctx.beginPath();
+        ctx.moveTo(0, yN);
+        for (let x = 0; x <= w; x += 2) {
+            const y = yN + Math.sin((x + t) * 0.04) * 15;
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        
+        // PE线 (虚线)
+        ctx.strokeStyle = 'rgba(245, 240, 232, 0.3)';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(0, yPE);
+        ctx.lineTo(w, yPE);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // 同向箭头
+        for (let i = 0; i < 4; i++) {
+            const x = (i / 4) * w + (t * 2) % (w / 4);
+            ctx.fillStyle = '#00d9a3';
+            // L箭头
+            ctx.beginPath();
+            ctx.moveTo(x, yL - 18);
+            ctx.lineTo(x - 6, yL - 25);
+            ctx.lineTo(x + 6, yL - 25);
+            ctx.closePath();
+            ctx.fill();
+            // N箭头
+            ctx.beginPath();
+            ctx.moveTo(x, yN - 18);
+            ctx.lineTo(x - 6, yN - 25);
+            ctx.lineTo(x + 6, yN - 25);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        // 通过寄生电容到PE
+        ctx.strokeStyle = 'rgba(0, 217, 163, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([2, 3]);
+        for (let i = 1; i < 4; i++) {
+            const x = (i / 4) * w;
+            ctx.beginPath();
+            ctx.moveTo(x, yN + 15);
+            ctx.lineTo(x, yPE - 5);
+            ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        
+        // 标签
+        ctx.fillStyle = '#00d9a3';
+        ctx.font = 'bold 12px JetBrains Mono';
+        ctx.fillText('L', 5, yL - 5);
+        ctx.fillText('N', 5, yN - 5);
+        ctx.fillStyle = 'rgba(245, 240, 232, 0.5)';
+        ctx.fillText('PE', 5, yPE - 5);
+        
+        t += 1.5;
+        requestAnimationFrame(frame);
+    }
+    frame();
+}
+
+// ============================================================
+// 信号分解演示
+// ============================================================
+let decompMode = 'pureDm';
+
+function drawDecomp() {
+    const canvas = $('decompCanvas');
+    const { ctx, w, h } = setupCanvas(canvas);
+    let t = 0;
+    
+    function frame() {
+        ctx.clearRect(0, 0, w, h);
+        
+        const padding = 30;
+        const plotW = (w - padding * 4) / 3;
+        const plotH = h - padding * 2;
+        
+        let lAmp, nAmp, mode;
+        if (decompMode === 'pureDm') {
+            lAmp = 1; nAmp = -1;
+        } else if (decompMode === 'pureCm') {
+            lAmp = 1; nAmp = 1;
+        } else {
+            lAmp = 1.3; nAmp = -0.5;
+        }
+        
+        // 三个区域
+        const plots = [
+            { x: padding, title: '原始信号', sub: 'L & N' },
+            { x: padding * 2 + plotW, title: '差模分量', sub: '(L-N)/2', color: '#ffaa00' },
+            { x: padding * 3 + plotW * 2, title: '共模分量', sub: '(L+N)/2', color: '#00d9a3' }
+        ];
+        
+        plots.forEach((p, idx) => {
+            // 边框
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(p.x, padding, plotW, plotH);
+            
+            // 中线
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.beginPath();
+            ctx.moveTo(p.x, padding + plotH / 2);
+            ctx.lineTo(p.x + plotW, padding + plotH / 2);
+            ctx.stroke();
+            
+            // 标题
+            ctx.fillStyle = p.color || '#f5f0e8';
+            ctx.font = 'bold 12px Space Grotesk';
+            ctx.fillText(p.title, p.x + 8, padding - 8);
+            ctx.fillStyle = 'rgba(245, 240, 232, 0.4)';
+            ctx.font = '10px JetBrains Mono';
+            ctx.fillText(p.sub, p.x + 8, padding + plotH + 18);
+            
+            // 绘制波形
+            const cy = padding + plotH / 2;
+            const scale = plotH * 0.35;
+            
+            if (idx === 0) {
+                // L和N
+                ctx.strokeStyle = '#f5f0e8';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let x = 0; x <= plotW; x += 2) {
+                    const y = cy + lAmp * Math.sin((x + t) * 0.05) * scale;
+                    if (x === 0) ctx.moveTo(p.x + x, y);
+                    else ctx.lineTo(p.x + x, y);
+                }
+                ctx.stroke();
+                
+                ctx.strokeStyle = 'rgba(245, 240, 232, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let x = 0; x <= plotW; x += 2) {
+                    const y = cy + nAmp * Math.sin((x + t) * 0.05) * scale;
+                    if (x === 0) ctx.moveTo(p.x + x, y);
+                    else ctx.lineTo(p.x + x, y);
+                }
+                ctx.stroke();
+            } else if (idx === 1) {
+                // 差模分量
+                const dmAmp = (lAmp - nAmp) / 2;
+                ctx.strokeStyle = '#ffaa00';
+                ctx.lineWidth = 2.5;
+                ctx.shadowColor = '#ffaa00';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                for (let x = 0; x <= plotW; x += 2) {
+                    const y = cy + dmAmp * Math.sin((x + t) * 0.05) * scale;
+                    if (x === 0) ctx.moveTo(p.x + x, y);
+                    else ctx.lineTo(p.x + x, y);
+                }
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            } else {
+                // 共模分量
+                const cmAmp = (lAmp + nAmp) / 2;
+                ctx.strokeStyle = '#00d9a3';
+                ctx.lineWidth = 2.5;
+                ctx.shadowColor = '#00d9a3';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                for (let x = 0; x <= plotW; x += 2) {
+                    const y = cy + cmAmp * Math.sin((x + t) * 0.05) * scale;
+                    if (x === 0) ctx.moveTo(p.x + x, y);
+                    else ctx.lineTo(p.x + x, y);
+                }
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+        });
+        
+        t += 1.2;
+        requestAnimationFrame(frame);
+    }
+    frame();
+}
+
+ $('decompPreset1').onclick = () => {
+    decompMode = 'pureDm';
+    ['decompPreset1','decompPreset2','decompPreset3'].forEach(id => $(id).classList.remove('btn-active'));
+    $('decompPreset1').classList.add('btn-active');
+};
+ $('decompPreset2').onclick = () => {
+    decompMode = 'pureCm';
+    ['decompPreset1','decompPreset2','decompPreset3'].forEach(id => $(id).classList.remove('btn-active'));
+    $('decompPreset2').classList.add('btn-active');
+};
+ $('decompPreset3').onclick = () => {
+    decompMode = 'mixed';
+    ['decompPreset1','decompPreset2','decompPreset3'].forEach(id => $(id).classList.remove('btn-active'));
+    $('decompPreset3').classList.add('btn-active');
+};
+
+// ============================================================
+// 噪声路径动画
+// ============================================================
+function drawDMNoise() {
+    const canvas = $('dmNoiseCanvas');
+    const { ctx, w, h } = setupCanvas(canvas);
+    let t = 0;
+    const particles = [];
+    
+    for (let i = 0; i < 8; i++) {
+        particles.push({ progress: i / 8 });
+    }
+    
+    function frame() {
+        ctx.clearRect(0, 0, w, h);
+        
+        const yL = h * 0.3;
+        const yN = h * 0.7;
+        const xSrc = w * 0.15;
+        const xLoad = w * 0.85;
+        
+        // L线
+        ctx.strokeStyle = 'rgba(255, 170, 0, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(xSrc, yL);
+        ctx.lineTo(xLoad, yL);
+        ctx.stroke();
+        
+        // N线
+        ctx.beginPath();
+        ctx.moveTo(xSrc, yN);
+        ctx.lineTo(xLoad, yN);
+        ctx.stroke();
+        
+        // 源 (开关管示意)
+        ctx.fillStyle = 'rgba(255, 56, 96, 0.15)';
+        ctx.strokeStyle = '#ff3860';
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(xSrc - 25, yL - 15, 25, 30);
+        ctx.strokeRect(xSrc - 25, yL - 15, 25, 30);
+        ctx.fillRect(xSrc - 25, yN - 15, 25, 30);
+        ctx.strokeRect(xSrc - 25, yN - 15, 25, 30);
+        ctx.fillStyle = '#ff3860';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText('SW', xSrc - 18, yL + 3);
+        ctx.fillText('SW', xSrc - 18, yN + 3);
+        
+        // 负载
+        ctx.strokeStyle = '#f5f0e8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(xLoad, yL);
+        ctx.lineTo(xLoad + 15, yL);
+        ctx.lineTo(xLoad + 15, yN);
+        ctx.lineTo(xLoad, yN);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(245, 240, 232, 0.1)';
+        ctx.fillRect(xLoad + 5, yL + 5, 20, h - 80);
+        
+        // 噪声电流粒子（红色）- 沿L到N循环
+        particles.forEach(p => {
+            p.progress = (p.progress + 0.008) % 1;
+            const isOnL = p.progress < 0.5;
+            const subProgress = isOnL ? p.progress * 2 : (1 - p.progress) * 2;
+            const x = xSrc + (xLoad - xSrc) * subProgress;
+            const y = isOnL ? yL : yN;
+            
+            ctx.fillStyle = '#ff3860';
+            ctx.shadowColor = '#ff3860';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        });
+        
+        // 标签
+        ctx.fillStyle = '#ff3860';
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.fillText('NOISE SRC', xSrc - 25, yL - 25);
+        ctx.fillStyle = '#f5f0e8';
+        ctx.fillText('LOAD', xLoad + 5, yL - 25);
+        
+        ctx.fillStyle = '#ffaa00';
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.fillText('L', xSrc - 35, yL + 3);
+        ctx.fillText('N', xSrc - 35, yN + 3);
+        
+        // 路径说明
+        ctx.strokeStyle = '#ff3860';
+        ctx.fillStyle = 'rgba(255, 56, 96, 0.1)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.rect(xSrc - 5, yL - 8, xLoad - xSrc + 20, yN - yL + 16);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        t += 0.05;
+        requestAnimationFrame(frame);
+    }
+    frame();
+}
+
+function drawCMNoise() {
+    const canvas = $('cmNoiseCanvas');
+    const { ctx, w, h } = setupCanvas(canvas);
+    const particles = [];
+    
+    for (let i = 0; i < 10; i++) {
+        particles.push({ progress: i / 10, line: i % 2 === 0 ? 'L' : 'N' });
+    }
+    
+    function frame() {
+        ctx.clearRect(0, 0, w, h);
+        
+        const yL = h * 0.25;
+        const yN = h * 0.55;
+        const yPE = h * 0.85;
+        const xSrc = w * 0.15;
+        const xLoad = w * 0.85;
+        
+        // L线
+        ctx.strokeStyle = 'rgba(0, 217, 163, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(xSrc, yL);
+        ctx.lineTo(xLoad, yL);
+        ctx.stroke();
+        
+        // N线
+        ctx.beginPath();
+        ctx.moveTo(xSrc, yN);
+        ctx.lineTo(xLoad, yN);
+        ctx.stroke();
+        
+        // PE线
+        ctx.strokeStyle = 'rgba(245, 240, 232, 0.3)';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(xSrc - 30, yPE);
+        ctx.lineTo(xLoad + 20, yPE);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // 寄生电容
+        ctx.strokeStyle = '#ff3860';
+        ctx.lineWidth = 1.5;
+        [xSrc + 20, xLoad - 20].forEach(x => {
+            ctx.beginPath();
+            ctx.moveTo(x, yL);
+            ctx.lineTo(x, yL + 8);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x - 4, yL + 8);
+            ctx.lineTo(x + 4, yL + 8);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x - 4, yL + 12);
+            ctx.lineTo(x + 4, yL + 12);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, yL + 12);
+            ctx.lineTo(x, yPE);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x, yN);
+            ctx.lineTo(x, yN + 8);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x - 4, yN + 8);
+            ctx.lineTo(x + 4, yN + 8);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x - 4, yN + 12);
+            ctx.lineTo(x + 4, yN + 12);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, yN + 12);
+            ctx.lineTo(x, yPE);
+            ctx.stroke();
+        });
+        
+        // 噪声电流 - 同向流动
+        particles.forEach(p => {
+            p.progress = (p.progress + 0.006) % 1;
+            const y = p.line === 'L' ? yL : yN;
+            const x = xSrc + (xLoad - xSrc) * p.progress;
+            
+            ctx.fillStyle = '#ff3860';
+            ctx.shadowColor = '#ff3860';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        });
+        
+        // 标签
+        ctx.fillStyle = '#ff3860';
+        ctx.font = 'bold 9px JetBrains Mono';
+        ctx.fillText('C_PARASITIC', xSrc + 5, yL - 8);
+        
+        ctx.fillStyle = '#00d9a3';
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.fillText('L', xSrc - 12, yL + 3);
+        ctx.fillText('N', xSrc - 12, yN + 3);
+        ctx.fillStyle = 'rgba(245, 240, 232, 0.5)';
+        ctx.fillText('PE / GND', xLoad - 20, yPE + 15);
+        
+        requestAnimationFrame(frame);
+    }
+    frame();
+}
+
+// ============================================================
+// 频谱图
+// ============================================================
+function drawSpectrum() {
+    const canvas = $('spectrumCanvas');
+    const { ctx, w, h } = setupCanvas(canvas);
+    
+    function frame() {
+        ctx.clearRect(0, 0, w, h);
+        
+        const padding = 40;
+        const plotW = w - padding * 2;
+        const plotH = h - padding * 2;
+        
+        // 坐标轴
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padding, padding);
+        ctx.lineTo(padding, padding + plotH);
+        ctx.lineTo(padding + plotW, padding + plotH);
+        ctx.stroke();
+        
+        // 网格
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+        for (let i = 1; i <= 4; i++) {
+            const y = padding + (plotH * i / 4);
+            ctx.beginPath();
+            ctx.moveTo(padding, y);
+            ctx.lineTo(padding + plotW, y);
+            ctx.stroke();
+        }
+        
+        // 频率刻度
+        const freqs = ['150k', '500k', '1M', '5M', '10M', '30M'];
+        ctx.fillStyle = 'rgba(245, 240, 232, 0.4)';
+        ctx.font = '9px JetBrains Mono';
+        freqs.forEach((f, i) => {
+            const x = padding + (plotW * i / (freqs.length - 1));
+            ctx.fillText(f, x - 10, padding + plotH + 15);
+        });
+        
+        // dB刻度
+        ['80', '60', '40', '20', '0'].forEach((db, i) => {
+            const y = padding + (plotH * i / 4);
+            ctx.fillText(db + 'dB', 5, y + 3);
+        });
+        
+        // 限值线 (CISPR 32 Class B)
+        ctx.strokeStyle = '#ff4757';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        const limitPoints = [
+            { x: 0, y: 0.15 },
+            { x: 0.2, y: 0.15 },
+            { x: 0.4, y: 0.35 },
+            { x: 1, y: 0.45 }
+        ];
+        limitPoints.forEach((p, i) => {
+            const x = padding + plotW * p.x;
+            const y = padding + plotH * p.y;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = '#ff4757';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText('LIMIT', padding + plotW * 0.7, padding + plotH * 0.4 - 5);
+        
+        // 差模噪声曲线
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#ffaa00';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        for (let i = 0; i <= 100; i++) {
+            const t = i / 100;
+            const x = padding + plotW * t;
+            const freq = 150000 * Math.pow(200, t);
+            // 差模衰减: -40dB/decade
+            const attenuation = 40 * Math.log10(freq / 50000);
+            const baseNoise = 70 - 10 * Math.log10(freq / 150000);
+            const value = Math.max(20, baseNoise - attenuation * 0.6);
+            const y = padding + plotH * (1 - value / 80);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        
+        // 共模噪声曲线
+        ctx.strokeStyle = '#00d9a3';
+        ctx.shadowColor = '#00d9a3';
+        ctx.beginPath();
+        for (let i = 0; i <= 100; i++) {
+            const t = i / 100;
+            const x = padding + plotW * t;
+            const freq = 150000 * Math.pow(200, t);
+            const attenuation = 50 * Math.log10(freq / 30000);
+            const baseNoise = 75 - 8 * Math.log10(freq / 150000);
+            const value = Math.max(15, baseNoise - attenuation * 0.65);
+            const y = padding + plotH * (1 - value / 80);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        
+        // 图例
+        ctx.fillStyle = '#ffaa00';
+        ctx.font = '10px JetBrains Mono';
+        ctx.fillText('DM', padding + plotW - 60, padding + 15);
+        ctx.fillStyle = '#00d9a3';
+        ctx.fillText('CM', padding + plotW - 30, padding + 15);
+    }
+    
+    frame();
+    window.addEventListener('resize', () => {
+        setupCanvas(canvas);
+        frame();
+    });
+}
+
+// ============================================================
+// 元器件示意图
+// ============================================================
+function drawXCapVisual() {
+    const canvas = $('xCapVisual');
+    const { ctx, w, h } = setupCanvas(canvas);
+    
+    function frame() {
+        ctx.clearRect(0, 0, w, h);
+        
+        const cx = w / 2;
+        const cy = h / 2;
+        
+        // L和N线
+        ctx.strokeStyle = 'rgba(255, 170, 0, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(10, cy - 25);
+        ctx.lineTo(cx - 25, cy - 25);
+        ctx.lineTo(cx - 25, cy + 25);
+        ctx.lineTo(10, cy + 25);
+        ctx.stroke();
+        
+        // 右侧线
+        ctx.beginPath();
+        ctx.moveTo(w - 10, cy - 25);
+        ctx.lineTo(cx + 25, cy - 25);
+        ctx.lineTo(cx + 25, cy + 25);
+        ctx.lineTo(w - 10, cy + 25);
+        ctx.stroke();
+        
+        // X电容符号 - 两条平行线
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#ffaa00';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(cx - 8, cy - 20);
+        ctx.lineTo(cx - 8, cy + 20);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx + 8, cy - 20);
+        ctx.lineTo(cx + 8, cy + 20);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        
+        // 标签
+        ctx.fillStyle = '#ffaa00';
+        ctx.font = 'bold 11px JetBrains Mono';
+        ctx.fillText('CX', cx - 10, cy + 38);
+        ctx.fillStyle = 'rgba(255, 170, 0, 0.5)';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText('L', 5, cy - 22);
+        ctx.fillText('N', 5, cy + 30);
+        
+        // 流动的差模电流
+        const t = Date.now() * 0.002;
+        for (let i = 0; i < 3; i++) {
+            const phase = (t + i * 0.33) % 1;
+            const y1 = cy - 25;
+            const y2 = cy + 25;
+            // 上线流动
+            const x1 = 10 + (cx - 35) * phase;
+            ctx.fillStyle = '#ffaa00';
+            ctx.beginPath();
+            ctx.arc(x1, y1, 2, 0, Math.PI * 2);
+            ctx.fill();
+            // 下线反方向流动
+            const x2 = cx - 25 - (cx - 35) * phase;
+            ctx.beginPath();
+            ctx.arc(x2 + cx + 25, y2, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        requestAnimationFrame(frame);
+    }
+    frame();
+}
+
+function drawYCapVisual() {
+    const canvas = $('yCapVisual');
+    const { ctx, w, h } = setupCanvas(canvas);
+    
+    function frame() {
+        ctx.clearRect(0, 0, w, h);
+        
+        const cx = w / 2;
+        const cy = h / 2;
+        
+        // L线
+        ctx.strokeStyle = 'rgba(0, 217, 163, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(10, cy - 30);
+        ctx.lineTo(w - 10, cy - 30);
+        ctx.stroke();
+        
+        // N线
+        ctx.beginPath();
+        ctx.moveTo(10, cy);
+        ctx.lineTo(w - 10, cy);
+        ctx.stroke();
+        
+        // PE线 (虚线)
+        ctx.strokeStyle = 'rgba(245, 240, 232, 0.3)';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(10, cy + 35);
+        ctx.lineTo(w - 10, cy + 35);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // Y电容 1 (L-PE)
+        ctx.strokeStyle = '#00d9a3';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#00d9a3';
+        ctx.shadowBlur = 8;
+        const x1 = cx - 25;
+        ctx.beginPath();
+        ctx.moveTo(x1 - 5, cy - 30);
+        ctx.lineTo(x1 - 5, cy + 5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x1 + 5, cy - 30);
+        ctx.lineTo(x1 + 5, cy + 5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x1 - 8, cy + 5);
+        ctx.lineTo(x1 + 8, cy + 5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x1 - 8, cy + 12);
+        ctx.lineTo(x1 + 8, cy + 12);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x1, cy + 12);
+        ctx.lineTo(x1, cy + 35);
+        ctx.stroke();
+        
+        // Y电容 2 (N-PE)
+        const x2 = cx + 25;
+        ctx.beginPath();
+        ctx.moveTo(x2 - 5, cy);
+        ctx.lineTo(x2 - 5, cy + 18);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2 + 5, cy);
+        ctx.lineTo(x2 + 5, cy + 18);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2 - 8, cy + 18);
+        ctx.lineTo(x2 + 8, cy + 18);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2 - 8, cy + 25);
+        ctx.lineTo(x2 + 8, cy + 25);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, cy + 25);
+        ctx.lineTo(x2, cy + 35);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        
+        // 标签
+        ctx.fillStyle = '#00d9a3';
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.fillText('CY1', x1 - 14, cy + 50);
+        ctx.fillText('CY2', x2 - 14, cy + 50);
+        
+        ctx.fillStyle = 'rgba(0, 217, 163, 0.6)';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText('L', 5, cy - 27);
+        ctx.fillText('N', 5, cy + 3);
+        ctx.fillStyle = 'rgba(245, 240, 232, 0.5)';
+        ctx.fillText('PE', 5, cy + 38);
+        
+        // 共模电流流动
+        const t = Date.now() * 0.0015;
+        for (let i = 0; i < 3; i++) {
+            const phase = (t + i * 0.33) % 1;
+            const xL = 10 + (x1 - 18) * phase;
+            const xN = 10 + (x2 - 18) * phase;
+            ctx.fillStyle = '#00d9a3';
+            ctx.beginPath();
+            ctx.arc(xL, cy - 30, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(xN, cy, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        requestAnimationFrame(frame);
+    }
+    frame();
+}
+
+function drawCMChokeVisual() {
+    const canvas = $('cmChokeVisual');
+    const { ctx, w, h } = setupCanvas(canvas);
+    
+    function frame() {
+        ctx.clearRect(0, 0, w, h);
+        
+        const cx = w / 2;
+        const cy = h / 2;
+        
+        // 磁芯 (圆环)
+        ctx.strokeStyle = 'rgba(245, 240, 232, 0.4)';
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 32, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        ctx.strokeStyle = 'rgba(245, 240, 232, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 38, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy, 26, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // 绕组1 (上方 - L)
+        ctx.strokeStyle = '#00d9a3';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#00d9a3';
+        ctx.shadowBlur = 6;
+        for (let i = 0; i < 6; i++) {
+            const angle = -Math.PI / 2 + (i - 2.5) * 0.25;
+            const r1 = 38;
+            const r2 = 26;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(angle) * r1, cy + Math.sin(angle) * r1);
+            ctx.lineTo(cx + Math.cos(angle) * r2, cy + Math.sin(angle) * r2);
+            ctx.stroke();
+        }
+        
+        // 绕组2 (下方 - N)
+        for (let i = 0; i < 6; i++) {
+            const angle = Math.PI / 2 + (i - 2.5) * 0.25;
+            const r1 = 38;
+            const r2 = 26;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(angle) * r1, cy + Math.sin(angle) * r1);
+            ctx.lineTo(cx + Math.cos(angle) * r2, cy + Math.sin(angle) * r2);
+            ctx.stroke();
+        }
+        ctx.shadowBlur = 0;
+        
+        // 引出线
+        ctx.strokeStyle = '#00d9a3';
+        ctx.lineWidth = 1.5;
+        // L 入
+        ctx.beginPath();
+        ctx.moveTo(10, cy - 25);
+        ctx.lineTo(cx - 30, cy - 30);
+        ctx.stroke();
+        // L 出
+        ctx.beginPath();
+        ctx.moveTo(cx + 30, cy - 30);
+        ctx.lineTo(w - 10, cy - 25);
+        ctx.stroke();
+        // N 入
+        ctx.beginPath();
+        ctx.moveTo(10, cy + 25);
+        ctx.lineTo(cx - 30, cy + 30);
+        ctx.stroke();
+        // N 出
+        ctx.beginPath();
+        ctx.moveTo(cx + 30, cy + 30);
+        ctx.lineTo(w - 10, cy + 25);
+        ctx.stroke();
+        
+        // 电流方向箭头 - 同向
+        const t = Date.now() * 0.001;
+        ctx.fillStyle = '#00d9a3';
+        ctx.shadowColor = '#00d9a3';
+        ctx.shadowBlur = 8;
+        const flowPos = (t % 1);
+        // L线箭头向右
+        ctx.beginPath();
+        ctx.arc(10 + (w - 20) * flowPos, cy - 27, 3, 0, Math.PI * 2);
+        ctx.fill();
+        // N线箭头也向右 (共模)
+        ctx.beginPath();
+        ctx.arc(10 + (w - 20) * flowPos, cy + 27, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // 标签
+        ctx.fillStyle = '#00d9a3';
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.fillText('CM CHOKE', cx - 28, cy + 55);
+        ctx.fillStyle = 'rgba(0, 217, 163, 0.5)';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText('L', 5, cy - 22);
+        ctx.fillText('N', 5, cy + 32);
+        
+        requestAnimationFrame(frame);
+    }
+    frame();
+}
+
+function drawDMChokeVisual() {
+    const canvas = $('dmChokeVisual');
+    const { ctx, w, h } = setupCanvas(canvas);
+    
+    function frame() {
+        ctx.clearRect(0, 0, w, h);
+        
+        const cx = w / 2;
+        const cy = h / 2;
+        
+        // 磁芯 (单绕组 - 圆柱)
+        ctx.strokeStyle = 'rgba(245, 240, 232, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.rect(cx - 25, cy - 30, 50, 60);
+        ctx.stroke();
+        
+        // 绕组 (螺旋)
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#ffaa00';
+        ctx.shadowBlur = 6;
+        for (let i = 0; i < 8; i++) {
+            const y = cy - 25 + i * 7;
+            ctx.beginPath();
+            ctx.moveTo(cx - 25, y);
+            ctx.bezierCurveTo(cx - 15, y - 5, cx + 15, y - 5, cx + 25, y);
+            ctx.stroke();
+        }
+        ctx.shadowBlur = 0;
+        
+        // 引线
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(10, cy);
+        ctx.lineTo(cx - 25, cy - 25);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx + 25, cy + 25);
+        ctx.lineTo(w - 10, cy);
+        ctx.stroke();
+        
+        // 电流方向 - 单向流动
+        const t = Date.now() * 0.0015;
+        const flowPos = (t % 1);
+        ctx.fillStyle = '#ffaa00';
+        ctx.shadowColor = '#ffaa00';
+        ctx.shadowBlur = 8;
+        // 左侧入
+        const x1 = 10 + (cx - 35) * flowPos;
+        ctx.beginPath();
+        ctx.arc(x1, cy - 8 + (flowPos - 0.5) * 20, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // 标签
+        ctx.fillStyle = '#ffaa00';
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.fillText('DM INDUCTOR', cx - 35, cy + 50);
+        ctx.fillStyle = 'rgba(255, 170, 0, 0.5)';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText('L', 5, cy + 3);
+        
+        requestAnimationFrame(frame);
+    }
+    frame();
+}
+
+// ============================================================
+// 电路仿真器核心
+// ============================================================
+const sim = {
+    // 噪声参数
+    dmAmp: 2.0,
+    cmAmp: 2.0,
+    noiseFreq: 500, // kHz
+    powerAmp: 220,
+    // 滤波器参数
+    xCap: 1.0, // μF
+    yCap: 4.7, // nF
+    cmInd: 10.0, // mH
+    dmInd: 100, // μH
+    load: 50, // Ω
+    // 时间
+    t: 0,
+    particles: []
+};
+
+// 初始化电路图粒子
+for (let i = 0; i < 30; i++) {
+    sim.particles.push({
+        progress: Math.random(),
+        speed: 0.003 + Math.random() * 0.003,
+        path: Math.floor(Math.random() * 4) // 0:L, 1:N, 2:DM-noise, 3:CM-noise
+    });
+}
+
+// 计算传递函数
+function transferDM(f) {
+    // LC低通: L = dmInd, C = xCap
+    const L = sim.dmInd * 1e-6; // H
+    const C = sim.xCap * 1e-6; // F
+    const wc = 1 / Math.sqrt(L * C);
+    const w = 2 * Math.PI * f;
+    const ratio = w / wc;
+    // 二阶LC传递函数 |H| = 1/sqrt((1-ratio^2)^2 + (ratio/Q)^2)
+    const Q = 1; // 临界阻尼近似
+    return 1 / Math.sqrt(Math.pow(1 - ratio * ratio, 2) + Math.pow(ratio / Q, 2));
+}
+
+function transferCM(f) {
+    // LC低通: L = cmInd (两倍,因为共模等效), C = 2*yCap (两个Y电容串联后再... 简化)
+    const L = 2 * sim.cmInd * 1e-3; // H (共模电感在共模信号下等效为2L)
+    const C = sim.yCap * 2 * 1e-9; // F (两个Y电容并联效应)
+    const wc = 1 / Math.sqrt(L * C);
+    const w = 2 * Math.PI * f;
+    const ratio = w / wc;
+    const Q = 1;
+    return 1 / Math.sqrt(Math.pow(1 - ratio * ratio, 2) + Math.pow(ratio / Q, 2));
+}
+
+function cutoffFreq(L, C) {
+    return 1 / (2 * Math.PI * Math.sqrt(L * C));
+}
+
+// 绘制电路图
+function drawCircuit() {
+    const canvas = $('circuitCanvas');
+    const { ctx, w, h } = setupCanvas(canvas);
+    
+    function frame() {
+        ctx.clearRect(0, 0, w, h);
+        
+        // 背景网格
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < w; x += 20) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+        }
+        for (let y = 0; y < h; y += 20) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+        }
+        
+        // 关键位置
+        const xSrc = 60;
+        const xCmChoke = 200;
+        const xDmInd = 320;
+        const xOut = 480;
+        const yL = 100;
+        const yN = 220;
+        const yPE = 340;
+        const xMid = (xSrc + xOut) / 2;
+        
+        // ===== 导线 =====
+        // L线 主路径
+        ctx.strokeStyle = '#f5f0e8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(xSrc, yL);
+        ctx.lineTo(xCmChoke - 30, yL);
+        ctx.lineTo(xCmChoke + 30, yL);
+        ctx.lineTo(xDmInd - 20, yL);
+        ctx.lineTo(xDmInd + 20, yL);
+        ctx.lineTo(xOut, yL);
+        ctx.stroke();
+        
+        // N线 主路径
+        ctx.beginPath();
+        ctx.moveTo(xSrc, yN);
+        ctx.lineTo(xCmChoke - 30, yN);
+        ctx.lineTo(xCmChoke + 30, yN);
+        ctx.lineTo(xDmInd - 20, yN);
+        ctx.lineTo(xDmInd + 20, yN);
+        ctx.lineTo(xOut, yN);
+        ctx.stroke();
+        
+        // PE线
+        ctx.strokeStyle = 'rgba(245, 240, 232, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(xSrc - 20, yPE);
+        ctx.lineTo(xOut + 20, yPE);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // ===== 电源 =====
+        ctx.strokeStyle = '#f5f0e8';
+        ctx.fillStyle = 'rgba(245, 240, 232, 0.05)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(xSrc - 15, yL + 60, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        // 内部波形
+        ctx.strokeStyle = '#f5f0e8';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = -12; i <= 12; i++) {
+            const y = yL + 60 + Math.sin(i * 0.6 + sim.t * 0.1) * 6;
+            if (i === -12) ctx.moveTo(xSrc - 15 + i, y);
+            else ctx.lineTo(xSrc - 15 + i, y);
+        }
+        ctx.stroke();
+        ctx.fillStyle = '#f5f0e8';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText('AC SOURCE', xSrc - 35, yL + 95);
+        ctx.fillText('220V/50Hz', xSrc - 32, yL + 108);
+        
+        // 电源连接
+        ctx.strokeStyle = '#f5f0e8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(xSrc - 15, yL + 42);
+        ctx.lineTo(xSrc - 15, yL);
+        ctx.lineTo(xSrc, yL);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(xSrc - 15, yL + 78);
+        ctx.lineTo(xSrc - 15, yN);
+        ctx.lineTo(xSrc, yN);
+        ctx.stroke();
+        
+        // ===== 噪声源 (红色,叠加在L-N线上) =====
+        const noiseX = xSrc + 60;
+        ctx.strokeStyle = '#ff3860';
+        ctx.fillStyle = 'rgba(255, 56, 96, 0.1)';
+        ctx.lineWidth = 1.5;
+        // 差模噪声源 (在L线上的小圆圈)
+        ctx.beginPath();
+        ctx.arc(noiseX, yL, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(noiseX - 4, yL - 4);
+        ctx.lineTo(noiseX + 4, yL + 4);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(noiseX + 4, yL - 4);
+        ctx.lineTo(noiseX - 4, yL + 4);
+        ctx.stroke();
+        // 共模噪声源
+        ctx.beginPath();
+        ctx.arc(noiseX, yN, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(noiseX - 4, yN - 4);
+        ctx.lineTo(noiseX + 4, yN + 4);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(noiseX + 4, yN - 4);
+        ctx.lineTo(noiseX - 4, yN + 4);
+        ctx.stroke();
+        
+        ctx.fillStyle = '#ff3860';
+        ctx.font = '8px JetBrains Mono';
+        ctx.fillText('NOISE', noiseX - 12, yL - 15);
+        ctx.fillText(`${sim.noiseFreq}k`, noiseX - 12, yL + 25);
+        
+        // ===== 共模电感 =====
+        const cmCx = xCmChoke;
+        // 磁芯
+        ctx.strokeStyle = 'rgba(0, 217, 163, 0.3)';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(cmCx, (yL + yN) / 2, 30, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(0, 217, 163, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(cmCx, (yL + yN) / 2, 35, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cmCx, (yL + yN) / 2, 25, 0, Math.PI * 2);
+        ctx.stroke();
+        // 绕组
+        ctx.strokeStyle = '#00d9a3';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#00d9a3';
+        ctx.shadowBlur = 4;
+        for (let i = 0; i < 5; i++) {
+            const angle = -Math.PI / 2 + (i - 2) * 0.3;
+            const r1 = 35, r2 = 25;
+            ctx.beginPath();
+            ctx.moveTo(cmCx + Math.cos(angle) * r1, (yL + yN) / 2 + Math.sin(angle) * r1 - 20);
+            ctx.lineTo(cmCx + Math.cos(angle) * r1, (yL + yN) / 2 + Math.sin(angle) * r1 + 20);
+            ctx.stroke();
+        }
+        ctx.shadowBlur = 0;
+        
+        ctx.fillStyle = '#00d9a3';
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.fillText('CM CHOKE', cmCx - 25, (yL + yN) / 2 + 50);
+        ctx.fillStyle = 'rgba(0, 217, 163, 0.6)';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText(`${sim.cmInd.toFixed(1)} mH`, cmCx - 22, (yL + yN) / 2 + 62);
+        
+        // ===== 差模电感 =====
+        const dmX = xDmInd;
+        ctx.strokeStyle = 'rgba(255, 170, 0, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.rect(dmX - 15, yL - 15, 30, 30);
+        ctx.stroke();
+        // 绕组
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = '#ffaa00';
+        ctx.shadowBlur = 4;
+        for (let i = 0; i < 4; i++) {
+            ctx.beginPath();
+            ctx.moveTo(dmX - 15, yL - 12 + i * 7);
+            ctx.bezierCurveTo(dmX - 8, yL - 16 + i * 7, dmX + 8, yL - 16 + i * 7, dmX + 15, yL - 12 + i * 7);
+            ctx.stroke();
+        }
+        ctx.shadowBlur = 0;
+        
+        // N线上的差模电感
+        ctx.strokeStyle = 'rgba(255, 170, 0, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.rect(dmX - 15, yN - 15, 30, 30);
+        ctx.stroke();
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = '#ffaa00';
+        ctx.shadowBlur = 4;
+        for (let i = 0; i < 4; i++) {
+            ctx.beginPath();
+            ctx.moveTo(dmX - 15, yN - 12 + i * 7);
+            ctx.bezierCurveTo(dmX - 8, yN - 16 + i * 7, dmX + 8, yN - 16 + i * 7, dmX + 15, yN - 12 + i * 7);
+            ctx.stroke();
+        }
+        ctx.shadowBlur = 0;
+        
+        ctx.fillStyle = '#ffaa00';
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.fillText('DM CHOKE', dmX - 25, yN + 28);
+        ctx.fillStyle = 'rgba(255, 170, 0, 0.6)';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText(`${sim.dmInd} μH`, dmX - 18, yN + 40);
+        
+        // ===== X电容 (L-N之间) =====
+        const xCx = (xCmChoke + xDmInd) / 2;
+        ctx.strokeStyle = '#ffaa00';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#ffaa00';
+        ctx.shadowBlur = 6;
+        // 连接线
+        ctx.beginPath();
+        ctx.moveTo(xCx, yL);
+        ctx.lineTo(xCx, yL + 35);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(xCx, yN);
+        ctx.lineTo(xCx, yN - 35);
+        ctx.stroke();
+        // 电容板
+        ctx.beginPath();
+        ctx.moveTo(xCx - 12, yL + 35);
+        ctx.lineTo(xCx + 12, yL + 35);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(xCx - 12, yL + 42);
+        ctx.lineTo(xCx + 12, yL + 42);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(xCx - 12, yN - 35);
+        ctx.lineTo(xCx + 12, yN - 35);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(xCx - 12, yN - 42);
+        ctx.lineTo(xCx + 12, yN - 42);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        
+        ctx.fillStyle = '#ffaa00';
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.fillText('CX', xCx - 8, (yL + yN) / 2 - 3);
+        ctx.fillStyle = 'rgba(255, 170, 0, 0.6)';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText(`${sim.xCap.toFixed(1)}μF`, xCx - 16, (yL + yN) / 2 + 10);
+        
+        // ===== Y电容 =====
+        const yCapX1 = xCmChoke - 50;
+        const yCapX2 = xDmInd + 60;
+        
+        [yCapX1, yCapX2].forEach((yx, i) => {
+            // L-PE
+            ctx.strokeStyle = '#00d9a3';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = '#00d9a3';
+            ctx.shadowBlur = 4;
+            ctx.beginPath();
+            ctx.moveTo(yx, yL);
+            ctx.lineTo(yx, yL + 80);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(yx - 8, yL + 80);
+            ctx.lineTo(yx + 8, yL + 80);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(yx - 8, yL + 86);
+            ctx.lineTo(yx + 8, yL + 86);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(yx, yL + 86);
+            ctx.lineTo(yx, yPE);
+            ctx.stroke();
+            // N-PE
+            ctx.beginPath();
+            ctx.moveTo(yx, yN);
+            ctx.lineTo(yx, yN + 50);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(yx - 8, yN + 50);
+            ctx.lineTo(yx + 8, yN + 50);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(yx - 8, yN + 56);
+            ctx.lineTo(yx + 8, yN + 56);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(yx, yN + 56);
+            ctx.lineTo(yx, yPE);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        });
+        
+        ctx.fillStyle = '#00d9a3';
+        ctx.font = 'bold 9px JetBrains Mono';
+        ctx.fillText('CY', yCapX1 - 8, yPE - 8);
+        ctx.fillText('CY', yCapX2 - 8, yPE - 8);
+        ctx.fillStyle = 'rgba(0, 217, 163, 0.6)';
+        ctx.font = '8px JetBrains Mono';
+        ctx.fillText(`${sim.yCap.toFixed(1)}nF`, yCapX1 - 14, yPE + 12);
+        ctx.fillText(`${sim.yCap.toFixed(1)}nF`, yCapX2 - 14, yPE + 12);
+        
+        // ===== 负载 =====
+        ctx.strokeStyle = '#f5f0e8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(xOut, yL);
+        ctx.lineTo(xOut + 15, yL);
+        ctx.lineTo(xOut + 15, yN);
+        ctx.lineTo(xOut, yN);
+        ctx.stroke();
+        // 电阻符号
+        ctx.strokeStyle = '#f5f0e8';
+        ctx.fillStyle = 'rgba(245, 240, 232, 0.05)';
+        ctx.beginPath();
+        ctx.rect(xOut + 8, yL + 25, 14, yN - yL - 50);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#f5f0e8';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText('LOAD', xOut + 35, (yL + yN) / 2);
+        ctx.fillText(`${sim.load}Ω`, xOut + 35, (yL + yN) / 2 + 12);
+        
+        // ===== 标签 =====
+        ctx.fillStyle = '#f5f0e8';
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.fillText('INPUT', xSrc - 20, yL - 30);
+        ctx.fillText('OUTPUT', xOut - 10, yL - 30);
+        ctx.fillStyle = 'rgba(245, 240, 232, 0.4)';
+        ctx.font = '8px JetBrains Mono';
+        ctx.fillText('L', xSrc - 8, yL - 8);
+        ctx.fillText('N', xSrc - 8, yN + 16);
+        ctx.fillText('PE', xSrc - 12, yPE + 15);
+        
+        // ===== 流动粒子 =====
+        sim.particles.forEach(p => {
+            p.progress += p.speed;
+            if (p.progress > 1) p.progress -= 1;
+            
+            let x, y, color;
+            if (p.path === 0) {
+                // L线 工频
+                x = xSrc + (xOut - xSrc) * p.progress;
+                y = yL;
+                color = 'rgba(245, 240, 232, 0.6)';
+            } else if (p.path === 1) {
+                // N线 工频
+                x = xSrc + (xOut - xSrc) * p.progress;
+                y = yN;
+                color = 'rgba(245, 240, 232, 0.4)';
+            } else if (p.path === 2) {
+                // 差模噪声路径
+                if (p.progress < 0.5) {
+                    x = xSrc + (xOut - xSrc) * p.progress * 2;
+                    y = yL;
+                } else {
+                    x = xOut - (xOut - xSrc) * (p.progress - 0.5) * 2;
+                    y = yN;
+                }
+                color = '#ffaa00';
+            } else {
+                // 共模噪声路径 - L/N -> Y电容 -> PE
+                const halfP = p.progress < 0.5 ? p.progress * 2 : (p.progress - 0.5) * 2;
+                if (p.progress < 0.5) {
+                    x = xSrc + (yCapX1 - xSrc) * halfP;
+                    y = yL;
+                } else {
+                    x = yCapX1;
+                    y = yL + (yPE - yL) * halfP;
+                }
+                color = '#00d9a3';
+            }
+            
+            ctx.fillStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.arc(x, y, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        });
+        
+        sim.t += 1;
+        requestAnimationFrame(frame);
+    }
+    frame();
+}
+
+// ============================================================
+// 波形绘制
+// ============================================================
+function drawWaves() {
+    const inputCanvas = $('inputWaveCanvas');
+    const outputCanvas = $('outputWaveCanvas');
+    
+    function drawWave(canvas, isOutput) {
+        const { ctx, w, h } = setupCanvas(canvas);
+        ctx.clearRect(0, 0, w, h);
+        
+        // 中线
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, h / 2);
+        ctx.lineTo(w, h / 2);
+        ctx.stroke();
+        
+        // 网格
+        for (let i = 1; i < 6; i++) {
+            const y = (h / 6) * i;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(w, y);
+            ctx.stroke();
+        }
+        
+        const noiseFreqHz = sim.noiseFreq * 1000;
+        const powerFreq = 50;
+        const samples = w;
+        const timeWindow = 0.04; // 40ms 显示两个工频周期
+        
+        // 计算缩放
+        const dmTransfer = isOutput ? transferDM(noiseFreqHz) : 1;
+        const cmTransfer = isOutput ? transferCM(noiseFreqHz) : 1;
+        
+        // L线
+        ctx.strokeStyle = '#f5f0e8';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < samples; i++) {
+            const t = (i / samples) * timeWindow;
+            // 工频
+            const power = sim.powerAmp * Math.sin(2 * Math.PI * powerFreq * t);
+            // 噪声
+            const dmNoise = sim.dmAmp * Math.sin(2 * Math.PI * noiseFreqHz * t) * (isOutput ? dmTransfer : 1);
+            const cmNoise = sim.cmAmp * Math.sin(2 * Math.PI * noiseFreqHz * t) * (isOutput ? cmTransfer : 1);
+            
+            const value = power + dmNoise + cmNoise;
+            // 归一化
+            const y = h / 2 - (value / (sim.powerAmp + 10)) * (h / 2 - 5);
+            if (i === 0) ctx.moveTo(i, y);
+            else ctx.lineTo(i, y);
+        }
+        ctx.stroke();
+        
+        // N线 (反相)
+        ctx.strokeStyle = 'rgba(245, 240, 232, 0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < samples; i++) {
+            const t = (i / samples) * timeWindow;
+            const power = -sim.powerAmp * Math.sin(2 * Math.PI * powerFreq * t);
+            const dmNoise = -sim.dmAmp * Math.sin(2 * Math.PI * noiseFreqHz * t) * (isOutput ? dmTransfer : 1);
+            const cmNoise = sim.cmAmp * Math.sin(2 * Math.PI * noiseFreqHz * t) * (isOutput ? cmTransfer : 1);
+            
+            const value = power + dmNoise + cmNoise;
+            const y = h / 2 - (value / (sim.powerAmp + 10)) * (h / 2 - 5);
+            if (i === 0) ctx.moveTo(i, y);
+            else ctx.lineTo(i, y);
+        }
+        ctx.stroke();
+        
+        // 噪声部分高亮 (在工频上方/下方)
+        if (!isOutput) {
+            // 输入端显示噪声包络
+            ctx.strokeStyle = 'rgba(255, 56, 96, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            for (let i = 0; i < samples; i++) {
+                const t = (i / samples) * timeWindow;
+                const noiseLevel = (sim.dmAmp + sim.cmAmp) * Math.abs(Math.sin(2 * Math.PI * noiseFreqHz * t * 0.01));
+                const y = h / 2 - (sim.powerAmp + noiseLevel) / (sim.powerAmp + 10) * (h / 2 - 5);
+                if (i === 0) ctx.moveTo(i, y);
+                else ctx.lineTo(i, y);
+            }
+            ctx.stroke();
+            ctx.beginPath();
+            for (let i = 0; i < samples; i++) {
+                const t = (i / samples) * timeWindow;
+                const noiseLevel = (sim.dmAmp + sim.cmAmp) * Math.abs(Math.sin(2 * Math.PI * noiseFreqHz * t * 0.01));
+                const y = h / 2 + (sim.powerAmp + noiseLevel) / (sim.powerAmp + 10) * (h / 2 - 5);
+                if (i === 0) ctx.moveTo(i, y);
+                else ctx.lineTo(i, y);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+    }
+    
+    drawWave(inputCanvas, false);
+    drawWave(outputCanvas, true);
+}
+
+// ============================================================
+// Bode图
+// ============================================================
+function drawBode() {
+    const canvas = $('bodeCanvas');
+    const { ctx, w, h } = setupCanvas(canvas);
+    ctx.clearRect(0, 0, w, h);
+    
+    const padding = 40;
+    const plotW = w - padding * 2;
+    const plotH = h - padding * 2;
+    
+    // 坐标轴
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, padding + plotH);
+    ctx.lineTo(padding + plotW, padding + plotH);
+    ctx.stroke();
+    
+    // 网格
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+    for (let i = 1; i <= 8; i++) {
+        const y = padding + (plotH * i / 8);
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(padding + plotW, y);
+        ctx.stroke();
+    }
+    for (let i = 1; i <= 8; i++) {
+        const x = padding + (plotW * i / 8);
+        ctx.beginPath();
+        ctx.moveTo(x, padding);
+        ctx.lineTo(x, padding + plotH);
+        ctx.stroke();
+    }
+    
+    // 频率刻度 (10k - 10M, log)
+    const fMin = 10000, fMax = 30000000;
+    const freqs = [10000, 100000, 1000000, 10000000];
+    ctx.fillStyle = 'rgba(245, 240, 232, 0.5)';
+    ctx.font = '9px JetBrains Mono';
+    freqs.forEach(f => {
+        const x = padding + plotW * (Math.log10(f / fMin) / Math.log10(fMax / fMin));
+        ctx.fillText(f >= 1000000 ? `${f/1000000}M` : `${f/1000}k`, x - 8, padding + plotH + 15);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath();
+        ctx.moveTo(x, padding);
+        ctx.lineTo(x, padding + plotH);
+        ctx.stroke();
+    });
+    
+    // dB刻度
+    ['0', '-20', '-40', '-60', '-80'].forEach((db, i) => {
+        const y = padding + (plotH * i / 4);
+        ctx.fillText(db + 'dB', 5, y + 3);
+    });
+    
+    // 差模曲线
+    ctx.strokeStyle = '#ffaa00';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#ffaa00';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    for (let i = 0; i <= 200; i++) {
+        const t = i / 200;
+        const f = fMin * Math.pow(fMax / fMin, t);
+        const h_val = transferDM(f);
+        const db = 20 * Math.log10(Math.max(0.0001, h_val));
+        const x = padding + plotW * t;
+        const y = padding + plotH * clamp(-db / 80, 0, 1);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    
+    // 共模曲线
+    ctx.strokeStyle = '#00d9a3';
+    ctx.shadowColor = '#00d9a3';
+    ctx.beginPath();
+    for (let i = 0; i <= 200; i++) {
+        const t = i / 200;
+        const f = fMin * Math.pow(fMax / fMin, t);
+        const h_val = transferCM(f);
+        const db = 20 * Math.log10(Math.max(0.0001, h_val));
+        const x = padding + plotW * t;
+        const y = padding + plotH * clamp(-db / 80, 0, 1);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    
+    // 当前噪声频率标记
+    const noiseF = sim.noiseFreq * 1000;
+    const noiseX = padding + plotW * (Math.log10(noiseF / fMin) / Math.log10(fMax / fMin));
+    ctx.strokeStyle = '#ff3860';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(noiseX, padding);
+    ctx.lineTo(noiseX, padding + plotH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    ctx.fillStyle = '#ff3860';
+    ctx.font = 'bold 10px JetBrains Mono';
+    ctx.fillText(`${sim.noiseFreq}kHz`, noiseX - 18, padding - 5);
+    
+    // 在交点处标记衰减量
+    const dmDb = 20 * Math.log10(Math.max(0.0001, transferDM(noiseF)));
+    const cmDb = 20 * Math.log10(Math.max(0.0001, transferCM(noiseF)));
+    
+    ctx.fillStyle = '#ffaa00';
+    ctx.font = '9px JetBrains Mono';
+    ctx.fillText(`${dmDb.toFixed(1)}dB`, noiseX + 5, padding + plotH * clamp(-dmDb/80, 0, 1));
+    ctx.fillStyle = '#00d9a3';
+    ctx.fillText(`${cmDb.toFixed(1)}dB`, noiseX + 5, padding + plotH * clamp(-cmDb/80, 0, 1) + 12);
+}
+
+// ============================================================
+// 更新指标
+// ============================================================
+function updateMetrics() {
+    const noiseF = sim.noiseFreq * 1000;
+    const dmH = transferDM(noiseF);
+    const cmH = transferCM(noiseF);
+    const dmDb = 20 * Math.log10(Math.max(0.0001, dmH));
+    const cmDb = 20 * Math.log10(Math.max(0.0001, cmH));
+    
+    $('dmAttenuation').textContent = `${dmDb.toFixed(1)} dB`;
+    $('cmAttenuation').textContent = `${cmDb.toFixed(1)} dB`;
+    
+    // 进度条 (衰减越强进度越满)
+    const dmPercent = clamp((-dmDb / 80) * 100, 0, 100);
+    const cmPercent = clamp((-cmDb / 80) * 100, 0, 100);
+    $('dmProgressBar').style.width = dmPercent + '%';
+    $('cmProgressBar').style.width = cmPercent + '%';
+    
+    // 截止频率
+    const dmFc = cutoffFreq(sim.dmInd * 1e-6, sim.xCap * 1e-6);
+    const cmFc = cutoffFreq(2 * sim.cmInd * 1e-3, sim.yCap * 2 * 1e-9);
+    $('dmCutoff').textContent = `${(dmFc / 1000).toFixed(1)} kHz`;
+    $('cmCutoff').textContent = `${(cmFc / 1000).toFixed(1)} kHz`;
+    
+    // 漏电流 (220V, 50Hz, Cy)
+    const leakCurrent = 2 * Math.PI * 50 * sim.yCap * 1e-9 * 220 * 2; // 两个Y电容
+    $('leakageCurrent').textContent = `${(leakCurrent * 1000).toFixed(2)} mA`;
+    
+    // 合规检查
+    $('checkY').textContent = sim.yCap <= 4.7 ? 'PASS' : 'FAIL';
+    $('checkY').className = 'font-mono ' + (sim.yCap <= 4.7 ? 'text-cm' : 'text-noise');
+    
+    $('checkLeak').textContent = leakCurrent <= 0.5e-3 ? 'PASS' : 'FAIL';
+    $('checkLeak').className = 'font-mono ' + (leakCurrent <= 0.5e-3 ? 'text-cm' : 'text-noise');
+    
+    const minAtt = Math.max(-dmDb, -cmDb);
+    $('checkAtt').textContent = minAtt >= 40 ? 'PASS' : 'FAIL';
+    $('checkAtt').className = 'font-mono ' + (minAtt >= 40 ? 'text-cm' : 'text-noise');
+    
+    // 计时器
+    $('simTimer').textContent = `T = ${(sim.t * 0.01).toFixed(2)} ms`;
+}
+
+// ============================================================
+// 仿真主循环
+// ============================================================
+function simulationLoop() {
+    updateMetrics();
+    drawWaves();
+    drawBode();
+}
+
+setInterval(simulationLoop, 100);
+
+// ============================================================
+// 参数绑定
+// ============================================================
+function bindSlider(id, prop, formatter, scale = 1) {
+    const el = $(id);
+    const valEl = $(id + 'Val');
+    el.addEventListener('input', () => {
+        sim[prop] = parseFloat(el.value) * scale;
+        if (valEl) valEl.textContent = formatter(parseFloat(el.value));
+    });
+}
+
+bindSlider('dmAmp', 'dmAmp', v => `${v.toFixed(1)} V`);
+bindSlider('cmAmp', 'cmAmp', v => `${v.toFixed(1)} V`);
+bindSlider('noiseFreq', 'noiseFreq', v => `${v} kHz`);
+bindSlider('powerAmp', 'powerAmp', v => `${v} V`);
+bindSlider('xCap', 'xCap', v => `${v.toFixed(1)} μF`);
+bindSlider('yCap', 'yCap', v => `${v.toFixed(1)} nF`);
+bindSlider('cmInd', 'cmInd', v => `${v.toFixed(1)} mH`);
+bindSlider('dmInd', 'dmInd', v => `${v} μH`);
+bindSlider('load', 'load', v => `${v} Ω`);
+
+// 预设
+const presets = {
+    light: { dmAmp: 0.5, cmAmp: 0.5, noiseFreq: 200, xCap: 0.47, yCap: 2.2, cmInd: 5, dmInd: 47, load: 100 },
+    standard: { dmAmp: 2.0, cmAmp: 2.0, noiseFreq: 500, xCap: 1.0, yCap: 4.7, cmInd: 10, dmInd: 100, load: 50 },
+    harsh: { dmAmp: 4.5, cmAmp: 4.5, noiseFreq: 1000, xCap: 2.2, yCap: 4.7, cmInd: 20, dmInd: 220, load: 20 }
+};
+
+function applyPreset(name) {
+    const p = presets[name];
+    if (!p) return;
+    Object.keys(p).forEach(k => {
+        sim[k] = p[k];
+        const el = $(k);
+        if (el) el.value = p[k];
+        const valEl = $(k + 'Val');
+        if (valEl) {
+            const formatters = {
+                dmAmp: v => `${v.toFixed(1)} V`,
+                cmAmp: v => `${v.toFixed(1)} V`,
+                noiseFreq: v => `${v} kHz`,
+                powerAmp: v => `${v} V`,
+                xCap: v => `${v.toFixed(1)} μF`,
+                yCap: v => `${v.toFixed(1)} nF`,
+                cmInd: v => `${v.toFixed(1)} mH`,
+                dmInd: v => `${v} μH`,
+                load: v => `${v} Ω`
+            };
+            valEl.textContent = formatters[k](p[k]);
+        }
+    });
+    showToast(`已加载预设: ${name === 'light' ? '轻载' : name === 'standard' ? '标准' : '恶劣环境'}`);
+}
+
+ $('presetLight').onclick = () => {
+    applyPreset('light');
+    ['presetLight','presetStandard','presetHarsh'].forEach(id => $(id).classList.remove('btn-active'));
+    $('presetLight').classList.add('btn-active');
+};
+ $('presetStandard').onclick = () => {
+    applyPreset('standard');
+    ['presetLight','presetStandard','presetHarsh'].forEach(id => $(id).classList.remove('btn-active'));
+    $('presetStandard').classList.add('btn-active');
+};
+ $('presetHarsh').onclick = () => {
+    applyPreset('harsh');
+    ['presetLight','presetStandard','presetHarsh'].forEach(id => $(id).classList.remove('btn-active'));
+    $('presetHarsh').classList.add('btn-active');
+};
+ $('presetReset').onclick = () => {
+    applyPreset('standard');
+    sim.powerAmp = 220;
+    $('powerAmp').value = 220;
+    $('powerAmpVal').textContent = '220 V';
+    showToast('参数已重置');
+};
+
+// ============================================================
+// 初始化
+// ============================================================
+window.addEventListener('load', () => {
+    drawHero();
+    drawDMSignal();
+    drawCMSignal();
+    drawDecomp();
+    drawDMNoise();
+    drawCMNoise();
+    drawSpectrum();
+    drawXCapVisual();
+    drawYCapVisual();
+    drawCMChokeVisual();
+    drawDMChokeVisual();
+    drawCircuit();
+    simulationLoop();
+});
+
+window.addEventListener('resize', () => {
+    // 重新初始化所有canvas
+    setTimeout(() => {
+        drawHero();
+        drawDMSignal();
+        drawCMSignal();
+        drawDecomp();
+        drawDMNoise();
+        drawCMNoise();
+        drawSpectrum();
+        drawXCapVisual();
+        drawYCapVisual();
+        drawCMChokeVisual();
+        drawDMChokeVisual();
+        drawCircuit();
+        drawBode();
+        drawWaves();
+    }, 100);
+});
+
+</script>
+
+</body>
+</html>
