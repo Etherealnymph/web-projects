@@ -1,0 +1,12 @@
+{
+  "name": "fourier-contour",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "圆上之圆 · 轮廓傅里叶绘图工具（参数文档 ⇄ 动画 / 图像 → 参数文档）",
+  "scripts": {
+    "test": "node tools/gen-examples.mjs && node tools/smoke-test.mjs",
+    "examples": "node tools/gen-examples.mjs",
+    "smoke": "node tools/smoke-test.mjs"
+  }
+}

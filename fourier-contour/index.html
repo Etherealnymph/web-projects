@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>圆上之圆 · 轮廓傅里叶绘图工具</title>
+<meta name="description" content="传入参数文档即可播放「圆上之圆」傅里叶轨迹动画；传入图像即可提取轮廓并生成傅里叶参数文档。">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 44 44" fill="none" aria-hidden="true">
+      <circle cx="22" cy="22" r="16" stroke="#1b2531" stroke-width="1.6"/>
+      <circle cx="22" cy="22" r="9" stroke="#3fd8c0" stroke-width="1.4" opacity=".85"/>
+      <circle cx="31" cy="22" r="4.2" stroke="#f2a44e" stroke-width="1.4"/>
+      <path d="M22 22 L31 22" stroke="#5d6e80" stroke-width="1.1"/>
+      <circle cx="31" cy="22" r="1.9" fill="#f2a44e"/>
+      <path d="M22 38 A16 16 0 0 0 38 22" stroke="#3fd8c0" stroke-width="1.6" opacity=".7"/>
+    </svg>
+    <div>
+      <h1>圆上之圆 · 轮廓傅里叶绘图工具</h1>
+      <small>FOURIER CONTOUR · DOC ⇄ ANIMATION</small>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab on" data-view="play"><span class="no">01</span>参数文档 → 动图</button>
+    <button class="tab" data-view="extract"><span class="no">02</span>图像 → 参数文档</button>
+    <button class="tab" data-view="format"><span class="no">03</span>文档格式</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ==================== 视图一：参数文档 → 动图 ==================== -->
+<section id="view-play" class="view on">
+  <div class="col">
+
+    <div class="box">
+      <h2><span class="no">01</span>参数文档<span class="hint">JSON</span></h2>
+
+      <div class="field">
+        <label for="exampleSelect">内置示例文档</label>
+        <select id="exampleSelect"></select>
+      </div>
+
+      <div class="field" style="margin-bottom:9px">
+        <label for="docText">文档内容（可直接编辑 / 拖入 .json 文件 / 粘贴）</label>
+        <textarea id="docText" rows="13" wrap="off" spellcheck="false" placeholder='在此粘贴参数文档，例如：
+{
+  "description": "半径 100 的圆",
+  "terms": [ {"n":0,"amp":100,"phase":0}, {"n":1,"amp":100,"phase":1.5708} ]
+}'></textarea>
+      </div>
+
+      <div class="row" style="margin-bottom:8px">
+        <button class="btn primary" id="btnApplyDoc" style="flex:1 1 100%">应用文档并播放</button>
+      </div>
+      <div class="row">
+        <button class="btn ghost sm" id="btnOpenDoc">打开文件</button>
+        <button class="btn ghost sm" id="btnDownloadDoc">导出当前项</button>
+        <button class="btn ghost sm" id="btnCopyDoc">复制</button>
+        <button class="btn ghost sm" id="btnClearDoc">清空</button>
+      </div>
+      <input type="file" id="docFile" accept=".json,.txt,application/json" hidden>
+
+      <div class="note" id="noteDoc"></div>
+    </div>
+
+    <div class="box">
+      <h2><span class="no">02</span>图像说明<span class="hint">description</span></h2>
+      <div class="desc" id="descText">（尚未载入文档）</div>
+      <div class="stats">
+        <div class="stat"><b id="statTerms">—</b><span>傅里叶项数</span></div>
+        <div class="stat"><b id="statPoints">—</b><span>采样点数</span></div>
+        <div class="stat"><b id="statNRange">—</b><span>频率范围 n</span></div>
+        <div class="stat"><b id="statCoverage">—</b><span>振幅覆盖率</span></div>
+        <div class="stat"><b id="statSize">—</b><span>轮廓尺寸</span></div>
+        <div class="stat"><b id="statErr">—</b><span>截断重建误差</span></div>
+      </div>
+    </div>
+
+    <div class="box">
+      <h2><span class="no">03</span>动画控制</h2>
+      <div class="field">
+        <label for="limitRange">绘制的圆数量（最大轮廓的 K，小轮廓按面积自动减少）</label>
+        <input type="range" id="limitRange" min="1" max="128" value="48" step="1">
+        <output id="limitOut">48</output>
+      </div>
+      <div class="field" style="margin-bottom:6px">
+        <label for="durationRange">一圈用时（速度）</label>
+        <input type="range" id="durationRange" min="0.5" max="60" value="10" step="0.5">
+        <output id="durationOut">10.0 s</output>
+      </div>
+      <div class="chips">
+        <button class="chip" data-speed="0.5">0.5×</button>
+        <button class="chip on" data-speed="1">1×</button>
+        <button class="chip" data-speed="2">2×</button>
+        <button class="chip" data-speed="4">4×</button>
+        <button class="chip" data-speed="8">8×</button>
+        <button class="chip" data-speed="20">20×</button>
+      </div>
+      <div class="field">
+        <label for="widthRange">轨迹线宽</label>
+        <input type="range" id="widthRange" min="0.5" max="4" value="1.6" step="0.1">
+        <output id="widthOut">1.6</output>
+      </div>
+      <div class="field" style="margin-bottom:6px">
+        <label for="zoomRange">缩放（滚轮 / 拖动平移 / 双击复位）</label>
+        <input type="range" id="zoomRange" min="0" max="100" value="55" step="1">
+        <output id="zoomOut">1.00×</output>
+      </div>
+      <div class="chks">
+        <label class="chk"><input type="checkbox" id="chkCircles" checked>显示圆</label>
+        <label class="chk"><input type="checkbox" id="chkRadii" checked>显示半径</label>
+        <label class="chk"><input type="checkbox" id="chkGhost">显示完整轨迹</label>
+        <label class="chk"><input type="checkbox" id="chkFlip">Y 轴翻转</label>
+        <label class="chk"><input type="checkbox" id="chkSort" checked>按振幅排序</label>
+        <label class="chk"><input type="checkbox" id="chkGrid" checked>网格</label>
+      </div>
+      <div style="font-size:11.5px;color:var(--faint);line-height:1.7;margin-top:6px">
+        画布：滚轮缩放 · 按住拖动平移 · 双击复位<br>
+        快捷键：空格 播放/暂停 · ↑↓ 调速 · ←→ 逐步
+      </div>
+    </div>
+
+    <div class="box">
+      <h2><span class="no">04</span>当前绘制的参数<span class="hint" id="termTableHint">—</span></h2>
+      <div class="field" id="contourPickWrap" style="display:none">
+        <label for="contourSelect">查看哪个轮廓的参数</label>
+        <select id="contourSelect"></select>
+      </div>
+      <div class="terms">
+        <table>
+          <thead><tr><th>#</th><th>n 频率</th><th>amp 振幅</th><th>phase 相位</th><th>占比</th></tr></thead>
+          <tbody id="termTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="stage">
+    <div class="canvasWrap tall">
+      <canvas id="animCanvas"></canvas>
+      <div class="badges">
+        <span class="badge">项数 <b id="badgeTerms">0</b></span>
+        <span class="badge">t = <b id="badgeT">0.000</b></span>
+        <span class="badge">速度 <b id="badgeSpeed">0.10</b> 圈/秒</span>
+        <span class="badge">缩放 <b id="badgeZoom">1.00×</b></span>
+      </div>
+      <div class="legend" id="animLegend"></div>
+    </div>
+    <div class="toolbar">
+      <button class="iconBtn" id="btnPlay" title="播放 / 暂停（空格）">
+        <svg id="iconPause" viewBox="0 0 16 16"><rect x="3.5" y="2.5" width="3.2" height="11" rx="1"/><rect x="9.3" y="2.5" width="3.2" height="11" rx="1"/></svg>
+        <svg id="iconPlay" viewBox="0 0 16 16" style="display:none"><path d="M4 2.6v10.8c0 .5.55.8.97.53l8.2-5.4a.64.64 0 0 0 0-1.07l-8.2-5.4A.64.64 0 0 0 4 2.6z"/></svg>
+      </button>
+      <button class="iconBtn" id="btnReset" title="回到起点">
+        <svg viewBox="0 0 16 16"><path d="M8 3.2V1.1L4.4 3.9 8 6.7V4.6a3.9 3.9 0 1 1-3.9 3.9H2.7A5.3 5.3 0 1 0 8 3.2z"/></svg>
+      </button>
+      <button class="iconBtn" id="btnFit" title="复位视图（双击画布）">
+        <svg viewBox="0 0 16 16"><path d="M2.2 6.2V3.4c0-.66.54-1.2 1.2-1.2h2.8v1.6H3.8v2.4zM10.6 2.2h2.8c.66 0 1.2.54 1.2 1.2v2.8h-1.6V3.8h-2.4zM2.2 9.8h1.6v2.4h2.4v1.6H3.4c-.66 0-1.2-.54-1.2-1.2zM12.4 9.8H14v2.8c0 .66-.54 1.2-1.2 1.2h-2.8v-1.6h2.4z"/></svg>
+      </button>
+      <div class="progress">
+        <span class="clock" id="clockT">0.00 / 1.00</span>
+        <input type="range" id="progress" min="0" max="1000" value="0" step="1">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 视图二：图像 → 参数文档 ==================== -->
+<section id="view-extract" class="view">
+  <div class="col">
+
+    <div class="box">
+      <h2><span class="no">01</span>图像来源</h2>
+      <div class="row" style="margin-bottom:9px">
+        <button class="btn primary" id="btnPickImage" style="flex:1 1 100%">选择图片 / 拖到右侧预览区</button>
+      </div>
+      <input type="file" id="imageFile" accept="image/*" hidden>
+      <div class="field">
+        <label for="sampleSelect">内置示例图（无需外部文件）</label>
+        <select id="sampleSelect"></select>
+      </div>
+      <button class="btn ghost sm" id="btnSample" style="width:100%">绘制示例图并提取</button>
+      <div class="note" id="noteImg"></div>
+    </div>
+
+    <div class="box">
+      <h2><span class="no">02</span>轮廓提取</h2>
+      <div class="field">
+        <label for="modeSelect">前景判定</label>
+        <select id="modeSelect">
+          <option value="dark">深色为前景（线稿 / 黑底白字反相）</option>
+          <option value="light">浅色为前景（白底黑字图像取亮部）</option>
+          <option value="alpha">透明通道（PNG 贴图 / 无背景 logo）</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sizeRange">处理分辨率（长边像素）</label>
+        <input type="range" id="sizeRange" min="96" max="640" value="320" step="32">
+        <output id="sizeOut">320 px</output>
+      </div>
+      <div class="field">
+        <label for="thrRange">阈值</label>
+        <input type="range" id="thrRange" min="1" max="254" value="128" step="1">
+        <output id="thrOut">128</output>
+      </div>
+      <label class="chk" style="margin:-4px 0 8px"><input type="checkbox" id="chkAutoThr" checked>Otsu 自动阈值</label>
+      <div class="chks">
+        <label class="chk"><input type="checkbox" id="chkInvert">反相</label>
+        <label class="chk"><input type="checkbox" id="chkShowMask">显示掩膜</label>
+      </div>
+      <div class="field">
+        <label for="closingRange">闭运算（连接断线 / 网点）</label>
+        <input type="range" id="closingRange" min="0" max="4" value="1" step="1">
+        <output id="closingOut">1 ×</output>
+      </div>
+      <div class="field">
+        <label for="pointsRange">轮廓采样点数 N</label>
+        <input type="range" id="pointsRange" min="64" max="1024" value="512" step="64">
+        <output id="pointsOut">512</output>
+      </div>
+      <div class="field" style="margin-bottom:2px">
+        <label for="smoothRange">轮廓平滑（抑制像素锯齿）</label>
+        <input type="range" id="smoothRange" min="0" max="15" value="3" step="2">
+        <output id="smoothOut">3</output>
+      </div>
+    </div>
+
+    <div class="box">
+      <h2><span class="no">03</span>轮廓范围<span class="hint">含内部孔洞</span></h2>
+      <div class="field">
+        <label for="contourMode">提取哪些轮廓</label>
+        <select id="contourMode">
+          <option value="largest">仅最大外轮廓（单轮廓文档）</option>
+          <option value="all" selected>全部轮廓（外轮廓 + 内部孔洞）</option>
+        </select>
+      </div>
+      <div id="holeOpts">
+        <div class="field">
+          <label for="minAreaRange">最小轮廓面积（相对最大轮廓）</label>
+          <input type="range" id="minAreaRange" min="0" max="60" value="2" step="1">
+          <output id="minAreaOut">0.2 %</output>
+        </div>
+        <div class="field" style="margin-bottom:2px">
+          <label for="maxContoursRange">最多轮廓数</label>
+          <input type="range" id="maxContoursRange" min="1" max="48" value="12" step="1">
+          <output id="maxContoursOut">12</output>
+        </div>
+      </div>
+      <div style="font-size:11.5px;color:var(--faint);line-height:1.7;margin-top:4px">
+        轮廓按面积从大到小排序；每个轮廓的项数 = K·√(面积比)，小孔洞自动少画几个圆。
+      </div>
+    </div>
+
+    <div class="box">
+      <h2><span class="no">04</span>傅里叶展开</h2>
+      <div class="field">
+        <label for="keepRange">保留项数 K（最大轮廓保留振幅最大的 K 项）</label>
+        <input type="range" id="keepRange" min="2" max="512" value="128" step="2">
+        <output id="keepOut">128</output>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="exCount">—</b><span>轮廓数量（外+孔）</span></div>
+        <div class="stat"><b id="exCoverage">—</b><span>振幅覆盖率</span></div>
+        <div class="stat"><b id="exDeviation">—</b><span>重建最大偏差</span></div>
+        <div class="stat"><b id="exRms">—</b><span>重建 RMS 偏差</span></div>
+        <div class="stat"><b id="exThreshold">—</b><span>实际阈值</span></div>
+      </div>
+      <button class="btn primary" id="btnExtract" style="width:100%;margin-top:11px">生成参数文档</button>
+    </div>
+
+  </div>
+
+  <div class="stage">
+    <div class="pvWrap" id="imageDrop">
+      <canvas id="previewCanvas"></canvas>
+      <div class="legend">
+        <span class="lg"><i style="background:#3fd8c0"></i>提取的轮廓（多轮廓分色）</span>
+        <span class="lg"><i style="background:#f2a44e"></i>K 项重建轨迹（虚线）</span>
+      </div>
+      <div class="dropHint" id="dropHint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/>
+          <path d="M3 16.5 8.8 11l4.4 4.4 2.6-2.2L21 17"/>
+        </svg>
+        <span>把图片拖到这里，或点左上角「选择图片」<br>也可以用内置示例图</span>
+      </div>
+    </div>
+
+    <div class="box">
+      <h2><span class="no">05</span>生成的参数文档<span class="hint" id="exHint">—</span></h2>
+      <textarea id="extractResult" rows="12" wrap="off" spellcheck="false" placeholder="生成后的参数文档会显示在这里，可直接编辑后送入动画播放。"></textarea>
+      <div class="row" style="margin-top:9px">
+        <button class="btn amber" id="btnUseInPlay">在动图中播放</button>
+        <button class="btn ghost" id="btnDownloadExDoc">下载 JSON</button>
+        <button class="btn ghost" id="btnCopyExDoc">复制</button>
+      </div>
+      <div class="note" id="noteEx"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 视图三：文档格式 ==================== -->
+<section id="view-format" class="view">
+  <div class="doc">
+    <h2>参数文档格式速查</h2>
+    <p>参数文档是一份纯 JSON 文本，描述「一个图像轮廓」的傅里叶展开。<span class="kbd">开头是图像说明</span>，
+      然后是元信息，最后是每一项参数。文件扩展名建议 <code>.json</code>。</p>
+
+<pre><code>{
+  "format": "fourier-contour",
+  "version": 1,
+  <span class="kbd">"description": "心形轮廓：512 点等弧长采样，保留振幅最大的 128 项。",</span>
+  "meta": {
+    "name": "心形 heart",
+    "source": "builtin:heart",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "pointCount": 512,
+    "termCount": 128,
+    "amplitudeCoverage": 0.999999,
+    "phaseUnit": "rad",
+    "origin": "center",
+    "yAxis": "down",
+    "unit": "px",
+    "coordinate": { "width": 400, "height": 398, "minX": -200, "minY": -199, "maxX": 200, "maxY": 199 },
+    "notes": "p(t) = Σ amp·e^{i(2π·n·t + phase)}，t∈[0,1)。"
+  },
+  "terms": [
+    { "n": 0,  "amp": 3.2041,  "phase": 0 },
+    { "n": 1,  "amp": 178.9,   "phase": -1.5708 },
+    { "n": -1, "amp": 178.9,   "phase": 1.5708 },
+    { "n": 2,  "amp": 62.31,   "phase": 0.7854 }
+  ]
+}</code></pre>
+
+    <h2>字段说明</h2>
+    <table>
+      <thead><tr><th>字段</th><th>必填</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>description</code></td><td>建议</td><td>图像说明。文档开头的自然语言描述，会显示在界面「图像说明」卡片里。</td></tr>
+        <tr><td><code>format</code> / <code>version</code></td><td>否</td><td>格式标识与版本号，当前为 <code>"fourier-contour"</code> / <code>1</code>。</td></tr>
+        <tr><td><code>meta</code></td><td>否</td><td>元信息：来源、采样点数、覆盖率、误差、坐标系等。仅用于展示与溯源，不影响绘制。</td></tr>
+        <tr><td><code>meta.phaseUnit</code></td><td>否</td><td><code>"rad"</code>（默认，弧度）或 <code>"deg"</code>（角度）。角度制文档会被自动换算。</td></tr>
+        <tr><td><code>terms[].n</code></td><td>是</td><td><b>整数频率</b>，可为负。负频率表示反向旋转，<code>n=0</code> 项不旋转，就是轮廓的中心偏移。</td></tr>
+        <tr><td><code>terms[].amp</code></td><td>二选一</td><td>圆的半径（振幅）。</td></tr>
+        <tr><td><code>terms[].phase</code></td><td>二选一</td><td>初相（弧度）。省略按 0 处理。它与 <code>amp</code> 一起等价于复数系数。</td></tr>
+        <tr><td><code>terms[].re</code> / <code>im</code></td><td>二选一</td><td>直接给复数系数 <code>c = re + im·i</code>，此时无需 <code>amp</code> / <code>phase</code>。</td></tr>
+        <tr><td><code>points</code></td><td>否</td><td>也可以直接给轮廓点数组 <code>[[x,y],…]</code>，工具会在线做傅里叶展开（保留 <code>meta.termCount</code> 项，默认 128）。</td></tr>
+      </tbody>
+    </table>
+
+    <h2>多轮廓文档（version 2）：包含图像内部的孔洞</h2>
+    <p>一个图形往往不止一条轮廓：字母「O」有内孔、同心圆环有多层、logo 里可能有多个独立形状。
+      <b>当图像提取到一条以上轮廓时，文档改用顶层 <code>contours</code> 数组</b>，每条轮廓各自带一组 <code>terms</code>：</p>
+<pre><code>{
+  <span class="kbd">"description": "由图像「示例图:target」提取轮廓生成：共提取 5 个轮廓（含 2 个内部孔洞）……",</span>
+  "meta": {
+    "contourCount": 5,
+    "outerCount": 3,
+    "holeCount": 2,
+    "termCount": 410,
+    "termCountPolicy": "每个轮廓的项数 = K·√(该轮廓面积/最大轮廓面积)，下限 6 项",
+    "contours": [
+      { "index": 0, "role": "outer", "name": "外轮廓 1", "area": 48717.4, "termCount": 160, "amplitudeCoverage": 0.999998 },
+      { "index": 1, "role": "hole",  "name": "内部孔洞 2", "area": 27455.1, "termCount": 120, "amplitudeCoverage": 0.999991 }
+    ]
+  },
+  <span class="kbd">"contours": [</span>
+    { "role": "outer", "name": "外轮廓 1", "terms": [ { "n": 0, "amp": 160.4, "phase": -2.356 }, … ] },
+    { "role": "hole",  "name": "内部孔洞 2", "terms": [ { "n": 0, "amp": 160.0, "phase": -2.356 }, … ] },
+    { "role": "outer", "name": "外轮廓 3", "terms": [ … ] }
+  ]
+}</code></pre>
+    <table>
+      <thead><tr><th>字段</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>contours[].role</code></td><td><code>"outer"</code>（外轮廓）或 <code>"hole"</code>（内部孔洞）。只影响标注与配色，不影响绘制。</td></tr>
+        <tr><td><code>contours[].name</code></td><td>轮廓名称，显示在界面的参数表标题与图例里。</td></tr>
+        <tr><td><code>contours[].terms</code></td><td>与单轮廓文档的 <code>terms</code> 格式完全一致。</td></tr>
+        <tr><td><code>meta.termCountPolicy</code></td><td>项数分配策略的说明文本，便于溯源。</td></tr>
+      </tbody>
+    </table>
+    <p>单轮廓文档（顶层 <code>terms</code>）依然完全兼容：两种结构可以混用，解析器会自动识别。
+      动画中每条轮廓都是<b>独立的一条「圆上之圆」链条</b>，按面积分配圆的数量，同时旋转、各画各的轨迹。</p>
+    <blockquote>自己写多轮廓文档时，只要保证 <code>contours</code> 里每一项都有 <code>terms</code> 即可；
+      <code>role</code> 和 <code>meta</code> 都可以省略。想只画外轮廓，删掉 <code>role: "hole"</code> 的项即可。</blockquote>
+
+    <h2>数学约定</h2>
+    <p>轮廓被看作复平面上的闭合曲线 <code>z(t) = x(t) + i·y(t)</code>，<code>t ∈ [0,1)</code>：</p>
+<pre><code>z(t) = Σ_k  c_k · e^{ i·2π·n_k·t }
+c_k  = (1/N) Σ_{j=0}^{N-1} z_j · e^{ -i·2π·n_k·j/N }      ← 离散采样点的展开系数</code></pre>
+    <p>文档中的每一项 <code>{ n, amp, phase }</code> 对应 <code>c = amp·e^{i·phase}</code>，它对轨迹的贡献是</p>
+<pre><code>amp · e^{ i·(2π·n·t + phase) }</code></pre>
+    <p>也就是：<b>半径 <code>amp</code>、初相 <code>phase</code>、角速度 <code>2π·n</code></b> 的一个匀速旋转矢量。
+      把它们首尾相接（每一项的起点是前一项的终点）就得到经典的「圆上之圆」动画，最后一项的终点即为笔尖。</p>
+    <blockquote>画布坐标使用图像坐标系：原点在左上角、y 轴向下。若希望得到数学课本里 y 轴向上的观感，
+      勾选界面上的「Y 轴翻转」即可，它只影响显示，不影响文档数值。</blockquote>
+    <p>参数文档的 <code>terms</code> 建议按 <code>amp</code> <b>从大到小</b>排序：这样只画前若干个圆时，
+      轨迹已经是轮廓的合理近似（界面上的「按振幅排序」开关默认打开）。</p>
+
+    <h2>容错与简写</h2>
+    <ul>
+      <li>键名可用中文：<code>说明</code> / <code>参数</code> / <code>频率</code> / <code>振幅</code> / <code>相位</code>。</li>
+      <li>每一项可以简写成数组：<code>[n, amp, phase]</code>。</li>
+      <li>根对象可以再包一层 <code>{"doc": { … }}</code>。</li>
+      <li>相位单位可用 <code>"deg"</code> 或中文 <code>"度"</code>，会自动换算成弧度。</li>
+      <li>解析失败会给出中文提示，指明是第几项、缺什么字段。</li>
+    </ul>
+
+    <h2>最小可用文档</h2>
+    <p>两项就能画出一个圆（<code>n=0</code> 决定圆心，<code>n=1</code> 决定半径）：</p>
+<pre><code>{
+  "description": "半径 100、圆心 (200,150) 的圆",
+  "terms": [
+    { "n": 0, "amp": 250, "phase": 0.6435 },
+    { "n": 1, "amp": 100, "phase": 1.5708 }
+  ]
+}</code></pre>
+    <p>其中圆心 <code>(200,150)</code> 写成复数 <code>200+150i</code>，其极坐标即
+      <code>amp=√(200²+150²)=250</code>、<code>phase=atan2(150,200)=0.6435</code>。</p>
+
+    <h2>从图像自动生成文档的流程</h2>
+    <ol>
+      <li><b>缩放</b>：按「处理分辨率」把图片等比缩放到长边 N 像素（默认 320），减少噪点与计算量。</li>
+      <li><b>二值化</b>：按前景判定方式（深色 / 浅色 / 透明通道）与阈值（默认 Otsu 自动）生成掩膜。</li>
+      <li><b>闭运算</b>：可选地先膨胀后腐蚀，把断裂的线条、网点连成整体。</li>
+      <li><b>连通域分析</b>：分别标记前景与背景的连通域。落在图像内部、不与边框相连的背景连通域，就是<b>内部孔洞</b>。</li>
+      <li><b>边界跟踪</b>：对每个前景连通域和每个孔洞做 Moore 邻域跟踪，得到多条有序轮廓像素链，
+          并按面积从大到小排序（可用「最小轮廓面积」「最多轮廓数」过滤碎轮廓）。</li>
+      <li><b>等弧长重采样</b>：每条轮廓均匀取 N 个点（默认 512），并做环形平滑削掉像素锯齿。</li>
+      <li><b>傅里叶展开</b>：每条轮廓各自 DFT，按振幅从大到小保留前 K 项（K = 设定值 × √面积比，下限 6），
+          写出多轮廓参数文档。</li>
+    </ol>
+    <blockquote>抽稀与偏置说明：孔洞轮廓跟踪的是孔洞区域的边界像素中心，因此内轮廓比真实内边缘约大半个像素；
+      外轮廓则约小半个像素。对傅里叶展开无实质影响。</blockquote>
+
+    <h2>用这份工具做什么</h2>
+    <ul>
+      <li>把任意 logo、签名、线稿（含内孔、多层镂空）丢进「图像 → 参数文档」，得到一份可读、可手改、可版本管理的参数文档。</li>
+      <li>把参数文档丢进「参数文档 → 动图」，看圆上之圆如何一笔画完整个轮廓；多轮廓时是几条链条同时作画。</li>
+      <li>拖动「绘制的圆数量」，直观看到低频圆搭出大致形体、高频圆补出细节尖角的过程。</li>
+      <li>用「一圈用时」滑块或 0.5×–20× 预设调速：慢速看每个圆怎么转，高速看整体的「一笔画」效果。</li>
+      <li>在画布上滚轮缩放、按住拖动平移、双击复位，放大看某个小圆如何一点点补出尖角。</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script src="assets/fourier-core.js"></script>
+<script src="assets/examples.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
