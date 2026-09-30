@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数感训练场 · Number Sense Lab</title>
+<style>
+/*@STYLES*/
+</style>
+</head>
+<body data-theme="dark">
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">π</span>
+      <div class="brand-text">
+        <h1>数感训练场</h1>
+        <p>看清一个小数，用按钮拼出它未被四舍五入前的原式</p>
+      </div>
+    </div>
+
+    <nav class="modes" id="modeNav">
+      <button class="mode-btn active" data-mode="classic"><b>经典模式</b><span>还原原式</span></button>
+      <button class="mode-btn" data-mode="compare"><b>比大小</b><span>谁的值更大</span></button>
+      <button class="mode-btn" data-mode="estimate"><b>估数挑战</b><span>盲估数值</span></button>
+    </nav>
+
+    <div class="hud">
+      <label class="hud-item"><span>玩家</span><input id="playerName" maxlength="12" value="无名数感师"></label>
+      <div class="hud-item"><span>本局</span><b id="hudScore">0</b></div>
+      <div class="hud-item"><span>连击</span><b id="hudStreak">0</b></div>
+      <div class="hud-item"><span>总分</span><b id="hudTotal">0</b></div>
+      <button class="icon-btn" id="themeBtn" title="切换明暗主题">◐</button>
+      <button class="icon-btn" id="soundBtn" title="音效开关">♪</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage">
+
+      <!-- ================= 经典模式 ================= -->
+      <div class="panel active" id="panel-classic">
+        <div class="card quest">
+          <div class="quest-head">
+            <span class="badge" id="qTier">普通</span>
+            <span class="qmeta" id="qProgress">第 1 / 10 题</span>
+            <span class="qmeta" id="qTimer">0.0 秒</span>
+            <span class="spacer"></span>
+            <div class="seg" id="tierSeg">
+              <button data-tier="1">简单</button>
+              <button data-tier="2" class="active">普通</button>
+              <button data-tier="3">困难</button>
+              <button data-tier="4">专家</button>
+              <button data-tier="0" title="随连击自动加难">自适应</button>
+            </div>
+          </div>
+
+          <p class="caption" id="qCaption">这个数已被四舍五入到 6 位小数，请还原它未截断的原式。</p>
+          <div class="target" id="qTarget">—</div>
+          <div class="target-note" id="qNote"></div>
+
+          <div class="answer-box">
+            <div class="answer-row">
+              <input id="answerInput" type="text" autocomplete="off" spellcheck="false"
+                     placeholder="用下面的按钮拼出原式，例如 (1+√5)/2 或 3π/7 ＋4/9">
+              <button class="btn primary" id="submitBtn">提交答案 <kbd>Enter</kbd></button>
+            </div>
+            <div class="answer-tools">
+              <span class="validity" id="validity">等待输入……</span>
+              <label class="switch"><input type="checkbox" id="peekChk"> 实时显示数值（练习用）</label>
+              <button class="btn tiny" id="backspaceBtn">退格 ⌫</button>
+              <button class="btn tiny" id="clearBtn">清空</button>
+              <button class="btn tiny" id="revealBtn">我不会，看答案</button>
+            </div>
+          </div>
+
+          <div class="pad" id="pad"></div>
+
+          <div class="feedback" id="feedback"></div>
+        </div>
+      </div>
+
+      <!-- ================= 比大小 ================= -->
+      <div class="panel" id="panel-compare">
+        <div class="card quest">
+          <div class="quest-head">
+            <span class="badge">比大小</span>
+            <span class="qmeta" id="cmpProgress">第 1 / 10 题</span>
+            <span class="qmeta" id="cmpScore">本局 0 分</span>
+          </div>
+          <p class="caption">别按计算器——凭数感判断哪一边的值更大。答得越快，分越高。</p>
+          <div class="duel">
+            <button class="duel-side" id="cmpLeft"><span class="duel-label">左边更大</span><span class="duel-expr">—</span></button>
+            <div class="duel-vs">VS</div>
+            <button class="duel-side" id="cmpRight"><span class="duel-label">右边更大</span><span class="duel-expr">—</span></button>
+          </div>
+          <div class="timer-bar"><i id="cmpTimerBar"></i></div>
+          <div class="feedback" id="cmpFeedback"></div>
+        </div>
+      </div>
+
+      <!-- ================= 估数挑战 ================= -->
+      <div class="panel" id="panel-estimate">
+        <div class="card quest">
+          <div class="quest-head">
+            <span class="badge">估数挑战</span>
+            <span class="qmeta" id="estProgress">第 1 / 8 题</span>
+            <span class="qmeta" id="estScore">本局 0 分</span>
+          </div>
+          <p class="caption">写下这个式子的数值估计（可以用小数）。误差越小，得分越高。</p>
+          <div class="target small" id="estExpr">—</div>
+          <div class="answer-row">
+            <input id="estInput" type="text" autocomplete="off" placeholder="例如 1.4427">
+            <button class="btn primary" id="estSubmit">提交估计 <kbd>Enter</kbd></button>
+          </div>
+          <div class="feedback" id="estFeedback"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================= 侧栏 ================= -->
+    <aside class="sidebar">
+      <div class="tabs" id="sideTabs">
+        <button data-tab="calc" class="active">验算区</button>
+        <button data-tab="hint">提示</button>
+        <button data-tab="log">记录</button>
+        <button data-tab="rank">排行</button>
+        <button data-tab="help">帮助</button>
+      </div>
+
+      <div class="tab-body">
+
+        <section class="tabpane active" id="tab-calc">
+          <p class="muted">把你的猜想丢进来试试。这里允许写小数，怎么算都行。</p>
+          <input id="calcInput" type="text" autocomplete="off" spellcheck="false" placeholder="比如 3π/7 + 4/9">
+          <div class="chip-row" id="calcChips"></div>
+          <div class="calc-out" id="calcOut"><span class="muted">输入一个表达式即可开始验算。</span></div>
+          <div class="digit-compare" id="calcDigits"></div>
+
+          <h4 class="sec-title">常数速查 <span class="muted">（点一行可填入验算区）</span></h4>
+          <div class="const-table" id="constTable"></div>
+        </section>
+
+        <section class="tabpane" id="tab-hint">
+          <p class="muted">提示会扣分，但总比卡住强。</p>
+          <div class="hint-actions">
+            <button class="btn" id="hint1Btn">① 结构提示 <em>-20</em></button>
+            <button class="btn" id="hint2Btn">② 类型提示 <em>-45</em></button>
+            <button class="btn warn" id="hint3Btn">③ 直接看答案 <em>本题作废</em></button>
+          </div>
+          <div class="hint-list" id="hintList"><span class="muted">还没有使用提示。</span></div>
+        </section>
+
+        <section class="tabpane" id="tab-log">
+          <div class="stat-grid" id="statGrid"></div>
+          <h4 class="sec-title">题目记录 <span class="muted" id="logCount"></span></h4>
+          <div class="log-list" id="logList"></div>
+          <div class="chip-row">
+            <button class="btn tiny" id="exportBtn">导出存档</button>
+            <button class="btn tiny" id="importBtn">导入存档</button>
+            <button class="btn tiny danger" id="clearDataBtn">清空全部数据</button>
+          </div>
+          <input type="file" id="importFile" accept=".json,application/json" hidden>
+        </section>
+
+        <section class="tabpane" id="tab-rank">
+          <p class="muted">把满意的单局成绩记进排行榜，数据存在本机浏览器里。</p>
+          <div class="rank-list" id="rankList"></div>
+          <div class="chip-row">
+            <button class="btn tiny danger" id="clearRankBtn">清空排行榜</button>
+          </div>
+        </section>
+
+        <section class="tabpane" id="tab-help">
+          <h4 class="sec-title">怎么玩</h4>
+          <ol class="help-list">
+            <li>屏幕中央给出一个<b>已经四舍五入过</b>的十进制小数，它由有理数、无理数、超越数组合而成。</li>
+            <li>你要用按钮拼出它<b>未被截断的原式</b>。判定标准：你算出的值必须落在"能四舍五入成屏幕上那个数"的范围里。</li>
+            <li>答案里<b>不许出现小数点</b>——想写 1.5 就写 3/2。这既是防作弊，也是数感的核心。</li>
+            <li>数值完全精确（误差小于 1e-9）有额外加分；和出题人的写法完全一致还有"正中靶心"加分。</li>
+            <li>右侧<b>验算区</b>可以随便试算，看你的值离目标还差多少、前几位小数对上了。</li>
+          </ol>
+          <h4 class="sec-title">表达式写法</h4>
+          <ul class="help-list">
+            <li>四则运算 <code>+ - * /</code>，乘号也可用 <code>×</code>，除号可用 <code>÷</code>。</li>
+            <li>乘方 <code>^</code>（右结合），也认上标，如 <code>π²</code>。</li>
+            <li>开方用 <code>√</code>：<code>√2</code>、<code>√(3+1)</code>；三次根 <code>5^(1/3)</code>。</li>
+            <li>隐式乘法：<code>2π</code> = 2×π，<code>3√2</code>、<code>2(3+4)</code> 都合法。</li>
+            <li>函数：<code>ln</code> <code>log</code> <code>sin</code> <code>cos</code> <code>tan</code> <code>exp</code>，写作 <code>ln2</code> 或 <code>ln(2)</code>。</li>
+            <li>常数：<code>π e φ γ τ ζ(3) G</code>。阶乘 <code>5!</code> 也支持。</li>
+          </ul>
+          <h4 class="sec-title">快捷键</h4>
+          <ul class="help-list">
+            <li><kbd>Enter</kbd> 提交答案 / 进入下一题　<kbd>Esc</kbd> 清空输入</li>
+            <li>数字键盘直接敲表达式，按钮盘只是辅助。</li>
+          </ul>
+          <h4 class="sec-title">关于"数感"</h4>
+          <p class="muted">熟悉常数的小数前几位，是识别原式的唯一捷径：π≈3.14159265、e≈2.71828183、√2≈1.41421356、φ≈1.61803399、ln2≈0.69314718、γ≈0.57721566、ζ(3)≈1.20205690、G≈0.91596559。剩下的就是把小数拆成"某个常数 × 有理数"的直觉。</p>
+        </section>
+
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/*@CORE*/
+</script>
+<script>
+/*@UI*/
+</script>
+<script>
+/*@MINI*/
+</script>
+</body>
+</html>
