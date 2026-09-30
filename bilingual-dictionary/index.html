@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>中英双语词典 · Bilingual Dictionary</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+<style>
+  :root{
+    --bg:#f6f3ec;
+    --surface:#fffdf8;
+    --surface2:#efe9dc;
+    --ink:#26231c;
+    --muted:#8d8674;
+    --line:#e3dccb;
+    --accent:#b4552d;          /* 朱砂 */
+    --accent-soft:#f6e3d6;
+    --link:#16647c;
+    --link-soft:#d9ecf1;
+    --shadow:0 1px 2px rgba(60,50,30,.06), 0 8px 24px rgba(60,50,30,.07);
+    --serif:'Georgia','Times New Roman','Songti SC','SimSun',serif;
+    --sans:'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif;
+  }
+  html[data-theme="dark"]{
+    --bg:#181a1e;
+    --surface:#202228;
+    --surface2:#2a2d34;
+    --ink:#e9e6df;
+    --muted:#9d9789;
+    --line:#363a42;
+    --accent:#e08a5e;
+    --accent-soft:#3a2a20;
+    --link:#79b8cc;
+    --link-soft:#1d323b;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:var(--sans);line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    transition:background .3s,color .3s;
+  }
+  a{color:var(--link);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ---------- 头部 ---------- */
+  header{
+    position:sticky;top:0;z-index:1000;
+    overflow:visible;
+    background:color-mix(in srgb,var(--bg) 82%,transparent);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .head-inner{
+    max-width:1180px;margin:0 auto;padding:12px 20px;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    overflow:visible;
+  }
+  .brand{display:flex;flex-direction:column;line-height:1.2}
+  .brand b{font-family:var(--serif);font-size:19px;letter-spacing:1px}
+  .brand b .seal{color:var(--accent)}
+  .brand small{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .search-wrap{flex:1;min-width:240px;position:relative}
+  .search-box{
+    display:flex;align-items:center;gap:8px;
+    background:var(--surface);border:1.5px solid var(--line);border-radius:999px;
+    padding:9px 16px;transition:border-color .2s,box-shadow .2s;
+  }
+  .search-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .search-box .mag{opacity:.55}
+  .search-box input{
+    flex:1;border:none;outline:none;background:transparent;color:var(--ink);
+    font-size:15px;font-family:var(--sans);min-width:0;
+  }
+  .search-box input::placeholder{color:var(--muted)}
+  #suggest{
+    position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:1200;
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);overflow:hidden;display:none;
+  }
+  #suggest a{
+    display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+    padding:10px 16px;border-bottom:1px solid var(--line);color:var(--ink);
+  }
+  #suggest a:last-child{border-bottom:none}
+  #suggest a:hover,#suggest a.sel{background:var(--surface2);text-decoration:none}
+  #suggest .sw{font-family:var(--serif);font-weight:700;font-size:16px}
+  #suggest .sp{font-size:12px;color:var(--muted);white-space:nowrap}
+  #suggest .sn{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
+  .head-actions{display:flex;gap:8px;align-items:center}
+  .icon-btn{
+    border:1px solid var(--line);background:var(--surface);color:var(--ink);
+    border-radius:999px;padding:8px 12px;font-size:14px;cursor:pointer;
+    transition:border-color .2s,background .2s;
+  }
+  .icon-btn:hover{border-color:var(--accent);background:var(--accent-soft)}
+
+  /* ---------- 主体 ---------- */
+  main{max-width:1180px;margin:0 auto;padding:22px 20px 60px;display:flex;gap:26px;align-items:flex-start;position:relative;z-index:0}
+  aside{
+    width:250px;flex:none;position:sticky;top:78px;max-height:calc(100vh - 100px);
+    overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    padding:14px;box-shadow:var(--shadow);
+  }
+  aside h3{font-size:12px;letter-spacing:2px;color:var(--muted);margin:4px 8px 10px;font-weight:600}
+  aside a{
+    display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+    padding:7px 10px;border-radius:9px;color:var(--ink);border-left:3px solid transparent;
+  }
+  aside a:hover{background:var(--surface2);text-decoration:none}
+  aside a.active{background:var(--accent-soft);border-left-color:var(--accent)}
+  aside a b{font-family:var(--serif);font-size:16px}
+  aside a i{font-style:normal;font-size:11.5px;color:var(--muted)}
+  #detail{flex:1;min-width:0}
+
+  /* 精选标记 / 首页分区 / 词性筛选 */
+  .feat-badge{display:inline-block;font-size:11px;letter-spacing:1px;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:3px 10px;font-weight:600;vertical-align:middle}
+  .dom-badge{display:inline-block;font-size:11px;letter-spacing:.5px;color:var(--link);background:var(--link-soft);border-radius:999px;padding:3px 10px;font-weight:600;vertical-align:middle}
+  .card .card-dom{display:inline-block;font-size:10.5px;color:var(--link);background:var(--link-soft);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:1px}
+  aside .d-filters{margin-top:6px;border-top:1px dashed var(--line);padding-top:8px}
+  .home-sec{font-size:13px;letter-spacing:2.5px;color:var(--muted);font-weight:700;display:flex;align-items:baseline;gap:10px;margin:30px 0 14px}
+  .home-sec::after{content:"";flex:1;height:1px;background:var(--line)}
+  .home-sec small{letter-spacing:1px;text-transform:uppercase;font-weight:400;opacity:.8}
+  aside{display:flex;flex-direction:column}
+  aside .cnt{font-weight:400;margin-left:6px;color:var(--accent)}
+  aside .filters{display:flex;flex-wrap:wrap;gap:6px;padding:0 8px 10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+  .fchip{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;transition:all .15s}
+  .fchip:hover{border-color:var(--accent);color:var(--accent)}
+  .fchip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  aside .index-links{overflow:auto;flex:1;min-height:0}
+  aside .empty{font-size:12.5px;color:var(--muted);padding:8px}
+
+  /* ---------- 首页 ---------- */
+  .hero{padding:14px 0 6px}
+  .hero h1{font-family:var(--serif);font-size:clamp(28px,4.5vw,42px);margin:6px 0 10px;letter-spacing:.5px}
+  .hero p{color:var(--muted);max-width:640px;margin:0 0 4px}
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 26px}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-size:13px;color:var(--muted);box-shadow:var(--shadow)}
+  .stat b{color:var(--accent);font-size:16px;margin-right:4px}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;
+    box-shadow:var(--shadow);transition:transform .18s,border-color .18s;display:block;color:var(--ink);
+  }
+  .card:hover{transform:translateY(-3px);border-color:var(--accent);text-decoration:none}
+  .card .cw{font-family:var(--serif);font-size:21px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline}
+  .card .cw small{font-family:var(--sans);font-size:11px;color:var(--muted);font-weight:400}
+  .card .cd{font-size:13px;color:var(--muted);margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .card .cipa{margin-top:8px;font-size:12px;color:var(--link);font-family:var(--serif)}
+
+  /* ---------- 词条页 ---------- */
+  .entry{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px 28px;box-shadow:var(--shadow)}
+  .entry-head{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:20px}
+  .word-row{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .word-row h1{font-family:var(--serif);font-size:clamp(34px,5.5vw,46px);margin:0;letter-spacing:.5px}
+  .word-full{margin-top:10px;font-size:15px;color:var(--link);font-family:var(--serif);font-style:italic}
+  .ptag{
+    display:inline-block;font-size:11.5px;font-weight:600;color:var(--accent);
+    background:var(--accent-soft);border-radius:6px;padding:2px 8px;margin-right:5px;letter-spacing:.5px;
+  }
+  .ipa-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .ipa{
+    display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+    border:1px solid var(--line);background:var(--surface2);color:var(--ink);
+    border-radius:999px;padding:7px 14px;font-family:var(--serif);font-size:16px;
+    transition:border-color .2s,transform .15s;
+  }
+  .ipa:hover{border-color:var(--link);transform:translateY(-1px)}
+  .ipa .flag{font-size:12px;font-family:var(--sans);color:var(--muted);font-weight:600}
+  .ipa .spk{font-size:13px}
+  .head-note{font-size:12.5px;color:var(--muted);margin:12px 0 0}
+
+  .sec{margin-top:24px}
+  .sec>h2{
+    font-size:13px;letter-spacing:2.5px;color:var(--muted);font-weight:700;
+    display:flex;align-items:baseline;gap:10px;margin:0 0 14px;
+  }
+  .sec>h2::after{content:"";flex:1;height:1px;background:var(--line)}
+  .sec>h2 small{letter-spacing:1px;text-transform:uppercase;font-weight:400;opacity:.8}
+
+  /* 变形 */
+  .infl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+  .infl{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:9px 13px}
+  .infl .lbl{font-size:11.5px;color:var(--muted);letter-spacing:1px}
+  .infl .frm{font-family:var(--serif);font-size:16px;margin-top:2px}
+  .fl{border-bottom:1px dashed var(--link);cursor:pointer}
+  .fl:hover{background:var(--link-soft);text-decoration:none;border-bottom-style:solid}
+  .infl .sep{color:var(--muted);margin:0 4px}
+
+  /* 释义 */
+  ol.senses{list-style:none;margin:0;padding:0;counter-reset:sense}
+  .sense{position:relative;padding:12px 0 14px 44px;counter-increment:sense;border-bottom:1px dashed var(--line)}
+  .sense:last-child{border-bottom:none}
+  .sense::before{
+    content:counter(sense);position:absolute;left:0;top:13px;
+    width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);
+    font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;
+  }
+  .sense-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .sense-head .cn{font-weight:700;font-size:16.5px}
+  .sense .en{color:var(--muted);font-family:var(--serif);font-size:15.5px;margin:5px 0 0}
+  .sense .ex{font-size:14.5px;margin:8px 0 0;background:var(--surface2);border-radius:10px;padding:8px 12px}
+  .collocs{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .colloc{font-size:12px;color:var(--link);background:var(--link-soft);border-radius:999px;padding:3px 11px}
+
+  /* 例句/名言 */
+  .quote{
+    margin:0 0 16px;padding:16px 18px 14px;border-radius:14px;
+    background:var(--surface2);border-left:4px solid var(--accent);position:relative;
+  }
+  .quote blockquote{
+    margin:0;font-family:var(--serif);font-style:italic;font-size:17.5px;line-height:1.6;
+  }
+  .quote .qmark{position:absolute;right:14px;top:2px;font-family:var(--serif);font-size:52px;color:var(--accent);opacity:.18;line-height:1}
+  .quote figcaption{margin-top:10px;font-size:12.5px;color:var(--accent);font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .quote .qtype{background:var(--accent-soft);border-radius:999px;padding:1px 10px;font-size:11px;color:var(--accent)}
+  .quote .qsrc{color:var(--muted);font-weight:400}
+  .quote .qzh{font-size:13.5px;color:var(--muted);margin:7px 0 0;border-top:1px dashed var(--line);padding-top:7px}
+
+  /* 相关词汇 */
+  .related{display:flex;gap:8px;flex-wrap:wrap}
+  .rchip{
+    display:flex;flex-direction:column;gap:2px;
+    background:var(--surface2);border:1px solid var(--line);border-radius:12px;
+    padding:8px 14px;color:var(--ink);transition:border-color .2s,transform .15s;
+  }
+  .rchip:hover{border-color:var(--accent);transform:translateY(-2px);text-decoration:none}
+  .rchip b{font-family:var(--serif);font-size:16px}
+  .rchip i{font-style:normal;font-size:11.5px;color:var(--muted)}
+
+  /* 变形词页 */
+  .derived .dtag{display:inline-block;font-size:11.5px;letter-spacing:2px;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:3px 12px;margin-bottom:10px}
+  .rel-box{background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin:12px 0}
+  .rel-box p{margin:0 0 8px;color:var(--muted);font-size:13.5px}
+  .rel-line{display:flex;align-items:baseline;gap:8px;margin:6px 0;font-size:15px}
+  .rel-line b{font-family:var(--serif);font-size:18px}
+  .rel-line .rel-note{color:var(--muted);font-size:13px;background:var(--surface);border-radius:8px;padding:2px 10px}
+  .btn-back{
+    display:inline-block;margin-top:16px;background:var(--accent);color:#fff;border-radius:999px;
+    padding:10px 20px;font-size:14.5px;font-weight:600;transition:filter .2s;
+  }
+  .btn-back:hover{filter:brightness(1.08);text-decoration:none;color:#fff}
+  .hint{font-size:12.5px;color:var(--muted);margin-top:10px}
+  .nfound{text-align:center;padding:40px 20px}
+  .nfound h1{font-family:var(--serif)}
+  .nfound .sug{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+  .nfound .sug a{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 14px;color:var(--ink);font-family:var(--serif)}
+  .nfound .sug a:hover{border-color:var(--accent);text-decoration:none}
+
+  footer{
+    max-width:1180px;margin:0 auto;padding:0 20px 40px;text-align:center;
+    font-size:12.5px;color:var(--muted);
+  }
+  footer .rule{border:none;border-top:1px solid var(--line);margin:0 0 16px}
+
+  @media (max-width:900px){
+    main{flex-direction:column}
+    aside{width:100%;position:static;max-height:210px}
+    .entry{padding:20px 16px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-inner">
+    <a class="brand" href="#/" style="color:var(--ink)">
+      <b>中英双语词典<span class="seal"> · </span>Bilingual Dictionary</b>
+      <small>Word · IPA · Examples · Quotes</small>
+    </a>
+    <div class="search-wrap">
+      <div class="search-box">
+        <span class="mag">🔍</span>
+        <input id="search" type="text" placeholder="输入英文或中文检索，如 dream / 梦想 / believe" autocomplete="off" spellcheck="false">
+      </div>
+      <div id="suggest"></div>
+    </div>
+    <div class="head-actions">
+      <button class="icon-btn" id="rand" title="随机一词">🎲 随机</button>
+      <button class="icon-btn" id="theme" title="切换明暗主题">🌙</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <aside id="index"></aside>
+  <section id="detail"></section>
+</main>
+
+<footer>
+  <hr class="rule">
+  <p>收录 <b id="stat-words">0</b> 个词条，自动关联 <b id="stat-derived">0</b> 个变形/相关词。发音使用浏览器内置语音合成（Web Speech API）。</p>
+  <p>部分名言为广泛流传的常见出处标注；例句中的电影台词与名人名言均注明来源。直接双击本文件即可离线使用。</p>
+</footer>
+
+<script src="data-common-1.js"></script>
+<script src="data-common-2.js"></script>
+<script src="data-common-3.js"></script>
+<script src="data-common-4.js"></script>
+<script src="data-common-5.js"></script>
+<script src="data-common-6.js"></script>
+<script src="data-common-7.js"></script>
+<script src="data-common-8.js"></script>
+<script src="data-common-9.js"></script>
+<script src="data-common-10.js"></script>
+<script src="data-common-11.js"></script>
+<script src="data-common-12.js"></script>
+<script src="data-common-13.js"></script>
+<script src="data-eecs.js"></script>
+
+<script>
+"use strict";
+
+/* ================= 精选词条数据（含名言/电影台词出处） ================= */
+const FEATURED = {
+  dream: {
+    pos: ["n.", "v."],
+    ipa: { us: "driːm", uk: "driːm" },
+    note: "美式与英式发音相同；动词过去式 dreamed / dreamt 两种写法均可。",
+    senses: [
+      { pos: "n.", cn: "梦，梦境", en: "a series of images, events and feelings that happen in your mind while you are asleep", ex: "I had a strange dream last night. 我昨晚做了一个奇怪的梦。", colloc: ["sweet dreams 好梦", "a dream come true 梦想成真"] },
+      { pos: "n.", cn: "梦想，理想，抱负", en: "something that you want very much to happen; a strong wish or ambition", ex: "She finally realized her dream of becoming a doctor. 她终于实现了当医生的梦想。", colloc: ["dream of / about doing sth 梦想做某事", "dream job 梦寐以求的工作"] },
+      { pos: "n.", cn: "美好的人或事物", en: "a person or thing that is very beautiful, perfect or pleasant", ex: "The house by the lake is an absolute dream. 湖边那栋房子简直美极了。" },
+      { pos: "v.", cn: "做梦，梦见", en: "to experience images and events in your mind while you are asleep", ex: "I dreamed I was flying over the sea. 我梦见自己飞越大海。" },
+      { pos: "v.", cn: "梦想，渴望", en: "to wish for something very much, especially something you may never have", ex: "He dreams of owning his own business one day. 他梦想着有一天拥有自己的公司。" }
+    ],
+    quotes: [
+      { type: "演讲", en: "I have a dream that my four little children will one day live in a nation where they will not be judged by the color of their skin but by the content of their character.", zh: "我有一个梦想：我的四个孩子将有一天生活在一个不以肤色、而以品格来评判他们的国度。", src: "Martin Luther King Jr. — “I Have a Dream” (1963)" },
+      { type: "电影", en: "A dream is a wish your heart makes.", zh: "梦想，是心灵许下的愿望。", src: "Cinderella 《灰姑娘》— Disney (1950)" },
+      { type: "名言", en: "All our dreams can come true, if we have the courage to pursue them.", zh: "只要我们有勇气去追求，所有的梦想都能成真。", src: "Walt Disney（常见出处标注）" }
+    ],
+    inflections: [
+      { label: "复数", forms: "dreams" },
+      { label: "第三人称单数", forms: "dreams" },
+      { label: "过去式", forms: "dreamed / dreamt" },
+      { label: "过去分词", forms: "dreamed / dreamt" },
+      { label: "现在分词", forms: "dreaming" }
+    ],
+    related: [
+      { word: "dreamer", note: "n. 梦想家" },
+      { word: "dreamy", note: "adj. 梦幻的" },
+      { word: "daydream", note: "n./v. 白日梦" }
+    ]
+  },
+
+  time: {
+    pos: ["n.", "v."],
+    ipa: { us: "taɪm", uk: "taɪm" },
+    senses: [
+      { pos: "n.", cn: "时间", en: "what is measured in minutes, hours, days, years, etc.", ex: "Time passes quickly when you're absorbed in work. 专心工作时时间过得飞快。", colloc: ["on time 准时", "in time 及时", "time flies 时光飞逝"] },
+      { pos: "n.", cn: "时刻，钟点", en: "a particular point in the day shown by a clock", ex: "What time does the train leave? 火车几点发车？" },
+      { pos: "n.", cn: "次数，回，倍", en: "an occasion when something happens, or the number of times it happens", ex: "I've told you many times — don't be late. 我跟你说过很多次了——别迟到。" },
+      { pos: "n.", cn: "时代，时期", en: "a particular period in history or in a person's life", ex: "These are difficult times for small businesses. 对小企业来说，这是艰难的时期。" },
+      { pos: "v.", cn: "为……计时；安排……的时间", en: "to measure how long something takes, or to arrange when something happens", ex: "The race was timed to the nearest second. 比赛计时精确到秒。" }
+    ],
+    quotes: [
+      { type: "名言", en: "Time is money.", zh: "时间就是金钱。", src: "Benjamin Franklin — “Advice to Young Tradesmen” (1748)" },
+      { type: "谚语", en: "Time and tide wait for no man.", zh: "岁月不待人；时不我待。", src: "英语谚语 Proverb" }
+    ],
+    inflections: [
+      { label: "复数", forms: "times" },
+      { label: "第三人称单数", forms: "times" },
+      { label: "过去式", forms: "timed" },
+      { label: "过去分词", forms: "timed" },
+      { label: "现在分词", forms: "timing" }
+    ],
+    related: [
+      { word: "timely", note: "adj. 及时的" },
+      { word: "timeless", note: "adj. 永恒的" },
+      { word: "timetable", note: "n. 时刻表" }
+    ]
+  },
+
+  believe: {
+    pos: ["v."],
+    ipa: { us: "bɪˈliːv", uk: "bɪˈliːv" },
+    note: "名词形式是 belief（把 v 变 f）；形容词 believable / unbelievable。",
+    senses: [
+      { pos: "v.", cn: "相信（某事属实）", en: "to accept that something is true, especially without proof", ex: "I don't believe a word he says. 他的话我一个字都不信。", colloc: ["believe it or not 信不信由你"] },
+      { pos: "v.", cn: "认为，觉得", en: "to think or suppose that something is true or possible", ex: "Scientists believe the universe is still expanding. 科学家认为宇宙仍在膨胀。" },
+      { pos: "v.", cn: "信任，信赖（believe in）", en: "to trust somebody or have confidence in them", ex: "Whatever happens, I believe in you. 无论发生什么，我都信任你。", colloc: ["believe in 信仰；信任", "make believe 假装"] }
+    ],
+    quotes: [
+      { type: "剧集", en: "I want to believe.", zh: "我愿意相信。", src: "The X-Files 《X档案》— Mulder 办公室海报 (1993)" },
+      { type: "名言", en: "Believe you can and you're halfway there.", zh: "相信自己能行，你就已经成功了一半。", src: "Theodore Roosevelt（常见出处标注）" },
+      { type: "歌词", en: "I believe I can fly. I believe I can touch the sky.", zh: "我相信我能飞翔，我相信我能触摸天空。", src: "R. Kelly — “I Believe I Can Fly” (1996)" }
+    ],
+    inflections: [
+      { label: "第三人称单数", forms: "believes" },
+      { label: "过去式", forms: "believed" },
+      { label: "过去分词", forms: "believed" },
+      { label: "现在分词", forms: "believing" }
+    ],
+    related: [
+      { word: "belief", note: "n. 信念" },
+      { word: "believable", note: "adj. 可信的" },
+      { word: "unbelievable", note: "adj. 难以置信的" },
+      { word: "believer", note: "n. 信徒" }
+    ]
+  },
+
+  courage: {
+    pos: ["n."],
+    ipa: { us: "ˈkɜːrɪdʒ", uk: "ˈkʌrɪdʒ" },
+    note: "美式发 /ˈkɜːrɪdʒ/（卷舌），英式发 /ˈkʌrɪdʒ/。形容词是 courageous。",
+    senses: [
+      { pos: "n.", cn: "勇气，胆量", en: "the ability to do something dangerous, difficult or frightening without showing fear", ex: "She showed great courage in the face of danger. 面对危险，她表现出极大的勇气。", colloc: ["have the courage to do sth 有勇气做某事", "pluck up courage 鼓起勇气"] },
+      { pos: "n.", cn: "（坚持正道的）勇气，胆识", en: "the strength of mind to do what is right even when it is hard or unpopular", ex: "It takes real courage to speak the truth. 说真话需要真正的勇气。" }
+    ],
+    quotes: [
+      { type: "名言", en: "Courage is being scared to death... but saddling up anyway.", zh: "勇气，就是怕得要死，却依然上马前行。", src: "John Wayne（常见出处标注）" },
+      { type: "文学", en: "Cowards die many times before their deaths; the valiant never taste of death but once.", zh: "懦夫在死之前，其实已经死过很多次；勇士一生只品尝一次死亡的滋味。", src: "William Shakespeare — Julius Caesar 《恺撒大帝》" },
+      { type: "电影", en: "Every man dies, not every man really lives.", zh: "每个人都会死，但并非每个人都真正活过。", src: "William Wallace — Braveheart 《勇敢的心》 (1995)" }
+    ],
+    inflections: [
+      { label: "复数", forms: "courages" }
+    ],
+    related: [
+      { word: "courageous", note: "adj. 勇敢的" },
+      { word: "courageously", note: "adv. 勇敢地" },
+      { word: "encourage", note: "v. 鼓励" },
+      { word: "discourage", note: "v. 使气馁" }
+    ]
+  },
+
+  freedom: {
+    pos: ["n."],
+    ipa: { us: "ˈfriːdəm", uk: "ˈfriːdəm" },
+    senses: [
+      { pos: "n.", cn: "自由（不受限制的权利）", en: "the right to do or say what you want without being stopped or controlled", ex: "Freedom of speech is a basic human right. 言论自由是一项基本人权。", colloc: ["freedom of speech 言论自由", "freedom of choice 选择自由"] },
+      { pos: "n.", cn: "自由（摆脱监禁/束缚的状态）", en: "the state of not being imprisoned or controlled by somebody else", ex: "The hostages were finally given their freedom. 人质们终于重获自由。" },
+      { pos: "n.", cn: "自由度，灵活余地", en: "the ability to move or act freely, without being limited", ex: "The loose dress allows freedom of movement. 这件宽松的连衣裙便于活动。" }
+    ],
+    quotes: [
+      { type: "电影", en: "They may take our lives, but they'll never take our freedom!", zh: "他们可以夺走我们的生命，但永远夺不走我们的自由！", src: "William Wallace — Braveheart 《勇敢的心》 (1995)" },
+      { type: "演讲", en: "Freedom is never voluntarily given by the oppressor; it must be demanded by the oppressed.", zh: "自由绝不会由压迫者自愿给予；它必须由被压迫者去争取。", src: "Martin Luther King Jr. — “Letter from Birmingham Jail” (1963)" },
+      { type: "文学", en: "I am no bird; and no net ensnares me: I am a free human being with an independent will.", zh: "我不是鸟，也没有罗网能困住我：我是一个拥有独立意志的自由人。", src: "Charlotte Brontë — Jane Eyre 《简·爱》" }
+    ],
+    inflections: [
+      { label: "复数", forms: "freedoms" }
+    ],
+    related: [
+      { word: "free", note: "adj./v. 自由的；释放" },
+      { word: "freely", note: "adv. 自由地" }
+    ]
+  },
+
+  love: {
+    pos: ["n.", "v."],
+    ipa: { us: "lʌv", uk: "lʌv" },
+    senses: [
+      { pos: "n.", cn: "爱，热爱（深厚情感）", en: "a strong feeling of deep affection for somebody", ex: "A mother's love for her child is unconditional. 母亲对孩子的爱是无条件的。" },
+      { pos: "n.", cn: "爱情，恋爱", en: "romantic or sexual attraction between people", ex: "They fell in love at first sight. 他们一见钟情。", colloc: ["fall in love with 爱上", "be in love 恋爱中"] },
+      { pos: "v.", cn: "爱，热爱（某人）", en: "to have a very strong feeling of affection for somebody", ex: "I love my family more than anything. 我爱我的家人胜过一切。" },
+      { pos: "v.", cn: "喜爱，喜欢（做某事）", en: "to enjoy something very much", ex: "I love reading under the tree on sunny days. 我喜欢在晴天的树下读书。" }
+    ],
+    quotes: [
+      { type: "歌词", en: "All you need is love.", zh: "你所需要的，只是爱。", src: "The Beatles — “All You Need Is Love” (1967)" },
+      { type: "电影", en: "Love means never having to say you're sorry.", zh: "爱，就是永远不必说抱歉。", src: "Love Story 《爱情故事》 (1970)" }
+    ],
+    inflections: [
+      { label: "复数", forms: "loves" },
+      { label: "第三人称单数", forms: "loves" },
+      { label: "过去式", forms: "loved" },
+      { label: "过去分词", forms: "loved" },
+      { label: "现在分词", forms: "loving" }
+    ],
+    related: [
+      { word: "lovely", note: "adj. 可爱的" },
+      { word: "lovable", note: "adj. 讨人喜欢的" },
+      { word: "lover", note: "n. 情人；爱好者" }
+    ]
+  },
+
+  hope: {
+    pos: ["n.", "v."],
+    ipa: { us: "hoʊp", uk: "həʊp" },
+    note: "英式发 /həʊp/（əʊ），美式发 /hoʊp/（oʊ）。形容词 hopeful / hopeless。",
+    senses: [
+      { pos: "n.", cn: "希望，期望", en: "a feeling that something you want will happen or be possible", ex: "There is still hope of finding the missing hikers alive. 仍有希望找到失踪的徒步者。", colloc: ["in the hope of 怀着……的希望", "lose hope 失去希望"] },
+      { pos: "n.", cn: "希望（寄托）", en: "a person or thing that gives you hope of success", ex: "The young striker is the hope of the national team. 这位年轻前锋是国家队的希望。" },
+      { pos: "v.", cn: "希望，期望", en: "to want something to happen and think that it is possible", ex: "I hope you'll be happy in your new city. 我希望你在新城市过得幸福。" }
+    ],
+    quotes: [
+      { type: "电影", en: "Hope is a good thing, maybe the best of things, and no good thing ever dies.", zh: "希望是美好的事物，也许是世上最美好的，而美好的事物永不消逝。", src: "Andy Dufresne — The Shawshank Redemption 《肖申克的救赎》 (1994)" },
+      { type: "文学", en: "Hope is the thing with feathers that perches in the soul.", zh: "希望是只长着羽毛的鸟儿，栖息在灵魂之中。", src: "Emily Dickinson — “Hope is the thing with feathers”" }
+    ],
+    inflections: [
+      { label: "复数", forms: "hopes" },
+      { label: "第三人称单数", forms: "hopes" },
+      { label: "过去式", forms: "hoped" },
+      { label: "过去分词", forms: "hoped" },
+      { label: "现在分词", forms: "hoping" }
+    ],
+    related: [
+      { word: "hopeful", note: "adj. 有希望的" },
+      { word: "hopeless", note: "adj. 绝望的" },
+      { word: "hopefully", note: "adv. 但愿；满怀希望地" }
+    ]
+  },
+
+  journey: {
+    pos: ["n.", "v."],
+    ipa: { us: "ˈdʒɜːrni", uk: "ˈdʒɜːni" },
+    note: "复数直接加 s 为 journeys（元音字母 y 前有 e，不变成 ies）；过去式 journeyed 要保留 e。",
+    senses: [
+      { pos: "n.", cn: "旅行，旅程（尤指长途）", en: "the act of travelling from one place to another, especially over a long distance", ex: "The journey from Beijing to Lhasa took three days by train. 从北京坐火车到拉萨的旅程花了三天。", colloc: ["take a journey 踏上旅程", "a long journey 长途旅行"] },
+      { pos: "n.", cn: "历程，过程（比喻）", en: "a process of change or development over time", ex: "Learning a language is a lifelong journey. 学一门语言是一生的旅程。" },
+      { pos: "v.", cn: "旅行", en: "to travel somewhere, especially over a long distance", ex: "They journeyed across the desert on camels. 他们骑着骆驼穿越沙漠。" }
+    ],
+    quotes: [
+      { type: "名言", en: "A journey of a thousand miles begins with a single step.", zh: "千里之行，始于足下。", src: "老子《道德经》— Lao Tzu, Tao Te Ching" },
+      { type: "名言", en: "It's not the destination, it's the journey.", zh: "重要的不是目的地，而是旅程本身。", src: "Ralph Waldo Emerson（常见出处标注）" }
+    ],
+    inflections: [
+      { label: "复数", forms: "journeys" },
+      { label: "第三人称单数", forms: "journeys" },
+      { label: "过去式", forms: "journeyed" },
+      { label: "过去分词", forms: "journeyed" },
+      { label: "现在分词", forms: "journeying" }
+    ],
+    related: []
+  },
+
+  change: {
+    pos: ["n.", "v."],
+    ipa: { us: "tʃeɪndʒ", uk: "tʃeɪndʒ" },
+    senses: [
+      { pos: "v.", cn: "改变，变化", en: "to become different, or to make something different", ex: "People change, and that's a part of growing up. 人会改变，这是成长的一部分。", colloc: ["change one's mind 改变主意", "change for the better 好转"] },
+      { pos: "v.", cn: "更换，替换", en: "to exchange one thing for another", ex: "Let's change the subject — this is too awkward. 我们换个话题吧——这太尴尬了。" },
+      { pos: "n.", cn: "变化，变革", en: "the act or result of becoming different", ex: "Climate change is a global challenge we must face. 气候变化是我们必须面对的全球性挑战。", colloc: ["make a change 做出改变"] },
+      { pos: "n.", cn: "零钱", en: "coins or small bills instead of larger ones", ex: "Here's your change — twenty yuan. 这是找您的零钱——二十元。", colloc: ["loose change 零钱"] }
+    ],
+    quotes: [
+      { type: "名言", en: "Be the change you wish to see in the world.", zh: "欲变世界，先变其身。", src: "Mahatma Gandhi（常见出处标注）" },
+      { type: "名言", en: "The only constant in life is change.", zh: "生活中唯一不变的就是变化。", src: "Heraclitus（常见出处标注）" },
+      { type: "演讲", en: "Change is the law of life. And those who look only to the past or present are certain to miss the future.", zh: "变革是生活的法则。只盯着过去或现在的人，必将错过未来。", src: "John F. Kennedy — 法兰克福演讲 (1963)" }
+    ],
+    inflections: [
+      { label: "复数", forms: "changes" },
+      { label: "第三人称单数", forms: "changes" },
+      { label: "过去式", forms: "changed" },
+      { label: "过去分词", forms: "changed" },
+      { label: "现在分词", forms: "changing" }
+    ],
+    related: [
+      { word: "changeable", note: "adj. 易变的" },
+      { word: "unchanged", note: "adj. 未改变的" },
+      { word: "exchange", note: "v./n. 交换" }
+    ]
+  },
+
+  friend: {
+    pos: ["n.", "v."],
+    ipa: { us: "frend", uk: "frend" },
+    senses: [
+      { pos: "n.", cn: "朋友，友人", en: "a person you know well and like, who is not a member of your family", ex: "A true friend is someone who stays when everyone else leaves. 真正的朋友，是当所有人都离开时仍留在你身边的人。", colloc: ["best friend 最好的朋友", "make friends with 与……交朋友"] },
+      { pos: "n.", cn: "支持者，盟友", en: "a person who supports an idea, an organization or a cause", ex: "He is a long-time friend of the environmental movement. 他是环保运动的长期支持者。" },
+      { pos: "v.", cn: "加为好友（社交媒体）", en: "to add somebody to your list of contacts on a social networking site", ex: "I friended her on Weibo. 我在微博上把她加为好友了。" }
+    ],
+    quotes: [
+      { type: "谚语", en: "A friend in need is a friend indeed.", zh: "患难见真情。", src: "英语谚语 Proverb" },
+      { type: "名言", en: "Friendship is born at that moment when one person says to another: “What! You too? I thought I was the only one.”", zh: "友谊诞生于这样的时刻：一个人对另一个人说：“什么！你也是这样？我还以为只有我是这样。”", src: "C. S. Lewis — The Four Loves" },
+      { type: "剧集", en: "I'll be there for you, 'cause you're there for me too.", zh: "我会在你身边，因为你也在我身边。", src: "The Rembrandts —《老友记》主题曲 “I'll Be There for You”" }
+    ],
+    inflections: [
+      { label: "复数", forms: "friends" }
+    ],
+    related: [
+      { word: "friendly", note: "adj. 友好的" },
+      { word: "friendship", note: "n. 友谊" },
+      { word: "befriend", note: "v. 帮助；与……为友" }
+    ]
+  },
+
+  home: {
+    pos: ["n.", "adv.", "adj.", "v."],
+    ipa: { us: "hoʊm", uk: "həʊm" },
+    note: "home 作副词时前面不加 to：go home、stay home，而不是 go to home。",
+    senses: [
+      { pos: "n.", cn: "家，住所", en: "the place where you live", ex: "After a long trip, there's nothing better than home. 长途旅行后，没有什么比家更好了。", colloc: ["at home 在家", "make yourself at home 请随意，别拘束"] },
+      { pos: "n.", cn: "家乡，祖国", en: "the place where you grew up or feel you belong", ex: "My home is in a small town in Sichuan. 我的家乡在四川的一个小镇。" },
+      { pos: "adv.", cn: "在家，回家", en: "to or at the place where you live", ex: "She stayed home all day reading. 她一整天都待在家里读书。", colloc: ["go home 回家"] },
+      { pos: "n.", cn: "收容所，养老院（照顾场所）", en: "a place where people who need special care live", ex: "Grandma now lives in a nursing home. 奶奶现在住在养老院。", colloc: ["nursing home 养老院", "orphanage 孤儿院"] }
+    ],
+    quotes: [
+      { type: "电影", en: "There's no place like home.", zh: "哪里都不如家好。", src: "Dorothy — The Wizard of Oz 《绿野仙踪》 (1939)" },
+      { type: "谚语", en: "Home is where the heart is.", zh: "心之所安，即是吾家。", src: "英语谚语 Proverb" },
+      { type: "名言", en: "The ache for home lives in all of us, the safe place where we can go as we are and not be questioned.", zh: "对家的渴望存在于我们所有人心中——那是一个可以以本来的面目去往、而不会被质疑的安全之所。", src: "Maya Angelou" }
+    ],
+    inflections: [
+      { label: "复数", forms: "homes" },
+      { label: "第三人称单数", forms: "homes" },
+      { label: "过去式", forms: "homed" },
+      { label: "过去分词", forms: "homed" },
+      { label: "现在分词", forms: "homing" }
+    ],
+    related: [
+      { word: "homeless", note: "adj. 无家可归的" },
+      { word: "hometown", note: "n. 家乡" },
+      { word: "homework", note: "n. 家庭作业" }
+    ]
+  },
+
+  success: {
+    pos: ["n."],
+    ipa: { us: "səkˈses", uk: "səkˈses" },
+    note: "动词 succeed、形容词 successful、副词 successfully 都是它的同族词。",
+    senses: [
+      { pos: "n.", cn: "成功，成就", en: "the achieving of the results you wanted; the fact of becoming rich, famous or respected", ex: "The product launch was a great success. 这次产品发布非常成功。", colloc: ["achieve success 取得成功", "the key to success 成功的关键"] },
+      { pos: "n.", cn: "成功的人或事物", en: "a person or thing that is successful", ex: "The play was an overnight success. 这部剧一夜之间大获成功。" },
+      { pos: "n.", cn: "成功（财富/地位）", en: "wealth, fame and respect that you get from doing well", ex: "She measured success not by money but by happiness. 她衡量成功的标准不是金钱，而是幸福。" }
+    ],
+    quotes: [
+      { type: "名言", en: "Success is not final, failure is not fatal: it is the courage to continue that counts.", zh: "成功并非终点，失败也并非末日，重要的是继续前行的勇气。", src: "Winston Churchill（常见出处标注）" },
+      { type: "名言", en: "The secret of success is to do the common thing uncommonly well.", zh: "成功的秘诀，是把平凡的事做得不平凡地好。", src: "John D. Rockefeller Jr." }
+    ],
+    inflections: [
+      { label: "复数", forms: "successes" }
+    ],
+    related: [
+      { word: "successful", note: "adj. 成功的" },
+      { word: "successfully", note: "adv. 成功地" },
+      { word: "succeed", note: "v. 成功" },
+      { word: "unsuccessful", note: "adj. 失败的" }
+    ]
+  },
+
+  opportunity: {
+    pos: ["n."],
+    ipa: { us: "ˌɑːpərˈtuːnəti", uk: "ˌɒpəˈtjuːnəti" },
+    note: "复数变化为 opportunities（辅音字母 + y，变 y 为 i 再加 es）。",
+    senses: [
+      { pos: "n.", cn: "机会，时机", en: "a time or situation that makes it possible to do something you want to do", ex: "This internship is a golden opportunity you shouldn't miss. 这份实习是你不可错过的绝佳机会。", colloc: ["take / seize the opportunity 抓住机会", "miss an opportunity 错失机会"] },
+      { pos: "n.", cn: "就业机会", en: "a chance to get a job or improve your position", ex: "The company promises equal employment opportunities for all. 公司承诺为所有人提供平等的就业机会。", colloc: ["equal opportunities 机会均等"] }
+    ],
+    quotes: [
+      { type: "名言", en: "Opportunity is missed by most people because it is dressed in overalls and looks like work.", zh: "大多数人错失机会，因为它穿着工装裤，看上去像是一份苦差。", src: "Thomas Edison（常见出处标注）" },
+      { type: "名言", en: "A wise man will make more opportunities than he finds.", zh: "智者创造的机会，比他们找到的更多。", src: "Francis Bacon（常见出处标注）" },
+      { type: "名言", en: "You miss 100% of the shots you don't take.", zh: "不投篮，命中率永远是零。", src: "Wayne Gretzky（常见出处标注）" }
+    ],
+    inflections: [
+      { label: "复数", forms: "opportunities" }
+    ],
+    related: [
+      { word: "opportune", note: "adj. 恰逢其时的" },
+      { word: "opportunistic", note: "adj. 机会主义的" }
+    ]
+  },
+
+  choice: {
+    pos: ["n.", "adj."],
+    ipa: { us: "tʃɔɪs", uk: "tʃɔɪs" },
+    note: "动词是 choose（过去式 chose，过去分词 chosen）；形容词 choosy 意为“挑剔的”。",
+    senses: [
+      { pos: "n.", cn: "选择，挑选", en: "an act of choosing between two or more possibilities", ex: "You have a choice: stay and fight, or walk away. 你有两个选择：留下抗争，或转身离开。", colloc: ["make a choice 做出选择", "first choice 首选"] },
+      { pos: "n.", cn: "选择权", en: "the right or ability to choose", ex: "I had no choice but to tell the truth. 我别无选择，只能说出真相。", colloc: ["have no choice but to 别无选择只能"] },
+      { pos: "n.", cn: "可供选择的人或物", en: "a range of things from which you can choose", ex: "The menu offers a wide choice of vegetarian dishes. 菜单上有许多素食可选。" },
+      { pos: "adj.", cn: "精选的，上等的", en: "of very good quality; specially selected", ex: "The restaurant serves only choice cuts of beef. 这家餐厅只供应精选牛肉。" }
+    ],
+    quotes: [
+      { type: "电影", en: "You take the blue pill — the story ends. You take the red pill — you stay in Wonderland, and I show you how deep the rabbit hole goes.", zh: "吃下蓝色药丸，故事到此结束；吃下红色药丸，你留在仙境，我带你看兔子洞究竟有多深。", src: "Morpheus — The Matrix 《黑客帝国》 (1999)" },
+      { type: "名言", en: "We are our choices.", zh: "我们，就是我们的选择。", src: "Jean-Paul Sartre（常见出处标注）" }
+    ],
+    inflections: [
+      { label: "复数", forms: "choices" }
+    ],
+    related: [
+      { word: "choose", note: "v. 选择" },
+      { word: "chose", note: "v. choose 的过去式" },
+      { word: "chosen", note: "v. choose 的过去分词" },
+      { word: "choosy", note: "adj. 挑剔的" }
+    ]
+  },
+
+  power: {
+    pos: ["n.", "v.", "adj."],
+    ipa: { us: "ˈpaʊər", uk: "ˈpaʊə(r)" },
+    senses: [
+      { pos: "n.", cn: "权力，统治权", en: "the ability to control people or things", ex: "The emperor held absolute power over the whole country. 皇帝对全国拥有绝对的权力。", colloc: ["come to power 掌权", "be in power 执政"] },
+      { pos: "n.", cn: "力量，能力", en: "the ability or capacity to do something", ex: "Music has the power to heal a broken heart. 音乐有治愈破碎心灵的力量。", colloc: ["the power of 爱的力量/……的力量"] },
+      { pos: "n.", cn: "电力，动力，能源", en: "energy, especially electricity, used to run machines", ex: "The storm cut off the power for three hours. 暴风雨导致断电三小时。", colloc: ["solar power 太阳能", "wind power 风能"] },
+      { pos: "v.", cn: "为……提供动力", en: "to supply power to a machine or vehicle", ex: "The engine is powered by solar energy. 这台发动机由太阳能驱动。" }
+    ],
+    quotes: [
+      { type: "电影", en: "With great power comes great responsibility.", zh: "能力越大，责任越大。", src: "Uncle Ben — Spider-Man 《蜘蛛侠》 (2002)" },
+      { type: "名言", en: "Knowledge is power.", zh: "知识就是力量。", src: "Francis Bacon（常见出处标注）" },
+      { type: "名言", en: "Power tends to corrupt, and absolute power corrupts absolutely.", zh: "权力导致腐败，绝对的权力导致绝对的腐败。", src: "Lord Acton (1887)" }
+    ],
+    inflections: [
+      { label: "复数", forms: "powers" },
+      { label: "第三人称单数", forms: "powers" },
+      { label: "过去式", forms: "powered" },
+      { label: "过去分词", forms: "powered" },
+      { label: "现在分词", forms: "powering" }
+    ],
+    related: [
+      { word: "powerful", note: "adj. 强大的" },
+      { word: "powerfully", note: "adv. 强有力地" },
+      { word: "empower", note: "v. 授权；赋能" },
+      { word: "powerless", note: "adj. 无能为力的" }
+    ]
+  },
+
+  beautiful: {
+    pos: ["adj."],
+    ipa: { us: "ˈbjuːtɪfl", uk: "ˈbjuːtɪfl" },
+    note: "比较级、最高级用 more / most beautiful（多音节形容词）；名词 beauty，副词 beautifully。",
+    senses: [
+      { pos: "adj.", cn: "美丽的，漂亮的", en: "very attractive or pleasing to look at", ex: "She has a beautiful smile that lights up the room. 她的笑容很美，能点亮整个房间。", colloc: ["beautiful scenery 美景", "a beautiful voice 美妙的嗓音"] },
+      { pos: "adj.", cn: "美好的，出色的", en: "giving great pleasure; excellent or impressive", ex: "What a beautiful performance by the orchestra! 这支乐团的演奏多么精彩！" },
+      { pos: "adj.", cn: "（天气）晴朗宜人的", en: "(of weather) pleasant; sunny and warm", ex: "We had beautiful weather all week on the coast. 我们在海边一整个星期都赶上好天气。" }
+    ],
+    quotes: [
+      { type: "电影", en: "Life is beautiful.", zh: "生活是美丽的。（片名即金句）", src: "Life Is Beautiful 《美丽人生》 (1997)" },
+      { type: "名言", en: "Everything has beauty, but not everyone sees it.", zh: "万物皆有美，只是并非人人都能看见。", src: "孔子 Confucius（常见出处标注）" }
+    ],
+    inflections: [
+      { label: "比较级", forms: "more beautiful" },
+      { label: "最高级", forms: "most beautiful" }
+    ],
+    related: [
+      { word: "beauty", note: "n. 美；美人" },
+      { word: "beautifully", note: "adv. 优美地" },
+      { word: "beautify", note: "v. 美化" }
+    ]
+  },
+
+  imagine: {
+    pos: ["v."],
+    ipa: { us: "ɪˈmædʒɪn", uk: "ɪˈmædʒɪn" },
+    senses: [
+      { pos: "v.", cn: "想象，设想", en: "to form a picture or idea in your mind of something that may not exist or be true", ex: "Imagine a world without war — what would it look like? 想象一个没有战争的世界——它会是什么样子？", colloc: ["imagine doing sth 想象做某事", "just imagine 想想看"] },
+      { pos: "v.", cn: "猜想，料想", en: "to think or suppose that something is true or likely", ex: "I imagine he'll be late again — traffic is terrible. 我猜他又要迟到了——路上堵得厉害。" },
+      { pos: "v.", cn: "（表惊讶）想不到，真没想到", en: "used to express surprise at something", ex: "Imagine my surprise when I saw her name on the list! 看到她的名字出现在名单上，我有多惊讶啊！" }
+    ],
+    quotes: [
+      { type: "歌词", en: "Imagine all the people living life in peace.", zh: "想象所有的人们，都生活在和平之中。", src: "John Lennon — “Imagine” (1971)" },
+      { type: "名言", en: "Imagination is more important than knowledge.", zh: "想象力比知识更重要。", src: "Albert Einstein（常见出处标注）" }
+    ],
+    inflections: [
+      { label: "第三人称单数", forms: "imagines" },
+      { label: "过去式", forms: "imagined" },
+      { label: "过去分词", forms: "imagined" },
+      { label: "现在分词", forms: "imagining" }
+    ],
+    related: [
+      { word: "imagination", note: "n. 想象力" },
+      { word: "imaginary", note: "adj. 想象中的" },
+      { word: "imaginative", note: "adj. 富有想象力的" }
+    ]
+  },
+
+  world: {
+    pos: ["n.", "adj."],
+    ipa: { us: "wɜːrld", uk: "wɜːld" },
+    senses: [
+      { pos: "n.", cn: "世界，地球", en: "the earth with all its countries, seas and people", ex: "She dreams of traveling around the world after graduation. 她梦想毕业后环游世界。", colloc: ["around the world 环游世界", "world peace 世界和平"] },
+      { pos: "n.", cn: "界，领域", en: "a particular area of activity or society", ex: "The world of fashion changes faster than any other. 时尚界的变化比任何领域都快。" },
+      { pos: "n.", cn: "世事，人生", en: "human life and the way people live; the way things are", ex: "It's a small world — we met again in Paris! 世界真小——我们又在巴黎遇见了！", colloc: ["the real world 现实世界", "out of this world 好极了"] }
+    ],
+    quotes: [
+      { type: "名言", en: "The world is a book, and those who do not travel read only one page.", zh: "世界是一本书，不旅行的人只读了其中一页。", src: "Saint Augustine（常见出处标注）" },
+      { type: "电影", en: "The world is not enough.", zh: "世界还不够。（片名即金句）", src: "The World Is Not Enough 《007：黑日危机》 (1999)" }
+    ],
+    inflections: [
+      { label: "复数", forms: "worlds" }
+    ],
+    related: [
+      { word: "worldly", note: "adj. 世故的" },
+      { word: "worldwide", note: "adj./adv. 全球的/遍布全球" },
+      { word: "world-famous", note: "adj. 举世闻名的" }
+    ]
+  },
+
+  life: {
+    pos: ["n."],
+    ipa: { us: "laɪf", uk: "laɪf" },
+    note: "复数变化为 lives（f → ves，注意发音也变为 /laɪvz/）。形容词 alive、lively、lifeless。",
+    senses: [
+      { pos: "n.", cn: "生命", en: "the ability to grow, reproduce and function that living things have, unlike dead things", ex: "Life on Earth began billions of years ago. 地球上的生命始于数十亿年前。" },
+      { pos: "n.", cn: "生活，人生", en: "the experience of being alive; the way a person lives", ex: "City life is fast-paced but exciting. 城市生活节奏快，但也令人兴奋。", colloc: ["way of life 生活方式", "daily life 日常生活"] },
+      { pos: "n.", cn: "一生，寿命", en: "the period between somebody's birth and death", ex: "He devoted his whole life to education. 他把毕生献给了教育事业。", colloc: ["life span 寿命", "bring to life 使生动"] }
+    ],
+    quotes: [
+      { type: "电影", en: "Life is like a box of chocolates; you never know what you're gonna get.", zh: "生活就像一盒巧克力，你永远不知道下一颗是什么味道。", src: "Forrest Gump 《阿甘正传》 (1994)" },
+      { type: "名言", en: "Life is what happens when you're busy making other plans.", zh: "生活，就是当你忙着制定其他计划时，发生在你身上的事。", src: "John Lennon（常见出处标注）" },
+      { type: "名言", en: "To live is the rarest thing in the world. Most people exist, that is all.", zh: "活着是世上最稀有的事，大多数人只是在“存在”而已。", src: "Oscar Wilde" }
+    ],
+    inflections: [
+      { label: "复数", forms: "lives" }
+    ],
+    related: [
+      { word: "live", note: "v. 生活；居住" },
+      { word: "alive", note: "adj. 活着的" },
+      { word: "lively", note: "adj. 活泼的" },
+      { word: "lifeless", note: "adj. 死气沉沉的" }
+    ]
+  }
+};
+
+/* ================= 常用词：紧凑格式 + 自动词形变化引擎 ================= */
+// 常用词数据文件（data-common-*.js）使用紧凑数组格式：
+//   [word, pos, ipaUS, ipaUK, senses, inflectionsOverride|null, related|null, note|null]
+//   senses: [[pos, cn, en, ex|null, colloc|null], ...]  colloc 为搭配数组或 "a；b" 字符串
+//   inflectionsOverride: [[label, forms], ...]（forms 可用 " / " 分隔多个变体），null 则自动生成
+const NO_PLURAL = new Set(["news","money","bread","rice","water","milk","juice","sugar","salt","tea","coffee","music","homework","information","advice","furniture","weather","knowledge","traffic","people","police","clothes","pants","scissors","physics","math","mathematics","stuff","cotton","cheese","butter","meat","air","sand","oil","luck","pride","peace","health","wealth","safety","hair","fun","weather","equipment","progress","research","luggage","baggage","wine","hardware","software","firmware","noise","data"]);
+const MODAL_VERBS = new Set(["can","could","may","might","must","shall","should","will","would"]);
+const NO_COMPARATIVE = new Set(["alone","asleep","awake","afraid","alive","aware","correct","perfect","pregnant","excellent","main","major","minor","senior","junior","equal","favorite","dead","right","wrong","true"]);
+const IRREGULAR_PLURALS = {
+  man:"men", woman:"women", child:"children", foot:"feet", tooth:"teeth", goose:"geese",
+  mouse:"mice", person:"people", sheep:"sheep", fish:"fish", deer:"deer", ox:"oxen",
+  leaf:"leaves", knife:"knives", wife:"wives", half:"halves", shelf:"shelves", wolf:"wolves",
+  loaf:"loaves", thief:"thieves", self:"selves", calf:"calves", life:"lives", quiz:"quizzes",
+  basis:"bases", analysis:"analyses", crisis:"crises", thesis:"theses", hypothesis:"hypotheses",
+  diagnosis:"diagnoses", axis:"axes", oasis:"oases", phenomenon:"phenomena", criterion:"criteria",
+  datum:"data", medium:"media", curriculum:"curricula", matrix:"matrices", vertex:"vertices",
+  index:"indices", appendix:"appendices", formula:"formulas", focus:"focuses", radius:"radii",
+  stimulus:"stimuli", hero:"heroes", potato:"potatoes", tomato:"tomatoes", echo:"echoes",
+  veto:"vetoes", zero:"zeros", photo:"photos", piano:"pianos", radio:"radios", video:"videos",
+  studio:"studios", zoo:"zoos", bamboo:"bamboos", belief:"beliefs", roof:"roofs", chief:"chiefs",
+  cliff:"cliffs", safe:"safes", scarf:"scarves", handkerchief:"handkerchiefs", child:"children"
+};
+const IRREGULAR_VERBS = {
+  be:["was","been"], have:["had","had"], do:["did","done"], go:["went","gone"],
+  see:["saw","seen"], make:["made","made"], take:["took","taken"], come:["came","come"],
+  get:["got","gotten"], say:["said","said"], know:["knew","known"], think:["thought","thought"],
+  give:["gave","given"], find:["found","found"], tell:["told","told"], become:["became","become"],
+  show:["showed","shown"], leave:["left","left"], feel:["felt","felt"], put:["put","put"],
+  bring:["brought","brought"], begin:["began","begun"], keep:["kept","kept"], hold:["held","held"],
+  write:["wrote","written"], stand:["stood","stood"], hear:["heard","heard"], let:["let","let"],
+  mean:["meant","meant"], set:["set","set"], meet:["met","met"], run:["ran","run"],
+  pay:["paid","paid"], sit:["sat","sat"], speak:["spoke","spoken"], lie:["lied","lied"],
+  lay:["laid","laid"], lead:["led","led"], read:["read","read"], grow:["grew","grown"],
+  lose:["lost","lost"], fall:["fell","fallen"], send:["sent","sent"], build:["built","built"],
+  understand:["understood","understood"], draw:["drew","drawn"], break:["broke","broken"],
+  spend:["spent","spent"], cut:["cut","cut"], rise:["rose","risen"], drive:["drove","driven"],
+  buy:["bought","bought"], wear:["wore","worn"], choose:["chose","chosen"], seek:["sought","sought"],
+  catch:["caught","caught"], teach:["taught","taught"], fight:["fought","fought"],
+  throw:["threw","thrown"], win:["won","won"], fly:["flew","flown"], sing:["sang","sung"],
+  sleep:["slept","slept"], swim:["swam","swum"], eat:["ate","eaten"], drink:["drank","drunk"],
+  hit:["hit","hit"], shut:["shut","shut"], hurt:["hurt","hurt"], cost:["cost","cost"],
+  sell:["sold","sold"], ride:["rode","ridden"], forget:["forgot","forgotten"],
+  forgive:["forgave","forgiven"], freeze:["froze","frozen"], steal:["stole","stolen"],
+  shake:["shook","shaken"], wake:["woke","woken"], ring:["rang","rung"], shoot:["shot","shot"],
+  feed:["fed","fed"], light:["lit","lit"], lend:["lent","lent"], bend:["bent","bent"],
+  burn:["burned / burnt","burned / burnt"], learn:["learned / learnt","learned / learnt"],
+  smell:["smelled / smelt","smelled / smelt"], spell:["spelled / spelt","spelled / spelt"],
+  deal:["dealt","dealt"], hang:["hung","hung"], stick:["stuck","stuck"], strike:["struck","struck"],
+  dig:["dug","dug"], swing:["swung","swung"], spin:["spun","spun"], slide:["slid","slid"],
+  split:["split","split"], spread:["spread","spread"], upset:["upset","upset"], quit:["quit","quit"],
+  bet:["bet","bet"], burst:["burst","burst"], cast:["cast","cast"], fit:["fit","fit"],
+  hide:["hid","hidden"], bite:["bit","bitten"], blow:["blew","blown"], beat:["beat","beaten"],
+  bear:["bore","borne"], arise:["arose","arisen"], awake:["awoke","awoken"],
+  swear:["swore","sworn"], tear:["tore","torn"], withdraw:["withdrew","withdrawn"],
+  overcome:["overcame","overcome"], mistake:["mistook","mistaken"], prove:["proved","proven"],
+  shine:["shone","shone"], sink:["sank","sunk"], sting:["stung","stung"], wind:["wound","wound"],
+  grind:["ground","ground"], bind:["bound","bound"], speed:["sped","sped"],
+  kneel:["knelt","knelt"], lean:["leaned / leant","leaned / leant"], leap:["leaped / leapt","leaped / leapt"],
+  spill:["spilled / spilt","spilled / spilt"], spoil:["spoiled / spoilt","spoiled / spoilt"],
+  dive:["dived","dived"], swing:["swung","swung"], string:["strung","strung"],
+  tread:["trod","trodden"], weave:["wove","woven"], forbid:["forbade","forbidden"],
+  foresee:["foresaw","foreseen"], retell:["retold","retold"], broadcast:["broadcast","broadcast"],
+  reset:["reset","reset"], offset:["offset","offset"], input:["input","input"], output:["output","output"]
+};
+const IRREGULAR_ADJ = {
+  good:["better","best"], bad:["worse","worst"], far:["farther","farthest"],
+  little:["less","least"], many:["more","most"], much:["more","most"],
+  old:["older","oldest"], well:["better","best"]
+};
+// 多音节词尾双写（重音在最后一个音节）
+const DOUBLE_CONSONANT = new Set(["prefer","occur","refer","transfer","admit","commit","permit","submit","regret","control","equip","excel","repel","compel","rebel","patrol","kidnap","worship","forget","upset","begin","forbid","forgive","debug","input","output"]);
+
+function pluralOf(w) {
+  if (NO_PLURAL.has(w)) return null;
+  if (IRREGULAR_PLURALS[w]) return IRREGULAR_PLURALS[w];
+  if (/[sxz]$/.test(w) || /(ch|sh)$/.test(w)) return w + "es";
+  if (/[^aeiou]y$/.test(w)) return w.slice(0, -1) + "ies";
+  return w + "s";
+}
+function thirdOf(w) {
+  if (w === "be") return "is";
+  if (w === "have") return "has";
+  if (/[sxz]$/.test(w) || /(ch|sh)$/.test(w)) return w + "es";
+  if (/[^aeiou]o$/.test(w)) return w + "es";       // do→does, go→goes
+  if (/[^aeiou]y$/.test(w)) return w.slice(0, -1) + "ies";
+  return w + "s";
+}
+function pastOf(w) {
+  if (IRREGULAR_VERBS[w]) return IRREGULAR_VERBS[w][0];
+  if (/e$/.test(w)) return w + "d";
+  if (/[^aeiou]y$/.test(w)) return w.slice(0, -1) + "ied";
+  if (DOUBLE_CONSONANT.has(w)) return w + w.slice(-1) + "ed";
+  if (/^[^aeiouy]+[aeiou][^aeiouwxy]$/.test(w) && w.length <= 4) return w + w.slice(-1) + "ed";
+  return w + "ed";
+}
+function ppOf(w) {
+  if (IRREGULAR_VERBS[w]) return IRREGULAR_VERBS[w][1];
+  return pastOf(w);
+}
+function ingOf(w) {
+  if (/ie$/.test(w)) return w.slice(0, -2) + "ying";
+  if (/e$/.test(w) && !/ee$/.test(w) && w !== "be") return w.slice(0, -1) + "ing";
+  if (DOUBLE_CONSONANT.has(w)) return w + w.slice(-1) + "ing";
+  if (/^[^aeiouy]+[aeiou][^aeiouwxy]$/.test(w) && w.length <= 4) return w + w.slice(-1) + "ing";
+  return w + "ing";
+}
+function comparativeOf(w) {
+  if (NO_COMPARATIVE.has(w)) return null;
+  if (IRREGULAR_ADJ[w]) return IRREGULAR_ADJ[w];
+  if (/[^aeiou]y$/.test(w)) return [w.slice(0, -1) + "ier", w.slice(0, -1) + "iest"];
+  if (/e$/.test(w) && w.length <= 5) return [w + "r", w + "st"];   // cute→cuter, nice→nicer
+  if (/^[^aeiouy]+[aeiou][^aeiouwxy]$/.test(w) && w.length <= 4) return [w + w.slice(-1) + "er", w + w.slice(-1) + "est"];
+  if (w.length <= 5 && !/ful$|less$|ous$|ive$|ing$|ed$|al$|ic$|ish$|en$|an$|ly$|ow$/.test(w))
+    return [w + "er", w + "est"];
+  return ["more " + w, "most " + w];
+}
+
+function autoInflections(word, posStr) {
+  const out = [];
+  if (posStr.includes("n.")) {
+    const p = pluralOf(word);
+    if (p) out.push({ label: "复数", forms: p });
+  }
+  if (posStr.includes("v.") && !MODAL_VERBS.has(word)) {
+    out.push({ label: "第三人称单数", forms: thirdOf(word) });
+    out.push({ label: "过去式", forms: pastOf(word) });
+    out.push({ label: "过去分词", forms: ppOf(word) });
+    out.push({ label: "现在分词", forms: ingOf(word) });
+  }
+  if (posStr.includes("adj.")) {
+    const c = comparativeOf(word);
+    if (c) { out.push({ label: "比较级", forms: c[0] }); out.push({ label: "最高级", forms: c[1] }); }
+  }
+  return out;
+}
+
+function normColloc(c) {
+  if (!c) return null;
+  if (Array.isArray(c)) return c;
+  return String(c).split(/[；;]/).map(s => s.trim()).filter(Boolean);
+}
+
+// 缩写词全称提取：从英文释义开头的 "全称, ..." 提取（如 "Application-Specific Integrated Circuit, ..."）
+const FULL_SPECIAL = { "op-amp": "operational amplifier", "RS-232": "Recommended Standard 232", "PVT": "Process, Voltage and Temperature" };
+function extractFull(word, sensesArr) {
+  if (FULL_SPECIAL[word]) return FULL_SPECIAL[word];
+  const en = (sensesArr && sensesArr[0] && sensesArr[0][2]) || "";
+  const m = en.match(/^([A-Z][A-Za-z0-9 ./-]{3,90}?)[,，]/);
+  return m ? m[1].trim() : null;
+}
+
+function buildCommon(list) {
+  const out = {};
+  for (const e of list) {
+    const [word, posStr, ipaUS, ipaUK, senses, inflOv, related, note, dom] = e;
+    out[word] = {
+      pos: posStr.split(/\s+/).filter(Boolean),
+      ipa: { us: ipaUS, uk: ipaUK },
+      senses: (senses || []).map(s => ({
+        pos: s[0], cn: s[1], en: s[2],
+        ex: s[3] || null, colloc: normColloc(s[4])
+      })),
+      quotes: [],
+      inflections: inflOv ? inflOv.map(([label, forms]) => ({ label, forms })) : autoInflections(word, posStr),
+      related: (related || []).map(([rw, rn]) => ({ word: rw, note: rn })),
+      note: note || null,
+      feat: false,
+      dom: DOM_LABEL[dom] ? dom : null,
+      full: extractFull(word, senses)
+    };
+  }
+  return out;
+}
+
+/* ================= 合并词库 ================= */
+const DOM_LABEL = {
+  analog: "🎛️ 模拟", digital: "🔢 数字", interface: "🔌 接口·协议",
+  device: "🔩 器件·工艺", eda: "🛠️ 设计·EDA", system: "📟 系统·嵌入式", power: "🔋 电源"
+};
+
+// 合并新条目：已存在的词条（通用/精选）与新义项合并，而不是覆盖
+function mergeWord(existing, add) {
+  const pos = [...new Set([...existing.pos, ...add.pos])];
+  const senses = [...existing.senses, ...add.senses];
+  const related = [...(existing.related || []), ...(add.related || [])];
+  const inflMap = new Map();
+  for (const it of [...(existing.inflections || []), ...(add.inflections || [])]) {
+    inflMap.set(it.label + "\u0000" + it.forms, it);
+  }
+  return Object.assign({}, existing, {
+    pos, senses, related,
+    inflections: [...inflMap.values()],
+    dom: existing.dom || add.dom || null
+  });
+}
+
+const WORDS = {};
+for (const [k, v] of Object.entries(FEATURED)) WORDS[k] = Object.assign({}, v, { feat: true });
+// 先合并通用词，最后合并专业领域词（EECS）
+const commonNames = Object.keys(window).filter(k => /^COMMON_[A-Z]+$/.test(k) && k !== "COMMON_EECS").sort();
+const eecsNames = Object.keys(window).filter(k => k === "COMMON_EECS");
+for (const arrName of [...commonNames, ...eecsNames]) {
+  const added = buildCommon(window[arrName]);
+  for (const [k, v] of Object.entries(added)) {
+    WORDS[k] = WORDS[k] ? mergeWord(WORDS[k], v) : v;
+  }
+}
+
+/* ================= 变形/相关词反向索引 ================= */
+const DERIVED = {};   // 变形词 -> [{base, rel}]
+const INDEX = [];     // 搜索索引
+
+const QUOTE_BADGE = { "电影": "🎬", "名言": "✒️", "歌词": "🎵", "文学": "📖", "谚语": "🏺", "演讲": "🗣️", "剧集": "📺" };
+const SKIP_WORDS = new Set(["more", "most", "less", "least"]);
+
+(function buildIndex() {
+  for (const [head, w] of Object.entries(WORDS)) {
+    for (const it of (w.inflections || [])) {
+      for (const tok of it.forms.split("/")) {
+        for (const word of tok.trim().split(/\s+/)) {
+          if (!word || SKIP_WORDS.has(word)) continue;
+          (DERIVED[word] = DERIVED[word] || []).push({ base: head, rel: it.label });
+        }
+      }
+    }
+    for (const r of (w.related || [])) {
+      (DERIVED[r.word] = DERIVED[r.word] || []).push({ base: head, rel: r.note });
+    }
+    const zh = [...w.senses.map(s => s.cn), ...w.quotes.map(q => q.zh), w.note || ""].join(" ");
+    const en = [...w.senses.map(s => s.en), ...w.quotes.map(q => q.en)].join(" ");
+    INDEX.push({ key: head, word: head, pos: w.pos.join(" · "), zh, en });
+  }
+  for (const [tok, list] of Object.entries(DERIVED)) {
+    INDEX.push({
+      key: tok, word: tok, pos: "变形/相关",
+      zh: "与 " + [...new Set(list.map(l => l.base))].join("、") + " 相关",
+      en: list.map(l => l.base + " (" + l.rel + ")").join("; ")
+    });
+  }
+  INDEX.sort((a, b) => a.word.localeCompare(b.word));
+})();
+
+/* ================= 工具函数 ================= */
+const $ = s => document.querySelector(s);
+
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function speak(text, lang) {
+  if (!("speechSynthesis" in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang;          // en-US / en-GB
+    u.rate = 0.82;
+    speechSynthesis.speak(u);
+  } catch (e) { /* 忽略 */ }
+}
+
+function ipaChip(label, lang, ipa, word) {
+  return `<button class="ipa" data-speak="${esc(word)}" data-lang="${lang}" title="点击收听发音">` +
+    `<span class="flag">${label}</span>/${ipa}/<span class="spk">🔊</span></button>`;
+}
+
+function formLinks(forms) {
+  return forms.split("/").map(tok => tok.trim())
+    .map(tok => tok.split(/\s+/).map(word => {
+      if (WORDS[word] || DERIVED[word]) return `<a class="fl" href="#/${esc(word)}">${esc(word)}</a>`;
+      return `<span>${esc(word)}</span>`;
+    }).join(" "))
+    .join('<span class="sep"> / </span>');
+}
+
+/* ================= 渲染：词条主页 ================= */
+function renderFull(w, head) {
+  head = head || w.head || "";
+  const pos = w.pos.map(p => `<span class="ptag">${esc(p)}</span>`).join("");
+  const senses = w.senses.map((s, i) => `
+    <li class="sense">
+      <div class="sense-head"><span class="ptag">${esc(s.pos)}</span><span class="cn">${esc(s.cn)}</span></div>
+      <p class="en">${esc(s.en)}</p>
+      ${s.ex ? `<p class="ex">💬 ${esc(s.ex)}</p>` : ""}
+      ${s.colloc ? `<div class="collocs">${s.colloc.map(c => `<span class="colloc">${esc(c)}</span>`).join("")}</div>` : ""}
+    </li>`).join("");
+
+  const quotes = w.quotes && w.quotes.length ? w.quotes.map(q => `
+    <figure class="quote">
+      <span class="qmark">“</span>
+      <blockquote>${esc(q.en)}</blockquote>
+      <figcaption>
+        <span class="qtype">${QUOTE_BADGE[q.type] || "✒️"} ${esc(q.type)}</span>
+        <span class="qsrc">${esc(q.src)}</span>
+      </figcaption>
+      <p class="qzh">${esc(q.zh)}</p>
+    </figure>`).join("") : "";
+
+  const inflections = w.inflections ? `
+    <section class="sec">
+      <h2><span>词形变化</span><small>Inflections · 点击可跳转到该词主页</small></h2>
+      <div class="infl-grid">
+        ${w.inflections.map(it => `
+          <div class="infl">
+            <div class="lbl">${esc(it.label)}</div>
+            <div class="frm">${formLinks(it.forms)}</div>
+          </div>`).join("")}
+      </div>
+    </section>` : "";
+
+  const related = (w.related && w.related.length) ? `
+    <section class="sec">
+      <h2><span>相关词汇</span><small>Related Words</small></h2>
+      <div class="related">
+        ${w.related.map(r => `<a class="rchip" href="#/${esc(r.word)}"><b>${esc(r.word)}</b><i>${esc(r.note)}</i></a>`).join("")}
+      </div>
+    </section>` : "";
+
+  return `
+  <article class="entry">
+    <header class="entry-head">
+      <div class="word-row">
+        <h1>${esc(head)}</h1>
+        <div>${pos}</div>
+        ${w.dom ? `<span class="dom-badge" title="专业领域">${esc(DOM_LABEL[w.dom] || w.dom)}</span>` : ""}
+        ${w.feat ? `<span class="feat-badge" title="精选词条：例句为电影台词或名人名言并标注出处">★ 精选</span>` : ""}
+      </div>
+      ${w.full ? `<div class="word-full">${esc(w.full)}（${esc(w.senses[0].cn)}）</div>` : ""}
+      <div class="ipa-row">
+        ${ipaChip("美", "en-US", w.ipa.us, head)}
+        ${ipaChip("英", "en-GB", w.ipa.uk, head)}
+      </div>
+      ${w.note ? `<p class="head-note">💡 ${esc(w.note)}</p>` : ""}
+    </header>
+
+    ${inflections}
+
+    <section class="sec">
+      <h2><span>详细释义</span><small>Definitions</small></h2>
+      <ol class="senses">${senses}</ol>
+    </section>
+
+    ${quotes ? `
+    <section class="sec">
+      <h2><span>例句 · 名言</span><small>Examples & Quotes · 均标注出处</small></h2>
+      <div class="quotes">${quotes}</div>
+    </section>` : ""}
+
+    ${related}
+  </article>`;
+}
+
+/* ================= 渲染：变形词页 ================= */
+function renderDerived(key) {
+  const list = DERIVED[key];
+  const bases = [...new Set(list.map(l => l.base))];
+  const base = bases[0];
+  const w = WORDS[base];
+  return `
+  <article class="entry derived">
+    <span class="dtag">变形词 · 相关词</span>
+    <div class="word-row"><h1>${esc(key)}</h1><div><span class="ptag">${esc(list[0].rel)}</span></div></div>
+
+    <div class="rel-box">
+      <p>这是以下主词条的变形或相关形式（点击跳转到对应词条主页）：</p>
+      ${list.map(l => `
+        <div class="rel-line">
+          <a href="#/${esc(l.base)}"><b>${esc(l.base)}</b></a>
+          <span class="rel-note">${esc(l.rel)}</span>
+        </div>`).join("")}
+    </div>
+
+    <div class="ipa-row">
+      ${ipaChip("美", "en-US", w.ipa.us, base)}
+      ${ipaChip("英", "en-GB", w.ipa.uk, base)}
+    </div>
+    <p class="hint">发音与主词条 ${esc(base)} 相同，完整释义、例句与变形请查看主词条。</p>
+
+    <a class="btn-back" href="#/${esc(base)}">← 查看「${esc(base)}」完整词条</a>
+    <p class="hint">💡 在本词典中，任意词形变化（复数、过去式、比较级等）都可以点击切换到对应词条主页。</p>
+  </article>`;
+}
+
+/* ================= 渲染：未收录 ================= */
+function renderNotFound(key) {
+  const q = key.toLowerCase();
+  const cands = INDEX.filter(i => i.word.includes(q) || i.zh.includes(key)).slice(0, 12);
+  return `
+  <article class="entry nfound">
+    <h1>🤔 “${esc(key)}” 未收录</h1>
+    <p>该词不在当前词库中，试试下面的相近词条：</p>
+    <div class="sug">${cands.map(c => `<a href="#/${esc(c.word)}">${esc(c.word)}</a>`).join("") || "<span>（暂无相近词条）</span>"}</div>
+    <p class="hint">提示：本词库为演示词典，可在 <code>index.html</code> 的 WORDS 数据中自行添加词条。</p>
+  </article>`;
+}
+
+/* ================= 渲染：首页 ================= */
+function renderHome() {
+  const sorted = Object.entries(WORDS).sort((a, b) => a[0].localeCompare(b[0]));
+  const card = ([head, w]) => `
+    <a class="card" href="#/${esc(head)}"${w.full ? ` title="${esc(w.full)}"` : ""}>
+      <div class="cw">${w.feat ? "★ " : ""}${esc(head)}<small>${esc(w.pos.join(" · "))}</small></div>
+      <div class="cd">${esc(w.senses[0].cn)}${w.dom ? `<span class="card-dom">${esc(DOM_LABEL[w.dom])}</span>` : ""}</div>
+      <div class="cipa">/${w.ipa.us}/</div>
+    </a>`;
+  const featured = sorted.filter(([, w]) => w.feat).map(card).join("");
+  const rest = sorted.filter(([, w]) => !w.feat).map(card).join("");
+  const eecsCount = Object.values(WORDS).filter(w => w.dom).length;
+  return `
+  <div class="hero">
+    <h1>中英双语词典 <span style="color:var(--accent)">Bilingual Dictionary</span></h1>
+    <p>收录常用核心词汇 + 电子工程/IC 设计专业术语：详细释义（中英对照）、词形变化（可点击跳转）、经典例句，并附美式 / 英式音标与真人发音。标注 ★ 的精选词条，其例句为电影台词或名人名言并注明出处。</p>
+    <div class="stats">
+      <span class="stat"><b>${Object.keys(WORDS).length}</b>个主词条</span>
+      <span class="stat"><b>${Object.keys(DERIVED).length}</b>个变形/相关词</span>
+      <span class="stat"><b>${eecsCount}</b>个专业领域词条</span>
+      <span class="stat"><b>${Object.values(WORDS).reduce((n, w) => n + (w.quotes ? w.quotes.length : 0), 0)}</b>条名言/台词</span>
+      <span class="stat">🎧 美/英 双发音</span>
+    </div>
+    ${featured ? `
+    <h2 class="home-sec"><span>精选词条</span><small>Featured · 例句为名言/电影台词并标注出处</small></h2>
+    <div class="card-grid">${featured}</div>` : ""}
+    <h2 class="home-sec"><span>全部词条</span><small>Common Words + 电子/IC 专业术语 · A–Z</small></h2>
+    <div class="card-grid">${rest}</div>
+  </div>`;
+}
+
+/* ================= 路由 ================= */
+// 大小写不敏感词表索引（ASIC、I2C、MOSFET 等缩写词）
+const KEYMAP = {};
+function rebuildKeymap() {
+  for (const k of Object.keys(WORDS)) {
+    const lk = k.toLowerCase();
+    if (!(lk in KEYMAP)) KEYMAP[lk] = k;
+  }
+  for (const k of Object.keys(DERIVED)) {
+    const lk = k.toLowerCase();
+    if (!(lk in KEYMAP)) KEYMAP[lk] = k;
+  }
+}
+
+function route() {
+  const raw = location.hash.replace(/^#\/?/, "");
+  const key = decodeURIComponent(raw).trim().toLowerCase();
+  const realKey = key ? (WORDS[key] ? key : (KEYMAP[key] || key)) : "";
+  const detail = $("#detail");
+  if (!realKey) {
+    detail.innerHTML = renderHome();
+  } else if (WORDS[realKey]) {
+    detail.innerHTML = renderFull(WORDS[realKey], realKey);
+  } else if (DERIVED[realKey]) {
+    detail.innerHTML = renderDerived(realKey);
+  } else {
+    detail.innerHTML = renderNotFound(realKey);
+  }
+  document.querySelectorAll("#index a").forEach(a =>
+    a.classList.toggle("active", (a.dataset.word || "").toLowerCase() === key));
+  detail.scrollTop = 0;
+  window.scrollTo({ top: 0 });
+}
+
+/* ================= 左侧索引 ================= */
+let posFilter = "全部";
+let domFilter = "全部";
+
+function wordCat(w) {
+  const p = w.pos.join(" ");
+  if (p.includes("n.")) return "名词";
+  if (p.includes("v.")) return "动词";
+  if (p.includes("adj.")) return "形容词";
+  if (p.includes("adv.")) return "副词";
+  return "其他";
+}
+
+function wordDom(w) { return w.dom ? DOM_LABEL[w.dom] : "通用"; }
+
+function renderIndex() {
+  const cats = ["全部", "名词", "动词", "形容词", "副词", "其他"];
+  const doms = ["全部", "通用", ...Object.values(DOM_LABEL)];
+  const chips = cats.map(c => `<button class="fchip${c === posFilter ? " active" : ""}" data-cat="${c}">${c}</button>`).join("");
+  const dchips = doms.map(d => `<button class="fchip dchip${d === domFilter ? " active" : ""}" data-dom="${d}">${d}</button>`).join("");
+  const list = Object.entries(WORDS)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .filter(([, w]) => (posFilter === "全部" || wordCat(w) === posFilter) &&
+                        (domFilter === "全部" || wordDom(w) === domFilter))
+    .map(([head, w]) => `
+      <a href="#/${esc(head)}" data-word="${esc(head)}"${w.full ? ` title="${esc(w.full)}"` : ""}>
+        <b>${w.feat ? "★ " : ""}${esc(head)}</b><i>${esc(w.pos[0])}</i>
+      </a>`).join("");
+  $("#index").innerHTML =
+    `<h3>词条列表 · A–Z<span class="cnt">${Object.keys(WORDS).length}</span></h3>` +
+    `<div class="filters">${chips}</div>` +
+    `<div class="filters d-filters">${dchips}</div>` +
+    `<div class="index-links">${list || `<p class="empty">当前筛选下暂无词条</p>`}</div>`;
+}
+
+/* ================= 搜索 ================= */
+const searchInput = $("#search");
+const suggestBox = $("#suggest");
+let selIdx = -1, lastQuery = "";
+
+function doSearch(q) {
+  q = q.trim().toLowerCase();
+  if (!q) { suggestBox.style.display = "none"; return; }
+  // 统一用小写比较：精确匹配(0) > 前缀(1) > 包含(2) > 中文/释义匹配(3)，次级按字母序（不区分大小写）
+  const scored = [];
+  for (const item of INDEX) {
+    const w = item.word.toLowerCase();
+    const score = w === q ? 0 : w.startsWith(q) ? 1 : w.includes(q) ? 2 :
+      (item.zh.includes(q) || item.en.toLowerCase().includes(q)) ? 3 : -1;
+    if (score >= 0) scored.push({ i: item, score });
+  }
+  scored.sort((a, b) => a.score - b.score || a.i.word.toLowerCase().localeCompare(b.i.word.toLowerCase()));
+  const items = scored.slice(0, 8);
+  lastQuery = q;
+  selIdx = -1;
+  if (!items.length) { suggestBox.style.display = "none"; return; }
+  suggestBox.innerHTML = items.map((it, n) => `
+    <a href="#/${esc(it.i.word)}" data-idx="${n}">
+      <span class="sw">${esc(it.i.word)}</span>
+      <span class="sp">${esc(it.i.pos)}</span>
+      <span class="sn">${esc(it.i.zh.slice(0, 40))}</span>
+    </a>`).join("");
+  suggestBox.style.display = "block";
+  markSel();
+}
+
+function markSel() {
+  suggestBox.querySelectorAll("a").forEach(a => a.classList.toggle("sel", +a.dataset.idx === selIdx));
+  const cur = suggestBox.querySelector(`a[data-idx="${selIdx}"]`);
+  if (cur) cur.scrollIntoView({ block: "nearest" });
+}
+
+searchInput.addEventListener("input", () => doSearch(searchInput.value));
+searchInput.addEventListener("keydown", e => {
+  const items = suggestBox.querySelectorAll("a");
+  if (!items.length) return;
+  if (e.key === "ArrowDown") { e.preventDefault(); selIdx = (selIdx + 1) % items.length; markSel(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); selIdx = (selIdx - 1 + items.length) % items.length; markSel(); }
+  else if (e.key === "Enter") {
+    e.preventDefault();
+    if (selIdx >= 0 && items[selIdx]) location.hash = items[selIdx].getAttribute("href").slice(1);
+    else if (items[0]) location.hash = items[0].getAttribute("href").slice(1);
+    suggestBox.style.display = "none";
+    searchInput.blur();
+  } else if (e.key === "Escape") suggestBox.style.display = "none";
+});
+document.addEventListener("click", e => {
+  if (!e.target.closest(".search-wrap")) suggestBox.style.display = "none";
+});
+suggestBox.addEventListener("click", () => { suggestBox.style.display = "none"; });
+
+/* ================= 全局事件 ================= */
+document.addEventListener("click", e => {
+  const d = e.target.closest(".dchip");
+  if (d) { domFilter = d.dataset.dom; renderIndex(); return; }
+  const f = e.target.closest(".fchip");
+  if (f) { posFilter = f.dataset.cat; renderIndex(); return; }
+  const b = e.target.closest("[data-speak]");
+  if (b) speak(b.dataset.speak, b.dataset.lang);
+});
+
+$("#rand").addEventListener("click", () => {
+  const keys = Object.keys(WORDS);
+  location.hash = "#/" + keys[Math.floor(Math.random() * keys.length)];
+});
+
+$("#theme").addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme") === "dark";
+  document.documentElement.setAttribute("data-theme", cur ? "light" : "dark");
+  $("#theme").textContent = cur ? "🌙" : "☀️";
+  localStorage.setItem("dict-theme", cur ? "light" : "dark");
+});
+
+/* ================= 初始化 ================= */
+(function init() {
+  const saved = localStorage.getItem("dict-theme");
+  const dark = saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  $("#theme").textContent = dark ? "☀️" : "🌙";
+
+  rebuildKeymap();
+  renderIndex();
+  $("#stat-words").textContent = Object.keys(WORDS).length;
+  $("#stat-derived").textContent = Object.keys(DERIVED).length;
+
+  window.addEventListener("hashchange", route);
+  route();
+})();
+</script>
+</body>
+</html>
