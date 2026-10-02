@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="font-size:100%">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title><%= user.nickname %>'s Profile</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <script>(function(){try{document.documentElement.style.fontSize = '<%= (typeof fontSize !== "undefined" ? fontSize : "100%") %>'}catch(e){} })()</script>
+</head>
+<body class="<%= theme === 'light' ? 'light' : '' %>" data-brightness="<%= brightness %>" data-lang="<%= lang %>" data-fontsize="<%= fontSize || '100%' %>">
+  <header class="site-header">
+    <div class="left">
+      <% if (currentUserId) { %>
+        <a class="btn" href="/?tab=blogs"><%= __('Blog') %></a>
+        <a class="btn" href="/favorites"><%= __('Favorites') %></a>
+      <% } %>
+    </div>
+    <div class="brand"><%= currentNickname ? currentNickname + "'s Blog" : "昵称's Blog" %></div>
+    <div class="right controls">
+      <div class="top-actions">
+        <% if (currentUserId) { %>
+          <a class="btn" href="/settings"><%= __('Settings') %></a>
+        <% } %>
+        <% if (currentUserRole === 'admin' || currentUserRole === 'superadmin') { %>
+          <a class="btn" href="/admin/users"><%= __('Admin') %></a>
+        <% } %>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+      <div class="card">
+      <div style="display:flex;gap:16px;align-items:center">
+        <div>
+          <% if (user.avatar) { %>
+            <img src="<%= user.avatar %>" style="width:120px;height:120px;border-radius:8px;object-fit:cover" />
+          <% } else { %>
+            <div style="width:120px;height:120px;border-radius:8px;background:#eee"></div>
+          <% } %>
+        </div>
+        <div>
+          <h2><%= user.nickname %> <% if (user.role === 'admin') { %><span style="background:#ffd;color:#a60;padding:2px 6px;border-radius:6px;font-size:12px"><%= __('Admin') %></span><% } else if (user.role === 'superadmin') { %><span style="background:#fde;color:#b00;padding:2px 6px;border-radius:6px;font-size:12px"><%= __('Superadmin') %></span><% } %></h2>
+          <div style="color:#666"><%= __('Gender') %>: <%= user.gender || __('NotFilled') %> · <%= __('Age') %>: <%= user.age || '—' %> · MBTI: <%= user.mbti || '—' %></div>
+          <div style="margin-top:8px;color:#444"><%= __('Signature') %>: <%= user.signature || __('None') %></div>
+          <div style="margin-top:8px;color:#666"><%= __('Birthday') %>: <%= user.birthday ? new Date(user.birthday).toLocaleDateString() : __('NotFilled') %></div>
+        </div>
+        <div style="margin-left:auto">
+          <% if (String(user._id) === String(currentUserId)) { %>
+            <a class="btn" href="/user/<%= user._id %>/edit"><%= __('EditProfile') %></a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <h3><%= __('TheirArticles') %></h3>
+          <% if (!articles || articles.length === 0) { %>
+        <div class="card empty"><%= __('NoArticles') %></div>
+      <% } %>
+      <% articles.forEach(a => { %>
+        <article class="card">
+          <h4><a href="/article/<%= a._id %>"><%= a.title %></a></h4>
+          <div class="meta"><%= __('PublishedAt') %> <%= new Date(a.createdAt).toLocaleString() %></div>
+        </article>
+      <% }) %>
+    </div>
+  </main>
+
+  <script src="/js/three.min.js"></script>
+  <script src="/js/three-bg.js"></script>
+  <script src="/js/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Edit Article</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <header class="site-header">
+        <div class="brand"><%= currentNickname ? currentNickname + "'s Blog" : "昵称's Blog" %></div>
+        <div class="controls">
+            <% if (currentUserRole === 'admin' || currentUserRole === 'superadmin') { %>
+                <a class="btn" href="/admin/users">用户管理</a>
+            <% } %>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card">
+            <h2>Edit Article</h2>
+            <div style="text-align:right;color:#666;margin-top:-20px">Posted by: <%= article.authorNickname || __('Anonymous') %></div>
+            <form action="/<%= article._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+                <div class="field">
+                    <label for="title">Title</label>
+                    <input required value="<%= article.title %>" type="text" name="title" id="title">
+                </div>
+
+                <div class="field">
+                    <label for="description">Description</label>
+                    <textarea name="description" id="description"><%= article.description %></textarea>
+                </div>
+
+                    <div class="field">
+                        <label for="markdown">Markdown (optional)</label>
+                        <textarea name="markdown" id="markdown" placeholder="Use markdown to write rich content"><%= article.markdown || '' %></textarea>
+                    </div>
+
+                <div class="field">
+                    <label for="media">Upload Photos / Videos (will append)</label>
+                    <input id="media" name="media" type="file" accept="image/*,video/*" multiple>
+                </div>
+
+                <% if (article && article.media && article.media.length) { %>
+                    <div style="margin-bottom:12px">
+                        <label>Existing media</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
+                            <% article.media.forEach(m => { %>
+                                <% if (/\.(mp4|webm|ogg)$/i.test(m)) { %>
+                                    <video src="<%= m %>" width="140" controls style="border-radius:8px"></video>
+                                <% } else { %>
+                                    <img src="<%= m %>" width="140" style="object-fit:cover;border-radius:8px"/>
+                                <% } %>
+                            <% }) %>
+                        </div>
+                    </div>
+                <% } %>
+
+                <div style="display:flex;gap:8px">
+                    <a class="btn" href="/">Cancel</a>
+                    <button class="btn primary" type="submit">Save</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="/js/three.min.js"></script>
+    <script src="/js/three-bg.js"></script>
+    <script src="/js/theme.js"></script>
+</body>
+</html>

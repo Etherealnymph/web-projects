@@ -1,0 +1,31 @@
+{
+  "name": "thirdweb",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^6.8.0",
+    "express-session": "^1.17.3",
+    "helmet": "^7.0.0",
+    "marked": "^5.1.1",
+    "marked-mangle": "^1.1.13",
+    "nodemailer": "^6.9.1",
+    "method-override": "^3.0.0",
+    "minimist": "^1.2.8",
+    "mongoose": "^9.4.1",
+    "multer": "^2.1.1",
+    "svg-captcha": "^1.4.0"
+  }
+}

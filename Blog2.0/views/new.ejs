@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="font-size:100%">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>New Article</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <script>(function(){try{document.documentElement.style.fontSize = '<%= (typeof fontSize !== "undefined" ? fontSize : "100%") %>'}catch(e){} })()</script>
+</head>
+<body class="<%= theme === 'light' ? 'light' : '' %>" data-brightness="<%= brightness %>" data-lang="<%= lang %>" data-fontsize="<%= fontSize || '100%' %>">
+    <header class="site-header">
+        <div class="brand"><%= currentNickname ? currentNickname + "'s Blog" : "昵称's Blog" %></div>
+        <div class="controls">
+            <% if (currentUserRole === 'admin' || currentUserRole === 'superadmin') { %>
+                <a class="btn" href="/admin/users"><%= __('Admin') %></a>
+            <% } %>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card">
+            <h2><%= __('New') %></h2>
+            <form action="/new" method="POST" enctype="multipart/form-data">
+                <div class="field">
+                    <label for="title"><%= __('Title') %></label>
+                    <input required type="text" name="title" id="title">
+                </div>
+
+                <div class="field">
+                    <label><%= __('Type') %></label>
+                    <div style="display:flex;gap:12px;align-items:center">
+                        <label><input type="radio" name="type" value="blog" checked> <%= __('Blog') %></label>
+                        <label><input type="radio" name="type" value="question"> <%= __('Question') %></label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="description"><%= __('Description') %></label>
+                    <textarea name="description" id="description"></textarea>
+                </div>
+
+                <div class="field">
+                    <label for="media"><%= __('UploadMedia') %></label>
+                    <input id="media" name="media" type="file" accept="image/*,video/*" multiple>
+                </div>
+
+                <div style="display:flex;gap:8px">
+                    <a class="btn" href="/"><%= __('Back') %></a>
+                    <button class="btn primary" type="submit"><%= __('Save') || 'Save' %></button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="/js/three.min.js"></script>
+    <script src="/js/three-bg.js"></script>
+    <script src="/js/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="font-size:100%">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Edit Profile</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <script>(function(){try{document.documentElement.style.fontSize = '<%= (typeof fontSize !== "undefined" ? fontSize : "100%") %>'}catch(e){} })()</script>
+</head>
+<body class="<%= theme === 'light' ? 'light' : '' %>" data-brightness="<%= brightness %>" data-lang="<%= lang %>" data-fontsize="<%= fontSize || '100%' %>">
+  <header class="site-header">
+    <div class="left">
+      <% if (currentUserId) { %>
+        <a class="btn" href="/user/<%= currentUserId %>"><%= __('Home') %></a>
+      <% } %>
+    </div>
+    <div class="brand"><%= currentNickname ? currentNickname + "'s Blog" : "昵称's Blog" %></div>
+    <div class="right controls"></div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h2>Edit Profile</h2>
+      <form action="/user/<%= user._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+        <div class="field">
+          <label for="avatar">Avatar</label>
+          <input id="avatar" name="avatar" type="file" accept="image/*">
+        </div>
+
+        <div class="field">
+          <label for="birthday">Birthday</label>
+          <input id="birthday" name="birthday" type="date" value="<%= user.birthday ? new Date(user.birthday).toISOString().substr(0,10) : '' %>">
+        </div>
+
+        <div class="field">
+          <label for="age">Age</label>
+          <input id="age" name="age" type="number" value="<%= user.age || '' %>">
+        </div>
+
+        <div class="field">
+          <label for="gender"><%= __('Gender') %></label>
+          <select id="gender" name="gender">
+            <option value="" <%= !user.gender ? 'selected' : '' %>><%= __('NotFilled') %></option>
+            <option value="male" <%= user.gender === 'male' ? 'selected' : '' %>><%= __('Male') %></option>
+            <option value="female" <%= user.gender === 'female' ? 'selected' : '' %>><%= __('Female') %></option>
+            <option value="other" <%= user.gender === 'other' ? 'selected' : '' %>><%= __('Other') %></option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="mbti">MBTI</label>
+          <input id="mbti" name="mbti" type="text" value="<%= user.mbti || '' %>">
+        </div>
+
+        <div class="field">
+          <label for="signature">Signature</label>
+          <textarea id="signature" name="signature"><%= user.signature || '' %></textarea>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <a class="btn" href="/user/<%= user._id %>"><%= __('Cancel') %></a>
+          <button class="btn primary" type="submit"><%= __('Save') %></button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="/js/three.min.js"></script>
+  <script src="/js/three-bg.js"></script>
+  <script src="/js/theme.js"></script>
+  </body>
+</html>

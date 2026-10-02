@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="font-size:100%">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title><%= article && article.authorNickname ? article.authorNickname + "'s Blog" : (currentNickname ? currentNickname + "'s Blog" : "昵称's Blog") %></title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <script>(function(){try{document.documentElement.style.fontSize = '<%= (typeof fontSize !== "undefined" ? fontSize : "100%") %>'}catch(e){} })()</script>
+</head>
+<body class="<%= theme === 'light' ? 'light' : '' %>" data-brightness="<%= brightness %>" data-lang="<%= lang %>" data-fontsize="<%= fontSize || '100%' %>">
+  <header class="site-header">
+    <div class="left">
+      <a class="btn" href="/?tab=blogs"><%= __('Blog') %></a>
+    </div>
+    <div class="brand"><%= article && article.authorNickname ? article.authorNickname + "'s Blog" : (currentNickname ? currentNickname + "'s Blog" : "昵称's Blog") %></div>
+    <div class="right controls">
+      <% if (currentUserRole === 'admin' || currentUserRole === 'superadmin') { %>
+        <a class="btn" href="/admin/users"><%= __('Admin') %></a>
+      <% } %>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="card">
+      <div class="author-meta">
+        <% if (article.authorAvatar) { %>
+          <img class="author-avatar" src="<%= article.authorAvatar %>" alt="avatar">
+        <% } %>
+        <% if (article.authorRole === 'admin') { %>
+          <span class="role-badge admin"><%= __('Admin') %></span>
+        <% } else if (article.authorRole === 'superadmin') { %>
+          <span class="role-badge superadmin"><%= __('Superadmin') %></span>
+        <% } %>
+      </div>
+      <h2><%= article.title %></h2>
+      <p class="meta"><%= __('Details') %></p>
+      <p class="meta"><%= __('PublishedAt') %>: <%= new Date(article.createdAt).toLocaleString() %></p>
+
+      <% if (renderedMarkdown) { %>
+        <div class="card" style="padding:12px;margin-top:8px">
+          <div class="rendered-md"><%- renderedMarkdown %></div>
+        </div>
+      <% } else { %>
+        <p><%= article.description %></p>
+      <% } %>
+
+      <% if (article && article.media && article.media.length) { %>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+          <% article.media.forEach(m => { %>
+            <% if (/\.(mp4|webm|ogg)$/i.test(m)) { %>
+              <video src="<%= m %>" controls style="max-width:320px;border-radius:10px"></video>
+            <% } else { %>
+              <img src="<%= m %>" style="max-width:320px;border-radius:10px;object-fit:cover" />
+            <% } %>
+          <% }) %>
+        </div>
+      <% } %>
+      <div style="margin-top:12px">
+        <a class="btn" href="/?tab=blogs"><%= __('Blog') %></a>
+        <% if ((article.authorId && String(article.authorId) === String(currentUserId)) || currentUserRole === 'admin' || currentUserRole === 'superadmin') { %>
+          <form style="display:inline;margin-left:8px" action="/<%= article._id %>?_method=DELETE" method="POST">
+            <button class="btn danger" type="submit"><%= __('Delete') %></button>
+          </form>
+        <% } %>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <form action="/article/<%= article._id %>/like" method="POST" style="display:inline">
+            <button class="btn" type="submit"><%= article.isLiked ? __('Liked') : __('Like') %> (<%= article.likesCount || 0 %>)</button>
+          </form>
+          <form action="/article/<%= article._id %>/favorite" method="POST" style="display:inline">
+            <button class="btn" type="submit"><%= article.isFavorited ? __('Favorited') : __('Favorite') %> (<%= article.favoritesCount || 0 %>)</button>
+          </form>
+          <div style="color:#666;margin-left:8px"><%= __('View') %>: <%= article.views || 0 %></div>
+        </div>
+      </div>
+    </article>
+    
+    <section style="margin-top:12px">
+      <div class="card">
+        <h3><%= __('Comments') %> (<%= comments ? comments.length : 0 %>)</h3>
+        <% if (currentUserId) { %>
+          <form action="/article/<%= article._id %>/comments" method="POST">
+            <textarea name="text" required placeholder="<%= __('WriteYourComment') %>" style="width:100%;min-height:80px;margin-bottom:8px"></textarea>
+            <div><button class="btn" type="submit"><%= __('PostComment') %></button></div>
+          </form>
+        <% } else { %>
+          <div><a class="btn" href="/login"><%= __('PleaseLoginToComment') %></a></div>
+        <% } %>
+
+        <% if (comments && comments.length) { %>
+          <% comments.forEach(c => { %>
+            <div style="border-top:1px solid #eee;padding:8px 0">
+              <div style="display:flex;align-items:center;gap:8px">
+                <strong><%= c.authorNickname %></strong>
+                <small style="color:#666"><%= new Date(c.createdAt).toLocaleString() %></small>
+              </div>
+              <div style="margin-top:6px"><%= c.text %></div>
+              <div style="margin-top:6px">
+                <form action="/comment/<%= c._id %>/like" method="POST" style="display:inline">
+                  <button class="btn" type="submit"><%= c.isLiked ? __('Liked') : __('Like') %> (<%= c.likesCount || 0 %>)</button>
+                </form>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+    </section>
+
+    <% if (article.type === 'question') { %>
+      <section style="margin-top:18px">
+        <div class="card">
+          <h3><%= __('Answers') %> (<%= answers ? answers.length : 0 %>)</h3>
+          <% if (currentUserId) { %>
+            <form id="answer-form" action="/article/<%= article._id %>/answers" method="POST">
+              <textarea name="text" required placeholder="<%= __('WriteYourAnswer') %>" style="width:100%;min-height:100px;margin-bottom:8px"></textarea>
+              <div><button class="btn" type="submit"><%= __('SubmitAnswer') %></button></div>
+            </form>
+          <% } else { %>
+            <div><%= __('PleaseLoginToComment') %></div>
+          <% } %>
+
+          <% if (answers && answers.length) { %>
+            <% answers.forEach(a => { %>
+              <div style="border-top:1px solid #eee;padding:12px 0;position:relative">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                  <div>
+                    <strong><%= a.authorNickname %></strong>
+                    <small style="color:#666;margin-left:8px"><%= new Date(a.createdAt).toLocaleString() %></small>
+                    <div style="margin-top:8px"><%= a.text %></div>
+                  </div>
+                  <div style="text-align:right">
+                        <div class="meta"><%= __('Like') %>: <%= a.likesCount || 0 %> · <%= __('Favorite') %>: <%= a.favoritesCount || 0 %></div>
+                        <div class="meta"><%= __('View') %>: <%= a.views || 0 %></div>
+                        <form action="/answer/<%= a._id %>/like" method="POST" style="display:inline">
+                          <button class="btn" type="submit"><%= a.isLiked ? __('Liked') : __('Like') %> (<%= a.likesCount || 0 %>)</button>
+                        </form>
+                        <form action="/answer/<%= a._id %>/favorite" method="POST" style="display:inline">
+                          <button class="btn" type="submit"><%= a.isFavorited ? __('Favorited') : __('Favorite') %> (<%= a.favoritesCount || 0 %>)</button>
+                        </form>
+                  </div>
+                </div>
+
+                <div style="margin-top:10px">
+                  <h4><%= __('Comments') %> (<%= a.comments ? a.comments.length : 0 %>)</h4>
+                  <% if (currentUserId) { %>
+                    <form action="/answer/<%= a._id %>/comments" method="POST">
+                      <textarea name="text" required placeholder="<%= __('CommentOnAnswer') %>" style="width:100%;min-height:60px;margin-bottom:8px"></textarea>
+                      <div><button class="btn" type="submit"><%= __('PostComment') %></button></div>
+                    </form>
+                  <% } %>
+                  <% if (a.comments && a.comments.length) { %>
+                    <% a.comments.forEach(cc => { %>
+                      <div style="border-top:1px solid #eee;padding:8px 0">
+                        <div style="display:flex;align-items:center;gap:8px">
+                          <strong><%= cc.authorNickname %></strong>
+                          <small style="color:#666"><%= new Date(cc.createdAt).toLocaleString() %></small>
+                        </div>
+                        <div style="margin-top:6px"><%= cc.text %></div>
+                        <div style="margin-top:6px">
+                          <form action="/comment/<%= cc._id %>/like" method="POST" style="display:inline">
+                            <button class="btn" type="submit"><%= cc.isLiked ? __('Liked') : __('Like') %> (<%= cc.likesCount || 0 %>)</button>
+                          </form>
+                        </div>
+                      </div>
+                    <% }) %>
+                  <% } %>
+                </div>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+      </section>
+    <% } %>
+  </main>
+
+  <script src="/js/three.min.js"></script>
+  <script src="/js/three-bg.js"></script>
+  <script src="/js/theme.js"></script>
+  <script src="/js/article-actions.js"></script>
+</body>
+</html>

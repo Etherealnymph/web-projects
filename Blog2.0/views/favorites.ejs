@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="font-size:100%">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title><%= __('MyFavorites') %></title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script>(function(){try{document.documentElement.style.fontSize = '<%= (typeof fontSize !== "undefined" ? fontSize : "100%") %>'}catch(e){} })()</script>
+</head>
+<body class="<%= theme === 'light' ? 'light' : '' %>" data-brightness="<%= brightness %>" data-lang="<%= lang %>" data-fontsize="<%= fontSize || '100%' %>">
+  <header class="site-header">
+    <div class="left"><a class="btn" href="/?tab=blogs"><%= __('Blog') %></a></div>
+    <div class="brand"><%= __('MyFavorites') %></div>
+    <div class="right controls">
+      <a class="btn" href="/settings"><%= __('Settings') %></a>
+    </div>
+  </header>
+  <main class="container">
+    <h2><%= __('MyFavorites') %></h2>
+    <% if (!articles || articles.length === 0) { %>
+      <div class="card empty"><%= __('NoFavorites') %></div>
+    <% } %>
+    <% (articles||[]).forEach(a => { %>
+      <article class="card">
+        <div class="author-meta">
+          <% if (a.authorAvatar) { %>
+            <img class="author-avatar" src="<%= a.authorAvatar %>">
+          <% } %>
+          <% if (a.authorRole === 'admin') { %>
+            <span class="role-badge admin"><%= __('Admin') %></span>
+          <% } else if (a.authorRole === 'superadmin') { %>
+            <span class="role-badge superadmin"><%= __('Superadmin') %></span>
+          <% } %>
+        </div>
+        <h3><a href="/article/<%= a._id %>"><%= a.title %></a></h3>
+        <div class="meta"><%= __('Like') %>: <%= a.likesCount || 0 %> · <%= __('Favorite') %>: <%= a.favoritesCount || 0 %></div>
+        <form action="/article/<%= a._id %>/favorite" method="POST" style="margin-top:8px">
+          <button class="btn" type="submit"><%= __('Unfavorite') %></button>
+        </form>
+      </article>
+    <% }) %>
+  </main>
+  <script src="/js/three.min.js"></script>
+  <script src="/js/three-bg.js"></script>
+  <script src="/js/theme.js"></script>
+</body>
+</html>

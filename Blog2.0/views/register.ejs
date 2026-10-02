@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN" style="font-size:100%">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title><%= __('Register') %></title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <!-- moved inline script to external /js/register-init.js to satisfy CSP -->
+  </head>
+  <body class="ready <%= theme === 'light' ? 'light' : '' %>" data-brightness="<%= brightness %>" data-lang="<%= lang %>" data-fontsize="<%= fontSize || '100%' %>">
+    <div style="position:fixed;top:8px;right:12px;z-index:60">
+      <a class="btn" href="/set-lang?lang=zh-CN"><%= __('Chinese') %></a>
+      <a class="btn" href="/set-lang?lang=en-US" style="margin-left:6px"><%= __('English') %></a>
+    </div>
+    <div class="container">
+      <div class="card">
+        <h2><%= __('Register') %></h2>
+        <% if (error) { %>
+          <p class="empty"><%= error %></p>
+        <% } %>
+        <form method="post" action="/register">
+          <label><%= __('Nickname') %></label>
+          <input type="text" name="nickname" required>
+          <br>
+          <br>
+           <label><%= __('Email') %></label>
+           <input type="email" name="email" placeholder="<%= __('EmailPlaceholder') %>">
+          <br>
+          <br>
+           <label><%= __('Account') %></label>
+          <input type="text" name="account" required>
+          <br>
+          <br>
+          <label><%= __('Password') %></label>
+          <input type="password" name="password" required>
+          <br>
+          <br>
+          <label><%= __('ConfirmPassword') %></label>
+          <input type="password" name="password2" required>
+          <br>
+          <br>
+          <div id="register-code-area" style="display:flex;gap:8px;align-items:center">
+            <label id="send-code-label"><%= __('SendCode') %></label>
+            <input id="email-code-input" type="text" name="emailCode">
+            <button type="button" id="send-register-code" class="btn"><%= __('SendCode') %></button>
+            <button type="button" id="toggle-invite-mode" class="btn" style="margin-left:6px" data-invite-label="<%= __('OtherRegister') %>" data-email-label="<%= __('UseEmailRegister') %>"><%= __('OtherRegister') %></button>
+            <br>
+            <!-- 邀请码区域，默认隐藏 -->
+            <span id="invite-area" style="display:none;align-items:center">
+              <label style="margin-left:8px"><%= __('InviteCode') %></label>
+              <input id="invite-code-input" type="text" name="inviteCode" placeholder="<%= __('InviteCode') %>">
+            </span>
+            <!-- inline script removed due to Content Security Policy; handled by /js/auth.js -->
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+            <button class="btn primary" type="submit"><%= __('Register') %></button>
+            <a class="btn" href="/login"><%= __('Back') %></a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Load frontend scripts: three.js, three-bg and theme -->
+<script src="/js/three.min.js"></script>
+<script src="/js/three-bg.js"></script>
+<script src="/js/theme.js"></script>
+<script src="/js/auth.js"></script>

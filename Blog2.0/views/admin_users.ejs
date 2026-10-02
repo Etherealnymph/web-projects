@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="font-size:100%">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Manage Users</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <script>(function(){try{document.documentElement.style.fontSize = '<%= (typeof fontSize !== "undefined" ? fontSize : "100%") %>'}catch(e){} })()</script>
+</head>
+<body class="<%= theme === 'light' ? 'light' : '' %>" data-brightness="<%= brightness %>" data-lang="<%= lang %>" data-fontsize="<%= fontSize || '100%' %>">
+  <header class="site-header">
+    <div class="brand"><%= currentNickname ? currentNickname + "'s Blog" : "昵称's Blog" %></div>
+    <div class="controls">
+      <a class="btn" href="/?tab=blogs"><%= __('Back') %></a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h2><%= __('RegisteredUsers') %></h2>
+      <% if (!users || users.length === 0) { %>
+        <div class="card empty"><%= __('NoUsers') %></div>
+      <% } %>
+      <% users.forEach(u => { %>
+        <div style="display:flex;align-items:center;gap:12px;padding:8px;border-bottom:1px solid #f0f0f0">
+          <div style="flex:1">
+            <strong><a href="/user/<%= u._id %>"><%= u.nickname %></a></strong>
+            <div style="color:#666"><%= __('Account') %>: <%= u.account %> · <%= __('Role') %>: <%= u.role %></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <% if (currentUserRole === 'admin' || currentUserRole === 'superadmin') { %>
+              <% /* 普通管理员不能对 superadmin 做 promote/demote */ %>
+              <% if (u.role !== 'superadmin') { %>
+                <% if (u.role !== 'admin') { %>
+                  <form action="/admin/user/<%= u._id %>/promote" method="POST" style="display:inline">
+                    <button class="btn"><%= __('PromoteToAdmin') %></button>
+                  </form>
+                <% } else { %>
+                  <form action="/admin/user/<%= u._id %>/demote" method="POST" style="display:inline">
+                    <button class="btn"><%= __('DemoteAdmin') %></button>
+                  </form>
+                <% } %>
+              <% } %>
+            <% } %>
+            <% if (currentUserRole === 'superadmin') { %>
+              <form action="/admin/user/<%= u._id %>?_method=DELETE" method="POST" style="display:inline">
+                <button class="btn danger"><%= __('DeleteUser') %></button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </main>
+
+  <script src="/js/three.min.js"></script>
+  <script src="/js/three-bg.js"></script>
+  <script src="/js/theme.js"></script>
+</body>
+</html>
