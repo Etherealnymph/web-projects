@@ -10,9 +10,9 @@
 
 export const CONFIG = {
   /** Supabase 项目地址，形如 https://abcdefg.supabase.co */
-  supabaseUrl: '',
-  /** Supabase anon public key（公开密钥，可安全放在前端） */
-  supabaseAnonKey: '',
+  supabaseUrl: 'https://gthztievqjovorlcwuwq.supabase.co',
+  /** Supabase publishable/anon public key（公开密钥，可安全放在前端） */
+  supabaseAnonKey: 'sb_publishable_lM1FncNduX2y0PXDowgiQA_bvnbQE0q',
   /** 媒体存储桶名称（需要是 public bucket） */
   storageBucket: 'media',
 
