@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="体悟集">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b07a35"/>
+      <stop offset="100%" stop-color="#2f6b5f"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#g)"/>
+  <text x="64" y="88" font-size="72" text-anchor="middle" fill="#fff"
+        font-family="Songti SC, Noto Serif SC, SimSun, Georgia, serif">体</text>
+</svg>

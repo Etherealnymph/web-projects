@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-lang="zh">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>体悟集 · Insight</title>
+  <meta name="description" content="个人私人体悟网站：推荐、日记、诗歌、文案、评论。邀请码注册，超管后台，支持图文音视频与 Markdown。" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./assets/icon.svg" />
+  <link rel="stylesheet" href="./assets/css/base.css" />
+  <link rel="stylesheet" href="./assets/css/components.css" />
+  <link rel="stylesheet" href="./assets/css/views.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="app" class="app-root">
+    <div class="boot-screen">
+      <div class="boot-mark">体</div>
+      <div class="boot-text">正在载入体悟集…</div>
+    </div>
+  </div>
+
+  <div id="toasts" class="toast-stack" role="status" aria-live="polite"></div>
+  <div id="modals" class="modal-layer"></div>
+
+  <noscript>
+    <p style="padding:24px;font-family:sans-serif">本网站需要启用 JavaScript 才能运行。</p>
+  </noscript>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

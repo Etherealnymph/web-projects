@@ -70,6 +70,47 @@ file:///D:/Project/html/index.html
 | 幸运老虎机 | [Tiger.html](./Tiger.html) | 轻量老虎机小游戏 |
 | 猫咪互动页面 | [v3.0.html](./v3.0.html) | 猫咪主题互动页面 |
 
+
+## 体悟集（私人站点）
+
+`insight-space/` 是一个可部署到 GitHub Pages 的私人「体悟」网站，纯静态前端 + 可选 Supabase 后端，无需构建。
+
+```text
+insight-space/
+├─ index.html
+├─ README.md
+├─ supabase/schema.sql
+├─ assets/
+└─ src/
+```
+
+主要能力：
+
+- 推荐（按综合热度排序）、日记、诗歌、文案、评论等模块，超管可在后台自由增删改；
+- 超管管理邀请码与账号；其他人用邀请码注册，邀请码停用 / 过期后对应模块访问立即失效；
+- 内容支持图片 / 视频 / 文档上传、Markdown 正文、语音与表情包；
+- 内容与评论都支持点赞 / 踩 / 收藏 / 评论（多级回复）；
+- 个人主页可改昵称与密码，支持中英文切换与日间 / 夜间主题。
+
+两种运行模式：
+
+| 模式 | 数据位置 | 说明 |
+|---|---|---|
+| 本地模式（默认） | 浏览器 IndexedDB | 打开即用，适合单人 / 演示 |
+| Supabase 模式 | Supabase 数据库 | 真实多人账号与权限，需按 `insight-space/README.md` 配置 |
+
+本地打开：
+
+```powershell
+cd D:\Project\html
+python -m http.server 8123 --bind 127.0.0.1
+# http://127.0.0.1:8123/insight-space/
+```
+
+在线入口：<https://etherealnymph.github.io/web-projects/insight-space/>
+
+详细说明（部署、Supabase 建表、邀请码与权限模型）见 [insight-space/README.md](./insight-space/README.md)。
+
 ## 股票训练场
 
 股票训练场由静态前端和 FastAPI 后端组成：
@@ -196,4 +237,3 @@ http://127.0.0.1:5500/index.html
 1. 根目录的 `index.html`
 2. 本 README
 3. 对应项目目录内的 README（如果项目包含多个文件或需要后端）
-
