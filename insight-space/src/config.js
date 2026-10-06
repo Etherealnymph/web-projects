@@ -19,11 +19,11 @@ export const CONFIG = {
    * 主机后（推荐 Netlify，见 proxy/README.md），把它的地址填在这里，
    * 所有 /auth/v1、/rest/v1、/storage/v1、/functions/v1 请求都会改走该代理。
    *
-   * 例：supabaseProxyUrl: 'https://your-proxy.netlify.app'
+   * 例：supabaseProxyUrl: 'https://insight-space-api.netlify.app'（本项目当前使用）
    *
    * 留空则直连 supabaseUrl（境外访问正常）。
    */
-  supabaseProxyUrl: '',
+  supabaseProxyUrl: 'https://insight-space-api.netlify.app',
   /** Supabase publishable/anon public key（公开密钥，可安全放在前端） */
   supabaseAnonKey: 'sb_publishable_lM1FncNduX2y0PXDowgiQA_bvnbQE0q',
   /** 媒体存储桶名称（需要是 public bucket） */

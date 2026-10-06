@@ -1,5 +1,8 @@
 # Supabase 反向代理
 
+本项目**已在用**的代理：<https://insight-space-api.netlify.app>
+（Netlify 项目 `insight-space-api`，规则见 [`netlify/_redirects`](./netlify/_redirects)）
+
 ## 为什么需要它
 
 中国大陆运营商对 `*.supabase.co` 做了**基于 SNI 的 TLS 阻断**：DNS 能解析、TCP 三次握手能成功，
@@ -34,8 +37,10 @@ Netlify 的 `_redirects` 支持「外部 URL + 状态码 200」的原样转发�
 ```powershell
 # 1) 把 proxy\netlify 目录拖到 https://app.netlify.com/drop
 #    （或先压成 zip 再上传：Compress-Archive -Path proxy\netlify\* -DestinationPath proxy.zip）
-# 2) 得到形如 https://xxxx.netlify.app 的域名，点 “Claim this site” 用 GitHub 登录认领，
-#    认领后才会永久保留，并且会去掉临时密码保护。
+# 2) 得到形如 https://xxxx.netlify.app 的域名，点 “Claim this site” 用 GitHub 登录认领。
+#    ⚠ 认领后还要去 Project configuration → General → Visitor access → Edit visibility，
+#      把 Production visibility 从 Private 改成 Public —— 新团队的默认值是 Private，
+#      不改的话站点会一直 401 并跳转到 app.netlify.com/edge-access。
 # 3) 把域名填进 src/config.js：
 #      supabaseProxyUrl: 'https://xxxx.netlify.app',
 ```
@@ -55,17 +60,24 @@ Netlify 的 `_redirects` 支持「外部 URL + 状态码 200」的原样转发�
 `Access-Control-Expose-Headers` 里带上 `Content-Range`（未读数的 `count: 'exact'` 依赖它），
 Netlify 会把响应头原样透传。
 
-已实测（经 `xxxx.netlify.app` 代理）：
+已实测（经 `https://insight-space-api.netlify.app` 代理，成都移动、无代理裸连）：
 
 | 请求 | 结果 |
 | --- | --- |
-| `GET /rest/v1/contents` + `apikey` | 200 |
-| `HEAD /rest/v1/contents` + `Prefer: count=exact` | 200，`content-range: */0` |
-| `GET /auth/v1/settings` | 200 |
-| `POST /auth/v1/token`（错误密码） | 400 `invalid_credentials`（说明 POST body 正确到达 GoTrue） |
-| `POST /rest/v1/contents`（匿名） | 401 `42501` RLS 拒绝（说明写路径透明） |
-| 12 MB 请求体上传 | 403（被 storage RLS 拒绝，而非体积限制） |
+| `GET /` | 200（代理说明页） |
+| `GET /rest/v1/contents` + `apikey` | 200，`[]`，`Access-Control-Allow-Origin: https://etherealnymph.github.io` |
+| `HEAD /rest/v1/contents` + `Prefer: count=exact` | 200，`Content-Range` 可读（未读数轮询依赖它） |
+| `GET /auth/v1/settings` + `apikey` | 200（对照：上游直连在同一台机器上是 `curl` exit 35，TLS 被重置） |
+| `POST /rest/v1/contents`（匿名） | RLS 拒绝 `42501`（说明 POST body 与写路径透明） |
+| `PUT /storage/v1/object/media/...` 19–20 MB | 请求体**完整送达**，被 storage RLS 拒绝（说明没有 6 MB 上限） |
+| `PUT` 最大实测到 35 MB | 请求体完整送达 |
 | `/definitely-not-proxied/x` | 404（不是开放代理） |
+
+> 体积的补充说明：Netlify 官方文档里的 6 MB 上限只针对 Serverless Function，`_redirects` 的代理走
+> CDN 不适用。实测 10–35 MB 的成功率呈**非单调**波动（19、20、35 MB 通过，10、15 MB 偶发空响应），
+> 说明瓶颈是裸连国际链路的丢包，而不是配置上限 —— 换任何境外代理都绕不开这一点，
+> 浏览器 `fetch` 遇到时会报网络错误，重试即可。链路差时建议把
+> [`src/components/composer.js`](../src/components/composer.js) 的 `MAX_MB` 调小。
 
 ---
 

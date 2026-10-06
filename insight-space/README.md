@@ -212,28 +212,34 @@ DNS 能解析、TCP 能建连，ClientHello 一发出去就被 RST。
 
 ### 解决：给 Supabase 套一层大陆可达的域名
 
-不用换掉 Supabase，把 API 走一个大陆能访问的反向代理即可。**完整说明见 [`proxy/README.md`](./proxy/README.md)**，
-最短路径：
+不用换掉 Supabase，把 API 走一个大陆能访问的反向代理即可。**本项目已在用**
+`https://insight-space-api.netlify.app`，规则与实测数据见 [`proxy/README.md`](./proxy/README.md)。
 
-1. 打开 <https://app.netlify.com/drop>，把 [`proxy/netlify/`](./proxy/netlify) 目录（或它压成的 zip）拖进去。
-2. 上传完成后点 **Claim this site** 并用 GitHub 登录认领 —— 认领前站点只有 1 小时生命且带临时密码。
-3. 把拿到的域名填进 `src/config.js`：
+`src/config.js` 里对应的配置就是这一行：
 
 ```js
 export const CONFIG = {
   supabaseUrl: 'https://gthztievqjovorlcwuwq.supabase.co',
-  supabaseProxyUrl: 'https://xxxx.netlify.app', // ← 填这里
+  supabaseProxyUrl: 'https://insight-space-api.netlify.app',
   // ...
 };
 ```
 
-4. 提交推送，等 Pages 重新构建。
+**重建代理的方法**（换 Supabase 项目、或想换一个域名时）：
+
+1. 打开 <https://app.netlify.com/drop>，把 [`proxy/netlify/`](./proxy/netlify) 目录（或它压成的 zip）拖进去。
+2. 点 **Claim this site**，用 GitHub 登录认领 —— 认领前站点只有 1 小时生命且带临时密码。
+3. ⚠ **认领后必须再做一步**：Project configuration → General → Visitor access → **Edit visibility**，
+   把 `Production visibility` 从 `Private` 改成 `Public`。Netlify 新团队的默认值是 Private，
+   不改的话站点会一直返回 401 并跳转到 `app.netlify.com/edge-access`，浏览器里表现为「打不开」。
+4. 把域名回填到 `src/config.js` 的 `supabaseProxyUrl`，并在 [`proxy/netlify/_redirects`](./proxy/netlify/_redirects)
+   里确认上游项目域名正确，然后提交推送、等 Pages 重新构建。
 
 为什么选 Netlify：
 
-- `_redirects` 的 `200` 重写跑在 CDN 边缘，**不经过 Serverless Function**，没有约 6 MB 的请求体上限，
-  本项目 [`src/components/composer.js`](./src/components/composer.js) 的 `MAX_MB = 30` 才能正常工作
-  （已验证 12 MB 请求体可以穿透）。
+- `_redirects` 的 `200` 重写跑在 CDN 边缘，**不经过 Serverless Function**，因此没有约 6 MB 的请求体上限。
+  实测 19、20、35 MB 的请求体都能完整送达（被 storage RLS 拒绝而不是体积错误），
+  [`src/components/composer.js`](./src/components/composer.js) 的 `MAX_MB = 30` 才有意义。
 - `app.netlify.com` / `api.netlify.com` 在大陆可达，能自己登录维护；`dash.deno.com`、`api.deno.com`
   在大陆被阻断，部署完就再也回不去控制台了。
 - Supabase 会针对请求的 `Origin` 自行回 CORS 头（`Access-Control-Allow-Origin` 回显 origin，
