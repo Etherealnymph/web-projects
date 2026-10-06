@@ -11,9 +11,10 @@ export async function renderUsersTab(ctx, panel) {
   const lang = document.documentElement.dataset.lang;
   let users = [];
   let modules = [];
+  let requests = [];
   try {
     [users, modules] = await Promise.all([api.auth.listUsers(), api.modules.list()]);
-    const requests = api.permissionRequests ? await api.permissionRequests.list() : [];
+    requests = api.permissionRequests ? await api.permissionRequests.list() : [];
   } catch (error) {
     panel.innerHTML = `<div class="banner banner--danger">${icon('alert', 17)}<div>${esc(errText(error))}</div></div>`;
     return;
