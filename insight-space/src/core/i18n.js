@@ -5,7 +5,7 @@ const zh = {
   'app.tagline': '私人的体悟与收藏',
   'app.footer': '体悟集 · 私人空间',
   'app.localMode': '本地模式（数据仅保存在本浏览器）',
-  'app.cloudMode': '云端模式（已连接 Supabase）',
+  'app.cloudMode': '云端模式（Supabase 托管的 PostgreSQL）',
   'app.localWarning': '当前为本地模式：数据只保存在这台设备的浏览器里。想多设备同步或给朋友用，请按 README 配置 Supabase。',
 
   'role.superadmin': '超级管理员',
@@ -290,7 +290,7 @@ const zh = {
   'invite.codeHint': '留空则自动生成；也可自定义，只能包含字母数字',
   'invite.category': '分类',
   'invite.categoryPh': '例如：朋友 / 家人 / 试用',
-  'invite.categoryHint': '分类只是标签，方便你在后台区分不同用途的邀请码',
+  'invite.categoryHint': '分类只是标签，方便在后台区分不同用途的邀请码',
   'invite.duration': '有效期',
   'invite.custom': '自定义到期时间',
   'invite.uses': '可用次数',
@@ -442,7 +442,7 @@ const en = {
   'app.tagline': 'A private collection of insights',
   'app.footer': 'Insight · private space',
   'app.localMode': 'Local mode (data stays in this browser)',
-  'app.cloudMode': 'Cloud mode (Supabase connected)',
+  'app.cloudMode': 'Cloud mode (PostgreSQL hosted on Supabase)',
   'app.localWarning': 'Local mode: data lives only in this browser. Configure Supabase (see README) for multi-device sync and sharing.',
 
   'role.superadmin': 'Super admin',

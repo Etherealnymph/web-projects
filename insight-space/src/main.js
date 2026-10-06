@@ -83,7 +83,7 @@ function renderShell() {
     <main class="page" id="view">${loadingState()}</main>
     <footer style="border-top:1px solid var(--line);padding:18px;text-align:center" class="tiny muted">
       ${esc(t('app.footer'))} · v${esc(APP_VERSION)} ·
-      <span title="${esc(api?.mode === 'supabase' ? t('app.cloudMode') : t('app.localMode'))}">${api?.mode === 'supabase' ? '☁︎' : '⌂'} ${esc(api?.mode === 'supabase' ? 'Supabase' : t('app.localMode'))}</span>
+      <span title="${esc(api?.mode === 'supabase' ? t('app.cloudMode') : t('app.localMode'))}">${api?.mode === 'supabase' ? '☁︎' : '⌂'} ${esc(api?.mode === 'supabase' ? 'PostgreSQL' : t('app.localMode'))}</span>
     </footer>
   `;
 
@@ -92,10 +92,9 @@ function renderShell() {
   searchInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && searchInput.value.trim()) navigate(`#/search?q=${encodeURIComponent(searchInput.value.trim())}`);
   });
-  app.querySelector('[data-role="theme"]').addEventListener('click', () => {
-    theme.toggle();
-    renderShell();
-  });
+  // 主题切换只改 data-theme 属性，按钮图标由 theme:change 事件更新；
+  // 这里不能重建外壳——renderShell() 会把 #view 重置成「载入中」且不会重新渲染视图。
+  app.querySelector('[data-role="theme"]').addEventListener('click', () => theme.toggle());
   app.querySelector('[data-role="lang"]').addEventListener('click', () => {
     lang.toggle();
     renderShell();
