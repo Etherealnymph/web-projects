@@ -52,6 +52,12 @@ function renderShell() {
   const modules = state.modules.filter((m) => m.access.visible);
   const { segments } = parseHash();
   const activeModuleId = segments[0] === 'm' ? segments[1] : null;
+  // 未登录时视图就是登录 / 注册页：顶栏只保留品牌与设置入口，
+  // 不显示「首页 / 排行榜 / 留言」导航标签与全局搜索框。
+  const bare = !user;
+
+  const themeBtn = `<button class="icon-btn" data-role="theme" title="${esc(t('settings.theme'))}">${icon(theme.current === 'dark' ? 'sun' : 'moon', 17)}</button>`;
+  const settingsBtn = `<a class="icon-btn" href="#/settings" title="${esc(t('settings.title'))}" aria-label="${esc(t('settings.title'))}">${icon('settings', 17)}</a>`;
 
   app.innerHTML = `
     <header class="topbar">
@@ -63,21 +69,21 @@ function renderShell() {
             <span class="brand__sub" style="display:block">Insight</span>
           </span>
         </a>
-        <nav class="navtabs">
+        ${bare ? '' : `<nav class="navtabs">
           <a class="navtab ${segments.length === 0 ? 'is-active' : ''}" href="#/">${esc(t('nav.home'))}</a>
           ${moduleNavHtml(modules, activeModuleId)}
           <a class="navtab ${segments[0] === 'rank' ? 'is-active' : ''}" href="#/rank">${esc(t('nav.ranking'))}</a>
-          ${user ? `<a class="navtab ${segments[0] === 'msg' ? 'is-active' : ''}" href="#/msg" style="display:inline-flex;align-items:center;gap:5px">${esc(t('nav.messages'))}<span class="badge badge--accent hidden" data-badge="nav-msg"></span></a>` : ''}
-        </nav>
+          <a class="navtab ${segments[0] === 'msg' ? 'is-active' : ''}" href="#/msg" style="display:inline-flex;align-items:center;gap:5px">${esc(t('nav.messages'))}<span class="badge badge--accent hidden" data-badge="nav-msg"></span></a>
+        </nav>`}
         <div class="topbar__actions">
+          ${bare ? `${themeBtn}${settingsBtn}` : `
           <input class="input" data-role="global-search" placeholder="${esc(t('nav.search'))}" value="${esc(segments[0] === 'search' ? (parseHash().query.q || '') : '')}"
                  style="width:170px;height:34px;padding:4px 10px" />
-          <button class="icon-btn" data-role="theme" title="${esc(t('settings.theme'))}">${icon(theme.current === 'dark' ? 'sun' : 'moon', 17)}</button>
-          <a class="icon-btn" href="#/settings" title="${esc(t('settings.title'))}" aria-label="${esc(t('settings.title'))}">${icon('settings', 17)}</a>
-          ${user ? `
-            <button class="icon-btn" data-role="write" title="${esc(t('content.new'))}">${icon('plus', 18)}</button>
-            <button class="icon-btn" data-role="user-menu" style="padding:0">${avatarHtml(user, 'avatar--sm')}</button>
-          ` : `<a class="btn btn--sm btn--primary" href="#/login">${esc(t('nav.login'))}</a>`}
+          ${themeBtn}
+          ${settingsBtn}
+          <button class="icon-btn" data-role="write" title="${esc(t('content.new'))}">${icon('plus', 18)}</button>
+          <button class="icon-btn" data-role="user-menu" style="padding:0">${avatarHtml(user, 'avatar--sm')}</button>
+          `}
         </div>
       </div>
     </header>
@@ -90,7 +96,7 @@ function renderShell() {
 
   /* 顶栏交互 */
   const searchInput = app.querySelector('[data-role="global-search"]');
-  searchInput.addEventListener('keydown', (event) => {
+  searchInput?.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && searchInput.value.trim()) navigate(`#/search?q=${encodeURIComponent(searchInput.value.trim())}`);
   });
   // 主题切换只改 data-theme 属性，按钮图标由 theme:change 事件更新；
