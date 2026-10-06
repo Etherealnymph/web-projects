@@ -293,9 +293,19 @@ create policy invites_admin on public.invites for all to authenticated
   using (public.is_superadmin()) with check (public.is_superadmin());
 
 -- 内容：需拥有该模块访问权；草稿仅作者可见
+-- 注意：这里必须直接判断本行字段，不能调用 public.can_read_content(id)。
+-- 该函数会回查 contents 表，而 INSERT ... RETURNING（PostgREST 的
+-- Prefer: return=representation，supabase-js 的 .insert().select()）执行期间，
+-- 新插入的行对函数内部的扫描不可见（PostgreSQL 同一命令看不到自己的写入），
+-- 于是 WITH CHECK 判定失败，前端会收到
+-- 「new row violates row-level security policy for table "contents"」。
 drop policy if exists contents_select on public.contents;
 create policy contents_select on public.contents for select to authenticated
-  using (public.can_read_content(id));
+  using (
+    public.is_staff()
+    or author_id = auth.uid()
+    or (status <> 'draft' and public.has_module_access(module_id))
+  );
 drop policy if exists contents_insert on public.contents;
 create policy contents_insert on public.contents for insert to authenticated
   with check (author_id = auth.uid() and public.has_module_write(module_id));
