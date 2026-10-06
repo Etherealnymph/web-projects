@@ -5,7 +5,6 @@ import { icon, emptyState, loadingState, avatarHtml } from '../core/ui.js';
 import { esc, fromNow } from '../core/util.js';
 import { firstImage } from '../core/markdown.js';
 import { emit } from '../core/store.js';
-import { createInbox } from './messages.js';
 import { errText } from '../data/index.js';
 import {
   contentCardHtml, rankedItemHtml, sortControl, moduleName, moduleDesc, authorName, roleBadge,
@@ -103,20 +102,8 @@ export async function renderHome(ctx) {
           </div>
         </section>
       ` : emptyState(t('common.empty'), '空')}
-
-      ${user ? `<section class="panel" data-role="inbox-panel">
-        <div class="panel__head">
-          <span class="panel__title">${icon('chat', 15)} ${esc(t('nav.messages'))}</span>
-          <span class="grow"></span>
-          <a class="tiny" href="#/msg">${esc(t('common.more'))}</a>
-        </div>
-        <div class="inbox inbox--embed" data-role="home-inbox"></div>
-      </section>` : ''}
     </div>
   `;
-
-  const inboxHost = container.querySelector('[data-role="home-inbox"]');
-  if (inboxHost) createInbox(inboxHost, ctx).refresh(null).catch(() => {});
 }
 
 export async function renderModule(ctx) {
