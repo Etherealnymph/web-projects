@@ -1,6 +1,6 @@
 /** Supabase：邀请码 / 授权 / 后台统计 / 媒体 */
 
-import { CONFIG } from '../config.js';
+import { CONFIG, rewriteSupabaseUrls, toUpstreamSupabaseUrl } from '../config.js';
 import { fail, mapInvite, mapUser, mapContent, mapComment } from './sb-core.js';
 import { randomCode, hotScore, formatDay } from '../core/util.js';
 
@@ -290,10 +290,15 @@ export function createMediaApi(sb) {
         .upload(path, file, { cacheControl: '31536000', upsert: false });
       if (error) throw fail('content.uploadFail');
       const { data } = client.storage.from(CONFIG.storageBucket).getPublicUrl(path);
-      return { id: path, kind, name: file.name, size: file.size, type: file.type, url: data.publicUrl };
+      // 入库的是 SDK 按当前基地址生成的绝对地址；这里还原成上游地址，
+      // 这样以后更换代理域名不需要迁移历史数据（读取时再统一重写）。
+      return { id: path, kind, name: file.name, size: file.size, type: file.type, url: toUpstreamSupabaseUrl(data.publicUrl) };
     },
-    async resolve(ref) { return typeof ref === 'string' ? ref : ref?.url || ''; },
-    async resolveText(text) { return text; },
+    async resolve(ref) {
+      const url = typeof ref === 'string' ? ref : ref?.url || '';
+      return rewriteSupabaseUrls(url);
+    },
+    async resolveText(text) { return rewriteSupabaseUrls(text); },
     async remove(ref) {
       const url = typeof ref === 'string' ? ref : ref?.url;
       if (!url) return;

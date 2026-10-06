@@ -1,6 +1,7 @@
 /** Supabase：账号与模块 */
 
-import { CONFIG } from '../config.js';
+import { CONFIG, resolveSupabaseUrl } from '../config.js';
+import { loadSupabaseSdk } from './supabase-sdk.js';
 import { fail, mapUser, mapModule, usernameToEmail } from './sb-core.js';
 
 /** 从 Edge Function 的 FunctionsHttpError 中提取业务错误码（如 self_delete / last_superadmin） */
@@ -177,8 +178,8 @@ export function createAuthApi(sb) {
 
       // 用独立客户端建号，避免把当前（超管）的登录态替换成新用户。
       // 新版 Supabase 已禁止 SQL 直接写 auth.users，改走 auth.signUp（由触发器自动建 profile）。
-      const { createClient } = await import('@supabase/supabase-js');
-      const tmp = createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey, {
+      const { createClient } = await loadSupabaseSdk();
+      const tmp = createClient(resolveSupabaseUrl(), CONFIG.supabaseAnonKey, {
         auth: { persistSession: false, autoRefreshToken: false },
       });
       const signUp = await tmp.auth.signUp({

@@ -1,0 +1,19 @@
+# Netlify 反向代理规则（中国大陆访问 Supabase 用）
+#
+# 把本目录直接拖到 https://app.netlify.com/drop 即可得到一个 `*.netlify.app` 域名，
+# 该域名会把下面这些前缀原样转发到 Supabase，从而绕开大陆对 *.supabase.co 的 SNI 阻断。
+#
+# 说明：
+#   - 状态码 200 表示「重写 / 透明代理」，不会 302 跳转，浏览器看到的仍是代理域名。
+#   - 只转发这几个固定前缀，且目标写死为同一个 Supabase 项目，所以它不是开放代理。
+#   - Netlify 的 CDN 会原样透传请求体、请求头和响应头，因此 Supabase 自己返回的
+#     `Access-Control-Allow-Origin` / `Access-Control-Expose-Headers`（含 Content-Range）
+#     会一并送达浏览器，前端无需任何 CORS 适配。
+#
+# 换项目时把下面的域名整体替换成自己的即可。
+
+/rest/v1/*      https://gthztievqjovorlcwuwq.supabase.co/rest/v1/:splat      200
+/auth/v1/*      https://gthztievqjovorlcwuwq.supabase.co/auth/v1/:splat      200
+/storage/v1/*   https://gthztievqjovorlcwuwq.supabase.co/storage/v1/:splat   200
+/functions/v1/* https://gthztievqjovorlcwuwq.supabase.co/functions/v1/:splat 200
+/realtime/v1/*  https://gthztievqjovorlcwuwq.supabase.co/realtime/v1/:splat  200

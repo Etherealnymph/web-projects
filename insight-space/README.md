@@ -52,6 +52,7 @@ https://etherealnymph.github.io/web-projects/insight-space/
 - 只需要静态文件，**不需要构建步骤**；`.nojekyll` 已就位，避免下划线目录被 Jekyll 忽略。
 - 使用相对路径（`./src/...`），放在任意子目录都能跑。
 - GitHub Pages 是纯静态托管，**没有后端**；因此多账号必须依赖 Supabase（见下）。
+- 中国大陆打不开站点时请先看[第八节](#八中国大陆访问反向代理)；实测站点本身可达，被阻断的是 Supabase 的 API 域名。
 
 ---
 
@@ -161,10 +162,16 @@ update public.profiles set role = 'superadmin' where username = '你的用户名
 
 ```text
 insight-space/
-├─ index.html              入口（importmap / 样式 / 启动脚本）
+├─ index.html              入口（样式 / 启动脚本）
 ├─ supabase/
 │  ├─ schema.sql           数据库结构（表 / RLS / 函数 / 存储桶）
 │  └─ functions/admin-auth/index.ts  超管重置密码 / 删除账号（Edge Function）
+├─ proxy/                  中国大陆反向代理（见第八节）
+│  ├─ README.md            为什么需要、Netlify / Deno 两种部署方式
+│  ├─ netlify/             方案 A：_redirects 纯 CDN 转发（推荐）
+│  ├─ supabase-proxy.js    方案 B：Web 标准处理器
+│  ├─ main.js              方案 B：Deno Deploy 入口
+│  └─ dev.mjs              方案 B：本地调试服务器
 ├─ assets/
 │  ├─ css/{base,components,views}.css
 │  ├─ icon.svg
@@ -179,3 +186,78 @@ insight-space/
 ```
 
 数据层对两种后端暴露**完全一致**的 API（`auth / modules / contents / comments / reactions / invites / grants / admin / media / friends / messages`），因此切换模式无需改动界面代码。
+
+---
+
+## 八、中国大陆访问（反向代理）
+
+### 现象与根因
+
+在大陆打开 `https://etherealnymph.github.io/web-projects/insight-space/` 时，页面能加载，
+但登录、发帖等操作全部失败，或者应用静默退化成「本地模式」而看不到云端数据。
+
+实测（成都 · 中国移动 · **无代理裸连**）表明**站点没有被墙**，被阻断的是 Supabase 的 API 域名：
+
+| 域名 | 结果 |
+| --- | --- |
+| `etherealnymph.github.io` | 200（正常） |
+| `*.supabase.co`（含本项目） | **HTTP 000，TLS 握手被重置** |
+| `supabase.com` / `api.supabase.com` | 200 / 404（正常） |
+
+只封 `*.supabase.co` 而不封 `supabase.com`，说明这是**基于 SNI 的定向 TLS 阻断**：
+DNS 能解析、TCP 能建连，ClientHello 一发出去就被 RST。
+
+> 因此失败时的表现是「数据为空」而不是报错 —— `src/data/index.js` 的 `isCloudConfigured()`
+> 发现 Supabase 初始化失败会自动回退到 IndexedDB 本地模式。
+
+### 解决：给 Supabase 套一层大陆可达的域名
+
+不用换掉 Supabase，把 API 走一个大陆能访问的反向代理即可。**完整说明见 [`proxy/README.md`](./proxy/README.md)**，
+最短路径：
+
+1. 打开 <https://app.netlify.com/drop>，把 [`proxy/netlify/`](./proxy/netlify) 目录（或它压成的 zip）拖进去。
+2. 上传完成后点 **Claim this site** 并用 GitHub 登录认领 —— 认领前站点只有 1 小时生命且带临时密码。
+3. 把拿到的域名填进 `src/config.js`：
+
+```js
+export const CONFIG = {
+  supabaseUrl: 'https://gthztievqjovorlcwuwq.supabase.co',
+  supabaseProxyUrl: 'https://xxxx.netlify.app', // ← 填这里
+  // ...
+};
+```
+
+4. 提交推送，等 Pages 重新构建。
+
+为什么选 Netlify：
+
+- `_redirects` 的 `200` 重写跑在 CDN 边缘，**不经过 Serverless Function**，没有约 6 MB 的请求体上限，
+  本项目 [`src/components/composer.js`](./src/components/composer.js) 的 `MAX_MB = 30` 才能正常工作
+  （已验证 12 MB 请求体可以穿透）。
+- `app.netlify.com` / `api.netlify.com` 在大陆可达，能自己登录维护；`dash.deno.com`、`api.deno.com`
+  在大陆被阻断，部署完就再也回不去控制台了。
+- Supabase 会针对请求的 `Origin` 自行回 CORS 头（`Access-Control-Allow-Origin` 回显 origin，
+  并在 `Access-Control-Expose-Headers` 里带 `Content-Range`），CDN 原样透传即可，无需额外适配。
+
+### 本地验证
+
+```powershell
+# 起一个本机代理（Node 18+，零依赖）
+node proxy\dev.mjs
+# 另开一个窗口服务站点，再临时把 supabaseProxyUrl 设成 http://127.0.0.1:8787
+```
+
+代理与站点必须**跨域**（不同端口即可），否则测不出 CORS 问题。验证时注意清掉本机的
+`HTTP_PROXY` / `HTTPS_PROXY`，并用 `curl.exe --noproxy '*'`，否则会得到「通」的假结论。
+
+### 其它说明
+
+- SDK 本体（esm.sh / jsDelivr）在大陆不稳定，[`src/data/supabase-sdk.js`](./src/data/supabase-sdk.js)
+  做了 jsDelivr → unpkg → esm.sh 的顺序回退；`index.html` 里的 `importmap` 已移除，改由该模块动态 import。
+- 历史数据里图片/视频是入库时写死的 `https://<ref>.supabase.co/...` 绝对地址，
+  `rewriteSupabaseUrls()` 在渲染时改写、`toUpstreamSupabaseUrl()` 在入库时还原，
+  换代理域名**不需要迁移数据**。
+- 认证只有用户名/密码（合成邮箱 `xxx@tiwu.local`），没有 OAuth 与魔术链接，
+  因此 **Supabase 的 Redirect URLs 白名单不需要改**。
+- 代理地址必须是 `https://`；站点是 HTTPS，混合内容会被浏览器拦截。
+- 代理只转发本项目的五个 Supabase 前缀，其它路径一律 404，不构成开放代理。

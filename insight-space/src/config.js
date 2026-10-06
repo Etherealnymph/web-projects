@@ -11,6 +11,19 @@
 export const CONFIG = {
   /** Supabase 项目地址，形如 https://abcdefg.supabase.co */
   supabaseUrl: 'https://gthztievqjovorlcwuwq.supabase.co',
+  /**
+   * Supabase 反向代理地址（中国大陆用户必填）。
+   *
+   * 实测中国大陆运营商对 *.supabase.co 做了基于 SNI 的 TLS 阻断：DNS 能解析、TCP 能连上，
+   * 但 TLS 握手立刻被重置，因此直连必然失败。把 proxy/ 里的代理部署到一台大陆可达的
+   * 主机后（推荐 Netlify，见 proxy/README.md），把它的地址填在这里，
+   * 所有 /auth/v1、/rest/v1、/storage/v1、/functions/v1 请求都会改走该代理。
+   *
+   * 例：supabaseProxyUrl: 'https://your-proxy.netlify.app'
+   *
+   * 留空则直连 supabaseUrl（境外访问正常）。
+   */
+  supabaseProxyUrl: '',
   /** Supabase publishable/anon public key（公开密钥，可安全放在前端） */
   supabaseAnonKey: 'sb_publishable_lM1FncNduX2y0PXDowgiQA_bvnbQE0q',
   /** 媒体存储桶名称（需要是 public bucket） */
@@ -51,3 +64,34 @@ export const CONFIG = {
 };
 
 export const APP_VERSION = '1.0.0';
+
+/** 去掉结尾多余的斜杠 */
+function trimSlash(value) {
+  return String(value || '').replace(/\/+$/, '');
+}
+
+/** 实际使用的 Supabase 基地址：配置了反向代理时优先走代理 */
+export function resolveSupabaseUrl() {
+  return trimSlash(CONFIG.supabaseProxyUrl) || trimSlash(CONFIG.supabaseUrl);
+}
+
+/**
+ * 把指向 supabaseUrl（被阻断的域名）的绝对地址改写到当前使用的基地址。
+ * 历史记录里的图片/视频地址是入库时写死的绝对地址，换了域名会全部裂图，必须重写。
+ */
+export function rewriteSupabaseUrls(value) {
+  const from = trimSlash(CONFIG.supabaseUrl);
+  const to = resolveSupabaseUrl();
+  const source = String(value ?? '');
+  if (!from || from === to || !source.includes(from)) return source;
+  return source.split(from).join(to);
+}
+
+/** rewriteSupabaseUrls 的逆操作：入库前把代理地址还原成上游地址，保证数据与域名无关 */
+export function toUpstreamSupabaseUrl(value) {
+  const upstream = trimSlash(CONFIG.supabaseUrl);
+  const proxy = resolveSupabaseUrl();
+  const source = String(value ?? '');
+  if (!upstream || upstream === proxy || !source.startsWith(proxy)) return source;
+  return upstream + source.slice(proxy.length);
+}

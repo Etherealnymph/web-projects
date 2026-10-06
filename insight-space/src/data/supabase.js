@@ -1,14 +1,15 @@
 /** Supabase 模式入口：组装各模块 API（接口与本地模式完全一致） */
 
-import { CONFIG } from '../config.js';
+import { CONFIG, resolveSupabaseUrl } from '../config.js';
+import { loadSupabaseSdk } from './supabase-sdk.js';
 import { createContext } from './sb-core.js';
 import { createAuthApi, createModulesApi } from './supabase-auth.js';
 import { createContentsApi, createCommentsApi, createReactionsApi } from './supabase-content.js';
 import { createInvitesApi, createGrantsApi, createAdminApi, createMediaApi } from './supabase-ops.js';
 
 export async function createSupabaseApi() {
-  const { createClient } = await import('@supabase/supabase-js');
-  const client = createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey, {
+  const { createClient } = await loadSupabaseSdk();
+  const client = createClient(resolveSupabaseUrl(), CONFIG.supabaseAnonKey, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
   });
 

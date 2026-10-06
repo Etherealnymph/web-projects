@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Supabase 反向代理</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font: 15px/1.7 system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+         max-width: 40rem; margin: 0 auto; padding: 3rem 1.25rem; }
+  code { background: rgba(127,127,127,.16); padding: .15em .4em; border-radius: .25em; }
+  li { margin: .3rem 0; }
+  .ok { color: #16a34a; font-weight: 600; }
+</style>
+</head>
+<body>
+  <h1>Supabase 反向代理 <span class="ok">运行中</span></h1>
+  <p>本域名是「体悟集 · Insight」专用的大陆可达反向代理，只把下列前缀透明转发到 Supabase：</p>
+  <ul>
+    <li><code>/auth/v1/*</code></li>
+    <li><code>/rest/v1/*</code></li>
+    <li><code>/storage/v1/*</code></li>
+    <li><code>/functions/v1/*</code></li>
+    <li><code>/realtime/v1/*</code></li>
+  </ul>
+  <p>除此之外的路径一律返回 404，因此它不是一个开放代理。</p>
+  <p>站点本体在 <a href="https://etherealnymph.github.io/web-projects/insight-space/">etherealnymph.github.io/web-projects/insight-space/</a>。</p>
+</body>
+</html>
