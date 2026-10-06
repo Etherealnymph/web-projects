@@ -19,8 +19,11 @@ create table if not exists public.profiles (
   status text not null default 'active' check (status in ('active','disabled')),
   invite_id uuid,
   must_change_password boolean not null default false,
+  exp integer not null default 0,
   created_at timestamptz not null default now()
 );
+
+alter table public.profiles add column if not exists exp integer not null default 0;
 
 create table if not exists public.modules (
   id uuid primary key default gen_random_uuid(),
@@ -32,8 +35,11 @@ create table if not exists public.modules (
   icon text not null default '❖',
   sort integer not null default 99,
   hot boolean not null default false,
+  kind text not null default 'content' check (kind in ('content','qa')),
   created_at timestamptz not null default now()
 );
+
+alter table public.modules add column if not exists kind text not null default 'content';
 
 create table if not exists public.invites (
   id uuid primary key default gen_random_uuid(),
@@ -308,6 +314,10 @@ create policy comments_select on public.comments for select to authenticated
 drop policy if exists comments_insert on public.comments;
 create policy comments_insert on public.comments for insert to authenticated
   with check (author_id = auth.uid() and public.can_read_content(content_id));
+drop policy if exists comments_update on public.comments;
+create policy comments_update on public.comments for update to authenticated
+  using (public.is_staff() or author_id = auth.uid())
+  with check (public.is_staff() or author_id = auth.uid());
 drop policy if exists comments_delete on public.comments;
 create policy comments_delete on public.comments for delete to authenticated
   using (public.is_staff() or author_id = auth.uid());
@@ -445,68 +455,50 @@ $$ declare
       where id = v_invite.id;
    end $$;
 
-/* 超管新建账号（含初始授权） */
-create or replace function public.admin_create_user(
+/* 超管新建账号：前端先调用 auth.signUp 在 GoTrue 建号（由 handle_new_user 触发器自动建 profile），
+   再调用本函数补齐用户名 / 角色 / 初始授权。只操作 public 表，避免直接写 auth.users
+   （新版 Supabase 已收回 postgres 对 auth.users 的写权限，直接 insert 会 403）。 */
+drop function if exists public.admin_create_user(text, text, text, text, uuid[], boolean, timestamptz);
+create or replace function public.admin_provision_user(
+  p_user_id uuid,
   p_username text,
-  p_password text,
   p_nickname text default '',
   p_role text default 'member',
   p_module_ids uuid[] default null,
   p_write boolean default true,
   p_expires_at timestamptz default null)
-returns uuid language plpgsql security definer set search_path = public, auth, extensions as
+returns void language plpgsql security definer set search_path = public as
 $$ declare
-     v_uid uuid := gen_random_uuid();
      v_name text := lower(trim(coalesce(p_username,'')));
-     v_email text := lower(trim(coalesce(p_username,''))) || '@tiwu.local';
      v_role text := case when p_role in ('superadmin','owner') then p_role else 'member' end;
      v_mid uuid;
    begin
      if not public.is_superadmin() then raise exception 'forbidden'; end if;
      if v_name !~ '^[a-z0-9_]{3,20}$' then raise exception 'invalid_username'; end if;
-     if length(coalesce(p_password,'')) < 6 then raise exception 'invalid_password'; end if;
-     if exists (select 1 from auth.users where lower(email) = v_email) then raise exception 'user_exists'; end if;
+     if exists (select 1 from public.profiles where username = v_name and id <> p_user_id) then
+       raise exception 'user_exists';
+     end if;
      perform set_config('app.internal', 'on', true);
 
-     insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at,
-                             raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
-     values (v_uid, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', v_email,
-             crypt(p_password, gen_salt('bf')), now(),
-             jsonb_build_object('provider','email','providers', jsonb_build_array('email')),
-             jsonb_build_object('username', v_name, 'nickname', coalesce(nullif(trim(p_nickname),''), p_username)),
-             now(), now());
+     update public.profiles
+        set username = v_name,
+            nickname = coalesce(nullif(trim(p_nickname),''), p_username),
+            role = v_role,
+            status = 'active',
+            must_change_password = true
+      where id = p_user_id;
+     if not found then raise exception 'user_not_found'; end if;
 
-     begin
-       insert into auth.identities (provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
-       values (v_uid::text, v_uid,
-               jsonb_build_object('sub', v_uid::text, 'email', v_email, 'email_verified', true),
-               'email', now(), now(), now());
-     exception when others then
-       begin
-         insert into auth.identities (id, user_id, identity_data, provider, created_at, updated_at)
-         values (v_uid, v_uid,
-                 jsonb_build_object('sub', v_uid::text, 'email', v_email, 'email_verified', true),
-                 'email', now(), now());
-       exception when others then null;
-       end;
-     end;
-
-     insert into public.profiles (id, username, nickname, role, status, must_change_password)
-     values (v_uid, v_name, coalesce(nullif(trim(p_nickname),''), p_username), v_role, 'active', true)
-     on conflict (id) do update
-       set username = excluded.username, nickname = excluded.nickname,
-           role = excluded.role, status = 'active', must_change_password = true;
-
+     delete from public.grants where user_id = p_user_id;
      if p_module_ids is null or array_length(p_module_ids, 1) is null then
        insert into public.grants (user_id, module_id, write, expires_at, invite_id)
-       values (v_uid, null, coalesce(p_write, true), p_expires_at, null);
+       values (p_user_id, null, coalesce(p_write, true), p_expires_at, null);
      else
        foreach v_mid in array p_module_ids loop
          insert into public.grants (user_id, module_id, write, expires_at, invite_id)
-         values (v_uid, v_mid, coalesce(p_write, true), p_expires_at, null);
+         values (p_user_id, v_mid, coalesce(p_write, true), p_expires_at, null);
        end loop;
      end if;
-     return v_uid;
    end $$;
 
 /* 超管调整角色（不允许移除最后一位超管） */
@@ -525,47 +517,110 @@ $$ declare v_role text := case when p_role in ('superadmin','owner') then p_role
      if not found then raise exception 'user_not_found'; end if;
    end $$;
 
-/* 超管重置密码 */
-create or replace function public.admin_reset_password(p_user_id uuid, p_password text)
-returns void language plpgsql security definer set search_path = public, auth, extensions as
-$$ begin
-     if not public.is_superadmin() then raise exception 'forbidden'; end if;
-     if length(coalesce(p_password,'')) < 6 then raise exception 'invalid_password'; end if;
-     perform set_config('app.internal', 'on', true);
-     update auth.users set encrypted_password = crypt(p_password, gen_salt('bf')), updated_at = now()
-      where id = p_user_id;
-     if not found then raise exception 'user_not_found'; end if;
-     update public.profiles set must_change_password = true where id = p_user_id;
-   end $$;
+/* 超管重置密码 / 删除账号
+ * 新版 Supabase 已收回 postgres 对 auth.users 的写权限，直接 update/delete
+ * auth.users 会 403。这两个操作已迁移到 Edge Function `admin-auth`（service_role
+ * + Auth Admin API），请参考 supabase/functions/admin-auth/index.ts。
+ * 这里删除旧的、会 403 的 RPC 实现。 */
+drop function if exists public.admin_reset_password(uuid, text) cascade;
+drop function if exists public.admin_delete_user(uuid) cascade;
 
-/* 超管删除账号（级联删除内容 / 评论 / 互动 / 授权） */
-create or replace function public.admin_delete_user(p_user_id uuid)
-returns void language plpgsql security definer set search_path = public, auth as
-$$ begin
-     if not public.is_superadmin() then raise exception 'forbidden'; end if;
-     if p_user_id = auth.uid() then raise exception 'self_delete'; end if;
-     if exists (select 1 from public.profiles where id = p_user_id and role = 'superadmin')
-        and (select count(*) from public.profiles where role = 'superadmin' and status = 'active') <= 1 then
-       raise exception 'last_superadmin';
-     end if;
-     perform set_config('app.internal', 'on', true);
-     delete from auth.users where id = p_user_id;
-     if not found then raise exception 'user_not_found'; end if;
-   end $$;
 
 /* 阅读计数 */
 create or replace function public.increment_view(p_content_id uuid)
 returns void language sql security definer set search_path = public as
 $$ update public.contents set views = views + 1 where id = p_content_id $$;
 
+-- ------------------------------------------------------------
+-- 5b. 经验值触发器（与前端 src/core/util.js 的 EXP 常量保持一致）
+--     发布内容 +10；回答/评论 +5；被赞 +2；被收藏 +5；踩不加分。
+-- ------------------------------------------------------------
+create or replace function public.award_content_exp()
+returns trigger language plpgsql security definer set search_path = public as
+$$ begin
+     if tg_op = 'INSERT' then
+       if new.status = 'published' then
+         update public.profiles set exp = exp + 10 where id = new.author_id;
+       end if;
+       return new;
+     elsif tg_op = 'UPDATE' then
+       if old.status = 'draft' and new.status = 'published' then
+         update public.profiles set exp = exp + 10 where id = new.author_id;
+       elsif old.status = 'published' and new.status = 'draft' then
+         update public.profiles set exp = greatest(0, exp - 10) where id = new.author_id;
+       end if;
+       return new;
+     elsif tg_op = 'DELETE' then
+       if old.status = 'published' then
+         update public.profiles set exp = greatest(0, exp - 10) where id = old.author_id;
+       end if;
+       return old;
+     end if;
+     return coalesce(new, old);
+   end $$;
+
+drop trigger if exists contents_exp_trigger on public.contents;
+create trigger contents_exp_trigger after insert or update or delete on public.contents
+for each row execute function public.award_content_exp();
+
+create or replace function public.award_comment_exp()
+returns trigger language plpgsql security definer set search_path = public as
+$$ begin
+     if tg_op = 'INSERT' then
+       update public.profiles set exp = exp + 5 where id = new.author_id;
+       return new;
+     elsif tg_op = 'DELETE' then
+       update public.profiles set exp = greatest(0, exp - 5) where id = old.author_id;
+       return old;
+     end if;
+     return coalesce(new, old);
+   end $$;
+
+drop trigger if exists comments_exp_trigger on public.comments;
+create trigger comments_exp_trigger after insert or delete on public.comments
+for each row execute function public.award_comment_exp();
+
+create or replace function public.award_reaction_exp()
+returns trigger language plpgsql security definer set search_path = public as
+$$ declare
+     v_author uuid;
+     v_delta integer;
+   begin
+     if tg_op = 'INSERT' then
+       v_delta := case new.kind when 'like' then 2 when 'favorite' then 5 else 0 end;
+       if v_delta = 0 then return new; end if;
+       if new.target_type = 'content' then
+         select author_id into v_author from public.contents where id = new.target_id;
+       else
+         select author_id into v_author from public.comments where id = new.target_id;
+       end if;
+     elsif tg_op = 'DELETE' then
+       v_delta := case old.kind when 'like' then -2 when 'favorite' then -5 else 0 end;
+       if v_delta = 0 then return old; end if;
+       if old.target_type = 'content' then
+         select author_id into v_author from public.contents where id = old.target_id;
+       else
+         select author_id into v_author from public.comments where id = old.target_id;
+       end if;
+     else
+       return coalesce(new, old);
+     end if;
+     if v_author is not null and v_author <> auth.uid() then
+       update public.profiles set exp = greatest(0, exp + v_delta) where id = v_author;
+     end if;
+     return case when tg_op = 'DELETE' then old else new end;
+   end $$;
+
+drop trigger if exists reactions_exp_trigger on public.reactions;
+create trigger reactions_exp_trigger after insert or delete on public.reactions
+for each row execute function public.award_reaction_exp();
+
 grant execute on function public.app_bootstrap_state() to anon, authenticated;
 grant execute on function public.validate_invite(text) to anon, authenticated;
 grant execute on function public.claim_first_superadmin(text, text) to authenticated;
 grant execute on function public.register_with_invite(text, text, text) to authenticated;
-grant execute on function public.admin_create_user(text, text, text, text, uuid[], boolean, timestamptz) to authenticated;
+grant execute on function public.admin_provision_user(uuid, text, text, text, uuid[], boolean, timestamptz) to authenticated;
 grant execute on function public.admin_set_role(uuid, text) to authenticated;
-grant execute on function public.admin_reset_password(uuid, text) to authenticated;
-grant execute on function public.admin_delete_user(uuid) to authenticated;
 grant execute on function public.increment_view(uuid) to authenticated;
 
 -- ------------------------------------------------------------
@@ -588,12 +643,13 @@ create policy media_delete on storage.objects for delete to authenticated
 -- ------------------------------------------------------------
 -- 7. 默认模块（已存在则跳过）
 -- ------------------------------------------------------------
-insert into public.modules (key, name_zh, name_en, desc_zh, desc_en, icon, sort, hot) values
-  ('recommend', '推荐', 'Featured',     '按综合热度排序的精选内容', 'Highlights ranked by overall heat', '✦', 0, true),
-  ('diary',     '日记', 'Diary',        '日常记录与随想',           'Daily notes',                       '❀', 1, false),
-  ('poem',      '诗歌', 'Poetry',       '分行写下的句子',           'Lines and verses',                  '❖', 2, false),
-  ('copy',      '文案', 'Copywriting',  '值得收藏的表达',           'Words worth keeping',               '✎', 3, false),
-  ('review',    '评论', 'Reviews',      '书、影、事、物的评论',     'Reviews and critiques',             '☰', 4, false)
+insert into public.modules (key, name_zh, name_en, desc_zh, desc_en, icon, sort, hot, kind) values
+  ('recommend', '推荐', 'Featured',     '按综合热度排序的精选内容', 'Highlights ranked by overall heat', '✦', 0, true,  'content'),
+  ('diary',     '日记', 'Diary',        '日常记录与随想',           'Daily notes',                       '❀', 1, false, 'content'),
+  ('poem',      '诗歌', 'Poetry',       '分行写下的句子',           'Lines and verses',                  '❖', 2, false, 'content'),
+  ('copy',      '文案', 'Copywriting',  '值得收藏的表达',           'Words worth keeping',               '✎', 3, false, 'content'),
+  ('review',    '评论', 'Reviews',      '书、影、事、物的评论',     'Reviews and critiques',             '☰', 4, false, 'content'),
+  ('qa',        '问答', 'Q&A',          '提出问题，分享回答',       'Ask questions, share answers',      '❓', 5, false, 'qa')
 on conflict (key) do nothing;
 
 -- 完成。接下来：

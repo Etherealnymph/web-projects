@@ -7,7 +7,7 @@ import { renderMarkdown } from '../core/markdown.js';
 import { errText } from '../data/index.js';
 import { createComposer } from '../components/composer.js';
 import { friendActionHtml } from './messages.js';
-import { reactBarHtml, commentTreeHtml, mediaGalleryHtml, moduleName, authorName, roleBadge } from '../components/widgets.js';
+import { reactBarHtml, commentTreeHtml, answerTreeHtml, mediaGalleryHtml, moduleName, authorName, roleBadge, levelBadge } from '../components/widgets.js';
 
 const viewed = new Set();
 
@@ -33,6 +33,7 @@ export async function renderDetail(ctx) {
   for (const media of content.media || []) media.displayUrl = await api.media.resolve(media);
   const canEdit = Boolean(user && (user.id === content.authorId || user.role === 'superadmin' || user.role === 'owner'));
   const canComment = content.access?.visible !== false;
+  const isQA = content.module?.kind === 'qa';
 
   container.innerHTML = `
     <div class="stack gap-2">
@@ -49,7 +50,7 @@ export async function renderDetail(ctx) {
           <div class="row row--wrap">
             ${avatarHtml(content.author, 'avatar--sm')}
             <span class="small">${esc(authorName(content.author))}</span>
-            ${roleBadge(content.author)}
+            ${levelBadge(content.author)} ${roleBadge(content.author)}
             ${user && content.author && user.id !== content.authorId ? '<span data-role="friend-slot"></span>' : ''}
             <span class="tiny muted">${esc(formatDate(content.createdAt, lang))}${content.updatedAt && content.updatedAt !== content.createdAt ? ` · ${esc(t('content.updatedAt'))} ${esc(fromNow(content.updatedAt, lang))}` : ''}</span>
             <span class="tiny muted">${icon('eye', 12)} ${content.views || 0}</span>
@@ -68,7 +69,7 @@ export async function renderDetail(ctx) {
       </article>
 
       <section class="card">
-        <h2 class="card__title">${icon('comment', 16)} ${esc(t('comment.title'))} <span class="muted small" data-role="comment-count"></span></h2>
+        <h2 class="card__title">${icon(isQA ? 'chat' : 'comment', 16)} ${esc(t(isQA ? 'answer.title' : 'comment.title'))} <span class="muted small" data-role="comment-count"></span></h2>
         <div data-role="composer-slot"></div>
         <div data-role="comments"></div>
       </section>
@@ -118,7 +119,7 @@ export async function renderDetail(ctx) {
   async function reloadComments() {
     const comments = await api.comments.list(content.id);
     countBox.textContent = `· ${comments.length}`;
-    commentsBox.innerHTML = commentTreeHtml(comments);
+    commentsBox.innerHTML = isQA ? answerTreeHtml(comments) : commentTreeHtml(comments);
     bindCommentActions(comments);
   }
 
@@ -149,19 +150,87 @@ export async function renderDetail(ctx) {
         } catch (error) { toastErr(errText(error)); }
       });
     });
+    commentsBox.querySelectorAll('[data-edit-comment]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.editComment;
+        const slot = commentsBox.querySelector(`[data-edit-slot="${id}"]`);
+        if (!slot) return;
+        if (slot.dataset.open === '1') { slot.innerHTML = ''; slot.dataset.open = '0'; return; }
+        const target = comments.find((c) => c.id === id);
+        if (!target) return;
+        slot.dataset.open = '1';
+        slot.innerHTML = '';
+        mountCommentEditor(slot, target);
+      });
+    });
+    commentsBox.querySelectorAll('[data-toggle-answer]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.toggleAnswer;
+        const wrap = commentsBox.querySelector(`[data-answer-id="${id}"]`);
+        if (!wrap) return;
+        const preview = wrap.querySelector('[data-answer-preview]');
+        const body = wrap.querySelector('[data-answer-body]');
+        const expanded = !body.hidden;
+        body.hidden = expanded;
+        if (preview) preview.hidden = expanded;
+        btn.textContent = t(expanded ? 'answer.expand' : 'answer.collapse');
+      });
+    });
+  }
+
+  function mountCommentEditor(slot, comment) {
+    const composer = createComposer({
+      compact: true,
+      placeholder: t('comment.editPh'),
+      minHeight: 62,
+      value: comment.bodyMd || '',
+    });
+    composer.root.querySelector('[data-role="avatar"]').outerHTML = avatarHtml(user, 'avatar--sm');
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn btn--primary btn--sm';
+    saveBtn.type = 'button';
+    saveBtn.textContent = t('comment.save');
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn btn--ghost btn--sm';
+    cancelBtn.type = 'button';
+    cancelBtn.textContent = t('comment.cancelEdit');
+    composer.root.querySelector('[data-role="toolbar"]').appendChild(cancelBtn);
+    composer.root.querySelector('[data-role="toolbar"]').appendChild(saveBtn);
+    saveBtn.addEventListener('click', async () => {
+      const text = composer.getValue().trim();
+      if (!text && !composer.media.length) return;
+      saveBtn.disabled = true;
+      try {
+        await api.comments.update(comment.id, { bodyMd: text });
+        toastOk(t('comment.updated'));
+        slot.innerHTML = '';
+        slot.dataset.open = '0';
+        reloadComments();
+      } catch (error) {
+        toastErr(errText(error));
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+    cancelBtn.addEventListener('click', () => {
+      slot.innerHTML = '';
+      slot.dataset.open = '0';
+    });
+    slot.appendChild(composer.root);
+    composer.focus();
   }
 
   function mountCommentComposer(slot, options = {}) {
     const composer = createComposer({
       compact: true,
-      placeholder: options.placeholder || t('comment.ph'),
+      placeholder: options.placeholder || t(isQA ? 'answer.ph' : 'comment.ph'),
       minHeight: 62,
     });
     composer.root.querySelector('[data-role="avatar"]').outerHTML = avatarHtml(user, 'avatar--sm');
     const sendBtn = document.createElement('button');
     sendBtn.className = 'btn btn--primary btn--sm';
     sendBtn.type = 'button';
-    sendBtn.textContent = t('comment.send');
+    sendBtn.textContent = t(isQA ? 'answer.send' : 'comment.send');
     composer.root.querySelector('[data-role="toolbar"]').appendChild(sendBtn);
     sendBtn.addEventListener('click', async () => {
       const text = composer.getValue().trim();
@@ -169,7 +238,7 @@ export async function renderDetail(ctx) {
       sendBtn.disabled = true;
       try {
         await api.comments.create({ contentId: content.id, parentId: options.parentId || null, bodyMd: text, media: composer.media });
-        toastOk(t('comment.sendOk'));
+        toastOk(t(isQA ? 'answer.sendOk' : 'comment.sendOk'));
         if (options.onDone) options.onDone();
         else { composerSlot.innerHTML = ''; mountCommentComposer(composerSlot); }
         reloadComments();

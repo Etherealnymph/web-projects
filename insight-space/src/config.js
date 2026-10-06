@@ -46,6 +46,7 @@ export const CONFIG = {
     { key: 'poem', icon: '❖', nameZh: '诗歌', nameEn: 'Poetry', descZh: '分行写下的句子', descEn: 'Lines and verses', sort: 2 },
     { key: 'copy', icon: '✎', nameZh: '文案', nameEn: 'Copywriting', descZh: '值得收藏的表达', descEn: 'Words worth keeping', sort: 3 },
     { key: 'review', icon: '☰', nameZh: '评论', nameEn: 'Reviews', descZh: '书、影、事、物的评论', descEn: 'Reviews and critiques', sort: 4 },
+    { key: 'qa', icon: '❓', nameZh: '问答', nameEn: 'Q&A', descZh: '提出问题，分享回答', descEn: 'Ask questions, share answers', sort: 5, kind: 'qa' },
   ],
 };
 

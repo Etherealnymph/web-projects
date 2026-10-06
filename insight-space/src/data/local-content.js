@@ -1,9 +1,10 @@
 /** 本地模式：内容 / 评论 / 互动的读写 */
 
-import { uid, nowIso, sortContents } from '../core/util.js';
+import { uid, nowIso, sortContents, EXP } from '../core/util.js';
 import {
   buildIndex, countsOf, decorateContent, decorateComment, authorMapOf,
   visibleModules, accessFor, canEditContent, canWriteModule, myReactions, resolveText,
+  awardExp,
 } from './local-core.js';
 
 export function fail(code) {
@@ -102,6 +103,7 @@ export function createContentsApi(ctx) {
         updatedAt: nowIso(),
       };
       db.contents.unshift(content);
+      awardExp(db, user.id, EXP.content);
       await ctx.save();
       return content;
     },
@@ -144,6 +146,7 @@ export function createContentsApi(ctx) {
         if (r.targetType === 'content') return r.targetId !== id;
         return !commentIds.includes(r.targetId);
       });
+      awardExp(db, content.authorId, -EXP.content);
       await ctx.save();
       return true;
     },
@@ -188,7 +191,8 @@ export function createCommentsApi(ctx) {
         .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
         .map((c) => {
           const decorated = decorateComment(db, index, c, map);
-          return { ...decorated, mine: mine.get(c.id), canDelete: Boolean(user && (user.id === c.authorId || user.role === 'superadmin' || user.role === 'owner')) };
+          const canEdit = Boolean(user && (user.id === c.authorId || user.role === 'superadmin' || user.role === 'owner'));
+          return { ...decorated, mine: mine.get(c.id), canEdit, canDelete: canEdit };
         });
       return all;
     },
@@ -240,6 +244,19 @@ export function createCommentsApi(ctx) {
         createdAt: nowIso(),
       };
       db.comments.push(comment);
+      awardExp(db, user.id, EXP.comment);
+      await ctx.save();
+      return comment;
+    },
+
+    async update(id, { bodyMd }) {
+      const db = await ctx.db();
+      const user = ctx.user();
+      if (!user) throw fail('common.loginRequired');
+      const comment = db.comments.find((c) => c.id === id);
+      if (!comment) throw fail('content.notFound');
+      if (user.id !== comment.authorId && user.role !== 'superadmin' && user.role !== 'owner') throw fail('common.noPermission');
+      comment.bodyMd = String(bodyMd || '').slice(0, 4000);
       await ctx.save();
       return comment;
     },
@@ -254,6 +271,7 @@ export function createCommentsApi(ctx) {
       const removeIds = [id, ...db.comments.filter((c) => c.parentId === id).map((c) => c.id)];
       db.comments = db.comments.filter((c) => !removeIds.includes(c.id));
       db.reactions = db.reactions.filter((r) => !(r.targetType === 'comment' && removeIds.includes(r.targetId)));
+      awardExp(db, comment.authorId, -EXP.comment);
       await ctx.save();
       return true;
     },
@@ -268,16 +286,26 @@ export function createReactionsApi(ctx) {
       const user = ctx.user();
       if (!user) throw fail('common.loginRequired');
       if (!['content', 'comment'].includes(targetType) || !['like', 'dislike', 'favorite'].includes(kind)) throw fail('common.noPermission');
+      const targetAuthorId = targetType === 'content'
+        ? db.contents.find((c) => c.id === targetId)?.authorId
+        : db.comments.find((c) => c.id === targetId)?.authorId;
+      const expFor = (k) => (k === 'like' ? EXP.like : k === 'favorite' ? EXP.favorite : 0);
+      let delta = 0;
       const existing = db.reactions.find((r) => r.userId === user.id && r.targetType === targetType && r.targetId === targetId && r.kind === kind);
       if (existing) {
         db.reactions = db.reactions.filter((r) => r !== existing);
+        delta -= expFor(kind);
       } else {
         if (kind === 'like' || kind === 'dislike') {
           const opposite = kind === 'like' ? 'dislike' : 'like';
+          const hadOpposite = db.reactions.some((r) => r.userId === user.id && r.targetType === targetType && r.targetId === targetId && r.kind === opposite);
+          if (hadOpposite) delta -= expFor(opposite);
           db.reactions = db.reactions.filter((r) => !(r.userId === user.id && r.targetType === targetType && r.targetId === targetId && r.kind === opposite));
         }
         db.reactions.push({ id: uid('rx'), userId: user.id, targetType, targetId, kind, createdAt: nowIso() });
+        delta += expFor(kind);
       }
+      if (targetAuthorId && targetAuthorId !== user.id) awardExp(db, targetAuthorId, delta);
       await ctx.save();
       return this.state(targetType, [targetId]);
     },

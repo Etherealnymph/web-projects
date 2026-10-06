@@ -1,6 +1,36 @@
 /** Supabase：账号与模块 */
 
+import { CONFIG } from '../config.js';
 import { fail, mapUser, mapModule, usernameToEmail } from './sb-core.js';
+
+/** 从 Edge Function 的 FunctionsHttpError 中提取业务错误码（如 self_delete / last_superadmin） */
+async function fnErrorCode(error) {
+  try {
+    const context = error?.context;
+    if (!context) return null;
+    if (typeof context.json === 'function') {
+      const body = await context.json();
+      return body?.error || null;
+    }
+    if (context && typeof context === 'object') return context.error || null;
+  } catch { /* 忽略解析失败 */ }
+  return null;
+}
+
+/** Edge Function 返回的错误码 → i18n 文案键 */
+const FN_ERROR_KEYS = {
+  self_delete: 'admin.selfDelete',
+  last_superadmin: 'admin.lastSuperadmin',
+  user_not_found: 'admin.userNotFound',
+  invalid_password: 'auth.errPwShort',
+  forbidden: 'common.noPermission',
+  unauthorized: 'common.loginRequired',
+};
+
+async function failFromFn(error) {
+  const code = await fnErrorCode(error);
+  return fail(FN_ERROR_KEYS[code] || 'msg.error');
+}
 
 export function createAuthApi(sb) {
   const { client } = sb;
@@ -75,6 +105,10 @@ export function createAuthApi(sb) {
       return sb.loadProfile();
     },
 
+    async refresh() {
+      return sb.loadProfile();
+    },
+
     async updateProfile(patch) {
       const user = sb.requireUser();
       const row = {};
@@ -138,19 +172,44 @@ export function createAuthApi(sb) {
 
     async createUser({ username, password, nickname, role = 'member', moduleIds = [], write = true, expiresAt = null }) {
       sb.requireAdmin();
-      const { error } = await client.rpc('admin_create_user', {
+      if (!/^[A-Za-z0-9_]{3,20}$/.test(String(username || ''))) throw fail('auth.errUserLen');
+      if (String(password || '').length < 6) throw fail('auth.errPwShort');
+
+      // 用独立客户端建号，避免把当前（超管）的登录态替换成新用户。
+      // 新版 Supabase 已禁止 SQL 直接写 auth.users，改走 auth.signUp（由触发器自动建 profile）。
+      const { createClient } = await import('@supabase/supabase-js');
+      const tmp = createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const signUp = await tmp.auth.signUp({
+        email: usernameToEmail(username),
+        password,
+        options: { data: { username, nickname: nickname || username } },
+      });
+      if (signUp.error) {
+        throw fail(signUp.error.message?.includes('already') ? 'auth.errExists' : 'auth.errBad');
+      }
+      const newUserId = signUp.data?.user?.id;
+      if (!newUserId) throw fail('auth.errBad');
+
+      // ['*'] 表示「全部模块」，对应 grants.module_id 为 null。
+      const rpcModuleIds = (Array.isArray(moduleIds) && moduleIds.length && !moduleIds.includes('*'))
+        ? moduleIds
+        : null;
+
+      const { error } = await client.rpc('admin_provision_user', {
+        p_user_id: newUserId,
         p_username: username,
-        p_password: password,
         p_nickname: nickname || username,
         p_role: role,
-        p_module_ids: moduleIds.length ? moduleIds : null,
+        p_module_ids: rpcModuleIds,
         p_write: write,
         p_expires_at: expiresAt || null,
       });
       if (error) {
         const message = error.message || '';
         if (message.includes('user_exists')) throw fail('auth.errExists');
-        if (message.includes('invalid_password')) throw fail('auth.errPwShort');
+        if (message.includes('user_not_found')) throw fail('msg.error');
         throw fail('msg.error');
       }
       return true;
@@ -176,17 +235,21 @@ export function createAuthApi(sb) {
     async resetPassword(id, newPassword) {
       sb.requireAdmin();
       if (String(newPassword || '').length < 6) throw fail('auth.errPwShort');
-      const { error } = await client.rpc('admin_reset_password', { p_user_id: id, p_password: newPassword });
-      if (error) throw fail('msg.error');
-      return true;
+      const { data, error } = await client.functions.invoke('admin-auth', {
+        body: { action: 'reset_password', userId: id, password: newPassword },
+      });
+      if (error) throw await failFromFn(error);
+      return data?.ok === true;
     },
 
     async removeUser(id) {
       const admin = sb.requireAdmin();
       if (admin.id === id) throw fail('admin.selfDelete');
-      const { error } = await client.rpc('admin_delete_user', { p_user_id: id });
-      if (error) throw fail('msg.error');
-      return true;
+      const { data, error } = await client.functions.invoke('admin-auth', {
+        body: { action: 'delete_user', userId: id },
+      });
+      if (error) throw await failFromFn(error);
+      return data?.ok === true;
     },
   };
 }
@@ -228,6 +291,7 @@ export function createModulesApi(sb) {
         icon: patch.icon || '❖',
         sort: Number(patch.sort) || 99,
         hot: Boolean(patch.hot),
+        kind: patch.kind === 'qa' ? 'qa' : 'content',
       }).select().single();
       if (error) throw fail(error.message?.includes('duplicate') ? 'module.keyExists' : 'msg.error');
       return mapModule(data);
@@ -244,6 +308,7 @@ export function createModulesApi(sb) {
       if (patch.icon != null) row.icon = patch.icon;
       if (patch.sort != null) row.sort = Number(patch.sort) || 0;
       if (patch.hot != null) row.hot = Boolean(patch.hot);
+      if (patch.kind != null) row.kind = patch.kind === 'qa' ? 'qa' : 'content';
       const { data, error } = await client.from('modules').update(row).eq('id', id).select().single();
       if (error) throw fail(error.message?.includes('duplicate') ? 'module.keyExists' : 'msg.error');
       return mapModule(data);

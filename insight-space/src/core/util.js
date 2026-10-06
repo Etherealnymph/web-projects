@@ -21,6 +21,38 @@ export function debounce(fn, wait = 250) {
 
 export function uniq(list) { return Array.from(new Set(list)); }
 
+/** 经验值来源（与后端触发器保持一致） */
+export const EXP = {
+  content: 10,   // 发布内容（含提问）
+  comment: 5,    // 回答 / 评论
+  like: 2,       // 内容或回答被点赞
+  favorite: 5,   // 内容或回答被收藏
+};
+
+/** 由经验值推导等级：Lv n 需要 20·(n-1)² 经验 */
+export function expLevel(exp) {
+  const e = Math.max(0, Math.floor(Number(exp) || 0));
+  return Math.floor(Math.sqrt(e / 20)) + 1;
+}
+
+/** 等级进度：当前等级、距下一级所需经验、百分比 */
+export function expProgress(exp) {
+  const e = Math.max(0, Math.floor(Number(exp) || 0));
+  const level = expLevel(e);
+  const cur = 20 * (level - 1) * (level - 1);
+  const next = 20 * level * level;
+  const need = next - cur;
+  const current = e - cur;
+  return {
+    level,
+    exp: e,
+    current,
+    need,
+    next,
+    pct: Math.min(100, Math.max(0, Math.round((current / need) * 100))),
+  };
+}
+
 /** 相对时间 */
 export function fromNow(iso, lang = 'zh') {
   const then = new Date(iso).getTime();

@@ -27,6 +27,12 @@ export function roleBadge(user) {
   return '';
 }
 
+export function levelBadge(user) {
+  if (!user) return '';
+  const level = Number(user.level) || 1;
+  return `<span class="badge badge--level" title="${esc(t('profile.level'))} ${level}">Lv ${level}</span>`;
+}
+
 /** 赞 / 踩 / 收藏 / 浏览 / 评论 */
 export function reactBarHtml(targetType, entity, options = {}) {
   const counts = entity.counts || {};
@@ -108,7 +114,7 @@ export function commentHtml(comment, options = {}) {
       <div class="comment__main">
         <div class="comment__head">
           <span class="comment__author">${esc(authorName(comment.author))}</span>
-          ${roleBadge(comment.author)}
+          ${levelBadge(comment.author)} ${roleBadge(comment.author)}
           <span class="tiny muted">${esc(fromNow(comment.createdAt, lang))}</span>
         </div>
         ${isDeleted ? `<div class="comment__body muted">${esc(t('comment.authorDeleted'))}</div>` : `
@@ -118,8 +124,10 @@ export function commentHtml(comment, options = {}) {
         <div class="comment__actions">
           ${isDeleted ? '' : reactBarHtml('comment', comment)}
           <button type="button" class="react" data-reply="${esc(comment.id)}">${icon('comment', 15)}<span>${esc(t('comment.reply'))}</span></button>
+          ${options.canEdit && !isDeleted ? `<button type="button" class="react" data-edit-comment="${esc(comment.id)}">${icon('edit', 15)}<span>${esc(t('comment.edit'))}</span></button>` : ''}
           ${options.canDelete && !isDeleted ? `<button type="button" class="react" data-delete-comment="${esc(comment.id)}">${icon('trash', 15)}<span>${esc(t('comment.delete'))}</span></button>` : ''}
         </div>
+        <div data-edit-slot="${esc(comment.id)}"></div>
         <div data-reply-slot="${esc(comment.id)}"></div>
       </div>
     </div>
@@ -136,8 +144,56 @@ export function commentTreeHtml(comments) {
     replies.get(c.parentId).push(c);
   }
   return roots.map((root) => `
-    ${commentHtml(root, { canDelete: root.canDelete })}
-    ${(replies.get(root.id) || []).map((reply) => commentHtml(reply, { isReply: true, canDelete: reply.canDelete })).join('')}
+    ${commentHtml(root, { canEdit: root.canEdit, canDelete: root.canDelete })}
+    ${(replies.get(root.id) || []).map((reply) => commentHtml(reply, { isReply: true, canEdit: reply.canEdit, canDelete: reply.canDelete })).join('')}
+  `).join('');
+}
+
+/** 问答模块的回答：默认折叠，点击展开全文 */
+export function answerHtml(comment, options = {}) {
+  const lang = document.documentElement.dataset.lang;
+  const body = comment.bodyMd ? renderMarkdown(comment.bodyMd) : '';
+  const short = excerpt(comment.bodyMd || '', 110);
+  const isDeleted = comment.status === 'deleted';
+  return `
+    <div class="comment ${options.isReply ? 'comment--reply' : ''}" data-answer-id="${esc(comment.id)}">
+      ${avatarHtml(comment.author, 'avatar--sm')}
+      <div class="comment__main">
+        <div class="comment__head">
+          <span class="comment__author">${esc(authorName(comment.author))}</span>
+          ${levelBadge(comment.author)} ${roleBadge(comment.author)}
+          <span class="tiny muted">${esc(fromNow(comment.createdAt, lang))}</span>
+        </div>
+        ${isDeleted ? `<div class="comment__body muted">${esc(t('comment.authorDeleted'))}</div>` : `
+          <div class="answer__preview muted" data-answer-preview>${esc(short) || esc(t('answer.noPreview'))}</div>
+          <div class="answer__body prose" data-answer-body hidden>${body}${mediaGalleryHtml(comment.media, { compact: true })}</div>
+          <button type="button" class="link tiny" data-toggle-answer="${esc(comment.id)}">${esc(t('answer.expand'))}</button>
+        `}
+        <div class="comment__actions" ${isDeleted ? 'hidden' : ''}>
+          ${reactBarHtml('comment', comment)}
+          <button type="button" class="react" data-reply="${esc(comment.id)}">${icon('comment', 15)}<span>${esc(t('comment.reply'))}</span></button>
+          ${options.canEdit && !isDeleted ? `<button type="button" class="react" data-edit-comment="${esc(comment.id)}">${icon('edit', 15)}<span>${esc(t('comment.edit'))}</span></button>` : ''}
+          ${options.canDelete && !isDeleted ? `<button type="button" class="react" data-delete-comment="${esc(comment.id)}">${icon('trash', 15)}<span>${esc(t('comment.delete'))}</span></button>` : ''}
+        </div>
+        <div data-edit-slot="${esc(comment.id)}"></div>
+        <div data-reply-slot="${esc(comment.id)}"></div>
+      </div>
+    </div>
+  `;
+}
+
+export function answerTreeHtml(comments) {
+  if (!comments.length) return emptyState(t('answer.empty'), '答');
+  const roots = comments.filter((c) => !c.parentId);
+  const replies = new Map();
+  for (const c of comments) {
+    if (!c.parentId) continue;
+    if (!replies.has(c.parentId)) replies.set(c.parentId, []);
+    replies.get(c.parentId).push(c);
+  }
+  return roots.map((root) => `
+    ${answerHtml(root, { canEdit: root.canEdit, canDelete: root.canDelete })}
+    ${(replies.get(root.id) || []).map((reply) => commentHtml(reply, { isReply: true, canEdit: reply.canEdit, canDelete: reply.canDelete })).join('')}
   `).join('');
 }
 

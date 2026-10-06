@@ -138,6 +138,12 @@ export async function createLocalApi() {
       return user ? publicUser(user) : null;
     },
 
+    async refresh() {
+      await refresh();
+      const user = ctx.user();
+      return user ? publicUser(user) : null;
+    },
+
     async updateProfile(patch) {
       const db = await refresh();
       const user = requireUser();
@@ -288,6 +294,7 @@ export async function createLocalApi() {
         icon: String(patch.icon || '❖').slice(0, 2),
         sort: Number.isFinite(Number(patch.sort)) ? Number(patch.sort) : 99,
         hot: Boolean(patch.hot),
+        kind: patch.kind === 'qa' ? 'qa' : 'content',
         createdAt: nowIso(),
       };
       db.modules.push(module);
@@ -309,6 +316,7 @@ export async function createLocalApi() {
       if (patch.icon != null) module.icon = String(patch.icon).slice(0, 2);
       if (patch.sort != null) module.sort = Number(patch.sort) || 0;
       if (patch.hot != null) module.hot = Boolean(patch.hot);
+      if (patch.kind != null) module.kind = patch.kind === 'qa' ? 'qa' : 'content';
       await saveDb(db);
       return module;
     },

@@ -146,11 +146,15 @@ export function createCommentsApi(sb) {
         }
       }
       const authors = await sb.attachAuthors(data || []);
-      return rows.map((row) => ({
-        ...row,
-        author: authors.get(row.authorId) || null,
-        canDelete: Boolean(sb.profile && (sb.profile.id === row.authorId || sb.isStaff())),
-      }));
+      return rows.map((row) => {
+        const canEdit = Boolean(sb.profile && (sb.profile.id === row.authorId || sb.isStaff()));
+        return {
+          ...row,
+          author: authors.get(row.authorId) || null,
+          canEdit,
+          canDelete: canEdit,
+        };
+      });
     },
 
     async count(contentId) {
@@ -190,6 +194,17 @@ export function createCommentsApi(sb) {
         media: media || [],
       }).select().single();
       if (error) throw fail('msg.error');
+      return mapComment(data);
+    },
+
+    async update(id, { bodyMd }) {
+      sb.requireUser();
+      const { data, error } = await client.from('comments')
+        .update({ body_md: String(bodyMd || '').slice(0, 4000) })
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw fail('common.noPermission');
       return mapComment(data);
     },
 

@@ -1,7 +1,7 @@
 /** 本地模式的数据引擎：存储、访问控制、统计 */
 
 import { CONFIG } from '../config.js';
-import { uid, nowIso, hotScore } from '../core/util.js';
+import { uid, nowIso, hotScore, expLevel } from '../core/util.js';
 import { readDb, writeDb, putFile, getFile, deleteFile, hashPassword } from './storage.js';
 
 /* ------------------------------- 数据库 ------------------------------- */
@@ -30,6 +30,8 @@ export async function loadDb() {
   cache = stored && stored.users ? stored : emptyDb();
   if (!Array.isArray(cache.friendships)) cache.friendships = [];
   if (!Array.isArray(cache.messages)) cache.messages = [];
+  for (const m of cache.modules || []) if (!m.kind) m.kind = 'content';
+  for (const u of cache.users || []) if (u.exp == null) u.exp = 0;
   await ensureSeed(cache);
   return cache;
 }
@@ -54,6 +56,7 @@ export async function ensureSeed(db) {
       icon: m.icon || '❖',
       sort: m.sort ?? 99,
       hot: Boolean(m.hot),
+      kind: m.kind || 'content',
       createdAt: nowIso(),
     }));
     changed = true;
@@ -81,6 +84,7 @@ export async function makeUser({ username, password, nickname, role = 'member', 
     status: 'active',
     inviteId,
     secret,
+    exp: 0,
     mustChangePassword,
     createdAt: nowIso(),
   };
@@ -90,7 +94,17 @@ export async function makeUser({ username, password, nickname, role = 'member', 
 export function publicUser(user) {
   if (!user) return null;
   const { secret, ...rest } = user;
+  rest.exp = Math.max(0, Number(rest.exp) || 0);
+  rest.level = expLevel(rest.exp);
   return rest;
+}
+
+/** 给用户增减经验（调用方负责 saveDb） */
+export function awardExp(db, userId, delta) {
+  if (!delta) return;
+  const user = db.users.find((u) => u.id === userId);
+  if (!user) return;
+  user.exp = Math.max(0, (Number(user.exp) || 0) + delta);
 }
 
 /* ----------------------------- 访问控制 ----------------------------- */

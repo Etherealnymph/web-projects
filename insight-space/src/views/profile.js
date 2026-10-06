@@ -6,7 +6,7 @@ import { esc, formatDate, formatDay, fromNow, remainingText } from '../core/util
 import { errText } from '../data/index.js';
 import { theme, lang } from '../core/theme.js';
 import { emit } from '../core/store.js';
-import { contentCardHtml, commentHtml, moduleName } from '../components/widgets.js';
+import { contentCardHtml, commentHtml, moduleName, levelBadge } from '../components/widgets.js';
 import { resolveMediaUrls } from './home.js';
 
 export async function renderProfile(ctx) {
@@ -38,6 +38,8 @@ export async function renderProfile(ctx) {
           <h1 class="mb-0" style="font-size:24px">${esc(user.nickname || user.username)}</h1>
           <div class="row row--wrap mt-1">
             <span class="badge badge--accent">${esc(t(`role.${user.role}`))}</span>
+            ${levelBadge(user)}
+            <span class="tiny muted">${esc(t('profile.exp'))} ${user.exp || 0}</span>
             <span class="tiny muted mono">@${esc(user.username)}</span>
             <span class="tiny muted">${esc(t('profile.joined'))} ${esc(formatDate(user.createdAt, langNow))}</span>
           </div>

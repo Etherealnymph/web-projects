@@ -1,5 +1,7 @@
 /** Supabase 适配层：公共上下文与数据映射 */
 
+import { expLevel } from '../core/util.js';
+
 const EMAIL_DOMAIN = 'tiwu.local'; // 用户名 → 合成邮箱
 
 export function fail(code) {
@@ -25,6 +27,8 @@ export function mapUser(row) {
     status: row.status || 'active',
     inviteId: row.invite_id || null,
     mustChangePassword: Boolean(row.must_change_password),
+    exp: Math.max(0, Number(row.exp) || 0),
+    level: expLevel(row.exp),
     createdAt: row.created_at,
   };
 }
@@ -40,6 +44,7 @@ export function mapModule(row, access, counts) {
     icon: row.icon || '❖',
     sort: row.sort ?? 99,
     hot: Boolean(row.hot),
+    kind: row.kind || 'content',
     createdAt: row.created_at,
     access: access || { visible: true, write: true, expiresAt: null },
     counts: counts || { contents: 0 },

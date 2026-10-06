@@ -73,7 +73,22 @@ export const CONFIG = {
 };
 ```
 
-6. 重新打开站点，用首页的「初始化」表单创建第一位超管（该入口只在系统还没有超管时出现）。
+6. 部署超管账号管理的 Edge Function（用于「重置密码」和「删除账号」，这两个操作无法再用 SQL 直接改 `auth.users`）：
+
+```bash
+# 本地安装 Supabase CLI 并登录（首次）
+npm i -g supabase
+supabase login
+# 关联到你的项目，然后部署（项目引用 ID 见 Project Settings → General）
+supabase link --project-ref <你的项目ID>
+supabase functions deploy admin-auth --no-verify-jwt
+```
+
+   - 该函数代码在 [`supabase/functions/admin-auth/index.ts`](./supabase/functions/admin-auth/index.ts)。
+   - `--no-verify-jwt`：函数在内部自行校验调用者是否为已登录超管（依赖 Supabase 自动注入的 `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`）。
+   - 部署成功后，后台「重置密码 / 删除账号」即通过此函数调用 Auth Admin API，不会再 403。
+
+7. 重新打开站点，用首页的「初始化」表单创建第一位超管（该入口只在系统还没有超管时出现）。
 
 `schema.sql` 会自动：建表、开启 RLS、建 `media` 公共存储桶、写入 5 个默认模块、注册触发器（新用户自动建资料）。若你的 Supabase 版本限制了向 `auth.users` 写入，可改在 **Authentication → Users → Add user** 手动建号（邮箱填 `用户名@tiwu.local`），再执行：
 
@@ -147,7 +162,9 @@ update public.profiles set role = 'superadmin' where username = '你的用户名
 ```text
 insight-space/
 ├─ index.html              入口（importmap / 样式 / 启动脚本）
-├─ supabase/schema.sql     数据库结构（表 / RLS / 函数 / 存储桶）
+├─ supabase/
+│  ├─ schema.sql           数据库结构（表 / RLS / 函数 / 存储桶）
+│  └─ functions/admin-auth/index.ts  超管重置密码 / 删除账号（Edge Function）
 ├─ assets/
 │  ├─ css/{base,components,views}.css
 │  ├─ icon.svg
