@@ -140,6 +140,10 @@ export function createContentsApi(ctx) {
       if (!canEditContent(db, user, content) && user?.role !== 'owner' && user?.role !== 'superadmin') throw fail('common.noPermission');
       for (const media of content.media || []) await ctx.removeMedia(media);
       const commentIds = db.comments.filter((c) => c.contentId === id).map((c) => c.id);
+      // 评论会随内容一并删除，它们的附件也要回收
+      for (const comment of db.comments.filter((c) => c.contentId === id)) {
+        for (const media of comment.media || []) await ctx.removeMedia(media);
+      }
       db.contents = db.contents.filter((c) => c.id !== id);
       db.comments = db.comments.filter((c) => c.contentId !== id);
       db.reactions = db.reactions.filter((r) => {
@@ -267,8 +271,11 @@ export function createCommentsApi(ctx) {
       const comment = db.comments.find((c) => c.id === id);
       if (!comment) throw fail('content.notFound');
       if (!user || (user.id !== comment.authorId && user.role !== 'superadmin' && user.role !== 'owner')) throw fail('common.noPermission');
-      for (const media of comment.media || []) await ctx.removeMedia(media);
       const removeIds = [id, ...db.comments.filter((c) => c.parentId === id).map((c) => c.id)];
+      // 含本条的附件，以及会一起被删掉的二级回复的附件
+      for (const comment of db.comments.filter((c) => removeIds.includes(c.id))) {
+        for (const media of comment.media || []) await ctx.removeMedia(media);
+      }
       db.comments = db.comments.filter((c) => !removeIds.includes(c.id));
       db.reactions = db.reactions.filter((r) => !(r.targetType === 'comment' && removeIds.includes(r.targetId)));
       awardExp(db, comment.authorId, -EXP.comment);

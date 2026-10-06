@@ -278,6 +278,37 @@ export function createAdminApi(sb, modulesApi) {
   };
 }
 
+/** 从附件引用（`{id,url}` 或裸 URL）解析出存储路径；认不出就返回 null，避免误删 */
+export function mediaPathOf(ref) {
+  if (!ref) return null;
+  const url = typeof ref === 'string' ? ref : ref.url || '';
+  const id = (typeof ref === 'string' ? null : ref.id) || (url ? url.split(`/${CONFIG.storageBucket}/`).pop() : '');
+  const path = String(id || '').split(/[?#]/)[0];
+  return path && !/^https?:/i.test(path) ? path : null;
+}
+
+/**
+ * 批量回收存储对象（100 个一批），尽力而为：
+ * 他人上传的附件会被 storage 的 `media_delete` 策略拒绝（只有上传者本人能删），
+ * 且 SDK 在删除成功时也可能抛 TypeError，因此一律不向上抛，只记一条警告。
+ */
+export async function purgeMedia(sb, refs) {
+  const paths = Array.from(new Set((refs || []).map(mediaPathOf).filter(Boolean)));
+  if (!paths.length) return 0;
+  let removed = 0;
+  for (let i = 0; i < paths.length; i += 100) {
+    const chunk = paths.slice(i, i + 100);
+    try {
+      const { error } = await sb.client.storage.from(CONFIG.storageBucket).remove(chunk);
+      if (error) console.warn('[media] 回收附件失败', chunk, error.message || error);
+      else removed += chunk.length;
+    } catch (error) {
+      console.warn('[media] 回收附件异常（可能已成功）', chunk, error?.message || error);
+    }
+  }
+  return removed;
+}
+
 export function createMediaApi(sb) {
   const { client } = sb;
 
@@ -300,10 +331,8 @@ export function createMediaApi(sb) {
     },
     async resolveText(text) { return rewriteSupabaseUrls(text); },
     async remove(ref) {
-      const url = typeof ref === 'string' ? ref : ref?.url;
-      if (!url) return;
-      const id = ref?.id || url.split(`/${CONFIG.storageBucket}/`).pop();
-      if (id) await client.storage.from(CONFIG.storageBucket).remove([id]);
+      const path = mediaPathOf(ref);
+      if (path) await purgeMedia(sb, [path]);
     },
   };
 }

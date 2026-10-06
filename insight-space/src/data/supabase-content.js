@@ -1,5 +1,6 @@
 /** Supabase：内容 / 评论 / 互动 */
 
+import { purgeMedia } from './supabase-ops.js';
 import { fail, mapContent, mapComment } from './sb-core.js';
 import { sortContents } from '../core/util.js';
 
@@ -90,8 +91,17 @@ export function createContentsApi(sb, modulesApi) {
 
     async remove(id) {
       sb.requireUser();
+      // 附件清单必须在删除前取出：内容被删时其评论会级联消失，那些评论的附件同样要回收
+      const [contentRes, commentRes] = await Promise.all([
+        client.from('contents').select('media').eq('id', id).maybeSingle(),
+        client.from('comments').select('media').eq('content_id', id),
+      ]);
       const { error } = await client.from('contents').delete().eq('id', id);
       if (error) throw fail('common.noPermission');
+      await purgeMedia(sb, [
+        ...(contentRes?.data?.media || []),
+        ...(commentRes?.data || []).flatMap((row) => row.media || []),
+      ]);
       return true;
     },
 
@@ -210,8 +220,17 @@ export function createCommentsApi(sb) {
 
     async remove(id) {
       sb.requireUser();
+      // 二级回复会随 parent_id 级联删除，先取出两者（含本条）的附件
+      const [ownRes, replyRes] = await Promise.all([
+        client.from('comments').select('media').eq('id', id).maybeSingle(),
+        client.from('comments').select('media').eq('parent_id', id),
+      ]);
       const { error } = await client.from('comments').delete().eq('id', id);
       if (error) throw fail('common.noPermission');
+      await purgeMedia(sb, [
+        ...(ownRes?.data?.media || []),
+        ...(replyRes?.data || []).flatMap((row) => row.media || []),
+      ]);
       return true;
     },
   };
