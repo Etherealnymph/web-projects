@@ -64,20 +64,32 @@ Netlify 会把响应头原样透传。
 
 | 请求 | 结果 |
 | --- | --- |
+| `OPTIONS /storage/v1/object/media/*`（预检） | 200，`Access-Control-Allow-Methods` 含 `PUT`/`DELETE`，`Allow-Headers` 回显请求头 |
 | `GET /` | 200（代理说明页） |
 | `GET /rest/v1/contents` + `apikey` | 200，`[]`，`Access-Control-Allow-Origin: https://etherealnymph.github.io` |
-| `HEAD /rest/v1/contents` + `Prefer: count=exact` | 200，`Content-Range` 可读（未读数轮询依赖它） |
+| `HEAD /rest/v1/messages` + `Prefer: count=exact` | 200，`Content-Range` 可读（未读数轮询依赖它） |
 | `GET /auth/v1/settings` + `apikey` | 200（对照：上游直连在同一台机器上是 `curl` exit 35，TLS 被重置） |
 | `POST /rest/v1/contents`（匿名） | RLS 拒绝 `42501`（说明 POST body 与写路径透明） |
 | `PUT /storage/v1/object/media/...` 19–20 MB | 请求体**完整送达**，被 storage RLS 拒绝（说明没有 6 MB 上限） |
 | `PUT` 最大实测到 35 MB | 请求体完整送达 |
 | `/definitely-not-proxied/x` | 404（不是开放代理） |
 
+浏览器内的端到端验证（线上站点，真实 HTTP 栈，实测数据）：
+
+| 场景 | 结果 |
+| --- | --- |
+| 5 / 10 / 15 / 20 / 25 / 30 MB `PUT` | 全部完整送达（耗时随体积线性增长 1.7 s → 12 s） |
+| 邀请码注册 + 登录 | 成功（走代理） |
+| 发布图文（含 12 MB 附件） | 成功，入库的是上游 `supabase.co` 地址 |
+| 详情页渲染附件 | 地址被自动改写为代理域名，`GET` 回读 12 578 912 字节，与上传字节数一致 |
+| 发评论 | 成功，评论数由 `评论 · 0` 变为 `评论 · 1` |
+| 删除评论 / 删除帖子 | 成功 |
+
 > 体积的补充说明：Netlify 官方文档里的 6 MB 上限只针对 Serverless Function，`_redirects` 的代理走
-> CDN 不适用。实测 10–35 MB 的成功率呈**非单调**波动（19、20、35 MB 通过，10、15 MB 偶发空响应），
-> 说明瓶颈是裸连国际链路的丢包，而不是配置上限 —— 换任何境外代理都绕不开这一点，
-> 浏览器 `fetch` 遇到时会报网络错误，重试即可。链路差时建议把
-> [`src/components/composer.js`](../src/components/composer.js) 的 `MAX_MB` 调小。
+> CDN 不适用。用 `curl` 裸连做二进制大报文压测时成功率呈**非单调**波动（19、20、35 MB 通过，
+> 10、15 MB 偶发空响应、`size_upload=0`、约 0.4 s 就返回），但**换成浏览器 `fetch`（也是线上真实路径）
+> 后 5–30 MB 全部一次通过**。所以那是 `curl` 裸连国际链路的偶发中断被 Netlify 记为裸 400，
+> 与本代理的配置无关。
 
 ---
 
