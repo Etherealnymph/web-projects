@@ -39,6 +39,7 @@
   --topbar-h: 60px;
   --content-w: 1160px;
   --read-w: 760px;
+  --font-scale: 1;
 }
 
 html[data-theme="dark"] {
@@ -70,6 +71,8 @@ html[data-theme="dark"] {
 /* ---------- 基础重置 ---------- */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
+/* 字号设置：对根元素整体缩放（等价于浏览器缩放），文字、间距、图标一起变化 */
+html { zoom: var(--font-scale, 1); }
 body {
   margin: 0;
   background: var(--bg);

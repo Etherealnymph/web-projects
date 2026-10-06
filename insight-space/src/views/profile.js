@@ -2,9 +2,9 @@
 
 import { t } from '../core/i18n.js';
 import { icon, avatarHtml, toastOk, toastErr, loadingState, emptyState } from '../core/ui.js';
-import { esc, formatDate, formatDay, fromNow, remainingText } from '../core/util.js';
+import { esc, formatDate, formatDay, fromNow, remainingText, squareImage, bytesToDataUrl } from '../core/util.js';
+import { CONFIG } from '../config.js';
 import { errText } from '../data/index.js';
-import { theme, lang } from '../core/theme.js';
 import { emit } from '../core/store.js';
 import { contentCardHtml, commentHtml, moduleName, levelBadge } from '../components/widgets.js';
 import { resolveMediaUrls } from './home.js';
@@ -69,8 +69,17 @@ export async function renderProfile(ctx) {
             </div>
             <div class="field">
               <label class="field__label">${esc(t('profile.avatar'))}</label>
-              <input class="input" data-role="avatar" value="${esc(user.avatar || '')}" placeholder="https://…" />
-              <div class="field__hint">${esc(t('profile.avatarHint'))}</div>
+              <div class="avatar-edit">
+                <span data-role="avatar-preview">${avatarHtml(user, 'avatar--lg')}</span>
+                <div class="stack gap-1 grow">
+                  <div class="row row--wrap">
+                    <button class="btn btn--sm" type="button" data-role="avatar-pick">${icon('upload', 15)} ${esc(t('profile.avatarUpload'))}</button>
+                    <button class="btn btn--sm" type="button" data-role="avatar-remove">${esc(t('profile.avatarRemove'))}</button>
+                  </div>
+                  <div class="field__hint">${esc(t('profile.avatarHint', { mb: CONFIG.maxUploadMB }))}</div>
+                </div>
+                <input class="hidden" type="file" accept="image/*" data-role="avatar-file" />
+              </div>
             </div>
             <button class="btn btn--primary" data-role="save-profile">${esc(t('profile.save'))}</button>
           </div>
@@ -94,21 +103,7 @@ export async function renderProfile(ctx) {
             <div class="form-error" data-role="pw-error"></div>
             <button class="btn" data-role="change-pw">${esc(t('profile.changePw'))}</button>
             <div class="divider"></div>
-            <div class="row row--between">
-              <span class="small">${esc(t('settings.theme'))}</span>
-              <div class="segmented" data-role="theme">
-                <button data-value="light" class="${theme.current === 'light' ? 'is-active' : ''}">${esc(t('theme.light'))}</button>
-                <button data-value="dark" class="${theme.current === 'dark' ? 'is-active' : ''}">${esc(t('theme.dark'))}</button>
-                <button data-value="auto" class="${theme.current === 'auto' ? 'is-active' : ''}">${esc(t('theme.auto'))}</button>
-              </div>
-            </div>
-            <div class="row row--between">
-              <span class="small">${esc(t('settings.lang'))}</span>
-              <div class="segmented" data-role="lang">
-                <button data-value="zh" class="${lang.current === 'zh' ? 'is-active' : ''}">${esc(t('lang.zh'))}</button>
-                <button data-value="en" class="${lang.current === 'en' ? 'is-active' : ''}">${esc(t('lang.en'))}</button>
-              </div>
-            </div>
+            <a class="btn" href="#/settings">${icon('settings', 15)} ${esc(t('settings.title'))}</a>
             <button class="btn btn--danger mt-1" data-role="logout">${icon('logout', 15)} ${esc(t('profile.logout'))}</button>
           </div>
         </section>
@@ -168,13 +163,51 @@ export async function renderProfile(ctx) {
   `;
 
   /* 资料保存 */
+  let avatarValue = user.avatar || '';
+  const preview = container.querySelector('[data-role="avatar-preview"]');
+  const fileInput = container.querySelector('[data-role="avatar-file"]');
+  const renderPreview = () => { preview.innerHTML = avatarHtml({ ...user, avatar: avatarValue }, 'avatar--lg'); };
+  renderPreview();
+
+  container.querySelector('[data-role="avatar-pick"]').addEventListener('click', () => fileInput.click());
+
+  container.querySelector('[data-role="avatar-remove"]').addEventListener('click', () => {
+    avatarValue = '';
+    renderPreview();
+  });
+
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files?.[0];
+    fileInput.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toastErr(t('profile.avatarNotImage')); return; }
+    if (file.size > CONFIG.maxUploadMB * 1024 * 1024) { toastErr(t('profile.avatarTooBig', { mb: CONFIG.maxUploadMB })); return; }
+    try {
+      const square = await squareImage(file, 256);
+      if (api.mode === 'supabase') {
+        const uploaded = await api.media.upload(new File([square], `avatar.${square.type === 'image/png' ? 'png' : 'jpg'}`, { type: square.type }), 'avatar');
+        avatarValue = uploaded.url;
+      } else {
+        // 本地模式没有 storage，直接内联成 data URL，避免 idb:// 地址在 <img> 里失效
+        avatarValue = await bytesToDataUrl(square);
+      }
+      renderPreview();
+      toastOk(t('profile.avatarReady'));
+    } catch (error) { toastErr(errText(error)); }
+  });
+
   container.querySelector('[data-role="save-profile"]').addEventListener('click', async () => {
     try {
+      const previous = user.avatar || '';
       const updated = await api.auth.updateProfile({
         nickname: container.querySelector('[data-role="nickname"]').value,
         bio: container.querySelector('[data-role="bio"]').value,
-        avatar: container.querySelector('[data-role="avatar"]').value,
+        avatar: avatarValue,
       });
+      // 换头像后回收上一张，避免存储桶里堆积孤儿文件
+      if (previous && previous !== updated.avatar && previous.includes(`/${CONFIG.storageBucket}/`)) {
+        api.media.remove(previous).catch(() => {});
+      }
       toastOk(t('profile.saved'));
       emit('auth:changed', updated);
     } catch (error) { toastErr(errText(error)); }
@@ -196,19 +229,6 @@ export async function renderProfile(ctx) {
       container.querySelector('[data-role="new-pw"]').value = '';
       container.querySelector('[data-role="new-pw2"]').value = '';
     } catch (error) { errorBox.textContent = errText(error); }
-  });
-
-  /* 主题 / 语言 */
-  container.querySelector('[data-role="theme"]').addEventListener('click', (event) => {
-    const btn = event.target.closest('[data-value]');
-    if (!btn) return;
-    theme.apply(btn.dataset.value);
-    container.querySelectorAll('[data-role="theme"] [data-value]').forEach((node) => node.classList.toggle('is-active', node === btn));
-  });
-  container.querySelector('[data-role="lang"]').addEventListener('click', (event) => {
-    const btn = event.target.closest('[data-value]');
-    if (!btn) return;
-    lang.apply(btn.dataset.value);
   });
 
   container.querySelector('[data-role="logout"]').addEventListener('click', async () => {

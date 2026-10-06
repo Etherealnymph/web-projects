@@ -2,7 +2,7 @@
 
 import { CONFIG, APP_VERSION } from './config.js';
 import { t, tl } from './core/i18n.js';
-import { theme, lang } from './core/theme.js';
+import { theme, lang, font } from './core/theme.js';
 import { state, setState, on, emit } from './core/store.js';
 import { icon, toast, toastOk, toastErr, avatarHtml, emptyState, loadingState, lightbox } from './core/ui.js';
 import { esc, debounce } from './core/util.js';
@@ -15,6 +15,7 @@ import { renderHome, renderModule, renderRanking, renderFavorites, renderSearch,
 import { renderDetail } from './views/detail.js';
 import { renderEditor } from './views/editor.js';
 import { renderProfile } from './views/profile.js';
+import { renderSettings } from './views/settings.js';
 import { renderAdmin } from './views/admin.js';
 import { renderMessages } from './views/messages.js';
 
@@ -72,7 +73,7 @@ function renderShell() {
           <input class="input" data-role="global-search" placeholder="${esc(t('nav.search'))}" value="${esc(segments[0] === 'search' ? (parseHash().query.q || '') : '')}"
                  style="width:170px;height:34px;padding:4px 10px" />
           <button class="icon-btn" data-role="theme" title="${esc(t('settings.theme'))}">${icon(theme.current === 'dark' ? 'sun' : 'moon', 17)}</button>
-          <button class="icon-btn" data-role="lang" title="${esc(t('settings.lang'))}" style="font-size:12px;font-weight:600">${lang.current === 'zh' ? 'EN' : '中'}</button>
+          <a class="icon-btn" href="#/settings" title="${esc(t('settings.title'))}" aria-label="${esc(t('settings.title'))}">${icon('settings', 17)}</a>
           ${user ? `
             <button class="icon-btn" data-role="write" title="${esc(t('content.new'))}">${icon('plus', 18)}</button>
             <button class="icon-btn" data-role="user-menu" style="padding:0">${avatarHtml(user, 'avatar--sm')}</button>
@@ -95,11 +96,6 @@ function renderShell() {
   // 主题切换只改 data-theme 属性，按钮图标由 theme:change 事件更新；
   // 这里不能重建外壳——renderShell() 会把 #view 重置成「载入中」且不会重新渲染视图。
   app.querySelector('[data-role="theme"]').addEventListener('click', () => theme.toggle());
-  app.querySelector('[data-role="lang"]').addEventListener('click', () => {
-    lang.toggle();
-    renderShell();
-    renderView();
-  });
   app.querySelector('[data-role="write"]')?.addEventListener('click', () => navigate('#/edit'));
   refreshBadges();
 
@@ -109,7 +105,8 @@ function renderShell() {
     mountMenu(menuButton, [
       { label: `${state.user.nickname} · ${t(`role.short.${state.user.role}`)}`, icon: 'user', onClick: () => navigate('#/me') },
       { separator: true },
-      { label: t('nav.profile'), icon: 'settings', onClick: () => navigate('#/me') },
+      { label: t('nav.profile'), icon: 'user', onClick: () => navigate('#/me') },
+      { label: t('settings.title'), icon: 'settings', onClick: () => navigate('#/settings') },
       { label: t('nav.favorites'), icon: 'star', onClick: () => navigate('#/favorites') },
       { label: t('nav.messages'), icon: 'chat', onClick: () => navigate('#/msg') },
       ...(state.user.role === 'superadmin' || state.user.role === 'owner'
@@ -135,7 +132,7 @@ async function renderView() {
   const [first, second] = segments;
   const user = state.user;
 
-  const needsAuth = !(first === 'login');
+  const needsAuth = !(first === 'login' || first === 'settings');
   if (!user && needsAuth) {
     renderAuthView();
     return;
@@ -165,6 +162,7 @@ async function renderView() {
     else if (first === 'search') await renderSearch(ctx);
     else if (first === 'admin') await renderAdmin(ctx);
     else if (first === 'msg') await renderMessages(ctx);
+    else if (first === 'settings') await renderSettings(ctx);
     else view.innerHTML = emptyState(t('content.notFound'), '迷');
   } catch (error) {
     console.error('[体悟集] 视图渲染失败', error);
@@ -276,6 +274,7 @@ function wireLightbox() {
 async function boot() {
   theme.init();
   lang.init();
+  font.init();
 
   const app = document.getElementById('app');
   app.innerHTML = '<div class="boot-screen"><div class="boot-mark">体</div><div class="boot-text">正在载入体悟集…</div></div>';

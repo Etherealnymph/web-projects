@@ -1,6 +1,7 @@
 /** Supabase 适配层：公共上下文与数据映射 */
 
 import { expLevel } from '../core/util.js';
+import { rewriteSupabaseUrls } from '../config.js';
 
 const EMAIL_DOMAIN = 'tiwu.local'; // 用户名 → 合成邮箱
 
@@ -23,7 +24,7 @@ export function mapUser(row) {
     nickname: row.nickname || row.username,
     role: row.role,
     bio: row.bio || '',
-    avatar: row.avatar || '',
+    avatar: rewriteSupabaseUrls(row.avatar),
     status: row.status || 'active',
     inviteId: row.invite_id || null,
     mustChangePassword: Boolean(row.must_change_password),

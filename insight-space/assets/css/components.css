@@ -50,6 +50,35 @@
 .avatar--lg { width: 64px; height: 64px; font-size: 24px; }
 .avatar--xl { width: 92px; height: 92px; font-size: 34px; border-radius: 26px; }
 
+/* ---------- 头像上传 ---------- */
+.avatar-edit { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.avatar-edit .avatar { flex: none; }
+
+/* ---------- 设置页 ---------- */
+.settings .panel__title { display: inline-flex; align-items: center; gap: 8px; }
+.setting-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: space-between; }
+.setting-row + .setting-row { padding-top: 14px; border-top: 1px solid var(--line); }
+.setting-row__text { display: flex; flex-direction: column; gap: 2px; min-width: 130px; }
+.setting-row__text strong { font-size: 14px; font-weight: 600; }
+.setting-row .segmented { max-width: 100%; overflow-x: auto; }
+a.icon-btn:hover { text-decoration: none; }
+
+/* ---------- 筛选条（模块 / 作者 / 日期 / 标签） ---------- */
+.filters {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px;
+  margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line);
+}
+.filter { display: inline-flex; align-items: center; gap: 6px; }
+.filter__label { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.filter .select { padding: 6px 30px 6px 10px; font-size: 13px; width: auto; min-width: 112px; }
+.filter input[type="date"] { width: auto; padding: 6px 9px; font-size: 13px; }
+.filter[data-role="f-range"] { display: none; }
+.filter[data-role="f-range"].is-open { display: inline-flex; }
+@media (max-width: 720px) {
+  .filter { flex: 1 1 44%; }
+  .filter .select { width: 100%; }
+}
+
 /* ---------- 反应条（赞 / 踩 / 藏 / 评） ---------- */
 .reactbar { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .react {

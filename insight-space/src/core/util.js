@@ -154,6 +154,39 @@ export function bytesToDataUrl(blob) {
   });
 }
 
+/**
+ * 把图片等比缩放并居中裁剪成边长 maxSize 的方形图，返回 Blob。
+ * PNG 保留透明通道，其余格式统一编码为 JPEG；解码失败时原样返回。
+ */
+export async function squareImage(file, maxSize = 256) {
+  const source = URL.createObjectURL(file);
+  try {
+    const image = await new Promise((resolve, reject) => {
+      const node = new Image();
+      node.onload = () => resolve(node);
+      node.onerror = () => reject(new Error('image.decodeFail'));
+      node.src = source;
+    });
+    const side = Math.min(image.naturalWidth, image.naturalHeight);
+    if (!side) return file;
+    const canvas = document.createElement('canvas');
+    canvas.width = maxSize;
+    canvas.height = maxSize;
+    canvas.getContext('2d').drawImage(
+      image,
+      (image.naturalWidth - side) / 2, (image.naturalHeight - side) / 2, side, side,
+      0, 0, maxSize, maxSize,
+    );
+    const toPng = file.type === 'image/png';
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, toPng ? 'image/png' : 'image/jpeg', 0.9));
+    return blob || file;
+  } catch {
+    return file;
+  } finally {
+    URL.revokeObjectURL(source);
+  }
+}
+
 export async function copyText(text) {
   try {
     if (navigator.clipboard && window.isSecureContext) {

@@ -14,9 +14,19 @@ export function createContentsApi(sb, modulesApi) {
       if (options.moduleId && !visible.has(options.moduleId)) throw fail('module.noAccess');
       if (!visible.size) return { items: [], total: 0 };
 
+      const moduleIds = Array.isArray(options.moduleIds) && options.moduleIds.length
+        ? options.moduleIds.filter((id) => visible.has(id))
+        : null;
+      if (moduleIds && !moduleIds.length) return { items: [], total: 0 };
+
       let query = client.from('contents').select('*');
-      query = options.moduleId ? query.eq('module_id', options.moduleId) : query.in('module_id', Array.from(visible));
+      if (options.moduleId) query = query.eq('module_id', options.moduleId);
+      else if (moduleIds) query = query.in('module_id', moduleIds);
+      else query = query.in('module_id', Array.from(visible));
       if (options.authorId) query = query.eq('author_id', options.authorId);
+      if (options.dateFrom) query = query.gte('created_at', options.dateFrom);
+      if (options.dateTo) query = query.lte('created_at', options.dateTo);
+      if (options.tag) query = query.contains('tags', [options.tag]);
       if (options.q) query = query.or(`title.ilike.%${options.q}%,body_md.ilike.%${options.q}%`);
       const { data, error } = await query.limit(500);
       if (error) throw fail('msg.error');
@@ -32,7 +42,8 @@ export function createContentsApi(sb, modulesApi) {
       const authors = await sb.attachAuthors(data || []);
       const moduleMap = new Map(all.map((m) => [m.id, m]));
       items = items.map((c) => ({ ...c, author: authors.get(c.authorId) || null, module: moduleMap.get(c.moduleId) || null }));
-      const module = options.moduleId ? moduleMap.get(options.moduleId) : null;
+      const scoped = options.moduleId || (moduleIds?.length === 1 ? moduleIds[0] : null);
+      const module = scoped ? moduleMap.get(scoped) : null;
       items = sortContents(items, options.sort || (module?.hot ? 'hot' : 'new'));
       const total = items.length;
       const offset = options.offset || 0;

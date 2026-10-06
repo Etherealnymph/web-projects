@@ -150,7 +150,8 @@ export async function createLocalApi() {
       const record = db.users.find((u) => u.id === user.id);
       if (patch.nickname != null) record.nickname = String(patch.nickname).trim().slice(0, 30) || record.username;
       if (patch.bio != null) record.bio = String(patch.bio).slice(0, 300);
-      if (patch.avatar != null) record.avatar = String(patch.avatar).trim().slice(0, 500);
+      // 本地模式的上传接口不可用，头像直接存成 data URL，因此上限放宽到 1MB 文本
+      if (patch.avatar != null) record.avatar = String(patch.avatar).trim().slice(0, 1000000);
       await saveDb(db);
       return publicUser(record);
     },

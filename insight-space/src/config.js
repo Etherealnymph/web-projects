@@ -48,7 +48,7 @@ export const CONFIG = {
   site: {
     name: { zh: '体悟集', en: 'Insight' },
     tagline: { zh: '私人的体悟与收藏', en: 'A private collection of insights' },
-    quote: { zh: '万物静观皆自得，四时佳兴与人同。', en: 'In quiet observation, everything reveals itself.' },
+    quote: { zh: '万物静观皆自得 四时佳兴与人同', en: 'In quiet observation, everything reveals itself.' },
     footer: { zh: '体悟集 · 私人空间', en: 'Insight · private space' },
   },
 

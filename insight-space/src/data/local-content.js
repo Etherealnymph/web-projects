@@ -43,11 +43,14 @@ export function createContentsApi(ctx) {
 
       let items = db.contents.filter((c) => access.get(c.moduleId)?.visible);
       if (options.moduleId) items = items.filter((c) => c.moduleId === options.moduleId);
+      else if (options.moduleIds?.length) items = items.filter((c) => options.moduleIds.includes(c.moduleId));
       items = items.filter((c) => (c.status === 'draft' ? c.authorId === user?.id : true));
       if (options.authorId) items = items.filter((c) => c.authorId === options.authorId);
       if (options.includeDrafts) items = items.filter((c) => c.status !== 'draft' || c.authorId === user?.id);
       if (options.q) items = items.filter((c) => matchQuery(c, options.q));
       if (options.tag) items = items.filter((c) => (c.tags || []).includes(options.tag));
+      if (options.dateFrom) items = items.filter((c) => new Date(c.createdAt) >= new Date(options.dateFrom));
+      if (options.dateTo) items = items.filter((c) => new Date(c.createdAt) <= new Date(options.dateTo));
       if (options.favoritesOf) {
         const ids = new Set(db.reactions.filter((r) => r.userId === options.favoritesOf && r.kind === 'favorite' && r.targetType === 'content').map((r) => r.targetId));
         items = items.filter((c) => ids.has(c.id));
