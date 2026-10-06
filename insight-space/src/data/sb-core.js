@@ -163,7 +163,9 @@ export function createContext(client) {
     const valid = sb.grants
       .filter((g) => g.module_id === null || g.module_id === moduleId)
       .map((g) => {
+        let read = g.read !== false;
         let write = Boolean(g.write);
+        let upload = g.upload !== false;
         let expiry = g.expires_at ? new Date(g.expires_at).getTime() : Infinity;
         if (g.invite_id) {
           const invite = inviteMap.get(g.invite_id);
@@ -171,13 +173,16 @@ export function createContext(client) {
           if (invite.expires_at) expiry = Math.min(expiry, new Date(invite.expires_at).getTime());
           if (invite.write === false) write = false;
         }
-        return { write, expiry };
+        return { read, write, upload, expiry, direct: !g.invite_id };
       })
       .filter((g) => g && g.expiry > now);
     if (!valid.length) return { visible: false, write: false, expiresAt: null };
-    const write = valid.some((g) => g.write);
-    const best = Math.max(...valid.map((g) => g.expiry));
-    return { visible: true, write, expiresAt: best === Infinity ? null : new Date(best).toISOString() };
+    const effective = valid.some((g) => g.direct) ? valid.filter((g) => g.direct) : valid;
+    const visible = effective.some((g) => g.read);
+    const write = effective.some((g) => g.write && g.read);
+    const upload = effective.some((g) => g.upload && g.read);
+    const best = Math.max(...effective.map((g) => g.expiry));
+    return { visible, write, upload, expiresAt: best === Infinity ? null : new Date(best).toISOString() };
   };
 
   sb.attachCounts = async (contents) => {

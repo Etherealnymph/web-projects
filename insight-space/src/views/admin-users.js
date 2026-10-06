@@ -13,6 +13,7 @@ export async function renderUsersTab(ctx, panel) {
   let modules = [];
   try {
     [users, modules] = await Promise.all([api.auth.listUsers(), api.modules.list()]);
+    const requests = api.permissionRequests ? await api.permissionRequests.list() : [];
   } catch (error) {
     panel.innerHTML = `<div class="banner banner--danger">${icon('alert', 17)}<div>${esc(errText(error))}</div></div>`;
     return;
@@ -49,7 +50,7 @@ export async function renderUsersTab(ctx, panel) {
                   const grantText = grants.length
                     ? grants.map((g) => {
                       const name = g.allModules ? t('invite.allModules') : (moduleMap.get(g.moduleId) ? moduleName(moduleMap.get(g.moduleId), lang) : '?');
-                      const state = g.valid ? (g.write ? t('common.write') : t('common.readonly')) : t('common.expired');
+                      const state = g.valid ? [g.read ? t('common.read') : t('common.noRead'), g.write ? t('common.write') : t('common.readonly'), g.upload ? t('common.upload') : t('common.noUpload')].join(' · ') : t('common.expired');
                       const exp = g.expiresAt ? `（${remainingText(g.expiresAt, lang)}）` : '';
                       return `<span class="badge ${g.valid ? 'badge--jade' : 'badge--danger'}">${esc(name)} · ${esc(state)}${esc(exp)}</span>`;
                     }).join(' ')
@@ -90,6 +91,19 @@ export async function renderUsersTab(ctx, panel) {
           </div>
         </div>
       </section>
+      ${requests.filter((r) => r.status === 'pending').length ? `
+      <section class="panel mt-2">
+        <div class="panel__head"><span class="panel__title">${esc(t('admin.permissionRequests'))}</span></div>
+        <div class="panel__body stack gap-1">
+          ${requests.filter((r) => r.status === 'pending').map((r) => `
+            <div class="row row--wrap">
+              <span class="grow">${esc(r.user?.nickname || r.user?.username || r.userId)} · ${esc(moduleName(moduleMap.get(r.moduleId), lang))} · ${esc([r.read ? t('common.read') : t('common.noRead'), r.write ? t('common.write') : t('common.readonly'), r.upload ? t('common.upload') : t('common.noUpload')].join(' · '))}</span>
+              <button class="btn btn--xs btn--primary" data-request-approve="${esc(r.id)}">${esc(t('common.approve'))}</button>
+              <button class="btn btn--xs btn--danger" data-request-reject="${esc(r.id)}">${esc(t('common.reject'))}</button>
+            </div>
+          `).join('')}
+        </div>
+      </section>` : ''}
     `;
 
     let timer = 0;
@@ -118,6 +132,13 @@ export async function renderUsersTab(ctx, panel) {
 
     panel.querySelectorAll('[data-grant]').forEach((btn) => btn.addEventListener('click', () => {
       openGrantForm(ctx, panel, users.find((u) => u.id === btn.dataset.grant), modules);
+    }));
+    panel.querySelectorAll('[data-request-approve], [data-request-reject]').forEach((btn) => btn.addEventListener('click', async () => {
+      try {
+        await api.permissionRequests.decide(btn.dataset.requestApprove || btn.dataset.requestReject, btn.dataset.requestApprove ? 'approved' : 'rejected');
+        toastOk(t('common.saved'));
+        renderUsersTab(ctx, panel);
+      } catch (error) { toastErr(errText(error)); }
     }));
 
     panel.querySelectorAll('[data-delete]').forEach((btn) => btn.addEventListener('click', async () => {
@@ -199,7 +220,11 @@ function openUserForm(ctx, panel, modules) {
           </div>
         </div>
         <div class="grid grid--2">
-          <label class="checkbox"><input type="checkbox" data-role="write" checked /> <span>${esc(t('invite.write'))}</span></label>
+          <div class="row row--wrap">
+            <label class="checkbox"><input type="checkbox" data-role="read" checked /> <span>${esc(t('common.read'))}</span></label>
+            <label class="checkbox"><input type="checkbox" data-role="write" checked /> <span>${esc(t('common.write'))}</span></label>
+            <label class="checkbox"><input type="checkbox" data-role="upload" checked /> <span>${esc(t('common.upload'))}</span></label>
+          </div>
           <div class="field">
             <label class="field__label">${esc(t('invite.custom'))}（${esc(t('common.optional'))}）</label>
             <input class="input" type="datetime-local" data-role="expires" />
@@ -227,7 +252,9 @@ function openUserForm(ctx, panel, modules) {
       password: handle.body.querySelector('[data-role="password"]').value,
       role: handle.body.querySelector('[data-role="role"]').value,
       moduleIds: allBox.checked ? ['*'] : boxes.filter((b) => b.checked).map((b) => b.value),
+      read: handle.body.querySelector('[data-role="read"]').checked,
       write: handle.body.querySelector('[data-role="write"]').checked,
+      upload: handle.body.querySelector('[data-role="upload"]').checked,
       expiresAt: expires ? new Date(expires).toISOString() : null,
     };
     try {
@@ -250,7 +277,7 @@ function openGrantForm(ctx, panel, target, modules) {
           <div class="upload-item">
             <div class="grow">
               <strong>${esc(g.allModules ? t('invite.allModules') : (modules.find((m) => m.id === g.moduleId)?.nameZh || '?'))}</strong>
-              <div class="tiny muted">${esc(g.write ? t('common.write') : t('common.readonly'))} · ${g.expiresAt ? `${esc(formatDate(g.expiresAt, 'zh'))}（${esc(remainingText(g.expiresAt, 'zh'))}）` : esc(t('common.never'))}${g.inviteId ? ` · ${esc(t('admin.inviteBy'))}` : ''}</div>
+              <div class="tiny muted">${esc([g.read ? t('common.read') : t('common.noRead'), g.write ? t('common.write') : t('common.readonly'), g.upload ? t('common.upload') : t('common.noUpload')].join(' · '))} · ${g.expiresAt ? `${esc(formatDate(g.expiresAt, 'zh'))}（${esc(remainingText(g.expiresAt, 'zh'))}）` : esc(t('common.never'))}${g.inviteId ? ` · ${esc(t('admin.inviteBy'))}` : ''}</div>
             </div>
             <button class="btn btn--xs btn--danger" data-remove="${esc(g.allModules ? '*' : g.moduleId)}">${esc(t('common.delete'))}</button>
           </div>
@@ -269,7 +296,11 @@ function openGrantForm(ctx, panel, target, modules) {
             <input class="input" type="datetime-local" data-role="expires" />
           </div>
         </div>
-        <label class="checkbox"><input type="checkbox" data-role="write" checked /> <span>${esc(t('invite.write'))}</span></label>
+        <div class="row row--wrap">
+          <label class="checkbox"><input type="checkbox" data-role="read" checked /> <span>${esc(t('common.read'))}</span></label>
+          <label class="checkbox"><input type="checkbox" data-role="write" checked /> <span>${esc(t('common.write'))}</span></label>
+          <label class="checkbox"><input type="checkbox" data-role="upload" checked /> <span>${esc(t('common.upload'))}</span></label>
+        </div>
         <div class="form-error" data-role="error"></div>
       </div>
     `,
@@ -282,7 +313,9 @@ function openGrantForm(ctx, panel, target, modules) {
       await api.grants.set({
         userId: target.id,
         moduleId: handle.body.querySelector('[data-role="module"]').value,
+        read: handle.body.querySelector('[data-role="read"]').checked,
         write: handle.body.querySelector('[data-role="write"]').checked,
+        upload: handle.body.querySelector('[data-role="upload"]').checked,
         expiresAt: expires ? new Date(expires).toISOString() : null,
       });
       toastOk(t('common.saved'));

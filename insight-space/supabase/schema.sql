@@ -101,11 +101,28 @@ create table if not exists public.grants (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
   module_id uuid references public.modules(id) on delete cascade,
+  read boolean not null default true,
   write boolean not null default true,
+  upload boolean not null default true,
   expires_at timestamptz,
   invite_id uuid references public.invites(id) on delete set null,
   created_at timestamptz not null default now()
 );
+
+create table if not exists public.permission_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  module_id uuid not null references public.modules(id) on delete cascade,
+  read boolean not null default true,
+  write boolean not null default false,
+  upload boolean not null default false,
+  expires_at timestamptz,
+  status text not null default 'pending' check (status in ('pending','approved','rejected')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.grants add column if not exists read boolean not null default true;
+alter table public.grants add column if not exists upload boolean not null default true;
 
 create index if not exists contents_module_idx on public.contents (module_id, created_at desc);
 create index if not exists contents_author_idx on public.contents (author_id);
@@ -151,15 +168,31 @@ create or replace function public.is_staff()
 returns boolean language sql stable security definer set search_path = public as
 $$ select exists (select 1 from public.profiles where id = auth.uid() and role in ('superadmin','owner') and status = 'active') $$;
 
+alter table public.permission_requests enable row level security;
+drop policy if exists permission_requests_select on public.permission_requests;
+create policy permission_requests_select on public.permission_requests for select to authenticated
+  using (user_id = auth.uid() or public.is_superadmin());
+drop policy if exists permission_requests_insert on public.permission_requests;
+create policy permission_requests_insert on public.permission_requests for insert to authenticated
+  with check (user_id = auth.uid());
+drop policy if exists permission_requests_admin on public.permission_requests;
+create policy permission_requests_admin on public.permission_requests for update to authenticated
+  using (public.is_superadmin()) with check (public.is_superadmin());
+
 create or replace function public.has_module_access(p_module_id uuid)
 returns boolean language sql stable security definer set search_path = public as
 $$ select public.is_staff() or exists (
      select 1 from public.grants g
      left join public.invites i on i.id = g.invite_id
      where g.user_id = auth.uid()
+       and g.read
        and (g.module_id is null or g.module_id = p_module_id)
        and (g.expires_at is null or g.expires_at > now())
        and (g.invite_id is null or (i.active and (i.expires_at is null or i.expires_at > now())))
+       and (not exists (select 1 from public.grants d where d.user_id = auth.uid() and d.invite_id is null
+                       and (d.expires_at is null or d.expires_at > now())
+                       and (d.module_id is null or d.module_id = p_module_id))
+            or g.invite_id is null)
    ) $$;
 
 create or replace function public.has_module_write(p_module_id uuid)
@@ -168,10 +201,15 @@ $$ select public.is_staff() or exists (
      select 1 from public.grants g
      left join public.invites i on i.id = g.invite_id
      where g.user_id = auth.uid()
+       and g.read
        and g.write
        and (g.module_id is null or g.module_id = p_module_id)
        and (g.expires_at is null or g.expires_at > now())
        and (g.invite_id is null or (i.active and (i.expires_at is null or i.expires_at > now())))
+       and (not exists (select 1 from public.grants d where d.user_id = auth.uid() and d.invite_id is null
+                       and (d.expires_at is null or d.expires_at > now())
+                       and (d.module_id is null or d.module_id = p_module_id))
+            or g.invite_id is null)
    ) $$;
 
 create or replace function public.can_read_content(p_content_id uuid)
@@ -449,12 +487,12 @@ $$ declare
 
      delete from public.grants where user_id = v_uid;
      if v_invite.all_modules then
-       insert into public.grants (user_id, module_id, write, expires_at, invite_id)
-       values (v_uid, null, v_invite.write, v_invite.expires_at, v_invite.id);
+       insert into public.grants (user_id, module_id, read, write, upload, expires_at, invite_id)
+       values (v_uid, null, true, v_invite.write, true, v_invite.expires_at, v_invite.id);
      else
        foreach v_mid in array coalesce(v_invite.module_ids, '{}'::uuid[]) loop
-         insert into public.grants (user_id, module_id, write, expires_at, invite_id)
-         values (v_uid, v_mid, v_invite.write, v_invite.expires_at, v_invite.id);
+         insert into public.grants (user_id, module_id, read, write, upload, expires_at, invite_id)
+         values (v_uid, v_mid, true, v_invite.write, true, v_invite.expires_at, v_invite.id);
        end loop;
      end if;
 
@@ -469,13 +507,16 @@ $$ declare
    再调用本函数补齐用户名 / 角色 / 初始授权。只操作 public 表，避免直接写 auth.users
    （新版 Supabase 已收回 postgres 对 auth.users 的写权限，直接 insert 会 403）。 */
 drop function if exists public.admin_create_user(text, text, text, text, uuid[], boolean, timestamptz);
+drop function if exists public.admin_provision_user(uuid, text, text, text, uuid[], boolean, timestamptz);
 create or replace function public.admin_provision_user(
   p_user_id uuid,
   p_username text,
   p_nickname text default '',
   p_role text default 'member',
   p_module_ids uuid[] default null,
+  p_read boolean default true,
   p_write boolean default true,
+  p_upload boolean default true,
   p_expires_at timestamptz default null)
 returns void language plpgsql security definer set search_path = public as
 $$ declare
@@ -501,12 +542,12 @@ $$ declare
 
      delete from public.grants where user_id = p_user_id;
      if p_module_ids is null or array_length(p_module_ids, 1) is null then
-       insert into public.grants (user_id, module_id, write, expires_at, invite_id)
-       values (p_user_id, null, coalesce(p_write, true), p_expires_at, null);
+       insert into public.grants (user_id, module_id, read, write, upload, expires_at, invite_id)
+       values (p_user_id, null, coalesce(p_read, true), coalesce(p_write, true), coalesce(p_upload, true), p_expires_at, null);
      else
        foreach v_mid in array p_module_ids loop
-         insert into public.grants (user_id, module_id, write, expires_at, invite_id)
-         values (p_user_id, v_mid, coalesce(p_write, true), p_expires_at, null);
+         insert into public.grants (user_id, module_id, read, write, upload, expires_at, invite_id)
+         values (p_user_id, v_mid, coalesce(p_read, true), coalesce(p_write, true), coalesce(p_upload, true), p_expires_at, null);
        end loop;
      end if;
    end $$;
@@ -629,7 +670,7 @@ grant execute on function public.app_bootstrap_state() to anon, authenticated;
 grant execute on function public.validate_invite(text) to anon, authenticated;
 grant execute on function public.claim_first_superadmin(text, text) to authenticated;
 grant execute on function public.register_with_invite(text, text, text) to authenticated;
-grant execute on function public.admin_provision_user(uuid, text, text, text, uuid[], boolean, timestamptz) to authenticated;
+grant execute on function public.admin_provision_user(uuid, text, text, text, uuid[], boolean, boolean, boolean, timestamptz) to authenticated;
 grant execute on function public.admin_set_role(uuid, text) to authenticated;
 grant execute on function public.increment_view(uuid) to authenticated;
 

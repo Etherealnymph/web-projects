@@ -162,7 +162,9 @@ export function createAuthApi(sb) {
             moduleId: g.module_id,
             module: null,
             allModules: g.module_id === null,
+            read: g.read !== false,
             write: Boolean(g.write),
+            upload: g.upload !== false,
             expiresAt: g.expires_at,
             valid: !g.expires_at || new Date(g.expires_at) > new Date(),
             inviteId: g.invite_id,
@@ -171,7 +173,7 @@ export function createAuthApi(sb) {
       });
     },
 
-    async createUser({ username, password, nickname, role = 'member', moduleIds = [], write = true, expiresAt = null }) {
+    async createUser({ username, password, nickname, role = 'member', moduleIds = [], read = true, write = true, upload = true, expiresAt = null }) {
       sb.requireAdmin();
       if (!/^[A-Za-z0-9_]{3,20}$/.test(String(username || ''))) throw fail('auth.errUserLen');
       if (String(password || '').length < 6) throw fail('auth.errPwShort');
@@ -204,7 +206,9 @@ export function createAuthApi(sb) {
         p_nickname: nickname || username,
         p_role: role,
         p_module_ids: rpcModuleIds,
+        p_read: read,
         p_write: write,
+        p_upload: upload,
         p_expires_at: expiresAt || null,
       });
       if (error) {

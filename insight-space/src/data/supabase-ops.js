@@ -101,19 +101,23 @@ export function createGrantsApi(sb) {
         moduleId: g.module_id,
         module: g.module_id ? (moduleRows || []).find((m) => m.id === g.module_id) || null : null,
         allModules: g.module_id === null,
+        read: g.read !== false,
         write: Boolean(g.write),
+        upload: g.upload !== false,
         expiresAt: g.expires_at,
         valid: !g.expires_at || new Date(g.expires_at) > new Date(),
         inviteId: g.invite_id,
       }));
     },
 
-    async set({ userId, moduleId, write = true, expiresAt = null }) {
+    async set({ userId, moduleId, read = true, write = true, upload = true, expiresAt = null }) {
       sb.requireAdmin();
       const payload = {
         user_id: userId,
         module_id: moduleId === '*' ? null : moduleId,
+        read: Boolean(read),
         write: Boolean(write),
+        upload: Boolean(upload),
         expires_at: expiresAt || null,
         invite_id: null,
       };
@@ -134,11 +138,40 @@ export function createGrantsApi(sb) {
         const { error } = await client.from('grants').delete().eq('id', match.id);
         if (error) throw fail('msg.error');
       }
+
       return api.list(userId);
     },
   };
 
   return api;
+}
+
+export function createPermissionRequestsApi(sb) {
+  const { client } = sb;
+  return {
+    async list() {
+      sb.requireUser();
+      const { data, error } = await client.from('permission_requests').select('*').order('created_at', { ascending: false });
+      if (error) throw fail('msg.error');
+      return (data || []).map((r) => ({ id: r.id, userId: r.user_id, moduleId: r.module_id, read: r.read, write: r.write, upload: r.upload, expiresAt: r.expires_at, status: r.status, createdAt: r.created_at }));
+    },
+    async create({ moduleId, read = true, write = false, upload = false, expiresAt = null }) {
+      const user = sb.requireUser();
+      const { data, error } = await client.from('permission_requests').insert({ user_id: user.id, module_id: moduleId, read, write, upload, expires_at: expiresAt || null }).select().single();
+      if (error) throw fail('msg.error');
+      return data;
+    },
+    async decide(id, status) {
+      sb.requireAdmin();
+      const { data, error } = await client.from('permission_requests').update({ status: status === 'approved' ? 'approved' : 'rejected' }).eq('id', id).select().single();
+      if (error) throw fail('msg.error');
+      if (status === 'approved') {
+        const { data: row } = await client.from('permission_requests').select('*').eq('id', id).single();
+        await createGrantsApi(sb).set({ userId: row.user_id, moduleId: row.module_id, read: row.read, write: row.write, upload: row.upload, expiresAt: row.expires_at });
+      }
+      return data;
+    },
+  };
 }
 
 export function createAdminApi(sb, modulesApi) {

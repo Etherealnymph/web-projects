@@ -25,7 +25,7 @@ export async function renderProfile(ctx) {
   await resolveMediaUrls(api, mine.items);
   await resolveMediaUrls(api, favorites.items);
 
-  const accessible = modules.filter((m) => m.access.visible);
+  const accessible = modules;
   const ownContents = mine.items;
   const totalLikes = ownContents.reduce((sum, c) => sum + (c.counts?.like || 0), 0);
   const totalFavs = ownContents.reduce((sum, c) => sum + (c.counts?.favorite || 0), 0);
@@ -119,9 +119,10 @@ export async function renderProfile(ctx) {
                 <div class="list-item__index">${esc(m.icon)}</div>
                 <div class="grow">
                   <strong>${esc(moduleName(m, langNow))}</strong>
-                  <div class="tiny muted">${esc(m.access.write ? t('common.write') : t('common.readonly'))}${grant?.expiresAt ? ` · ${esc(t('common.expires'))} ${esc(formatDay(grant.expiresAt))}（${esc(remainingText(grant.expiresAt, langNow))}）` : ` · ${esc(t('common.never'))}`}</div>
+                  <div class="tiny muted">${esc(m.access.read === false ? t('common.noRead') : t('common.read'))} · ${esc(m.access.write ? t('common.write') : t('common.readonly'))} · ${esc(m.access.upload ? t('common.upload') : t('common.noUpload'))}${grant?.expiresAt ? ` · ${esc(t('common.expires'))} ${esc(formatDay(grant.expiresAt))}（${esc(remainingText(grant.expiresAt, langNow))}）` : ` · ${esc(t('common.never'))}`}</div>
                 </div>
                 ${m.access.expiresAt ? `<span class="badge badge--warn">${esc(remainingText(m.access.expiresAt, langNow))}</span>` : '<span class="badge badge--ok">∞</span>'}
+                ${m.access.visible ? '' : `<button class="btn btn--xs" data-request-permission="${esc(m.id)}">${esc(t('profile.requestPermission'))}</button>`}
               </div>
             `;
           }).join('') : `<div class="empty">${esc(t('profile.noModule'))}</div>`}
@@ -161,6 +162,16 @@ export async function renderProfile(ctx) {
       </section>
     </div>
   `;
+
+  container.querySelectorAll('[data-request-permission]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      try {
+        await api.permissionRequests.create({ moduleId: button.dataset.requestPermission, read: true, write: false, upload: false });
+        toastOk(t('profile.requestedPermission'));
+        button.remove();
+      } catch (error) { toastErr(errText(error)); }
+    });
+  });
 
   /* 资料保存 */
   let avatarValue = user.avatar || '';

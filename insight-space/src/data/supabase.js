@@ -6,6 +6,7 @@ import { createContext } from './sb-core.js';
 import { createAuthApi, createModulesApi } from './supabase-auth.js';
 import { createContentsApi, createCommentsApi, createReactionsApi } from './supabase-content.js';
 import { createInvitesApi, createGrantsApi, createAdminApi, createMediaApi } from './supabase-ops.js';
+import { createPermissionRequestsApi } from './supabase-ops.js';
 
 export async function createSupabaseApi() {
   const { createClient } = await loadSupabaseSdk();
@@ -34,6 +35,7 @@ export async function createSupabaseApi() {
     reactions: createReactionsApi(sb),
     invites: createInvitesApi(sb),
     grants: createGrantsApi(sb),
+    permissionRequests: createPermissionRequestsApi(sb),
     admin: createAdminApi(sb, modules),
     media: createMediaApi(sb),
     friends: createFriendsApi(sb),

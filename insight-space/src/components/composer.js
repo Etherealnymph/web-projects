@@ -45,6 +45,7 @@ export function createComposer(options = {}) {
     minHeight = compact ? 62 : 320,
     showPreview = !compact,
     media = [],
+    canUpload = () => true,
   } = options;
 
   const root = document.createElement('div');
@@ -140,6 +141,7 @@ export function createComposer(options = {}) {
   function getApiSync() { return getApiInstance(); }
 
   async function uploadFiles(files, accept = '') {
+    if (!canUpload()) { toastErr(t('common.noUpload')); return []; }
     const api = await getApi();
     const list = Array.from(files || []);
     if (!list.length) return [];
@@ -266,6 +268,7 @@ export function createComposer(options = {}) {
       const item = event.target.closest('[data-sticker]');
       if (item) { insertAt(input, `::sticker[${item.dataset.sticker}]`); return; }
       if (event.target.closest('[data-role="upload"]')) {
+        if (!canUpload()) { toastErr(t('common.noUpload')); return; }
         fileInput.accept = 'image/*';
         fileInput.onchange = async () => {
           const files = Array.from(fileInput.files || []);

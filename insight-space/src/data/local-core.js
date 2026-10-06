@@ -18,6 +18,7 @@ export function emptyDb() {
     grants: [],
     friendships: [],
     messages: [],
+    permissionRequests: [],
     meta: { createdAt: nowIso(), seeded: false },
   };
 }
@@ -30,6 +31,7 @@ export async function loadDb() {
   cache = stored && stored.users ? stored : emptyDb();
   if (!Array.isArray(cache.friendships)) cache.friendships = [];
   if (!Array.isArray(cache.messages)) cache.messages = [];
+  if (!Array.isArray(cache.permissionRequests)) cache.permissionRequests = [];
   for (const m of cache.modules || []) if (!m.kind) m.kind = 'content';
   for (const u of cache.users || []) if (u.exp == null) u.exp = 0;
   await ensureSeed(cache);
@@ -124,10 +126,17 @@ export function resolveGrant(db, grant) {
     if (invite.active === false) return null;
     const expiresAt = invite.expiresAt || null;
     if (expiresAt && new Date(expiresAt).getTime() <= now) return null;
-    return { ...grant, write: Boolean(invite.write) && grant.write !== false, expiresAt, invite };
+    return {
+      ...grant,
+      read: grant.read !== false,
+      write: Boolean(invite.write) && grant.write !== false,
+      upload: grant.upload !== false,
+      expiresAt,
+      invite,
+    };
   }
   if (grant.expiresAt && new Date(grant.expiresAt).getTime() <= now) return null;
-  return { ...grant, expiresAt: grant.expiresAt || null, invite: null };
+  return { ...grant, read: grant.read !== false, write: grant.write !== false, upload: grant.upload !== false, expiresAt: grant.expiresAt || null, invite: null };
 }
 
 /** 某个用户对某个模块的访问权限 */
@@ -141,15 +150,20 @@ export function accessFor(db, user, module) {
     .map((g) => resolveGrant(db, g))
     .filter(Boolean);
   if (!candidates.length) return { visible: false, write: false, expiresAt: null };
-  const write = candidates.some((g) => g.write);
-  const expiries = candidates.map((g) => (g.expiresAt ? new Date(g.expiresAt).getTime() : Infinity));
+  // 超管直接配置的授权（inviteId 为空）优先于邀请码授权。
+  const effective = candidates.some((g) => !g.inviteId) ? candidates.filter((g) => !g.inviteId) : candidates;
+  const visible = effective.some((g) => g.read !== false);
+  const write = effective.some((g) => g.write && g.read !== false);
+  const upload = effective.some((g) => g.upload && g.read !== false);
+  const expiries = effective.map((g) => (g.expiresAt ? new Date(g.expiresAt).getTime() : Infinity));
   const best = Math.max(...expiries);
   return {
-    visible: true,
+    visible,
     write,
+    upload,
     expiresAt: best === Infinity ? null : new Date(best).toISOString(),
-    grantId: candidates[0].id,
-    inviteId: candidates[0].inviteId,
+    grantId: effective[0]?.id,
+    inviteId: effective[0]?.inviteId,
   };
 }
 

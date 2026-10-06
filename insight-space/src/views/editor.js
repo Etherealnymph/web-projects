@@ -80,6 +80,10 @@ export async function renderEditor(ctx) {
     value: editing?.bodyMd || '',
     placeholder: t('content.bodyPh'),
     media,
+    canUpload: () => {
+      const selected = modules.find((m) => m.id === container.querySelector('[data-role="module"]').value);
+      return selected?.access.upload !== false;
+    },
   });
   composerHost.appendChild(composer.root);
 
@@ -100,6 +104,11 @@ export async function renderEditor(ctx) {
     if (uploadBusy) return;
     const files = Array.from(fileList || []);
     if (!files.length) return;
+    const selected = modules.find((m) => m.id === container.querySelector('[data-role="module"]').value);
+    if (selected && selected.access.upload === false) {
+      toastErr(t('common.noUpload'));
+      return;
+    }
     uploadBusy = true;
     dropzone.classList.add('is-busy');
     try {
