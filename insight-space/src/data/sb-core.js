@@ -182,14 +182,14 @@ export function createContext(client) {
   sb.attachCounts = async (contents) => {
     if (!contents.length) return contents;
     const ids = contents.map((c) => c.id);
-    const [stats, commentStats, mine] = await Promise.all([
+    const [stats, comments, mine] = await Promise.all([
       client.from('content_stats').select('*').in('content_id', ids),
-      client.from('comment_stats').select('*').in('content_id', ids),
+      client.from('comments').select('content_id').in('content_id', ids),
       sb.uid() ? client.from('reactions').select('target_id, kind').eq('user_id', sb.uid()).eq('target_type', 'content').in('target_id', ids) : Promise.resolve({ data: [] }),
     ]);
     const statMap = new Map((stats.data || []).map((s) => [s.content_id, s]));
     const commentMap = new Map();
-    for (const row of commentStats.data || []) commentMap.set(row.content_id, (commentMap.get(row.content_id) || 0) + row.comment_count);
+    for (const row of comments.data || []) commentMap.set(row.content_id, (commentMap.get(row.content_id) || 0) + 1);
     const mineMap = new Map();
     for (const row of mine.data || []) {
       if (!mineMap.has(row.target_id)) mineMap.set(row.target_id, { like: false, dislike: false, favorite: false });
