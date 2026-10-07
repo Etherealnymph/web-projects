@@ -83,5 +83,5 @@
   /* 无限循环动画用极小 duration 会变成每秒十万次抖动（比正常还刺眼），
      载入指示与载入标记在这里保留各自的正常时长 */
   .spinner { animation-duration: 2s !important; }
-  .boot-mark { animation-duration: 1.4s !important; }
+  .boot-mark { animation-duration: 1.5s !important; }
 }

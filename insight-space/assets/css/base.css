@@ -114,15 +114,23 @@ button, input, select, textarea { font: inherit; color: inherit; }
   font-family: var(--font-serif); font-size: 40px; color: var(--accent-ink);
   background: linear-gradient(150deg, var(--accent), color-mix(in srgb, var(--accent) 62%, var(--jade)));
   box-shadow: var(--shadow-2);
-  animation: bootBounce 1.4s cubic-bezier(.32, .78, .42, 1) infinite;
+  transform-origin: center bottom;
+  animation: bootBounce 1.5s linear infinite;
 }
-/* 只做上下位移，不改变颜色与透明度：靠"跳动"表达载入中，避免旧版呼吸式闪烁的观感 */
+/*
+ * 软性变速跳动：每一段单独给缓动函数，而不是全程一个速度 ——
+ * 蓄力下压 → 快速起跳后柔缓减速 → 顶点轻轻悬停 → 加速落下并压缩 → 一次衰减小弹 → 停一拍。
+ * 只用位移与挤压拉伸，颜色、透明度始终不变（旧版改透明度会被 reduced-motion 压成闪烁）。
+ */
 @keyframes bootBounce {
-  0%, 100% { transform: translateY(0); }
-  22% { transform: translateY(-15px); }
-  44% { transform: translateY(0); }
-  58% { transform: translateY(-5px); }
-  72% { transform: translateY(0); }
+  0% { transform: translateY(0) scale(1.03, .96); animation-timing-function: linear; }
+  5% { transform: translateY(0) scale(1.03, .96); animation-timing-function: cubic-bezier(.16, .84, .3, 1); }
+  26% { transform: translateY(-16px) scale(.998, 1.002); animation-timing-function: cubic-bezier(.5, 0, .8, .5); }
+  35% { transform: translateY(-16.6px) scale(1, 1); animation-timing-function: cubic-bezier(.55, 0, .85, .45); }
+  55% { transform: translateY(0) scale(1.03, .95); animation-timing-function: cubic-bezier(.16, .84, .3, 1); }
+  66% { transform: translateY(-5.5px) scale(1, 1); animation-timing-function: cubic-bezier(.5, 0, .8, .5); }
+  78% { transform: translateY(0) scale(1.015, .98); animation-timing-function: cubic-bezier(.2, .7, .4, 1); }
+  84%, 100% { transform: translateY(0) scale(1, 1); }
 }
 .boot-text { color: var(--muted); letter-spacing: .18em; font-size: 13px; }
 
