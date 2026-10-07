@@ -4,7 +4,7 @@ import { t } from '../core/i18n.js';
 import { icon, emptyState, loadingState, toastOk, toastErr, confirmDialog, avatarHtml } from '../core/ui.js';
 import { esc, fromNow, formatDate, bytesText } from '../core/util.js';
 import { errText } from '../data/index.js';
-import { statCard, rankedItemHtml, moduleName, authorName, roleBadge } from '../components/widgets.js';
+import { statCard, rankedItemHtml, moduleName, authorName, roleBadge, countChips } from '../components/widgets.js';
 import { renderModulesTab, renderInvitesTab } from './admin-modules.js';
 import { renderUsersTab } from './admin-users.js';
 
@@ -132,7 +132,7 @@ async function renderOverview(ctx, panel) {
                 ${avatarHtml(c.user, 'avatar--sm')}
                 <div class="grow">
                   <div class="row" style="gap:6px"><strong>${esc(authorName(c.user))}</strong>${roleBadge(c.user)}</div>
-                  <div class="tiny muted">${c.contents} 内容 · ${c.comments} 评论 · ${icon('like', 11)} ${c.likes} · ${icon('eye', 11)} ${c.views}</div>
+                  <div class="tiny muted">${c.contents} 内容 · ${c.comments} 评论 · ${countChips([['like', c.likes || 0], ['eye', c.views || 0]], 11)}</div>
                 </div>
               </div>
             `).join('') || `<div class="empty">${esc(t('admin.noData'))}</div>`}
@@ -149,10 +149,14 @@ async function renderOverview(ctx, panel) {
               <div class="grow">
                 <a href="#/c/${esc(item.id)}" style="color:inherit"><strong>${esc(item.title)}</strong></a>
                 <div class="tiny muted mt-1">
-                  ${esc(item.module ? moduleName(item.module, lang) : '')} · ${esc(authorName(item.author))}
-                  · ${icon('like', 12)} ${item.counts.like} · ${icon('comment', 12)} ${item.counts.comment}
-                  · ${icon('star', 12)} ${item.counts.favorite} · ${icon('eye', 12)} ${item.views || 0}
-                  · ${esc(fromNow(item.createdAt, lang))}
+                  ${esc(item.module ? moduleName(item.module, lang) : '')} · ${esc(authorName(item.author))} ·
+                  ${countChips([
+                    ['like', item.counts.like],
+                    ['comment', item.counts.comment],
+                    ['star', item.counts.favorite],
+                    ['eye', item.views || 0],
+                  ])} ·
+                  ${esc(fromNow(item.createdAt, lang))}
                 </div>
               </div>
             </div>

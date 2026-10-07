@@ -57,6 +57,16 @@ export function reactBarHtml(targetType, entity, options = {}) {
   `;
 }
 
+/** 单个「图标 + 数字」行内单元：图标与数字始终在同一行 */
+export function countChip(name, value, size = 12) {
+  return `<span class="meta-count">${icon(name, size)}<span>${esc(String(value ?? 0))}</span></span>`;
+}
+
+/** 一组行内计数单元（赞 / 评论 / 收藏…）不会被拆散到多行 */
+export function countChips(items, size = 12) {
+  return `<span class="meta-counts">${items.map(([name, value]) => countChip(name, value, size)).join('')}</span>`;
+}
+
 /** 网格卡片 */
 export function contentCardHtml(item) {
   const cover = item.coverUrl || firstImage(item.bodyMd);
@@ -71,9 +81,11 @@ export function contentCardHtml(item) {
       <h3 class="content-card__title">${esc(item.title)}</h3>
       ${text ? `<div class="content-card__excerpt clamp-2">${esc(text)}</div>` : ''}
       <div class="content-card__meta tiny muted">
-        ${icon('like', 13)} ${item.counts?.like || 0}
-        &nbsp;${icon('comment', 13)} ${item.counts?.comment || 0}
-        &nbsp;${icon('star', 13)} ${item.counts?.favorite || 0}
+        ${countChips([
+          ['like', item.counts?.like || 0],
+          ['comment', item.counts?.comment || 0],
+          ['star', item.counts?.favorite || 0],
+        ], 13)}
         <span class="grow"></span>
         ${esc(authorName(item.author))}
       </div>
@@ -92,10 +104,12 @@ export function rankedItemHtml(item, index, options = {}) {
         <div class="tiny muted mt-1">
           ${esc(item.module ? moduleName(item.module, document.documentElement.dataset.lang) : '')}
           · ${esc(authorName(item.author))}
-          · ${icon('like', 12)} ${item.counts?.like || 0}
-          · ${icon('comment', 12)} ${item.counts?.comment || 0}
-          · ${icon('star', 12)} ${item.counts?.favorite || 0}
-          ${options.views ? ` · ${icon('eye', 12)} ${item.views || 0}` : ''}
+          · ${countChips([
+            ['like', item.counts?.like || 0],
+            ['comment', item.counts?.comment || 0],
+            ['star', item.counts?.favorite || 0],
+            ...(options.views ? [['eye', item.views || 0]] : []),
+          ])}
         </div>
       </div>
       ${options.extra || ''}

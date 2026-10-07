@@ -80,4 +80,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  /* 无限循环的旋转用极小 duration 会变成每秒十万转（比正常还刺眼），
+     载入指示保留一圈 5 秒的缓慢匀速旋转 */
+  .spinner { animation-duration: 5s !important; }
 }
