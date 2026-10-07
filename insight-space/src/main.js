@@ -148,7 +148,9 @@ async function renderView() {
     api,
     user,
     container: view,
-    params: { ...query, id: second, tab: second },
+    // 路由参数：优先取路径段（#/c/:id），其次取查询串（#/edit?id=…），
+    // 这样「编辑」链接带上的 id 才不会被 undefined 覆盖掉。
+    params: { ...query, id: second || query.id, tab: second },
     navigate,
     onLeave: (hook) => leaveHooks.push(hook),
   };

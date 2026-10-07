@@ -91,6 +91,35 @@ export function inviteStatusOf(row) {
   return 'active';
 }
 
+/** jsonb → 前端结构：module_id 为 null 时用 '*' 表示「全部模块」 */
+export function mapInvitePerms(list) {
+  return (list || []).map((p) => ({
+    moduleId: p.module_id || '*',
+    read: p.read !== false,
+    write: Boolean(p.write),
+    upload: Boolean(p.upload),
+    expiresAt: p.expires_at || null,
+  }));
+}
+
+/** 前端结构 → jsonb：'*' 还原为 null（数据库里 module_id 必须是 uuid） */
+export function serializeInvitePerms(list) {
+  return (list || []).map((p) => ({
+    module_id: !p.moduleId || p.moduleId === '*' ? null : p.moduleId,
+    read: p.read !== false,
+    write: Boolean(p.write),
+    upload: Boolean(p.upload),
+    expires_at: p.expiresAt || null,
+  }));
+}
+
+/** 找出邀请码针对某模块（或「全部模块」）配置的权限 */
+export function invitePermFor(perms, moduleId) {
+  if (!Array.isArray(perms) || !perms.length) return null;
+  const key = (p) => p.module_id || '*';
+  return perms.find((p) => key(p) === moduleId) || perms.find((p) => key(p) === '*') || null;
+}
+
 export function mapInvite(row) {
   return {
     id: row.id,
@@ -98,6 +127,7 @@ export function mapInvite(row) {
     category: row.category || '',
     moduleIds: row.module_ids || [],
     allModules: Boolean(row.all_modules),
+    modulePerms: mapInvitePerms(row.module_perms),
     write: Boolean(row.write),
     expiresAt: row.expires_at,
     maxUses: row.max_uses,
@@ -171,7 +201,16 @@ export function createContext(client) {
           const invite = inviteMap.get(g.invite_id);
           if (!invite || invite.active === false) return null;
           if (invite.expires_at) expiry = Math.min(expiry, new Date(invite.expires_at).getTime());
-          if (invite.write === false) write = false;
+          // 邀请码配置了模块权限时，实时跟随邀请码的最新权限（旧邀请码没有该字段，回落到全局 write）
+          const perm = invitePermFor(invite.module_perms, moduleId);
+          if (perm) {
+            read = perm.read !== false;
+            write = read && perm.write === true;
+            upload = read && perm.upload === true;
+            if (perm.expires_at) expiry = Math.min(expiry, new Date(perm.expires_at).getTime());
+          } else if (invite.write === false) {
+            write = false;
+          }
         }
         return { read, write, upload, expiry, direct: !g.invite_id };
       })

@@ -117,6 +117,13 @@ export function isAdmin(user) { return user?.role === 'superadmin'; }
 export function isOwner(user) { return user?.role === 'owner'; }
 export function canManageSystem(user) { return isAdmin(user); }
 
+/** 找出邀请码针对某模块（或「全部模块」）配置的权限 */
+export function invitePermFor(perms, moduleId) {
+  if (!Array.isArray(perms) || !perms.length) return null;
+  const key = (p) => p.moduleId || '*';
+  return perms.find((p) => key(p) === (moduleId || '*')) || perms.find((p) => key(p) === '*') || null;
+}
+
 /** 解析一条授权记录是否仍然有效（会跟随邀请码的停用 / 过期实时失效） */
 export function resolveGrant(db, grant) {
   const now = Date.now();
@@ -124,16 +131,24 @@ export function resolveGrant(db, grant) {
     const invite = db.invites.find((i) => i.id === grant.inviteId);
     if (!invite) return null;
     if (invite.active === false) return null;
-    const expiresAt = invite.expiresAt || null;
+    let expiresAt = invite.expiresAt || null;
     if (expiresAt && new Date(expiresAt).getTime() <= now) return null;
-    return {
-      ...grant,
-      read: grant.read !== false,
-      write: Boolean(invite.write) && grant.write !== false,
-      upload: grant.upload !== false,
-      expiresAt,
-      invite,
-    };
+    let read = grant.read !== false;
+    let write = Boolean(invite.write) && grant.write !== false;
+    let upload = grant.upload !== false;
+    // 邀请码配置了模块权限时，实时跟随邀请码的最新权限（旧邀请码没有该字段，沿用全局 write）
+    const perm = invitePermFor(invite.modulePerms, grant.moduleId);
+    if (perm) {
+      read = perm.read !== false;
+      write = read && perm.write === true;
+      upload = read && perm.upload === true;
+      if (perm.expiresAt) {
+        const permExpiry = new Date(perm.expiresAt).getTime();
+        if (permExpiry <= now) return null;
+        expiresAt = expiresAt && new Date(expiresAt).getTime() < permExpiry ? expiresAt : perm.expiresAt;
+      }
+    }
+    return { ...grant, read, write, upload, expiresAt, invite };
   }
   if (grant.expiresAt && new Date(grant.expiresAt).getTime() <= now) return null;
   return { ...grant, read: grant.read !== false, write: grant.write !== false, upload: grant.upload !== false, expiresAt: grant.expiresAt || null, invite: null };

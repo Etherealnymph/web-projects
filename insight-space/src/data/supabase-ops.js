@@ -1,11 +1,72 @@
 /** Supabase：邀请码 / 授权 / 后台统计 / 媒体 */
 
 import { CONFIG, rewriteSupabaseUrls, toUpstreamSupabaseUrl } from '../config.js';
-import { fail, mapInvite, mapUser, mapContent, mapComment } from './sb-core.js';
+import { fail, mapInvite, mapUser, mapContent, mapComment, serializeInvitePerms } from './sb-core.js';
 import { randomCode, hotScore, formatDay } from '../core/util.js';
+
+/** 数据库还没执行最新 schema.sql（缺 module_perms 列）时，退回到旧的全局权限行为 */
+function isMissingPermColumn(error) {
+  return Boolean(error && /module_perms/i.test(error.message || ''));
+}
+
+function warnMissingPermColumn() {
+  console.warn('[insight-space] invites.module_perms 列不存在，已按旧版全局权限保存。请在 Supabase 重新执行 supabase/schema.sql。');
+}
+
+/** 规整前端传来的模块权限；allModules 为 undefined 时保持原样 */
+function normalizePerms(list, allModules) {
+  if (!Array.isArray(list) || !list.length) return [];
+  const rows = list.map((p) => ({
+    moduleId: !p.moduleId || p.moduleId === '*' ? '*' : p.moduleId,
+    read: p.read !== false,
+    write: Boolean(p.write),
+    upload: Boolean(p.upload),
+    expiresAt: p.expiresAt || null,
+  }));
+  if (allModules === true) return rows.filter((p) => p.moduleId === '*');
+  if (allModules === false) return rows.filter((p) => p.moduleId !== '*');
+  return rows;
+}
 
 export function createInvitesApi(sb) {
   const { client } = sb;
+
+  /** 按邀请码的模块权限生成注册用户应得的授权行 */
+  const grantRowsFor = (inviteRow, perms) => {
+    const fallbackExpiry = inviteRow.expires_at || null;
+    if (perms.length) {
+      return perms.map((p) => ({
+        module_id: p.moduleId === '*' ? null : p.moduleId,
+        read: p.read,
+        write: p.write,
+        upload: p.upload,
+        expires_at: p.expiresAt || fallbackExpiry,
+      }));
+    }
+    const ids = inviteRow.all_modules ? [null] : (inviteRow.module_ids || []);
+    return ids.map((moduleId) => ({
+      module_id: moduleId,
+      read: true,
+      write: inviteRow.write !== false,
+      upload: true,
+      expires_at: fallbackExpiry,
+    }));
+  };
+
+  /** 邀请码权限变了，已注册用户的授权同步刷新（与本地模式行为一致） */
+  const syncMemberGrants = async (inviteRow, perms) => {
+    const { data: members, error } = await client.from('profiles').select('id').eq('invite_id', inviteRow.id);
+    if (error) throw fail('msg.error');
+    const userIds = (members || []).map((m) => m.id);
+    if (!userIds.length) return;
+    const { error: delError } = await client.from('grants').delete().eq('invite_id', inviteRow.id);
+    if (delError) throw fail('msg.error');
+    const rows = grantRowsFor(inviteRow, perms);
+    if (!rows.length) return;
+    const payload = userIds.flatMap((userId) => rows.map((r) => ({ ...r, user_id: userId, invite_id: inviteRow.id })));
+    const { error: insError } = await client.from('grants').insert(payload);
+    if (insError) throw fail('msg.error');
+  };
 
   const api = {
     async list() {
@@ -21,10 +82,11 @@ export function createInvitesApi(sb) {
       if (code && !/^[A-Z0-9-]{4,24}$/.test(code)) throw fail('invite.errCodeFormat');
       if (!code) code = randomCode(10);
       const allModules = !patch.moduleIds || patch.moduleIds.length === 0 || patch.moduleIds.includes('*');
+      const perms = normalizePerms(patch.modulePerms, allModules);
       let expiresAt = null;
       if (patch.expiresAt) expiresAt = new Date(patch.expiresAt).toISOString();
       else if (patch.durationDays) expiresAt = new Date(Date.now() + Number(patch.durationDays) * 86400000).toISOString();
-      const { data, error } = await client.from('invites').insert({
+      const row = {
         code,
         category: patch.category || '通用',
         module_ids: allModules ? null : patch.moduleIds,
@@ -35,7 +97,14 @@ export function createInvitesApi(sb) {
         note: patch.note || '',
         active: patch.active !== false,
         created_by: admin.id,
-      }).select().single();
+      };
+      if (perms.length) row.module_perms = serializeInvitePerms(perms);
+      let { data, error } = await client.from('invites').insert(row).select().single();
+      if (error && row.module_perms && isMissingPermColumn(error)) {
+        delete row.module_perms;
+        warnMissingPermColumn();
+        ({ data, error } = await client.from('invites').insert(row).select().single());
+      }
       if (error) throw fail(error.message?.includes('duplicate') ? 'invite.errCodeExists' : 'msg.error');
       return mapInvite(data);
     },
@@ -54,8 +123,22 @@ export function createInvitesApi(sb) {
         row.all_modules = all;
         row.module_ids = all ? null : patch.moduleIds;
       }
-      const { data, error } = await client.from('invites').update(row).eq('id', id).select().single();
+      const hasPerms = patch.modulePerms !== undefined;
+      if (hasPerms) row.module_perms = serializeInvitePerms(normalizePerms(patch.modulePerms, undefined));
+      let { data, error } = await client.from('invites').update(row).eq('id', id).select().single();
+      if (error && hasPerms && isMissingPermColumn(error)) {
+        delete row.module_perms;
+        warnMissingPermColumn();
+        ({ data, error } = await client.from('invites').update(row).eq('id', id).select().single());
+      }
       if (error) throw fail('msg.error');
+      if (hasPerms || patch.moduleIds) {
+        try {
+          await syncMemberGrants(data, mapInvite(data).modulePerms);
+        } catch (e) {
+          console.warn('[insight-space] 同步已注册用户授权失败：', e);
+        }
+      }
       return mapInvite(data);
     },
 
@@ -80,7 +163,18 @@ export function createInvitesApi(sb) {
       if (invite.status === 'disabled') throw fail('auth.errInviteDisabled');
       if (invite.status === 'expired') throw fail('auth.errInviteExpired');
       if (invite.status === 'usedUp') throw fail('auth.errInviteUsedUp');
-      return { ...invite, modules: invite.allModules ? ['*'] : (invite.moduleIds || []) };
+      const moduleIds = invite.allModules ? ['*'] : (invite.moduleIds || []);
+      // 旧邀请码没有 module_perms，按全局 write 推导一份，前端展示更统一
+      const modulePerms = invite.modulePerms.length
+        ? invite.modulePerms
+        : moduleIds.map((moduleId) => ({
+            moduleId,
+            read: true,
+            write: invite.write !== false,
+            upload: true,
+            expiresAt: invite.expiresAt,
+          }));
+      return { ...invite, modulePerms, modules: moduleIds };
     },
   };
 

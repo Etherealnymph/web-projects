@@ -38,6 +38,13 @@
 .code-chip { font-family: var(--font-mono); font-size: 13px; padding: 2px 8px; border-radius: 6px; background: var(--surface-2); border: 1px dashed var(--line-strong); cursor: pointer; }
 .bar-row { display: grid; grid-template-columns: 110px 1fr 52px; gap: 10px; align-items: center; font-size: 13px; }
 
+/* ---------- 邀请码 · 模块权限 ---------- */
+.perm-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 7px 10px; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--surface-2); font-size: 13px; }
+.perm-row.is-on { border-color: var(--line-strong); background: var(--surface); }
+.perm-row__pick, .perm-row__title { flex: none; min-width: 150px; font-weight: 600; }
+.perm-row__opts { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1; }
+.perm-row__date { max-width: 188px; }
+
 /* ---------- 响应式 ---------- */
 @media (max-width: 980px) {
   .auth-wrap { grid-template-columns: 1fr; }

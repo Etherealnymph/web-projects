@@ -54,9 +54,15 @@ create table if not exists public.invites (
   used_by uuid[] not null default '{}',
   note text not null default '',
   active boolean not null default true,
+  module_perms jsonb not null default '[]'::jsonb,
   created_by uuid references public.profiles(id) on delete set null,
   created_at timestamptz not null default now()
 );
+
+/* 每个模块的独立权限（可读 / 可写 / 可上传 / 到期时间）。
+   结构：[{"module_id":uuid|null,"read":bool,"write":bool,"upload":bool,"expires_at":timestamptz|null}]
+   module_id 为 null 表示「全部模块」。空数组时回落到旧的 write + expires_at 行为。 */
+alter table public.invites add column if not exists module_perms jsonb not null default '[]'::jsonb;
 
 alter table public.profiles drop constraint if exists profiles_invite_id_fkey;
 alter table public.profiles add constraint profiles_invite_id_fkey
@@ -464,6 +470,7 @@ $$ declare
      v_invite public.invites;
      v_name text := lower(trim(coalesce(p_username,'')));
      v_mid uuid;
+     v_perm record;
    begin
      if v_uid is null then raise exception 'not_authenticated'; end if;
      perform set_config('app.internal', 'on', true);
@@ -486,7 +493,21 @@ $$ declare
      if not found then raise exception 'profile_missing'; end if;
 
      delete from public.grants where user_id = v_uid;
-     if v_invite.all_modules then
+     if v_invite.module_perms is not null and jsonb_array_length(v_invite.module_perms) > 0 then
+       for v_perm in
+         select * from jsonb_to_recordset(v_invite.module_perms)
+           as x(module_id uuid, read boolean, write boolean, upload boolean, expires_at timestamptz)
+       loop
+         insert into public.grants (user_id, module_id, read, write, upload, expires_at, invite_id)
+         values (v_uid,
+                 v_perm.module_id,
+                 coalesce(v_perm.read, true),
+                 coalesce(v_perm.write, false),
+                 coalesce(v_perm.upload, false),
+                 coalesce(v_perm.expires_at, v_invite.expires_at),
+                 v_invite.id);
+       end loop;
+     elsif v_invite.all_modules then
        insert into public.grants (user_id, module_id, read, write, upload, expires_at, invite_id)
        values (v_uid, null, true, v_invite.write, true, v_invite.expires_at, v_invite.id);
      else

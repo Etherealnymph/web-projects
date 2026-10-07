@@ -111,12 +111,8 @@ export async function createLocalApi() {
 
       const user = await makeUser({ username: name, password, nickname: nickname || name, role: 'member', inviteId: invite.id });
       db.users.push(user);
-      const moduleIds = invite.allModules ? ['*'] : invite.moduleIds;
-      for (const moduleId of moduleIds) {
-        db.grants.push({
-          id: uid('g'), userId: user.id, inviteId: invite.id, moduleId,
-          read: true, write: Boolean(invite.write), upload: true, expiresAt: null, createdAt: nowIso(),
-        });
+      for (const row of grantRowsForInvite(invite)) {
+        db.grants.push({ ...row, id: uid('g'), userId: user.id, inviteId: invite.id, createdAt: nowIso() });
       }
       invite.usedCount = (invite.usedCount || 0) + 1;
       invite.usedBy = [...(invite.usedBy || []), { userId: user.id, username: user.username, at: nowIso() }];
@@ -361,6 +357,55 @@ export async function createLocalApi() {
     return 'active';
   }
 
+  /* ---- 邀请码的模块权限（moduleId 为 '*' 代表全部模块；空数组代表旧版全局权限） ---- */
+
+  function normalizePerms(list) {
+    if (!Array.isArray(list) || !list.length) return [];
+    return list.map((p) => ({
+      moduleId: !p.moduleId || p.moduleId === '*' ? '*' : p.moduleId,
+      read: p.read !== false,
+      write: Boolean(p.write),
+      upload: Boolean(p.upload),
+      expiresAt: p.expiresAt || null,
+    }));
+  }
+
+  /** 权限列表 → 邀请码生效范围；没有权限配置时回落到 moduleIds */
+  function scopeFromPerms(perms, moduleIds) {
+    if (perms.length) {
+      const hasAll = perms.some((p) => p.moduleId === '*');
+      return {
+        allModules: hasAll,
+        moduleIds: hasAll ? [] : perms.filter((p) => p.moduleId && p.moduleId !== '*').map((p) => p.moduleId),
+        perms: hasAll ? perms.filter((p) => p.moduleId === '*') : perms,
+      };
+    }
+    const all = !moduleIds || moduleIds.length === 0 || moduleIds.includes('*');
+    return { allModules: all, moduleIds: all ? [] : moduleIds, perms: [] };
+  }
+
+  /** 按邀请码权限算出注册用户应得的授权行 */
+  function grantRowsForInvite(invite) {
+    const perms = Array.isArray(invite.modulePerms) ? invite.modulePerms : [];
+    if (perms.length) {
+      return perms.map((p) => ({
+        moduleId: p.moduleId || '*',
+        read: p.read !== false,
+        write: Boolean(p.write),
+        upload: Boolean(p.upload),
+        expiresAt: p.expiresAt || null,
+      }));
+    }
+    const moduleIds = invite.allModules ? ['*'] : (invite.moduleIds || []);
+    return moduleIds.map((moduleId) => ({
+      moduleId,
+      read: true,
+      write: Boolean(invite.write),
+      upload: true,
+      expiresAt: null,
+    }));
+  }
+
   const invites = {
     async list() {
       const db = await refresh();
@@ -380,8 +425,8 @@ export async function createLocalApi() {
         do { code = randomCode(10); } while (findInvite(db, code));
       }
       if (findInvite(db, code)) throw fail('invite.errCodeExists');
-      const allModules = !patch.moduleIds || patch.moduleIds.includes('*') || patch.moduleIds.length === 0;
-      if (!allModules && !patch.moduleIds.length) throw fail('invite.errNoModule');
+      const scope = scopeFromPerms(normalizePerms(patch.modulePerms), patch.moduleIds);
+      if (!scope.allModules && !scope.moduleIds.length) throw fail('invite.errNoModule');
       let expiresAt = null;
       if (patch.expiresAt) expiresAt = new Date(patch.expiresAt).toISOString();
       else if (patch.durationDays) expiresAt = new Date(Date.now() + Number(patch.durationDays) * 86400000).toISOString();
@@ -389,8 +434,9 @@ export async function createLocalApi() {
         id: uid('inv'),
         code,
         category: String(patch.category || '通用').trim().slice(0, 20),
-        moduleIds: allModules ? [] : patch.moduleIds,
-        allModules,
+        moduleIds: scope.moduleIds,
+        allModules: scope.allModules,
+        modulePerms: scope.perms,
         write: patch.write !== false,
         expiresAt,
         maxUses: patch.maxUses ? Number(patch.maxUses) : null,
@@ -417,15 +463,28 @@ export async function createLocalApi() {
       if (patch.expiresAt !== undefined) invite.expiresAt = patch.expiresAt ? new Date(patch.expiresAt).toISOString() : null;
       if (patch.write != null) invite.write = Boolean(patch.write);
       if (patch.maxUses !== undefined) invite.maxUses = patch.maxUses ? Number(patch.maxUses) : null;
-      if (patch.moduleIds) {
+      let scopeChanged = false;
+      if (patch.modulePerms !== undefined) {
+        const scope = scopeFromPerms(normalizePerms(patch.modulePerms), patch.moduleIds);
+        if (!scope.allModules && !scope.moduleIds.length) throw fail('invite.errNoModule');
+        invite.modulePerms = scope.perms;
+        invite.allModules = scope.allModules;
+        invite.moduleIds = scope.moduleIds;
+        scopeChanged = true;
+      } else if (patch.moduleIds) {
         invite.allModules = patch.moduleIds.includes('*');
         invite.moduleIds = invite.allModules ? [] : patch.moduleIds;
-        // 同步已注册用户的授权范围（邀请码变了，权限随之变化）
-        for (const grant of db.grants.filter((g) => g.inviteId === invite.id)) {
-          db.grants = db.grants.filter((g) => g !== grant);
-          const list = invite.allModules ? ['*'] : invite.moduleIds;
-          for (const moduleId of list) {
-            db.grants.push({ ...grant, id: uid('g'), moduleId });
+        if (!invite.allModules && !invite.moduleIds.length) throw fail('invite.errNoModule');
+        invite.modulePerms = [];
+        scopeChanged = true;
+      }
+      if (scopeChanged) {
+        // 同步已注册用户的授权（邀请码权限 / 范围变了，用户权限随之变化）
+        const stale = db.grants.filter((g) => g.inviteId === invite.id);
+        db.grants = db.grants.filter((g) => g.inviteId !== invite.id);
+        for (const grant of stale) {
+          for (const row of grantRowsForInvite(invite)) {
+            db.grants.push({ ...grant, id: uid('g'), ...row });
           }
         }
       }
@@ -447,10 +506,12 @@ export async function createLocalApi() {
       const db = await refresh();
       const invite = findInvite(db, code);
       validateInvite(invite);
+      const moduleIds = invite.allModules ? ['*'] : invite.moduleIds;
       return {
         code: invite.code,
         category: invite.category,
-        modules: invite.allModules ? ['*'] : invite.moduleIds,
+        modules: moduleIds,
+        modulePerms: grantRowsForInvite(invite).map((p) => ({ ...p })),
         write: invite.write,
         expiresAt: invite.expiresAt,
       };
