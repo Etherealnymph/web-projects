@@ -80,7 +80,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
-  /* 无限循环的旋转用极小 duration 会变成每秒十万转（比正常还刺眼），
-     载入指示保留一圈 5 秒的缓慢匀速旋转 */
-  .spinner { animation-duration: 5s !important; }
+  /* 无限循环动画用极小 duration 会变成每秒十万次抖动（比正常还刺眼），
+     载入指示与载入标记在这里保留各自的正常时长 */
+  .spinner { animation-duration: 2s !important; }
+  .boot-mark { animation-duration: 1.4s !important; }
 }

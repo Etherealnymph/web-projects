@@ -52,10 +52,37 @@ function optionsHtml(options, value) {
   return options.map((o) => `<option value="${esc(o.value)}"${o.value === value ? ' selected' : ''}>${esc(o.label)}</option>`).join('');
 }
 
-/** facets: { modules: [{value,label}], authors: [{value,label}], tags: [string] } */
+let authorListSeq = 0;
+
+/** 作者候选项：value 供输入框联想匹配（显示名），data-id 为真正的作者 id */
+function authorOptionsHtml(authors) {
+  return authors.map((a) => `<option value="${esc(a.label)}" data-id="${esc(a.value)}"${a.username ? ` data-username="${esc(a.username)}"` : ''}></option>`).join('');
+}
+
+/**
+ * 把作者搜索框的文字解析成作者 id：优先精确匹配显示名或用户名，其次唯一/首个包含匹配。
+ * 命中后把文字规范成该作者的显示名，让"看到什么就是筛了什么"。
+ */
+function resolveAuthor(input, bar) {
+  const text = input.value.trim();
+  if (!text) { input.value = ''; return ''; }
+  const options = Array.from(bar.querySelectorAll('datalist[data-role="f-author-list"] option'));
+  const q = text.toLowerCase();
+  const name = (o) => o.value.toLowerCase();
+  const user = (o) => (o.dataset.username || '').toLowerCase();
+  const hit = options.find((o) => name(o) === q || user(o) === q)
+    || options.find((o) => name(o).includes(q) || user(o).includes(q));
+  if (!hit) { input.value = ''; return ''; }
+  input.value = hit.value;
+  return hit.dataset.id || '';
+}
+
+/** facets: { modules: [{value,label}], authors: [{value,label,username}], tags: [string] } */
 export function filterBarHtml(state, facets) {
   const dateOptions = DATE_PRESETS.map((preset) => ({ value: preset, label: t(`date.${preset}`) }));
   const tagOptions = facets.tags.map((tag) => ({ value: tag, label: `#${tag}` }));
+  const authorListId = `f-author-list-${++authorListSeq}`;
+  const authorLabel = facets.authors.find((a) => a.value === state.authorId)?.label || '';
   return `
     <div class="filters" data-role="filters" role="group" aria-label="${esc(t('filter.title'))}">
       <label class="filter">
@@ -64,8 +91,10 @@ export function filterBarHtml(state, facets) {
       </label>
       <label class="filter">
         <span class="filter__label">${icon('user', 13)} ${esc(t('common.author'))}</span>
-        <select class="select" data-role="f-author">${optionsHtml([{ value: '', label: t('filter.allAuthors') }, ...facets.authors], state.authorId)}</select>
+        <input class="input" type="text" data-role="f-author" list="${authorListId}" autocomplete="off"
+               placeholder="${esc(t('filter.searchAuthor'))}" value="${esc(authorLabel)}" />
       </label>
+      <datalist id="${authorListId}" data-role="f-author-list">${authorOptionsHtml(facets.authors)}</datalist>
       <label class="filter">
         <span class="filter__label">${icon('calendar', 13)} ${esc(t('common.time'))}</span>
         <select class="select" data-role="f-date">${optionsHtml(dateOptions, state.datePreset)}</select>
@@ -85,20 +114,22 @@ export function filterBarHtml(state, facets) {
   `;
 }
 
-/** 重写作者 / 标签下拉项（模块作用域变化后调用），失效的选择会被清空 */
+/** 重写作者 / 标签候选项（模块作用域变化后调用），失效的选择会被清空 */
 export function fillFacetSelects(root, state, facets) {
   const bar = root.querySelector('[data-role="filters"]');
   if (!bar) return;
+  const authorInput = bar.querySelector('[data-role="f-author"]');
+  const authorList = bar.querySelector('datalist[data-role="f-author-list"]');
+  if (authorInput && authorList) {
+    if (state.authorId && !facets.authors.some((a) => a.value === state.authorId)) state.authorId = '';
+    authorList.innerHTML = authorOptionsHtml(facets.authors);
+    authorInput.value = facets.authors.find((a) => a.value === state.authorId)?.label || '';
+  }
   const tagOptions = facets.tags.map((tag) => ({ value: tag, label: `#${tag}` }));
-  const pairs = [
-    ['f-author', t('filter.allAuthors'), facets.authors, 'authorId'],
-    ['f-tag', t('filter.allTags'), tagOptions, 'tag'],
-  ];
-  for (const [role, allLabel, options, key] of pairs) {
-    const node = bar.querySelector(`[data-role="${role}"]`);
-    if (!node) continue;
-    if (state[key] && !options.some((o) => o.value === state[key])) state[key] = '';
-    node.innerHTML = optionsHtml([{ value: '', label: allLabel }, ...options], state[key]);
+  const node = bar.querySelector('[data-role="f-tag"]');
+  if (node) {
+    if (state.tag && !tagOptions.some((o) => o.value === state.tag)) state.tag = '';
+    node.innerHTML = optionsHtml([{ value: '', label: t('filter.allTags') }, ...tagOptions], state.tag);
   }
 }
 
@@ -118,7 +149,7 @@ export function wireFilterBar(root, state, onChange, baselineModuleId = '') {
 
   const read = () => {
     state.moduleId = bar.querySelector('[data-role="f-module"]').value;
-    state.authorId = bar.querySelector('[data-role="f-author"]').value;
+    state.authorId = resolveAuthor(bar.querySelector('[data-role="f-author"]'), bar);
     state.datePreset = bar.querySelector('[data-role="f-date"]').value;
     state.dateFrom = fromNode.value;
     state.dateTo = toNode.value;
@@ -136,6 +167,13 @@ export function wireFilterBar(root, state, onChange, baselineModuleId = '') {
 
   bar.addEventListener('change', (event) => {
     commit(event.target !== fromNode && event.target !== toNode);
+  });
+
+  // 作者是文本输入框，回车即确认；未在表单内，需阻止默认行为并让 change 事件接手
+  bar.querySelector('[data-role="f-author"]').addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    event.target.blur();
   });
 
   resetNode.addEventListener('click', () => {
@@ -158,11 +196,17 @@ export function facetsOf(items) {
   const authors = new Map();
   const tags = new Set();
   for (const item of items || []) {
-    if (item.author) authors.set(item.author.id, item.author.nickname || item.author.username || '');
+    if (item.author) {
+      authors.set(item.author.id, {
+        value: item.author.id,
+        label: item.author.nickname || item.author.username || '',
+        username: item.author.username || '',
+      });
+    }
     for (const tag of item.tags || []) tags.add(tag);
   }
   return {
-    authors: Array.from(authors, ([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label)),
+    authors: Array.from(authors.values()).sort((a, b) => a.label.localeCompare(b.label)),
     tags: Array.from(tags).sort((a, b) => a.localeCompare(b)),
   };
 }

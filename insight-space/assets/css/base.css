@@ -114,9 +114,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
   font-family: var(--font-serif); font-size: 40px; color: var(--accent-ink);
   background: linear-gradient(150deg, var(--accent), color-mix(in srgb, var(--accent) 62%, var(--jade)));
   box-shadow: var(--shadow-2);
-  animation: bootPulse 2.4s ease-in-out infinite;
+  animation: bootBounce 1.4s cubic-bezier(.32, .78, .42, 1) infinite;
 }
-@keyframes bootPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.025); opacity: .82; } }
+/* 只做上下位移，不改变颜色与透明度：靠"跳动"表达载入中，避免旧版呼吸式闪烁的观感 */
+@keyframes bootBounce {
+  0%, 100% { transform: translateY(0); }
+  22% { transform: translateY(-15px); }
+  44% { transform: translateY(0); }
+  58% { transform: translateY(-5px); }
+  72% { transform: translateY(0); }
+}
 .boot-text { color: var(--muted); letter-spacing: .18em; font-size: 13px; }
 
 /* ---------- 布局骨架 ---------- */
