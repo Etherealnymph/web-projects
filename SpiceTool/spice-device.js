@@ -238,13 +238,24 @@
       g.strokeStyle = '#2a3242'; g.fillStyle = '#98a2b3'; g.lineWidth = 1;
       const ticks = (a, b, n) => {
         const out = [];
-        let span = b - a;
-        if (!isFinite(span) || span <= 0) span = 1;
-        const step = Math.pow(10, Math.floor(Math.log10(span / n)));
-        const mult = [1, 2, 2.5, 5, 10].find((m) => span / (step * m) <= n) || 10;
+        if (!isFinite(a) || !isFinite(b)) return [0];
+        if (b < a) { const t = a; a = b; b = t; }
+        const span = b - a;
+        if (!isFinite(span) || span <= 0) return [a];
+        const target = Math.max(2, Math.min(12, Number(n) || 6));
+        const rawStep = span / target;
+        const exponent = Math.floor(Math.log10(rawStep));
+        let step = Math.pow(10, exponent);
+        if (!isFinite(step) || step <= 0) step = rawStep;
+        const mult = [1, 2, 2.5, 5, 10].find((m) => span / (step * m) <= target) || 10;
         const st = step * mult;
-        if (st <= 0) return [a];
-        for (let v = Math.ceil(a / st) * st; v <= b + st * 1e-9; v += st) out.push(v);
+        if (!isFinite(st) || st <= Number.EPSILON * Math.max(1, Math.abs(a), Math.abs(b))) return [a, b];
+        const first = Math.ceil(a / st) * st;
+        const limit = b + st * 1e-9;
+        for (let v = first, i = 0; v <= limit && i < 100; v += st, i++) {
+          out.push(v);
+          if (v + st === v) break;
+        }
         return out;
       };
       const xa = xLog ? Math.log10(x0) : x0, xb = xLog ? Math.log10(x1) : x1;

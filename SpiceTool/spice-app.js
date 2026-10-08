@@ -105,7 +105,19 @@
   function deviceBar(onChange) {
     const devSel = U.selectField({
       label: '器件', value: state.deviceId, options: deviceOptions(),
-      onChange: (v) => { state.deviceId = v; clampGeometry(); onChange(); }
+      onChange: (v) => {
+        state.deviceId = v;
+        clampGeometry();
+        const nextDevice = devById(v);
+        const nextCids = nextDevice && nextDevice.corners ? Object.keys(nextDevice.corners) : ['TT'];
+        const familyId = familyOfDevice(v).id;
+        const selected = nextDevice && nextDevice.corners && nextDevice.corners[state.cornerSel[familyId]]
+          ? state.cornerSel[familyId]
+          : nextCids[0];
+        state.cornerSel[familyId] = selected;
+        corSel.setOptions(nextCids.map((c) => ({ value: c, label: cornerInfo(c).label || c })), selected);
+        onChange();
+      }
     });
     const d = dev(), cids = d && d.corners ? Object.keys(d.corners) : ['TT'];
     const corSel = U.selectField({
