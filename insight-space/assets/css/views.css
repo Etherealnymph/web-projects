@@ -41,6 +41,8 @@
 /* ---------- 邀请码 · 模块权限 ---------- */
 .invite-module-cell { width: 230px; max-width: 230px; vertical-align: top !important; white-space: normal; overflow-wrap: anywhere; line-height: 1.6; }
 .invite-module-item + .invite-module-item { margin-top: 3px; }
+.table-wrap:has(.invite-module-cell) { overflow-x: auto; }
+.table-wrap:has(.invite-module-cell) > .table { min-width: 760px; }
 .perm-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 7px 10px; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--surface-2); font-size: 13px; }
 .perm-row.is-on { border-color: var(--line-strong); background: var(--surface); }
 .perm-row__pick, .perm-row__title { flex: none; min-width: 150px; font-weight: 600; }
@@ -70,8 +72,9 @@
   .gallery { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
   .hero { padding: 18px 16px; }
   .stat__value { font-size: 22px; }
-  .invite-table { min-width: 760px; }
+  .table-wrap:has(.invite-module-cell) > .table { min-width: 760px; }
   .invite-module-cell { width: 190px; max-width: 190px; line-height: 1.35; }
+  .invite-module-cell > div,
   .invite-module-item { white-space: nowrap; overflow-x: auto; scrollbar-width: thin; }
   .invite-module-item + .invite-module-item { margin-top: 1px; }
 }
