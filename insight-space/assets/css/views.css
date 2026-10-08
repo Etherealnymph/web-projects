@@ -62,8 +62,7 @@
   body { font-size: 14.5px; }
   .page { padding: 16px 12px 80px; }
   .topbar { height: auto; padding: 8px 0; }
-  .topbar__inner { padding: 0 12px; }
-  .topbar__inner { flex-wrap: wrap; }
+  .topbar__inner { width: 100%; max-width: none; flex: 0 0 100%; padding: 0 12px; flex-wrap: wrap; }
   .brand__sub { display: none; }
   .navtabs { order: 3; width: 100%; }
   .grid--cards { grid-template-columns: 1fr; }
