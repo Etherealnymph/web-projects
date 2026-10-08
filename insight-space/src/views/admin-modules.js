@@ -163,21 +163,6 @@ const DURATIONS = [
   { value: 'custom', label: 'invite.custom' },
 ];
 
-function expiryFields(role, value) {
-  return `
-    <select class="select perm-row__duration" data-${role}="duration" title="${esc(t('invite.duration'))}">
-      <option value="forever">${esc(t('invite.durationForever'))}</option>
-      <option value="1">${esc(t('invite.duration1'))}</option>
-      <option value="7">${esc(t('invite.duration7'))}</option>
-      <option value="30">${esc(t('invite.duration30'))}</option>
-      <option value="90">${esc(t('invite.duration90'))}</option>
-      <option value="365">${esc(t('invite.duration365'))}</option>
-      <option value="custom">${esc(t('invite.custom'))}</option>
-    </select>
-    <input class="input perm-row__date ${value ? '' : 'hidden'}" type="datetime-local" data-${role}="custom" value="${esc(value || '')}" />
-  `;
-}
-
 export async function renderInvitesTab(ctx, panel) {
   const { api } = ctx;
   const lang = document.documentElement.dataset.lang;
@@ -229,7 +214,7 @@ export async function renderInvitesTab(ctx, panel) {
                           const flags = [perm.read !== false ? t('invite.permRead') : t('common.noRead')];
                           if (perm.write) flags.push(t('invite.permWrite'));
                           if (perm.upload) flags.push(t('invite.permUpload'));
-                          if (perm.expiresAt) flags.push(remainingText(perm.expiresAt, lang));
+                          if (perm.readDays > 0) flags.push(t('invite.readDaysValue', { n: perm.readDays }));
                           return `<div class="nowrap"><strong>${esc(name)}</strong> · ${esc(flags.join(' / '))}</div>`;
                         }).join('')}
                       </td>
@@ -294,14 +279,6 @@ function toLocalInput(iso) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-function expiryFromRow(row) {
-  if (row.duration.value === 'custom') {
-    return row.custom.value ? new Date(row.custom.value).toISOString() : null;
-  }
-  if (row.duration.value === 'forever') return null;
-  return new Date(Date.now() + Number(row.duration.value) * 86400000).toISOString();
-}
-
 /** 邀请码的模块权限；旧邀请码没有 modulePerms，按全局 write 推导一份用于展示 / 编辑 */
 function invitePermsOf(invite) {
   if (Array.isArray(invite.modulePerms) && invite.modulePerms.length) return invite.modulePerms;
@@ -311,7 +288,7 @@ function invitePermsOf(invite) {
     read: true,
     write: Boolean(invite.write),
     upload: true,
-    expiresAt: null,
+    readDays: null,
   }));
 }
 
@@ -332,7 +309,7 @@ function openInviteForm(ctx, panel, modules, invite) {
         <label class="checkbox"><input type="checkbox" data-perm="read" checked /> <span class="small">${esc(t('invite.permRead'))}</span></label>
         <label class="checkbox"><input type="checkbox" data-perm="write" /> <span class="small">${esc(t('invite.permWrite'))}</span></label>
         <label class="checkbox"><input type="checkbox" data-perm="upload" /> <span class="small">${esc(t('invite.permUpload'))}</span></label>
-        ${expiryFields('perm', '')}
+        <input class="input perm-row__days" type="number" min="0" data-perm="days" placeholder="0 = ${esc(t('invite.readDaysUnlimited'))}" title="${esc(t('invite.readDays'))}" />
       </div>
     </div>
   `;
@@ -409,8 +386,7 @@ function openInviteForm(ctx, panel, modules, invite) {
     read: node.querySelector('[data-perm="read"]'),
     write: node.querySelector('[data-perm="write"]'),
     upload: node.querySelector('[data-perm="upload"]'),
-    duration: node.querySelector('[data-perm="duration"]'),
-    custom: node.querySelector('[data-perm="custom"]'),
+    days: node.querySelector('[data-perm="days"]'),
   }));
   const allRow = rows.find((r) => r.moduleId === '*');
   const pickRows = rows.filter((r) => r.moduleId !== '*');
@@ -419,12 +395,12 @@ function openInviteForm(ctx, panel, modules, invite) {
   const applyState = () => {
     const all = scope === 'all';
     allRow.node.classList.toggle('hidden', !all);
-    for (const input of [allRow.read, allRow.write, allRow.upload, allRow.duration, allRow.custom]) input.disabled = !all;
+    for (const input of [allRow.read, allRow.write, allRow.upload, allRow.days]) input.disabled = !all;
     for (const row of pickRows) {
       const on = all || row.pick.checked;
       row.node.classList.toggle('hidden', all);
       row.node.classList.toggle('is-on', on);
-      for (const input of [row.read, row.write, row.upload, row.duration, row.custom]) input.disabled = !on;
+      for (const input of [row.read, row.write, row.upload, row.days]) input.disabled = !on;
     }
   };
 
@@ -436,8 +412,7 @@ function openInviteForm(ctx, panel, modules, invite) {
       row.read.checked = perm.read !== false;
       row.write.checked = Boolean(perm.write);
       row.upload.checked = Boolean(perm.upload);
-      row.custom.value = toLocalInput(perm.expiresAt);
-      row.duration.value = perm.expiresAt ? 'custom' : 'forever';
+      row.days.value = perm.readDays ?? '';
     }
   } else if (!editing) {
     allRow.read.checked = true;
@@ -457,9 +432,6 @@ function openInviteForm(ctx, panel, modules, invite) {
       applyState();
     });
   }
-  for (const row of rows) {
-    row.duration.addEventListener('change', () => row.custom.classList.toggle('hidden', row.duration.value !== 'custom'));
-  }
   handle.body.querySelector('[data-role="random"]')?.addEventListener('click', (event) => {
     event.currentTarget.closest('.row').querySelector('[data-role="code"]').value = randomCode(10);
   });
@@ -475,7 +447,7 @@ function openInviteForm(ctx, panel, modules, invite) {
         read: allRow.read.checked,
         write: allRow.write.checked,
         upload: allRow.upload.checked,
-        expiresAt: expiryFromRow(allRow),
+        readDays: allRow.days.value ? Number(allRow.days.value) : null,
       }];
     }
     return pickRows.filter((r) => r.pick.checked).map((r) => ({
@@ -483,7 +455,7 @@ function openInviteForm(ctx, panel, modules, invite) {
       read: r.read.checked,
       write: r.write.checked,
       upload: r.upload.checked,
-      expiresAt: expiryFromRow(r),
+      readDays: r.days.value ? Number(r.days.value) : null,
     }));
   };
 

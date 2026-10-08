@@ -142,29 +142,24 @@ export function resolveGrant(db, grant) {
       read = perm.read !== false;
       write = read && perm.write === true;
       upload = read && perm.upload === true;
-      if (perm.expiresAt) {
-        const permExpiry = new Date(perm.expiresAt).getTime();
-        if (permExpiry <= now) return null;
-        expiresAt = expiresAt && new Date(expiresAt).getTime() < permExpiry ? expiresAt : perm.expiresAt;
-      }
+      grant.readDays = perm.readDays ?? grant.readDays ?? null;
     }
-    return { ...grant, read, write, upload, expiresAt, invite };
+    return { ...grant, read, write, upload, readDays: grant.readDays ?? null, expiresAt, invite };
   }
-  if (grant.expiresAt && new Date(grant.expiresAt).getTime() <= now) return null;
-  return { ...grant, read: grant.read !== false, write: grant.write !== false, upload: grant.upload !== false, expiresAt: grant.expiresAt || null, invite: null };
+  return { ...grant, read: grant.read !== false, write: grant.write !== false, upload: grant.upload !== false, readDays: grant.readDays ?? null, expiresAt: null, invite: null };
 }
 
 /** 某个用户对某个模块的访问权限 */
 export function accessFor(db, user, module) {
-  if (!user || !module) return { visible: false, write: false, expiresAt: null };
+  if (!user || !module) return { visible: false, write: false, readDays: null, expiresAt: null };
   if (user.role === 'superadmin' || user.role === 'owner') {
-    return { visible: true, write: true, expiresAt: null, role: user.role };
+    return { visible: true, write: true, readDays: null, expiresAt: null, role: user.role };
   }
   const candidates = db.grants
     .filter((g) => g.userId === user.id && (g.moduleId === module.id || g.moduleId === '*'))
     .map((g) => resolveGrant(db, g))
     .filter(Boolean);
-  if (!candidates.length) return { visible: false, write: false, expiresAt: null };
+  if (!candidates.length) return { visible: false, write: false, readDays: null, expiresAt: null };
   // 超管直接配置的授权（inviteId 为空）优先于邀请码授权。
   const effective = candidates.some((g) => !g.inviteId) ? candidates.filter((g) => !g.inviteId) : candidates;
   const visible = effective.some((g) => g.read !== false);
@@ -172,10 +167,13 @@ export function accessFor(db, user, module) {
   const upload = effective.some((g) => g.upload && g.read !== false);
   const expiries = effective.map((g) => (g.expiresAt ? new Date(g.expiresAt).getTime() : Infinity));
   const best = Math.max(...expiries);
+  const days = effective.map((g) => Number(g.readDays) || 0);
+  const readDays = days.some((n) => n <= 0) ? null : Math.max(...days);
   return {
     visible,
     write,
     upload,
+    readDays,
     expiresAt: best === Infinity ? null : new Date(best).toISOString(),
     grantId: effective[0]?.id,
     inviteId: effective[0]?.inviteId,

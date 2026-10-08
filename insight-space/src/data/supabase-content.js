@@ -32,6 +32,12 @@ export function createContentsApi(sb, modulesApi) {
       if (error) throw fail('msg.error');
 
       let items = (data || []).map(mapContent).filter((c) => (c.status === 'draft' ? c.authorId === sb.uid() : true));
+      const accessMap = new Map(all.map((m) => [m.id, m.access]));
+      items = items.filter((c) => {
+        const accessDays = accessMap.get(c.moduleId)?.readDays;
+        return !(accessDays > 0) || c.authorId === sb.uid() || sb.isStaff()
+          || new Date(c.createdAt).getTime() >= Date.now() - accessDays * 86400000;
+      });
       if (options.favoritesOf) {
         const { data: favRows } = await client.from('reactions').select('target_id')
           .eq('user_id', options.favoritesOf).eq('target_type', 'content').eq('kind', 'favorite');

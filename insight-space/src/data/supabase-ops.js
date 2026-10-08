@@ -21,7 +21,7 @@ function normalizePerms(list, allModules) {
     read: p.read !== false,
     write: Boolean(p.write),
     upload: Boolean(p.upload),
-    expiresAt: p.expiresAt || null,
+    readDays: p.readDays == null || p.readDays === '' ? null : Math.max(0, Number(p.readDays) || 0),
   }));
   if (allModules === true) return rows.filter((p) => p.moduleId === '*');
   if (allModules === false) return rows.filter((p) => p.moduleId !== '*');
@@ -40,7 +40,8 @@ export function createInvitesApi(sb) {
         read: p.read,
         write: p.write,
         upload: p.upload,
-        expires_at: p.expiresAt || fallbackExpiry,
+        read_days: p.readDays == null ? null : p.readDays,
+        expires_at: fallbackExpiry,
       }));
     }
     const ids = inviteRow.all_modules ? [null] : (inviteRow.module_ids || []);
@@ -49,6 +50,7 @@ export function createInvitesApi(sb) {
       read: true,
       write: inviteRow.write !== false,
       upload: true,
+      read_days: null,
       expires_at: fallbackExpiry,
     }));
   };
@@ -172,6 +174,7 @@ export function createInvitesApi(sb) {
             read: true,
             write: invite.write !== false,
             upload: true,
+            readDays: p.readDays,
             expiresAt: invite.expiresAt,
           }));
       return { ...invite, modulePerms, modules: moduleIds };
@@ -198,13 +201,13 @@ export function createGrantsApi(sb) {
         read: g.read !== false,
         write: Boolean(g.write),
         upload: g.upload !== false,
-        expiresAt: g.expires_at,
-        valid: !g.expires_at || new Date(g.expires_at) > new Date(),
+        readDays: g.read_days == null ? null : Number(g.read_days),
+        valid: !g.invite_id || !g.expires_at || new Date(g.expires_at) > new Date(),
         inviteId: g.invite_id,
       }));
     },
 
-    async set({ userId, moduleId, read = true, write = true, upload = true, expiresAt = null }) {
+    async set({ userId, moduleId, read = true, write = true, upload = true, readDays = null }) {
       sb.requireAdmin();
       const payload = {
         user_id: userId,
@@ -212,7 +215,7 @@ export function createGrantsApi(sb) {
         read: Boolean(read),
         write: Boolean(write),
         upload: Boolean(upload),
-        expires_at: expiresAt || null,
+        read_days: readDays == null ? null : Number(readDays),
         invite_id: null,
       };
       const existing = await client.from('grants').select('id').eq('user_id', userId);
@@ -247,11 +250,11 @@ export function createPermissionRequestsApi(sb) {
       sb.requireUser();
       const { data, error } = await client.from('permission_requests').select('*').order('created_at', { ascending: false });
       if (error) throw fail('msg.error');
-      return (data || []).map((r) => ({ id: r.id, userId: r.user_id, moduleId: r.module_id, read: r.read, write: r.write, upload: r.upload, expiresAt: r.expires_at, status: r.status, createdAt: r.created_at }));
+      return (data || []).map((r) => ({ id: r.id, userId: r.user_id, moduleId: r.module_id, read: r.read, write: r.write, upload: r.upload, readDays: r.read_days == null ? null : Number(r.read_days), status: r.status, createdAt: r.created_at }));
     },
-    async create({ moduleId, read = true, write = false, upload = false, expiresAt = null }) {
+    async create({ moduleId, read = true, write = false, upload = false, readDays = null }) {
       const user = sb.requireUser();
-      const { data, error } = await client.from('permission_requests').insert({ user_id: user.id, module_id: moduleId, read, write, upload, expires_at: expiresAt || null }).select().single();
+      const { data, error } = await client.from('permission_requests').insert({ user_id: user.id, module_id: moduleId, read, write, upload, read_days: readDays == null ? null : Number(readDays) }).select().single();
       if (error) throw fail('msg.error');
       return data;
     },
@@ -261,7 +264,7 @@ export function createPermissionRequestsApi(sb) {
       if (error) throw fail('msg.error');
       if (status === 'approved') {
         const { data: row } = await client.from('permission_requests').select('*').eq('id', id).single();
-        await createGrantsApi(sb).set({ userId: row.user_id, moduleId: row.module_id, read: row.read, write: row.write, upload: row.upload, expiresAt: row.expires_at });
+        await createGrantsApi(sb).set({ userId: row.user_id, moduleId: row.module_id, read: row.read, write: row.write, upload: row.upload, readDays: row.read_days });
       }
       return data;
     },

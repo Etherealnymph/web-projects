@@ -2,7 +2,7 @@
 
 import { t } from '../core/i18n.js';
 import { icon, openModal, confirmDialog, toastOk, toastErr, avatarHtml } from '../core/ui.js';
-import { esc, formatDay, formatDate, remainingText } from '../core/util.js';
+import { esc, formatDay } from '../core/util.js';
 import { errText } from '../data/index.js';
 import { moduleName } from '../components/widgets.js';
 
@@ -52,7 +52,7 @@ export async function renderUsersTab(ctx, panel) {
                     ? grants.map((g) => {
                       const name = g.allModules ? t('invite.allModules') : (moduleMap.get(g.moduleId) ? moduleName(moduleMap.get(g.moduleId), lang) : '?');
                       const state = g.valid ? [g.read ? t('common.read') : t('common.noRead'), g.write ? t('common.write') : t('common.readonly'), g.upload ? t('common.upload') : t('common.noUpload')].join(' · ') : t('common.expired');
-                      const exp = g.expiresAt ? `（${remainingText(g.expiresAt, lang)}）` : '';
+                      const exp = g.readDays > 0 ? `（${t('invite.readDaysValue', { n: g.readDays })}）` : '';
                       return `<span class="badge ${g.valid ? 'badge--jade' : 'badge--danger'}">${esc(name)} · ${esc(state)}${esc(exp)}</span>`;
                     }).join(' ')
                     : `<span class="muted tiny">${esc(t('admin.noGrant'))}</span>`;
@@ -227,8 +227,8 @@ function openUserForm(ctx, panel, modules) {
             <label class="checkbox"><input type="checkbox" data-role="upload" checked /> <span>${esc(t('common.upload'))}</span></label>
           </div>
           <div class="field">
-            <label class="field__label">${esc(t('invite.custom'))}（${esc(t('common.optional'))}）</label>
-            <input class="input" type="datetime-local" data-role="expires" />
+            <label class="field__label">${esc(t('invite.readDays'))}</label>
+            <input class="input" type="number" min="0" data-role="readDays" placeholder="${esc(t('invite.readDaysHint'))}" />
           </div>
         </div>
         <div class="form-error" data-role="error"></div>
@@ -246,7 +246,7 @@ function openUserForm(ctx, panel, modules) {
   handle.footer.querySelector('[data-role="save"]').addEventListener('click', async () => {
     const errorBox = handle.body.querySelector('[data-role="error"]');
     errorBox.textContent = '';
-    const expires = handle.body.querySelector('[data-role="expires"]').value;
+    const readDays = handle.body.querySelector('[data-role="readDays"]').value;
     const payload = {
       username: handle.body.querySelector('[data-role="username"]').value.trim(),
       nickname: handle.body.querySelector('[data-role="nickname"]').value.trim(),
@@ -256,7 +256,7 @@ function openUserForm(ctx, panel, modules) {
       read: handle.body.querySelector('[data-role="read"]').checked,
       write: handle.body.querySelector('[data-role="write"]').checked,
       upload: handle.body.querySelector('[data-role="upload"]').checked,
-      expiresAt: expires ? new Date(expires).toISOString() : null,
+      readDays: readDays ? Number(readDays) : null,
     };
     try {
       await api.auth.createUser(payload);
@@ -278,7 +278,7 @@ function openGrantForm(ctx, panel, target, modules) {
           <div class="upload-item">
             <div class="grow">
               <strong>${esc(g.allModules ? t('invite.allModules') : (modules.find((m) => m.id === g.moduleId)?.nameZh || '?'))}</strong>
-              <div class="tiny muted">${esc([g.read ? t('common.read') : t('common.noRead'), g.write ? t('common.write') : t('common.readonly'), g.upload ? t('common.upload') : t('common.noUpload')].join(' · '))} · ${g.expiresAt ? `${esc(formatDate(g.expiresAt, 'zh'))}（${esc(remainingText(g.expiresAt, 'zh'))}）` : esc(t('common.never'))}${g.inviteId ? ` · ${esc(t('admin.inviteBy'))}` : ''}</div>
+              <div class="tiny muted">${esc([g.read ? t('common.read') : t('common.noRead'), g.write ? t('common.write') : t('common.readonly'), g.upload ? t('common.upload') : t('common.noUpload')].join(' · '))} · ${g.readDays > 0 ? esc(t('invite.readDaysValue', { n: g.readDays })) : esc(t('invite.readDaysUnlimited'))}${g.inviteId ? ` · ${esc(t('admin.inviteBy'))}` : ''}</div>
             </div>
             <button class="btn btn--xs btn--danger" data-remove="${esc(g.allModules ? '*' : g.moduleId)}">${esc(t('common.delete'))}</button>
           </div>
@@ -293,17 +293,8 @@ function openGrantForm(ctx, panel, target, modules) {
             </select>
           </div>
           <div class="field">
-            <label class="field__label">${esc(t('invite.duration'))}</label>
-            <select class="select" data-role="duration">
-              <option value="forever">${esc(t('invite.durationForever'))}</option>
-              <option value="1">${esc(t('invite.duration1'))}</option>
-              <option value="7">${esc(t('invite.duration7'))}</option>
-              <option value="30">${esc(t('invite.duration30'))}</option>
-              <option value="90">${esc(t('invite.duration90'))}</option>
-              <option value="365">${esc(t('invite.duration365'))}</option>
-              <option value="custom">${esc(t('invite.custom'))}</option>
-            </select>
-            <input class="input mt-1 hidden" type="datetime-local" data-role="expires" />
+            <label class="field__label">${esc(t('invite.readDays'))}</label>
+            <input class="input" type="number" min="0" data-role="readDays" placeholder="${esc(t('invite.readDaysHint'))}" />
           </div>
         </div>
         <div class="row row--wrap">
@@ -317,15 +308,8 @@ function openGrantForm(ctx, panel, target, modules) {
     footer: `<button class="btn" data-modal-close>${esc(t('common.close'))}</button><button class="btn btn--primary" data-role="add">${esc(t('common.save'))}</button>`,
   });
 
-  const duration = handle.body.querySelector('[data-role="duration"]');
-  const expiresInput = handle.body.querySelector('[data-role="expires"]');
-  duration.addEventListener('change', () => expiresInput.classList.toggle('hidden', duration.value !== 'custom'));
   handle.footer.querySelector('[data-role="add"]').addEventListener('click', async () => {
-    const expires = duration.value === 'custom'
-      ? expiresInput.value
-      : duration.value === 'forever'
-        ? ''
-        : new Date(Date.now() + Number(duration.value) * 86400000).toISOString();
+    const readDays = handle.body.querySelector('[data-role="readDays"]').value;
     try {
       await api.grants.set({
         userId: target.id,
@@ -333,7 +317,7 @@ function openGrantForm(ctx, panel, target, modules) {
         read: handle.body.querySelector('[data-role="read"]').checked,
         write: handle.body.querySelector('[data-role="write"]').checked,
         upload: handle.body.querySelector('[data-role="upload"]').checked,
-        expiresAt: expires ? new Date(expires).toISOString() : null,
+        readDays: readDays ? Number(readDays) : null,
       });
       toastOk(t('common.saved'));
       handle.close();

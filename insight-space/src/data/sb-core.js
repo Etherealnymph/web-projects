@@ -100,7 +100,7 @@ export function mapInvitePerms(list) {
     read: p.read !== false,
     write: Boolean(p.write),
     upload: Boolean(p.upload),
-    expiresAt: p.expires_at || null,
+    readDays: p.read_days == null ? null : Math.max(0, Number(p.read_days) || 0),
   }));
 }
 
@@ -111,7 +111,7 @@ export function serializeInvitePerms(list) {
     read: p.read !== false,
     write: Boolean(p.write),
     upload: Boolean(p.upload),
-    expires_at: p.expiresAt || null,
+    read_days: p.readDays == null ? null : Number(p.readDays),
   }));
 }
 
@@ -198,7 +198,8 @@ export function createContext(client) {
         let read = g.read !== false;
         let write = Boolean(g.write);
         let upload = g.upload !== false;
-        let expiry = g.expires_at ? new Date(g.expires_at).getTime() : Infinity;
+        let expiry = Infinity;
+        let readDays = g.read_days == null ? null : Number(g.read_days);
         if (g.invite_id) {
           const invite = inviteMap.get(g.invite_id);
           if (!invite || invite.active === false) return null;
@@ -209,12 +210,12 @@ export function createContext(client) {
             read = perm.read !== false;
             write = read && perm.write === true;
             upload = read && perm.upload === true;
-            if (perm.expires_at) expiry = Math.min(expiry, new Date(perm.expires_at).getTime());
+            readDays = perm.read_days == null ? readDays : Number(perm.read_days);
           } else if (invite.write === false) {
             write = false;
           }
         }
-        return { read, write, upload, expiry, direct: !g.invite_id };
+        return { read, write, upload, readDays, expiry, direct: !g.invite_id };
       })
       .filter((g) => g && g.expiry > now);
     if (!valid.length) return { visible: false, write: false, expiresAt: null };
@@ -223,7 +224,9 @@ export function createContext(client) {
     const write = effective.some((g) => g.write && g.read);
     const upload = effective.some((g) => g.upload && g.read);
     const best = Math.max(...effective.map((g) => g.expiry));
-    return { visible, write, upload, expiresAt: best === Infinity ? null : new Date(best).toISOString() };
+    const days = effective.map((g) => Number(g.readDays) || 0);
+    const readDays = days.some((n) => n <= 0) ? null : Math.max(...days);
+    return { visible, write, upload, readDays, expiresAt: best === Infinity ? null : new Date(best).toISOString() };
   };
 
   sb.attachCounts = async (contents) => {

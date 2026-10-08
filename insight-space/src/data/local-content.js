@@ -52,6 +52,10 @@ export function createContentsApi(ctx) {
       if (options.moduleId) items = items.filter((c) => c.moduleId === options.moduleId);
       else if (options.moduleIds?.length) items = items.filter((c) => options.moduleIds.includes(c.moduleId));
       items = items.filter((c) => (c.status === 'draft' ? c.authorId === user?.id : true));
+      items = items.filter((c) => {
+        const readDays = access.get(c.moduleId)?.readDays;
+        return !(readDays > 0) || new Date(c.createdAt).getTime() >= Date.now() - readDays * 86400000;
+      });
       if (options.authorId) items = items.filter((c) => c.authorId === options.authorId);
       if (options.includeDrafts) items = items.filter((c) => c.status !== 'draft' || c.authorId === user?.id);
       if (options.q) items = items.filter((c) => matchQuery(c, options.q));
@@ -79,7 +83,11 @@ export function createContentsApi(ctx) {
       if (!content) throw fail('content.notFound');
       const module = db.modules.find((m) => m.id === content.moduleId);
       const access = accessFor(db, user, module);
-      if (content.status === 'draft' && content.authorId !== user?.id && user?.role !== 'superadmin' && user?.role !== 'owner') {
+      const privileged = content.authorId === user?.id || user?.role === 'superadmin' || user?.role === 'owner';
+      if (access.readDays > 0 && !privileged && new Date(content.createdAt).getTime() < Date.now() - access.readDays * 86400000) {
+        throw fail('content.notFound');
+      }
+      if (content.status === 'draft' && !privileged) {
         throw fail('content.notFound');
       }
       if ((!access.visible || !canSeeContent(content, user)) && content.authorId !== user?.id) throw fail('module.noAccess');

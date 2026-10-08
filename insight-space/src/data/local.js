@@ -193,7 +193,7 @@ export async function createLocalApi() {
         .sort((a, b) => a.nickname.localeCompare(b.nickname));
     },
 
-    async createUser({ username, password, nickname, role = 'member', moduleIds = [], read = true, write = true, upload = true, expiresAt = null }) {
+    async createUser({ username, password, nickname, role = 'member', moduleIds = [], read = true, write = true, upload = true, readDays = null }) {
       const db = await refresh();
       requireAdmin();
       const name = String(username || '').trim();
@@ -204,7 +204,7 @@ export async function createLocalApi() {
       db.users.push(user);
       const list = moduleIds.includes('*') ? ['*'] : moduleIds;
       for (const moduleId of list) {
-        db.grants.push({ id: uid('g'), userId: user.id, inviteId: null, moduleId, read: Boolean(read), write: Boolean(write), upload: Boolean(upload), expiresAt: expiresAt || null, createdAt: nowIso() });
+        db.grants.push({ id: uid('g'), userId: user.id, inviteId: null, moduleId, read: Boolean(read), write: Boolean(write), upload: Boolean(upload), readDays: readDays == null ? null : Number(readDays), createdAt: nowIso() });
       }
       await saveDb(db);
       return publicUser(user);
@@ -373,7 +373,7 @@ export async function createLocalApi() {
       read: p.read !== false,
       write: Boolean(p.write),
       upload: Boolean(p.upload),
-      expiresAt: p.expiresAt || null,
+      readDays: p.readDays == null ? null : Number(p.readDays),
     }));
   }
 
@@ -400,7 +400,7 @@ export async function createLocalApi() {
         read: p.read !== false,
         write: Boolean(p.write),
         upload: Boolean(p.upload),
-        expiresAt: p.expiresAt || null,
+        readDays: p.readDays == null ? null : Number(p.readDays),
       }));
     }
     const moduleIds = invite.allModules ? ['*'] : (invite.moduleIds || []);
@@ -409,7 +409,7 @@ export async function createLocalApi() {
       read: true,
       write: Boolean(invite.write),
       upload: true,
-      expiresAt: null,
+      readDays: null,
     }));
   }
 
@@ -541,7 +541,7 @@ export async function createLocalApi() {
           read: resolved ? resolved.read !== false : false,
           write: resolved ? resolved.write : false,
           upload: resolved ? resolved.upload !== false : false,
-          expiresAt: resolved ? resolved.expiresAt : null,
+          readDays: resolved ? resolved.readDays : null,
           valid: Boolean(resolved),
           inviteId: g.inviteId,
         };
@@ -557,7 +557,7 @@ export async function createLocalApi() {
       return grantsFor(db, userId);
     },
 
-    async set({ userId, moduleId, read = true, write = true, upload = true, expiresAt = null }) {
+    async set({ userId, moduleId, read = true, write = true, upload = true, readDays = null }) {
       const db = await refresh();
       requireAdmin();
       const existing = db.grants.find((g) => g.userId === userId && g.moduleId === moduleId);
@@ -565,10 +565,11 @@ export async function createLocalApi() {
         existing.write = Boolean(write);
         existing.read = Boolean(read);
         existing.upload = Boolean(upload);
-        existing.expiresAt = expiresAt || null;
+        existing.readDays = readDays == null ? null : Number(readDays);
+        existing.expiresAt = null;
         existing.inviteId = null;
       } else {
-        db.grants.push({ id: uid('g'), userId, moduleId, read: Boolean(read), write: Boolean(write), upload: Boolean(upload), expiresAt: expiresAt || null, inviteId: null, createdAt: nowIso() });
+        db.grants.push({ id: uid('g'), userId, moduleId, read: Boolean(read), write: Boolean(write), upload: Boolean(upload), readDays: readDays == null ? null : Number(readDays), inviteId: null, createdAt: nowIso() });
       }
       await saveDb(db);
       return grantsFor(db, userId);
@@ -709,11 +710,11 @@ export async function createLocalApi() {
       const rows = db.permissionRequests.filter((r) => r.userId === user.id || canManageSystem(user));
       return rows.map((r) => ({ ...r, user: publicUser(db.users.find((u) => u.id === r.userId)) }));
     },
-    async create({ moduleId, read = true, write = false, upload = false, expiresAt = null }) {
+    async create({ moduleId, read = true, write = false, upload = false, readDays = null }) {
       const db = await refresh();
       const user = requireUser();
       if (user.role !== 'member') throw fail('common.noPermission');
-      const row = { id: uid('pr'), userId: user.id, moduleId, read: Boolean(read), write: Boolean(write), upload: Boolean(upload), expiresAt: expiresAt || null, status: 'pending', createdAt: nowIso() };
+      const row = { id: uid('pr'), userId: user.id, moduleId, read: Boolean(read), write: Boolean(write), upload: Boolean(upload), readDays: readDays == null ? null : Number(readDays), status: 'pending', createdAt: nowIso() };
       db.permissionRequests.unshift(row);
       await saveDb(db);
       return row;
@@ -726,8 +727,8 @@ export async function createLocalApi() {
       row.status = status === 'approved' ? 'approved' : 'rejected';
       if (row.status === 'approved') {
         const existing = db.grants.find((g) => g.userId === row.userId && g.moduleId === row.moduleId && !g.inviteId);
-        if (existing) Object.assign(existing, { read: row.read, write: row.write, upload: row.upload, expiresAt: row.expiresAt });
-        else db.grants.push({ id: uid('g'), userId: row.userId, moduleId: row.moduleId, read: row.read, write: row.write, upload: row.upload, expiresAt: row.expiresAt, inviteId: null, createdAt: nowIso() });
+        if (existing) Object.assign(existing, { read: row.read, write: row.write, upload: row.upload, readDays: row.readDays });
+        else db.grants.push({ id: uid('g'), userId: row.userId, moduleId: row.moduleId, read: row.read, write: row.write, upload: row.upload, readDays: row.readDays, inviteId: null, createdAt: nowIso() });
       }
       await saveDb(db);
       return row;

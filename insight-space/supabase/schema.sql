@@ -59,9 +59,9 @@ create table if not exists public.invites (
   created_at timestamptz not null default now()
 );
 
-/* 每个模块的独立权限（可读 / 可写 / 可上传 / 到期时间）。
-   结构：[{"module_id":uuid|null,"read":bool,"write":bool,"upload":bool,"expires_at":timestamptz|null}]
-   module_id 为 null 表示「全部模块」。空数组时回落到旧的 write + expires_at 行为。 */
+/* 每个模块的独立权限（可读 / 可写 / 可上传 / 内容时间范围）。
+   结构：[{"module_id":uuid|null,"read":bool,"write":bool,"upload":bool,"read_days":integer|null}]
+   module_id 为 null 表示「全部模块」。空数组时回落到旧的 write 行为，邀请码整体 expires_at 仍然生效。 */
 alter table public.invites add column if not exists module_perms jsonb not null default '[]'::jsonb;
 
 alter table public.profiles drop constraint if exists profiles_invite_id_fkey;
@@ -138,6 +138,8 @@ create table if not exists public.permission_requests (
 
 alter table public.grants add column if not exists read boolean not null default true;
 alter table public.grants add column if not exists upload boolean not null default true;
+alter table public.grants add column if not exists read_days integer;
+alter table public.permission_requests add column if not exists read_days integer;
 
 create index if not exists contents_module_idx on public.contents (module_id, created_at desc);
 create index if not exists contents_author_idx on public.contents (author_id);
@@ -202,13 +204,42 @@ $$ select public.is_staff() or exists (
      where g.user_id = auth.uid()
        and g.read
        and (g.module_id is null or g.module_id = p_module_id)
-       and (g.expires_at is null or g.expires_at > now())
+       and (g.invite_id is null or g.expires_at is null or g.expires_at > now())
        and (g.invite_id is null or (i.active and (i.expires_at is null or i.expires_at > now())))
        and (not exists (select 1 from public.grants d where d.user_id = auth.uid() and d.invite_id is null
                        and (d.expires_at is null or d.expires_at > now())
                        and (d.module_id is null or d.module_id = p_module_id))
             or g.invite_id is null)
    ) $$;
+
+create or replace function public.has_content_read(p_module_id uuid, p_created_at timestamptz)
+returns boolean language sql stable security definer set search_path = public as
+$$ select exists (
+  select 1
+  from public.grants g
+  left join public.invites i on i.id = g.invite_id
+  where g.user_id = auth.uid()
+    and g.read
+    and (g.module_id is null or g.module_id = p_module_id)
+    and (g.invite_id is null or g.expires_at is null or g.expires_at > now())
+    and (g.invite_id is null or (i.active and (i.expires_at is null or i.expires_at > now())))
+    and (
+      coalesce((
+        select nullif(p->>'read_days', '')::integer
+        from jsonb_array_elements(coalesce(i.module_perms, '[]'::jsonb)) p
+        where p->>'module_id' is null or p->>'module_id' = p_module_id::text
+        order by case when p->>'module_id' = p_module_id::text then 0 else 1 end
+        limit 1
+      ), g.read_days, 0) <= 0
+      or p_created_at >= now() - make_interval(days => coalesce((
+        select nullif(p->>'read_days', '')::integer
+        from jsonb_array_elements(coalesce(i.module_perms, '[]'::jsonb)) p
+        where p->>'module_id' is null or p->>'module_id' = p_module_id::text
+        order by case when p->>'module_id' = p_module_id::text then 0 else 1 end
+        limit 1
+      ), g.read_days, 0))
+    )
+) $$;
 
 create or replace function public.has_module_write(p_module_id uuid)
 returns boolean language sql stable security definer set search_path = public as
@@ -219,7 +250,7 @@ $$ select public.is_staff() or exists (
        and g.read
        and g.write
        and (g.module_id is null or g.module_id = p_module_id)
-       and (g.expires_at is null or g.expires_at > now())
+       and (g.invite_id is null or g.expires_at is null or g.expires_at > now())
        and (g.invite_id is null or (i.active and (i.expires_at is null or i.expires_at > now())))
        and (not exists (select 1 from public.grants d where d.user_id = auth.uid() and d.invite_id is null
                        and (d.expires_at is null or d.expires_at > now())
@@ -233,7 +264,7 @@ $$ select exists (
      select 1 from public.contents c
      where c.id = p_content_id
        and (public.is_staff() or c.author_id = auth.uid()
-            or (c.status <> 'draft' and public.has_module_access(c.module_id)
+            or (c.status <> 'draft' and public.has_content_read(c.module_id, c.created_at)
                 and (c.visibility = 'public' or (c.visibility = 'selected' and auth.uid() = any(c.visible_user_ids)))))
    ) $$;
 
@@ -358,7 +389,7 @@ create policy contents_select on public.contents for select to authenticated
   using (
     public.is_staff()
     or author_id = auth.uid()
-    or (status <> 'draft' and public.has_module_access(module_id)
+    or (status <> 'draft' and public.has_content_read(module_id, created_at)
         and (visibility = 'public' or (visibility = 'selected' and auth.uid() = any(visible_user_ids))))
   );
 drop policy if exists contents_insert on public.contents;
@@ -508,15 +539,16 @@ $$ declare
      if v_invite.module_perms is not null and jsonb_array_length(v_invite.module_perms) > 0 then
        for v_perm in
          select * from jsonb_to_recordset(v_invite.module_perms)
-           as x(module_id uuid, read boolean, write boolean, upload boolean, expires_at timestamptz)
+           as x(module_id uuid, read boolean, write boolean, upload boolean, read_days integer)
        loop
-         insert into public.grants (user_id, module_id, read, write, upload, expires_at, invite_id)
+         insert into public.grants (user_id, module_id, read, write, upload, read_days, expires_at, invite_id)
          values (v_uid,
                  v_perm.module_id,
                  coalesce(v_perm.read, true),
                  coalesce(v_perm.write, false),
                  coalesce(v_perm.upload, false),
-                 coalesce(v_perm.expires_at, v_invite.expires_at),
+                 v_perm.read_days,
+                 v_invite.expires_at,
                  v_invite.id);
        end loop;
      elsif v_invite.all_modules then
@@ -540,7 +572,7 @@ $$ declare
    再调用本函数补齐用户名 / 角色 / 初始授权。只操作 public 表，避免直接写 auth.users
    （新版 Supabase 已收回 postgres 对 auth.users 的写权限，直接 insert 会 403）。 */
 drop function if exists public.admin_create_user(text, text, text, text, uuid[], boolean, timestamptz);
-drop function if exists public.admin_provision_user(uuid, text, text, text, uuid[], boolean, timestamptz);
+drop function if exists public.admin_provision_user(uuid, text, text, text, uuid[], boolean, boolean, boolean, timestamptz);
 create or replace function public.admin_provision_user(
   p_user_id uuid,
   p_username text,
@@ -550,7 +582,7 @@ create or replace function public.admin_provision_user(
   p_read boolean default true,
   p_write boolean default true,
   p_upload boolean default true,
-  p_expires_at timestamptz default null)
+  p_read_days integer default null)
 returns void language plpgsql security definer set search_path = public as
 $$ declare
      v_name text := lower(trim(coalesce(p_username,'')));
@@ -575,12 +607,12 @@ $$ declare
 
      delete from public.grants where user_id = p_user_id;
      if p_module_ids is null or array_length(p_module_ids, 1) is null then
-       insert into public.grants (user_id, module_id, read, write, upload, expires_at, invite_id)
-       values (p_user_id, null, coalesce(p_read, true), coalesce(p_write, true), coalesce(p_upload, true), p_expires_at, null);
+       insert into public.grants (user_id, module_id, read, write, upload, read_days, invite_id)
+       values (p_user_id, null, coalesce(p_read, true), coalesce(p_write, true), coalesce(p_upload, true), nullif(p_read_days, 0), null);
      else
        foreach v_mid in array p_module_ids loop
-         insert into public.grants (user_id, module_id, read, write, upload, expires_at, invite_id)
-         values (p_user_id, v_mid, coalesce(p_read, true), coalesce(p_write, true), coalesce(p_upload, true), p_expires_at, null);
+         insert into public.grants (user_id, module_id, read, write, upload, read_days, invite_id)
+         values (p_user_id, v_mid, coalesce(p_read, true), coalesce(p_write, true), coalesce(p_upload, true), nullif(p_read_days, 0), null);
        end loop;
      end if;
    end $$;
@@ -703,7 +735,7 @@ grant execute on function public.app_bootstrap_state() to anon, authenticated;
 grant execute on function public.validate_invite(text) to anon, authenticated;
 grant execute on function public.claim_first_superadmin(text, text) to authenticated;
 grant execute on function public.register_with_invite(text, text, text) to authenticated;
-grant execute on function public.admin_provision_user(uuid, text, text, text, uuid[], boolean, boolean, boolean, timestamptz) to authenticated;
+grant execute on function public.admin_provision_user(uuid, text, text, text, uuid[], boolean, boolean, boolean, integer) to authenticated;
 grant execute on function public.admin_set_role(uuid, text) to authenticated;
 grant execute on function public.increment_view(uuid) to authenticated;
 
