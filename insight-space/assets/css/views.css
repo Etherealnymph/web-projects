@@ -61,7 +61,8 @@
 @media (max-width: 680px) {
   body { font-size: 14.5px; }
   .page { padding: 16px 12px 80px; }
-  .topbar { height: auto; padding: 8px 12px; }
+  .topbar { height: auto; padding: 8px 0; }
+  .topbar__inner { padding: 0 12px; }
   .topbar__inner { flex-wrap: wrap; }
   .brand__sub { display: none; }
   .navtabs { order: 3; width: 100%; }
