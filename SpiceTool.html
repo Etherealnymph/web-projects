@@ -82,6 +82,7 @@ body {
   transition: all 0.2s ease;
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
 }
+.field-body input[type="text"] { appearance: textfield; }
 .field-body select { width: auto; font-family: inherit; min-width: 130px; cursor: pointer; }
 .field-body input:hover, .field-body select:hover { border-color: #45556e; }
 .field-body input:focus, .field-body select:focus { 
@@ -939,21 +940,60 @@ window.__SPICE_MODELS__ = {"meta":{"source":"rf018.scs","docNo":"T-018-MM-SP-001
     return (+x).toFixed(digits === undefined ? 4 : digits) + (unit ? ' ' + unit : '');
   }
   function numberField(spec) {
-    const input = el('input', { type: 'number', value: spec.value, step: spec.step || 'any', class: 'nf-input' });
-    if (spec.min !== undefined) input.min = spec.min;
-    if (spec.max !== undefined) input.max = spec.max;
+    const input = el('input', {
+      type: 'text',
+      value: spec.value === undefined || spec.value === null ? '' : String(spec.value),
+      inputmode: 'decimal',
+      autocomplete: 'off',
+      spellcheck: 'false',
+      class: 'nf-input'
+    });
     if (spec.width) input.style.width = spec.width;
     const box = el('label.field', null, [
       el('span.field-label', { text: spec.label }),
       el('span.field-body', null, [input, spec.unit ? el('span.unit', { text: spec.unit }) : null]),
       spec.hint ? el('span.hint', { text: spec.hint }) : null
     ]);
-    const fire = () => { if (spec.onChange) spec.onChange(parseFloat(input.value)); };
-    input.addEventListener('input', fire);
-    input.addEventListener('change', fire);
+    // Do not redraw while the user is typing. Redrawing replaces this input
+    // node and previously caused the field to lose focus after one character.
+    const numericPattern = /^[+-]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:[eE][+-]?\d+)?$/;
+    let lastCommitted = input.value;
+    const commit = () => {
+      const raw = input.value.trim();
+      if (!numericPattern.test(raw)) {
+        input.setCustomValidity(raw ? '请输入有效数字' : '请输入数字');
+        return;
+      }
+      const value = Number(raw);
+      if (!Number.isFinite(value)) {
+        input.setCustomValidity('请输入有效数字');
+        return;
+      }
+      if ((spec.min !== undefined && value < spec.min) || (spec.max !== undefined && value > spec.max)) {
+        input.setCustomValidity('数值超出允许范围');
+        return;
+      }
+      input.setCustomValidity('');
+      if (raw === lastCommitted) return;
+      lastCommitted = raw;
+      if (spec.onChange) spec.onChange(value);
+    };
+    input.addEventListener('input', () => input.setCustomValidity(''));
+    input.addEventListener('change', commit);
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        commit();
+        input.blur();
+      }
+    });
     box.getInput = () => input;
-    box.getValue = () => parseFloat(input.value);
-    box.setValue = (v) => { input.value = v; };
+    box.getValue = () => Number(input.value);
+    box.setValue = (v) => {
+      const value = v === undefined || v === null ? '' : String(v);
+      input.value = value;
+      lastCommitted = value;
+    };
     return box;
   }
   function selectField(spec) {
