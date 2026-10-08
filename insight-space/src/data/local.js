@@ -186,6 +186,13 @@ export async function createLocalApi() {
       }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     },
 
+    async listMembers() {
+      await refresh();
+      requireUser();
+      return dbCache.users.filter((u) => u.status === 'active').map(publicUser)
+        .sort((a, b) => a.nickname.localeCompare(b.nickname));
+    },
+
     async createUser({ username, password, nickname, role = 'member', moduleIds = [], read = true, write = true, upload = true, expiresAt = null }) {
       const db = await refresh();
       requireAdmin();

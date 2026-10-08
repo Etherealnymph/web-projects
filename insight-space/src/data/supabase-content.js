@@ -80,6 +80,8 @@ export function createContentsApi(sb, modulesApi) {
         tags: payload.tags || [],
         media: payload.media || [],
         status: payload.status === 'draft' ? 'draft' : 'published',
+        visibility: ['public', 'selected'].includes(payload.visibility) ? payload.visibility : 'private',
+        visible_user_ids: payload.visibility === 'selected' ? (payload.visibleUserIds || []) : [],
       }).select().single();
       if (error) throw fail('msg.error');
       return mapContent(data);
@@ -94,6 +96,10 @@ export function createContentsApi(sb, modulesApi) {
       if (patch.tags) row.tags = patch.tags;
       if (patch.media) row.media = patch.media;
       if (patch.status) row.status = patch.status;
+      if (patch.visibility) {
+        row.visibility = ['public', 'selected'].includes(patch.visibility) ? patch.visibility : 'private';
+        row.visible_user_ids = row.visibility === 'selected' ? (patch.visibleUserIds || []) : [];
+      }
       row.updated_at = new Date().toISOString();
       const { data, error } = await client.from('contents').update(row).eq('id', id).select().single();
       if (error) throw fail('msg.error');

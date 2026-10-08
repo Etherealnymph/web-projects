@@ -43,6 +43,7 @@
 .perm-row.is-on { border-color: var(--line-strong); background: var(--surface); }
 .perm-row__pick, .perm-row__title { flex: none; min-width: 150px; font-weight: 600; }
 .perm-row__opts { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1; }
+.perm-row__duration { min-width: 112px; }
 .perm-row__date { max-width: 188px; }
 
 /* ---------- 响应式 ---------- */

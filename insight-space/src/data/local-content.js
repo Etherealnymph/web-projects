@@ -26,6 +26,13 @@ function matchQuery(content, q) {
   return `${content.title || ''} ${content.bodyMd || ''} ${(content.tags || []).join(' ')}`.toLowerCase().includes(needle);
 }
 
+function canSeeContent(content, user) {
+  if (!user) return false;
+  if (user.role === 'superadmin' || user.role === 'owner' || content.authorId === user.id) return true;
+  if (!content.visibility || content.visibility === 'public') return true;
+  return content.visibility === 'selected' && (content.visibleUserIds || []).includes(user.id);
+}
+
 export function createContentsApi(ctx) {
   const sortFor = (module, requested) => {
     if (requested) return requested;
@@ -41,7 +48,7 @@ export function createContentsApi(ctx) {
       const module = options.moduleId ? db.modules.find((m) => m.id === options.moduleId) : null;
       if (options.moduleId && module && !access.get(module.id)?.visible) throw fail('module.noAccess');
 
-      let items = db.contents.filter((c) => access.get(c.moduleId)?.visible);
+      let items = db.contents.filter((c) => access.get(c.moduleId)?.visible && canSeeContent(c, user));
       if (options.moduleId) items = items.filter((c) => c.moduleId === options.moduleId);
       else if (options.moduleIds?.length) items = items.filter((c) => options.moduleIds.includes(c.moduleId));
       items = items.filter((c) => (c.status === 'draft' ? c.authorId === user?.id : true));
@@ -75,7 +82,7 @@ export function createContentsApi(ctx) {
       if (content.status === 'draft' && content.authorId !== user?.id && user?.role !== 'superadmin' && user?.role !== 'owner') {
         throw fail('content.notFound');
       }
-      if (!access.visible && content.authorId !== user?.id) throw fail('module.noAccess');
+      if ((!access.visible || !canSeeContent(content, user)) && content.authorId !== user?.id) throw fail('module.noAccess');
       const index = buildIndex(db);
       const map = authorMapOf(db);
       const author = map.get(content.authorId) || null;
@@ -101,6 +108,8 @@ export function createContentsApi(ctx) {
         tags: (data.tags || []).map((x) => String(x).trim()).filter(Boolean).slice(0, 12),
         media: data.media || [],
         status: data.status === 'draft' ? 'draft' : 'published',
+        visibility: ['public', 'selected'].includes(data.visibility) ? data.visibility : 'private',
+        visibleUserIds: data.visibility === 'selected' ? (data.visibleUserIds || []) : [],
         views: 0,
         createdAt: nowIso(),
         updatedAt: nowIso(),
@@ -130,6 +139,10 @@ export function createContentsApi(ctx) {
         content.media = patch.media;
       }
       if (patch.status) content.status = patch.status === 'draft' ? 'draft' : 'published';
+      if (patch.visibility) {
+        content.visibility = ['public', 'selected'].includes(patch.visibility) ? patch.visibility : 'private';
+        content.visibleUserIds = content.visibility === 'selected' ? (patch.visibleUserIds || []) : [];
+      }
       content.updatedAt = nowIso();
       await ctx.save();
       return content;

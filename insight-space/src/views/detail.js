@@ -44,6 +44,7 @@ export async function renderDetail(ctx) {
           <div class="row row--wrap">
             <span class="badge badge--accent">${esc(content.module?.icon || '')} ${esc(content.module ? moduleName(content.module, lang) : '')}</span>
             ${content.status === 'draft' ? `<span class="badge badge--warn">${esc(t('common.draft'))}</span>` : ''}
+            <span class="badge">${esc(t(`content.visibility${content.visibility === 'public' ? 'Public' : content.visibility === 'selected' ? 'Selected' : 'Private'}`))}</span>
             ${(content.tags || []).map((tag) => `<a class="badge" href="#/search?q=${encodeURIComponent(tag)}">#${esc(tag)}</a>`).join('')}
           </div>
           <h1 style="font-size:clamp(20px,2.6vw,28px)" class="mb-0">${esc(content.title)}</h1>

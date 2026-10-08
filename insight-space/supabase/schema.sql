@@ -77,10 +77,19 @@ create table if not exists public.contents (
   tags jsonb not null default '[]'::jsonb,
   media jsonb not null default '[]'::jsonb,
   status text not null default 'published' check (status in ('published','draft')),
+  visibility text not null default 'public' check (visibility in ('public','private','selected')),
+  visible_user_ids uuid[] not null default '{}',
   views integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.contents add column if not exists visibility text not null default 'public';
+alter table public.contents add column if not exists visible_user_ids uuid[] not null default '{}';
+alter table public.contents drop constraint if exists contents_visibility_check;
+alter table public.contents add constraint contents_visibility_check
+  check (visibility in ('public','private','selected'));
+create index if not exists contents_visible_users_idx on public.contents using gin (visible_user_ids);
 
 create table if not exists public.comments (
   id uuid primary key default gen_random_uuid(),
@@ -224,7 +233,8 @@ $$ select exists (
      select 1 from public.contents c
      where c.id = p_content_id
        and (public.is_staff() or c.author_id = auth.uid()
-            or (c.status <> 'draft' and public.has_module_access(c.module_id)))
+            or (c.status <> 'draft' and public.has_module_access(c.module_id)
+                and (c.visibility = 'public' or (c.visibility = 'selected' and auth.uid() = any(c.visible_user_ids)))))
    ) $$;
 
 create or replace function public.are_friends(p_user_id uuid)
@@ -348,7 +358,8 @@ create policy contents_select on public.contents for select to authenticated
   using (
     public.is_staff()
     or author_id = auth.uid()
-    or (status <> 'draft' and public.has_module_access(module_id))
+    or (status <> 'draft' and public.has_module_access(module_id)
+        and (visibility = 'public' or (visibility = 'selected' and auth.uid() = any(visible_user_ids))))
   );
 drop policy if exists contents_insert on public.contents;
 create policy contents_insert on public.contents for insert to authenticated
@@ -356,7 +367,8 @@ create policy contents_insert on public.contents for insert to authenticated
 drop policy if exists contents_update on public.contents;
 create policy contents_update on public.contents for update to authenticated
   using (public.is_staff() or author_id = auth.uid())
-  with check (public.is_staff() or (author_id = auth.uid() and public.has_module_write(module_id)));
+  with check (public.is_staff() or (author_id = auth.uid() and public.has_module_write(module_id)
+    and (visibility <> 'selected' or author_id = auth.uid() or auth.uid() = any(visible_user_ids))));
 drop policy if exists contents_delete on public.contents;
 create policy contents_delete on public.contents for delete to authenticated
   using (public.is_staff() or author_id = auth.uid());

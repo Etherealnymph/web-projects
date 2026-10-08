@@ -293,8 +293,17 @@ function openGrantForm(ctx, panel, target, modules) {
             </select>
           </div>
           <div class="field">
-            <label class="field__label">${esc(t('invite.custom'))}（${esc(t('common.optional'))}）</label>
-            <input class="input" type="datetime-local" data-role="expires" />
+            <label class="field__label">${esc(t('invite.duration'))}</label>
+            <select class="select" data-role="duration">
+              <option value="forever">${esc(t('invite.durationForever'))}</option>
+              <option value="1">${esc(t('invite.duration1'))}</option>
+              <option value="7">${esc(t('invite.duration7'))}</option>
+              <option value="30">${esc(t('invite.duration30'))}</option>
+              <option value="90">${esc(t('invite.duration90'))}</option>
+              <option value="365">${esc(t('invite.duration365'))}</option>
+              <option value="custom">${esc(t('invite.custom'))}</option>
+            </select>
+            <input class="input mt-1 hidden" type="datetime-local" data-role="expires" />
           </div>
         </div>
         <div class="row row--wrap">
@@ -308,8 +317,15 @@ function openGrantForm(ctx, panel, target, modules) {
     footer: `<button class="btn" data-modal-close>${esc(t('common.close'))}</button><button class="btn btn--primary" data-role="add">${esc(t('common.save'))}</button>`,
   });
 
+  const duration = handle.body.querySelector('[data-role="duration"]');
+  const expiresInput = handle.body.querySelector('[data-role="expires"]');
+  duration.addEventListener('change', () => expiresInput.classList.toggle('hidden', duration.value !== 'custom'));
   handle.footer.querySelector('[data-role="add"]').addEventListener('click', async () => {
-    const expires = handle.body.querySelector('[data-role="expires"]').value;
+    const expires = duration.value === 'custom'
+      ? expiresInput.value
+      : duration.value === 'forever'
+        ? ''
+        : new Date(Date.now() + Number(duration.value) * 86400000).toISOString();
     try {
       await api.grants.set({
         userId: target.id,

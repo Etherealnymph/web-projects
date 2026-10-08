@@ -62,6 +62,8 @@ export function mapContent(row) {
     tags: row.tags || [],
     media: row.media || [],
     status: row.status || 'published',
+    visibility: row.visibility || 'public',
+    visibleUserIds: row.visible_user_ids || [],
     views: row.views || 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

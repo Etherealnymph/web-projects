@@ -173,6 +173,16 @@ export function createAuthApi(sb) {
       });
     },
 
+    async listMembers() {
+      sb.requireUser();
+      const { data, error } = await client.from('profiles')
+        .select('id, username, nickname, avatar, role, status')
+        .eq('status', 'active')
+        .order('nickname', { ascending: true });
+      if (error) throw fail('msg.error');
+      return (data || []).map(mapUser);
+    },
+
     async createUser({ username, password, nickname, role = 'member', moduleIds = [], read = true, write = true, upload = true, expiresAt = null }) {
       sb.requireAdmin();
       if (!/^[A-Za-z0-9_]{3,20}$/.test(String(username || ''))) throw fail('auth.errUserLen');

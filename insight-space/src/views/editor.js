@@ -32,6 +32,8 @@ export async function renderEditor(ctx) {
       return;
     }
   }
+  let members = [];
+  try { members = await api.auth.listMembers(); } catch { members = []; }
 
   const presetModule = params.module || editing?.moduleId || modules[0].id;
   const media = editing?.media ? editing.media.slice() : [];
@@ -51,6 +53,23 @@ export async function renderEditor(ctx) {
             ${modules.map((m) => `<option value="${esc(m.id)}" ${m.id === presetModule ? 'selected' : ''}>${esc(m.icon)} ${esc(moduleName(m, lang))}</option>`).join('')}
           </select>
           <input class="input grow" data-role="tags" placeholder="${esc(t('content.tagsPh'))}" value="${esc((editing?.tags || []).join(', '))}" style="min-width:180px" />
+        </div>
+        <div class="field">
+          <label class="field__label">${esc(t('content.visibility'))}</label>
+          <div class="segmented" data-role="visibility">
+            <button type="button" data-visibility="public" class="${(editing?.visibility || 'private') === 'public' ? 'is-active' : ''}">${esc(t('content.visibilityPublic'))}</button>
+            <button type="button" data-visibility="private" class="${(editing?.visibility || 'private') === 'private' ? 'is-active' : ''}">${esc(t('content.visibilityPrivate'))}</button>
+            <button type="button" data-visibility="selected" class="${editing?.visibility === 'selected' ? 'is-active' : ''}">${esc(t('content.visibilitySelected'))}</button>
+          </div>
+          <div class="field__hint">${esc(t('content.visibilityHint'))}</div>
+          <div class="row row--wrap mt-1 ${editing?.visibility === 'selected' ? '' : 'hidden'}" data-role="member-list">
+            ${members.filter((member) => member.id !== user.id).map((member) => `
+              <label class="checkbox chip">
+                <input type="checkbox" data-visible-user="${esc(member.id)}" ${(editing?.visibleUserIds || []).includes(member.id) ? 'checked' : ''} />
+                <span>${esc(member.nickname)} <span class="tiny muted">@${esc(member.username)}</span></span>
+              </label>
+            `).join('') || `<span class="tiny muted">${esc(t('content.noMembers'))}</span>`}
+          </div>
         </div>
         <div data-role="composer"></div>
         <div class="field">
@@ -89,6 +108,14 @@ export async function renderEditor(ctx) {
 
   const uploadsBox = container.querySelector('[data-role="uploads"]');
   const statusBox = container.querySelector('[data-role="status"]');
+  const visibilityBox = container.querySelector('[data-role="visibility"]');
+  const memberList = container.querySelector('[data-role="member-list"]');
+  let visibility = editing?.visibility || 'private';
+  visibilityBox.querySelectorAll('[data-visibility]').forEach((button) => button.addEventListener('click', () => {
+    visibility = button.dataset.visibility;
+    visibilityBox.querySelectorAll('[data-visibility]').forEach((item) => item.classList.toggle('is-active', item === button));
+    memberList.classList.toggle('hidden', visibility !== 'selected');
+  }));
 
   /* 附件拖拽 / 点击上传 */
   const dropzone = container.querySelector('[data-role="dropzone"]');
@@ -191,7 +218,8 @@ export async function renderEditor(ctx) {
     buttons.forEach((b) => { b.disabled = true; });
     statusBox.textContent = t('common.loading');
     try {
-      const payload = { moduleId, title, bodyMd, tags, media: composer.media, status };
+      const visibleUserIds = Array.from(container.querySelectorAll('[data-visible-user]:checked')).map((input) => input.dataset.visibleUser);
+      const payload = { moduleId, title, bodyMd, tags, media: composer.media, status, visibility, visibleUserIds };
       const saved = editing
         ? await api.contents.update(editing.id, payload)
         : await api.contents.create(payload);
