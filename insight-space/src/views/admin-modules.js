@@ -178,7 +178,7 @@ export async function renderInvitesTab(ctx, panel) {
         <div class="panel__body panel__body--flush">
           ${invites.length ? `
             <div class="table-wrap">
-              <table class="table">
+              <table class="table invite-table">
                 <thead><tr>
                   <th>${esc(t('invite.code'))}</th>
                   <th>${esc(t('invite.category'))}</th>
@@ -205,7 +205,7 @@ export async function renderInvitesTab(ctx, panel) {
                           if (perm.write) flags.push(t('invite.permWrite'));
                           if (perm.upload) flags.push(t('invite.permUpload'));
                           if (perm.readDays > 0) flags.push(t('invite.readDaysValue', { n: perm.readDays }));
-                          return `<div><strong>${esc(name)}</strong> · ${esc(flags.join(' / '))}</div>`;
+                          return `<div class="invite-module-item"><strong>${esc(name)}</strong> · ${esc(flags.join(' / '))}</div>`;
                         }).join('')}
                       </td>
                       <td class="tiny nowrap">${invite.usedCount || 0} / ${invite.maxUses || '∞'}</td>
