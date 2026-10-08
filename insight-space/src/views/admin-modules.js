@@ -153,16 +153,6 @@ function openModuleForm(ctx, panel, module) {
 
 /* ------------------------------- 邀请码 ------------------------------- */
 
-const DURATIONS = [
-  { value: '1', label: 'invite.duration1' },
-  { value: '7', label: 'invite.duration7' },
-  { value: '30', label: 'invite.duration30' },
-  { value: '90', label: 'invite.duration90' },
-  { value: '365', label: 'invite.duration365' },
-  { value: 'forever', label: 'invite.durationForever' },
-  { value: 'custom', label: 'invite.custom' },
-];
-
 export async function renderInvitesTab(ctx, panel) {
   const { api } = ctx;
   const lang = document.documentElement.dataset.lang;
@@ -206,7 +196,7 @@ export async function renderInvitesTab(ctx, panel) {
                         ${invite.note ? `<div class="tiny muted">${esc(invite.note)}</div>` : ''}
                       </td>
                       <td><span class="badge">${esc(invite.category || '-')}</span></td>
-                      <td class="tiny" style="max-width:230px">
+                      <td class="tiny invite-module-cell">
                         ${invitePermsOf(invite).map((perm) => {
                           const name = perm.moduleId === '*'
                             ? t('invite.allModules')
@@ -215,7 +205,7 @@ export async function renderInvitesTab(ctx, panel) {
                           if (perm.write) flags.push(t('invite.permWrite'));
                           if (perm.upload) flags.push(t('invite.permUpload'));
                           if (perm.readDays > 0) flags.push(t('invite.readDaysValue', { n: perm.readDays }));
-                          return `<div class="nowrap"><strong>${esc(name)}</strong> · ${esc(flags.join(' / '))}</div>`;
+                          return `<div><strong>${esc(name)}</strong> · ${esc(flags.join(' / '))}</div>`;
                         }).join('')}
                       </td>
                       <td class="tiny nowrap">${invite.usedCount || 0} / ${invite.maxUses || '∞'}</td>
@@ -298,8 +288,6 @@ function openInviteForm(ctx, panel, modules, invite) {
   const editing = Boolean(invite);
   const initialPerms = invite ? invitePermsOf(invite) : [];
   const scopeInit = editing && initialPerms.length && !initialPerms.some((p) => p.moduleId === '*') ? 'some' : 'all';
-  const durationInit = !editing ? '30' : (invite.expiresAt ? 'custom' : 'forever');
-
   const permRow = (moduleId, glyph, label, pickable) => `
     <div class="perm-row" data-perm-row="${esc(moduleId)}">
       ${pickable
@@ -335,17 +323,10 @@ function openInviteForm(ctx, panel, modules, invite) {
           </div>
         </div>
 
-        <div class="grid grid--2">
-          <div class="field">
-            <label class="field__label">${esc(t('invite.duration'))}</label>
-            <select class="select" data-role="duration">
-              ${DURATIONS.map((d) => `<option value="${esc(d.value)}" ${d.value === durationInit ? 'selected' : ''}>${esc(t(d.label))}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field ${durationInit === 'custom' ? '' : 'hidden'}" data-role="custom-wrap">
-            <label class="field__label">${esc(t('invite.custom'))}</label>
-            <input class="input" type="datetime-local" data-role="custom" value="${esc(toLocalInput(invite?.expiresAt))}" />
-          </div>
+        <div class="field">
+          <label class="field__label">${esc(t('invite.custom'))}</label>
+          <input class="input" type="datetime-local" data-role="custom" value="${esc(toLocalInput(invite?.expiresAt))}" />
+          <div class="field__hint">${esc(t('invite.customHint'))}</div>
         </div>
 
         <div class="grid grid--2">
@@ -435,11 +416,6 @@ function openInviteForm(ctx, panel, modules, invite) {
   handle.body.querySelector('[data-role="random"]')?.addEventListener('click', (event) => {
     event.currentTarget.closest('.row').querySelector('[data-role="code"]').value = randomCode(10);
   });
-  const durationSelect = handle.body.querySelector('[data-role="duration"]');
-  durationSelect.addEventListener('change', () => {
-    handle.body.querySelector('[data-role="custom-wrap"]').classList.toggle('hidden', durationSelect.value !== 'custom');
-  });
-
   const collectPerms = () => {
     if (scope === 'all') {
       return [{
@@ -464,7 +440,6 @@ function openInviteForm(ctx, panel, modules, invite) {
     errorBox.textContent = '';
     const perms = collectPerms().filter((p) => p.read || p.write || p.upload);
     if (!perms.length) { errorBox.textContent = t('invite.errNoPerm'); return; }
-    const duration = durationSelect.value;
     const payload = {
       code: handle.body.querySelector('[data-role="code"]').value.trim(),
       category: handle.body.querySelector('[data-role="category"]').value.trim(),
@@ -474,14 +449,11 @@ function openInviteForm(ctx, panel, modules, invite) {
       moduleIds: perms.map((p) => p.moduleId),
       write: perms.some((p) => p.write),
     };
-    if (duration === 'custom') {
-      const custom = handle.body.querySelector('[data-role="custom"]').value;
-      if (!custom) { errorBox.textContent = t('common.required'); return; }
+    const custom = handle.body.querySelector('[data-role="custom"]').value;
+    if (custom) {
       payload.expiresAt = new Date(custom).toISOString();
-    } else if (duration === 'forever') {
-      payload.expiresAt = null;
     } else {
-      payload.expiresAt = new Date(Date.now() + Number(duration) * 86400000).toISOString();
+      payload.expiresAt = null;
     }
     try {
       if (editing) {
