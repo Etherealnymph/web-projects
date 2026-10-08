@@ -223,6 +223,10 @@ $$ select exists (
     and (g.module_id is null or g.module_id = p_module_id)
     and (g.invite_id is null or g.expires_at is null or g.expires_at > now())
     and (g.invite_id is null or (i.active and (i.expires_at is null or i.expires_at > now())))
+    and (not exists (select 1 from public.grants d where d.user_id = auth.uid() and d.invite_id is null
+                    and (d.expires_at is null or d.expires_at > now())
+                    and (d.module_id is null or d.module_id = p_module_id))
+         or g.invite_id is null)
     and (
       coalesce((
         select nullif(p->>'read_days', '')::integer
