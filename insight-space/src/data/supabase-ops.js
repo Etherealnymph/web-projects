@@ -218,7 +218,7 @@ export function createGrantsApi(sb) {
         read_days: readDays == null ? null : Number(readDays),
         invite_id: null,
       };
-      const existing = await client.from('grants').select('id').eq('user_id', userId);
+      const existing = await client.from('grants').select('id, module_id').eq('user_id', userId);
       const match = (existing.data || []).find((g) => (moduleId === '*' ? g.module_id === null : g.module_id === moduleId));
       const { error } = match
         ? await client.from('grants').update(payload).eq('id', match.id)
