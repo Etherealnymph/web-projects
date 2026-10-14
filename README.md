@@ -65,7 +65,7 @@ file:///D:/Project/html/index.html
 
 | 项目 | 入口 | 说明 |
 |---|---|---|
-| 怒海争锋 | [seawar.html](./seawar.html) | 海域领地战游戏 |
+| 怒海争锋 | [seawar.html](./seawar.html) | 海域领地战游戏（48 岛屿、Supabase 联网多人、战术技能、动态事件、战役星章） |
 | 铁血战线 | [WAR.html](./WAR.html) | 战争模拟和策略对抗 |
 | 幸运老虎机 | [Tiger.html](./Tiger.html) | 轻量老虎机小游戏 |
 | 猫咪互动页面 | [v3.0.html](./v3.0.html) | 猫咪主题互动页面 |
@@ -212,6 +212,17 @@ bilingual-dictionary/
 - 股票训练场的正式行情功能需要单独启动 FastAPI 后端。
 - 各项目的数据和状态可能保存在浏览器 `localStorage` 中。
 - 请不要随意移动单个项目内部的资源文件，否则可能导致相对路径失效。
+
+### 怒海争锋
+
+《怒海争锋》是一个无需构建、无需后端的 Canvas 单文件即时策略海战。除领地扩张、舰队交战、旗舰操船、岸防炮台和战争迷雾外，当前版本还包括：
+
+- `T / 战术`：48 秒冷却的紧急征募，为己方全岛补充兵力并修复结构；
+- 每约 1 分钟一次的海域事件：潮汐补给、顺风潮或海盗伏击；
+- 战役星章、胜场和成就会保存到浏览器本地 `localStorage`；
+- 支持自定义种子、三档难度、暂停、音效和电脑 / 手机操作。
+
+直接打开 [seawar.html](./seawar.html) 即可开始。联网配置、玩法、键位和测试命令见 [seawar-README.md](./seawar-README.md)；联网配置模板见 [seawar-config.js](./seawar-config.js)。
 
 ## 使用静态服务器打开
 

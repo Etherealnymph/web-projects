@@ -8,8 +8,8 @@
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{width:100%;height:100%;overflow:hidden;background:#05080e;color:#dbe8f2;
     font-family:"Segoe UI",system-ui,"Microsoft YaHei",sans-serif;user-select:none;-webkit-tap-highlight-color:transparent}
-  #stage{position:fixed;inset:0}
-  canvas{position:absolute;inset:0;display:block}
+  #stage{position:fixed;inset:0;touch-action:none}
+  canvas{position:absolute;inset:0;display:block;touch-action:none}
   #game{width:100%;height:100%}
   #cvFog,#cvUI{pointer-events:none}
   #hud{position:absolute;inset:0;pointer-events:none;font-size:12px;letter-spacing:.3px}
@@ -25,12 +25,13 @@
   .chip .sub{font-size:11px;opacity:.62}
   .chip.me{border-color:rgba(120,235,180,.55);box-shadow:0 0 0 1px rgba(120,235,180,.15),0 0 18px rgba(80,230,160,.12)}
   .chip.dead{filter:grayscale(1);opacity:.4}
-  #tools{position:absolute;top:10px;right:12px;display:flex;gap:6px;pointer-events:auto}
+  #tools{position:absolute;top:10px;right:12px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 24px);pointer-events:auto}
   #tools button{pointer-events:auto;cursor:pointer;color:#cfe6f7;font:600 12px/1 inherit;
     padding:8px 11px;border-radius:8px;border:1px solid rgba(96,180,240,.25);
     background:linear-gradient(180deg,rgba(14,26,42,.92),rgba(8,14,26,.86))}
   #tools button:hover{border-color:rgba(150,225,255,.6);color:#fff}
   #tools button.on{border-color:rgba(120,235,180,.7);color:#a9ffd2}
+  #btTactic.ready{border-color:rgba(255,194,90,.75);color:#ffe0a0;box-shadow:0 0 16px rgba(255,170,70,.18)}
   #hint{position:absolute;left:12px;bottom:12px;padding:9px 12px;border-radius:8px;line-height:1.7;
     background:linear-gradient(180deg,rgba(9,18,30,.86),rgba(6,12,22,.78));
     border:1px solid rgba(96,180,240,.18);max-width:330px}
@@ -82,7 +83,32 @@
     border:1px solid rgba(96,180,240,.3);background:linear-gradient(180deg,rgba(16,32,52,.95),rgba(8,16,28,.9))}
   #over button:hover{border-color:rgba(150,225,255,.7);color:#fff}
   #fps{position:absolute;left:12px;top:56px;font-size:10.5px;opacity:.35;font-variant-numeric:tabular-nums}
-  .aim{mix-blend-mode:screen}
+  #wave{position:absolute;left:50%;transform:translateX(-50%);top:10px;padding:7px 15px;border-radius:9px;
+    font:700 12.5px/1 inherit;letter-spacing:1px;color:#cfe6f7;font-variant-numeric:tabular-nums}
+  #wave.soon{color:#ffc08a;border-color:rgba(255,170,110,.5);box-shadow:0 0 20px rgba(255,140,80,.22)}
+  #wave.now{color:#ff9a86;border-color:rgba(255,120,90,.75);box-shadow:0 0 24px rgba(255,90,70,.35)}
+  #campaign{margin:0 0 14px;padding:9px 11px;border-radius:9px;background:rgba(255,194,90,.07);
+    border:1px solid rgba(255,194,90,.2);color:#ffe5ae;font-size:12px;line-height:1.6}
+  #online{margin:0 0 14px;padding:10px 11px;border-radius:9px;background:rgba(80,170,255,.07);
+    border:1px solid rgba(80,170,255,.22);font-size:12px;line-height:1.6}
+  #online .online-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:6px}
+  #online input{min-width:0;flex:1;background:rgba(5,10,18,.9);border:1px solid rgba(96,180,240,.25);
+    color:#cfe9ff;border-radius:6px;padding:6px 8px;font:12px inherit}
+  #online button{cursor:pointer;color:#dff6ff;background:rgba(35,100,150,.42);border:1px solid rgba(96,180,240,.35);
+    border-radius:6px;padding:6px 9px;font:600 12px inherit}
+  @media(max-width:760px){
+    /* 手机：顶部只留势力条 + 波次，工具按钮移到拇指区，长教程收进「玩法」按钮 */
+    #chips{max-width:calc(100vw - 158px);gap:6px}
+    .chip{min-width:auto;padding:5px 8px}
+    .chip .nm{font-size:11px}
+    .chip .sub{font-size:10px}
+    #wave{top:10px;left:auto;right:12px;transform:none;font-size:11px;padding:6px 10px}
+    #fps{display:none}
+    #hint{display:none}
+    #tools{top:auto;bottom:10px;left:12px;right:12px;justify-content:center;flex-wrap:wrap;gap:6px}
+    #info{bottom:64px;right:12px;min-width:150px;font-size:11.5px;padding:7px 10px}
+    #ticker{bottom:132px}
+  }
 </style>
 </head>
 <body>
@@ -93,17 +119,22 @@
   <div id="hud">
     <div id="chips"></div>
     <div id="fps"></div>
+    <div id="wave" class="panel"></div>
     <div id="tools">
       <button id="btPause">暂停 ⏸</button>
+      <button id="btFlag">旗舰 ⚓</button>
+      <button id="btUp">升级 U</button>
+      <button id="btBat">炮台 B</button>
+      <button id="btTactic">战术 T</button>
       <button id="btAuto" class="on">自动开火</button>
       <button id="btSound">音效 ♪</button>
       <button id="btHelp">玩法</button>
     </div>
     <div id="hint" class="panel">
       <div><b>拖拽</b> 己方岛屿 → 目标岛 = 派兵夺取（相邻 1:1，远程 50% 折损）</div>
-      <div><b>点击</b> 岛屿 = 查看；<b>滚轮</b> 缩放，<b>中键/右键拖动</b> 平移</div>
-      <div><b>F 键 / 空格</b> = 旗舰下海亲自操船（<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动，<kbd>鼠左</kbd> 开炮，<kbd>鼠右</kbd> 鱼雷）</div>
-      <div><b>U</b> = 升级当前岛（产兵提速）；<b>H</b> = 帮助</div>
+      <div><b>U</b> 升级岛屿 · <b>B</b> 建造岸防炮台（均消耗该岛驻军）</div>
+      <div>舰队会<b>炮击</b>敌岛结构：打到 0 即「<b>压制</b>」——炮台失效、守军减半，此时登陆最划算</div>
+      <div><b>F / 空格</b> 旗舰下海（<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 操舵，<kbd>鼠左</kbd> 开炮，<kbd>鼠右</kbd> 鱼雷）；<b>H</b> 帮助</div>
     </div>
     <div id="info" class="panel"></div>
     <div id="ticker"></div>
@@ -111,7 +142,7 @@
   <div id="menu">
     <div id="card">
       <h1>怒海争锋</h1>
-      <div class="tag">SEAWAR &nbsp;·&nbsp; 海域领地战 &nbsp;—&nbsp; 灵感来自 Kiomet 的节点扩张 与 MK48 的舰炮海战</div>
+      <div class="tag">SEAWAR &nbsp;·&nbsp; 海域领地战 &nbsp;—&nbsp; 灵感来自 Kiomet 的节点扩张、yorg.io 的岸防建造 与 MK48 的舰炮海战</div>
       <div class="cols">
         <div class="box">
           <h3>核心循环</h3>
@@ -120,17 +151,29 @@
             <li>拖拽派兵，兵线沿线自动交战</li>
             <li>占岛 → 收益更高 → 更强舰队</li>
             <li>相邻转移无损，远程增援折损 50%</li>
+            <li>敌国每隔一段时间发动「波次突袭」，屏幕上方有倒计时</li>
           </ul>
         </div>
         <div class="box">
           <h3>战场细节</h3>
           <ul>
-            <li>舰炮有射界与转向速度，会互相绕行</li>
-            <li>潜艇发射鱼雷，对主力舰伤害翻倍</li>
-            <li>旗舰可亲自下场：机动、集火、抢岛</li>
-            <li>战争迷雾 + 灯塔开图，视野即情报</li>
+            <li>岸防炮台自动迎击来犯舰队（要塞火力最猛）</li>
+            <li>舰炮可炮击岛屿结构，打到 0 即「压制」守军</li>
+            <li>U 升级 / B 建炮台，都从该岛驻军里扣</li>
+            <li>潜艇鱼雷对主力舰伤害翻倍；战争迷雾 + 灯塔开图</li>
           </ul>
         </div>
+      </div>
+      <div id="campaign"></div>
+      <div id="online">
+        <b>联网多人（Supabase Realtime）</b>
+        <span id="onlineStatus">未连接，直接出海为单机模式</span>
+        <div class="online-row">
+          <input id="roomId" placeholder="房间号，例如 7SEA42">
+          <button id="btCreateRoom">创建房间</button>
+          <button id="btJoinRoom">加入房间</button>
+        </div>
+        <div class="foot">需要在 seawar-config.js 填写 Supabase URL 和 anon key；房主关闭页面后房间结束。</div>
       </div>
       <div id="opts">
         <div class="seg" id="segDiff">
@@ -153,6 +196,8 @@
     </div>
   </div></div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="seawar-config.js"></script>
 <script>
 "use strict";
 /* =========================================================================
@@ -163,22 +208,35 @@
 /* ------------------------------ 常量 ------------------------------ */
 const TAU = Math.PI*2;
 const MAPW = 1780, MAPH = 1180;
-const NODE_N = 28;
+const NODE_N = 48;
 const KINDS = {
-  port:      {name:'港口',  r:42, rate:1.75, vision:300, max:260, hue:0.52},
-  farm:      {name:'渔场',  r:33, rate:2.20, vision:230, max:210, hue:0.44},
-  fort:      {name:'要塞',  r:38, rate:1.15, vision:290, max:340, hue:0.02},
-  lighthouse:{name:'灯塔',  r:28, rate:0.95, vision:560, max:150, hue:0.13},
+  port:      {name:'港口',  r:42, rate:1.75, vision:300, max:260, hp:620, gun:{n:2,r:300,dmg:6.0,reload:2.3}, hue:0.52},
+  farm:      {name:'渔场',  r:33, rate:2.20, vision:230, max:210, hp:460, gun:{n:1,r:250,dmg:4.6,reload:2.7}, hue:0.44},
+  fort:      {name:'要塞',  r:38, rate:1.15, vision:290, max:340, hp:980, gun:{n:4,r:390,dmg:9.0,reload:1.9}, hue:0.02},
+  lighthouse:{name:'灯塔',  r:28, rate:0.95, vision:560, max:150, hp:380, gun:{n:1,r:340,dmg:4.0,reload:2.6}, hue:0.13},
 };
-const RATIO_NEAR = 1.0, RATIO_FAR = 0.5;
+const RATIO_FAR = 0.5;                       // 远程增援折损 50%（相邻 1:1）
 const SPEED_BASE = 88, SPEED_SLOW = 320;     // 舰队航速 v = SPEED_BASE - troops/SPEED_SLOW
-const HP_PER_TROOP = 6, SHIP_HP = 46, SHIP_CAP = 240, SHIP_PX = 15;
+const HP_PER_TROOP = 6, SHIP_CAP = 240, SHIP_PX = 15;
 const GROW_CAP = 420;
 const FOG_CELL = 16;
+/* --- 塔防层（yorg.io 式岸防 / 结构血量） --- */
+const GUN_LV_DMG = 0.25, GUN_LV_RANGE = 0.08;  // 每级炮台伤害 / 射程加成
+const GUN_MAX = 8;                              // 单岛炮台上限
+const BATTERY_MAX = 3, BATTERY_COST = 60;       // 可建造的额外炮台
+const UPGRADE_COST = 40;                        // 升级消耗 = UPGRADE_COST*(level+1)
+const SUPPRESS_DEF = 0.45;                      // 被压制时守军有效防御倍率
+const HP_LV_BONUS = 0.35;                       // 每级结构上限加成
+const HP_REGEN = 0.05, HP_REGEN_DELAY = 6;      // 结构自修速度 / 挨打后的静默期
+const BOMB_DMG_MUL = 0.8;                       // 舰炮对岛屿结构的伤害系数
+/* --- 波次突袭（yorg.io 式节奏） --- */
+const WAVE_FIRST = 95;                          // 首波倒计时（秒）
+const WAVE_PERIOD = [120, 95, 78];              // 各难度波次间隔
+const AI_GRACE = [30, 22, 15];                  // 开局保护期：AI 此期间不出兵
 const DIFFS = [
-  {name:'新兵', aggr:0.72, econ:0.75, think:[3.4,5.2], hold:1.7},
-  {name:'老练', aggr:0.95, econ:1.00, think:[2.2,3.8], hold:1.35},
-  {name:'名将', aggr:1.20, econ:1.28, think:[1.4,2.6], hold:1.05},
+  {name:'新兵', aggro:0.72, econ:0.75, think:[3.4,5.2], hold:1.7},
+  {name:'老练', aggro:0.95, econ:1.00, think:[2.2,3.8], hold:1.35},
+  {name:'名将', aggro:1.20, econ:1.28, think:[1.4,2.6], hold:1.05},
 ];
 const FCOL = ['#4fd2ff','#ff6b6b','#c07bff','#ffc24a','#5ef0b0','#ff8fd0'];
 
@@ -217,6 +275,35 @@ const s2wx=x=>(x-view.W/2)/cam.z+cam.x;
 const s2wy=y=>(y-view.H/2)/cam.z+cam.y;
 function camRect(pad){pad=pad||0;const hw=view.W/2/cam.z+pad,hh=view.H/2/cam.z+pad;return {x0:cam.x-hw,x1:cam.x+hw,y0:cam.y-hh,y1:cam.y+hh}}
 function focusOn(x,y,pad){const z=clamp(Math.min(view.W,view.H)/(2*(pad||340)),0.34,1.35);cam.x=x;cam.y=y;cam.z=z;cam.tz=z}
+function camNear(x,y,pad){pad=pad||140;const sx=w2sx(x),sy=w2sy(y);return sx>-pad&&sy>-pad&&sx<view.W+pad&&sy<view.H+pad}
+
+/* --------------------- 空间网格（性能：避免 O(船数²) 寻敌） --------------------- */
+const GRID_CELL=200;
+let shipGrid=new Map();
+const gridKey=(cx,cy)=>cx*100003+cy;
+function rebuildShipGrid(){
+  shipGrid.clear();
+  for(const fl of game.fleets){
+    if(fl.dead)continue;
+    for(const s of fl.ships){
+      if(s.dead)continue;
+      const k=gridKey(Math.floor(s.x/GRID_CELL),Math.floor(s.y/GRID_CELL));
+      let cell=shipGrid.get(k);
+      if(!cell)shipGrid.set(k,cell=[]);
+      cell.push({s:s,fl:fl});
+    }
+  }
+}
+function nearbyShips(x,y,range){
+  const out=[];
+  const c0=Math.floor((x-range)/GRID_CELL),c1=Math.floor((x+range)/GRID_CELL);
+  const r0=Math.floor((y-range)/GRID_CELL),r1=Math.floor((y+range)/GRID_CELL);
+  for(let cx=c0;cx<=c1;cx++)for(let cy=r0;cy<=r1;cy++){
+    const cell=shipGrid.get(gridKey(cx,cy));
+    if(cell)for(let i=0;i<cell.length;i++)out.push(cell[i]);
+  }
+  return out;
+}
 
 /* ------------------------------ 战争迷雾画布 ------------------------------ */
 let fogCv=null,fogCtx=null,fogS=1;
@@ -228,7 +315,7 @@ function layoutFog(){
 }
 function drawFog(){
   if(!fogCtx)return;
-  const f=fogCtx, F=game.fogOf(game.me), s=fogS;
+  const f=fogCtx, F=fogOf(game.me), s=fogS;
   f.setTransform(1,0,0,1,0,0);
   f.globalCompositeOperation='source-over';
   f.fillStyle='#02050999';
@@ -267,7 +354,10 @@ const Snd={ctx:null,on:true,
   torp(){this.blip(340,0.35,'sine',0.05,120)},
   cap(){this.blip(520,0.30,'triangle',0.09,880)},
   lose(){this.blip(240,0.5,'triangle',0.09,90)},
-  click(){this.blip(660,0.05,'square',0.035)}
+  click(){this.blip(660,0.05,'square',0.035)},
+  // 每帧限定炮声数量，避免大舰队交火时音频开销爆炸
+  frameStart(){this.budget=6},
+  gun(vol){ if(this.budget===undefined)this.budget=6; if(this.budget<=0)return; this.budget--; this.shot(vol) }
 };
 
 /* ------------------------------ 游戏状态 ------------------------------ */
@@ -275,7 +365,11 @@ const game={
   phase:'menu', seed:0, rnd:null, time:0,
   nodes:[], edges:[], fleets:[], ships:[], bullets:[], parts:[], texts:[],
   factions:[], me:0, diff:1, winner:-1, paused:false, autoFire:true,
-  drag:null, hover:null, sel:null, flagship:null, autoRun:false, stats:{battles:0},
+  drag:null, hover:null, sel:null, flagship:null, autoRun:false, stats:{battles:0,suppressed:0},
+  waveN:0, waveT:WAVE_FIRST, touchMove:null, tacticCd:0, eventT:58, event:null,
+  profile:{wins:0,stars:0,achievements:[]},
+  network:{enabled:false,connected:false,host:false,room:'',channel:null,playerId:'',faction:-1,
+    snapshotT:0,applying:false},
 };
 const F = ()=>game.factions;
 const nodeAt=i=>game.nodes[i];
@@ -288,6 +382,127 @@ function factionShipTotal(fi){
   if(game.flagship&&game.flagship.owner===fi)t+=game.flagship.troops;
   return t;
 }
+function loadProfile(){
+  try{
+    if(typeof localStorage==='undefined')return;
+    const raw=localStorage.getItem('seawar-profile-v1');
+    if(raw){
+      const p=JSON.parse(raw);
+      if(p&&typeof p==='object')game.profile={
+        wins:Number(p.wins)||0,stars:Number(p.stars)||0,
+        achievements:Array.isArray(p.achievements)?p.achievements:[]
+      };
+    }
+  }catch(err){ console.warn('无法读取战役档案',err); }
+}
+function saveProfile(){
+  try{
+    if(typeof localStorage==='undefined')return;
+    localStorage.setItem('seawar-profile-v1',JSON.stringify(game.profile));
+  }catch(err){ console.warn('无法保存战役档案',err); }
+}
+function awardAchievement(id,label){
+  if(game.profile.achievements.includes(id))return;
+  game.profile.achievements.push(id);
+  pushTick('成就解锁：'+label);
+  saveProfile();
+}
+
+const Network={
+  config(){
+    const c=window.SEAWAR_SUPABASE_CONFIG;
+    return c&&c.url&&c.anonKey?c:null;
+  },
+  status(text,color){
+    const el=document.getElementById('onlineStatus');
+    if(el){el.textContent=text;el.style.color=color||'';}
+  },
+  async connect(room,host){
+    const cfg=this.config();
+    if(!cfg){this.status('未配置 Supabase，当前为单机模式','#ffc08a');pushTick('请先编辑 seawar-config.js 配置 Supabase');return false;}
+    if(!room||!/^[a-zA-Z0-9_-]{4,24}$/.test(room)){this.status('房间号需为 4～24 位字母、数字、下划线或短横线','#ff9a86');return false;}
+    if(typeof supabase==='undefined'){this.status('Supabase SDK 加载失败','#ff9a86');return false;}
+    if(this.connected)this.disconnect();
+    const client=supabase.createClient(cfg.url,cfg.anonKey);
+    const channel=client.channel('seawar:'+room,{config:{broadcast:{self:false}}});
+    game.network={enabled:true,connected:false,host:!!host,room:room,channel:channel,
+      playerId:Math.random().toString(36).slice(2,10),faction:host?0:-1,snapshotT:0,applying:false};
+    channel.on('broadcast',{event:'hello'},({payload})=>this.onHello(payload))
+      .on('broadcast',{event:'welcome'},({payload})=>this.onWelcome(payload))
+      .on('broadcast',{event:'command'},({payload})=>this.onCommand(payload))
+      .on('broadcast',{event:'snapshot'},({payload})=>this.onSnapshot(payload))
+      .subscribe(async status=>{
+        if(status!=='SUBSCRIBED')return;
+        game.network.connected=true;
+        this.status((host?'房主':'玩家')+'已连接 · 房间 '+room,'#8dffc4');
+        if(host)this.status('房主已创建 · 等待玩家加入（'+room+'）','#8dffc4');
+        else await this.send({type:'hello',from:game.network.playerId});
+      });
+    return true;
+  },
+  async send(payload){
+    const n=game.network;
+    if(!n.channel||!n.connected)return;
+    await n.channel.send({type:'broadcast',event:payload.type,payload:payload});
+  },
+  disconnect(){
+    const n=game.network;
+    if(n.channel&&typeof n.channel.unsubscribe==='function')n.channel.unsubscribe();
+    game.network={enabled:false,connected:false,host:false,room:'',channel:null,playerId:'',faction:-1,snapshotT:0,applying:false};
+    this.status('已断开，直接出海为单机模式');
+  },
+  async onHello(payload){
+    if(!game.network.host||!game.network.connected)return;
+    const used=F().filter(f=>f.remote).map(f=>f.id);
+    const faction=[1,2,3].find(id=>!used.includes(id));
+    if(faction===undefined){await this.send({type:'welcome',to:payload.from,faction:-1,full:null});return;}
+    F()[faction].remote=true;F()[faction].ai=false;
+    await this.send({type:'welcome',to:payload.from,faction:faction,seed:game.seed,diff:game.diff,full:this.snapshot()});
+    pushTick('新玩家加入：'+F()[faction].name);
+  },
+  onWelcome(payload){
+    if(payload.to!==game.network.playerId||payload.faction<0)return;
+    game.network.faction=payload.faction;game.me=payload.faction;
+    game.seed=payload.seed;game.diff=payload.diff;
+    if(game.phase==='menu')startGame();
+    game.me=payload.faction;
+    if(payload.full)this.applySnapshot(payload.full);
+    this.status('已加入房间 '+game.network.room+' · 你是 '+F()[game.me].name,'#8dffc4');
+  },
+  onCommand(payload){
+    if(!game.network.host||payload.from===game.network.playerId)return;
+    const f=F()[payload.faction];
+    if(!f||!f.remote)return;
+    const old=game.me;game.me=payload.faction;
+    game.network.applying=true;
+    if(payload.action==='send')playerSend(nodeAt(payload.src),nodeAt(payload.dst));
+    if(payload.action==='upgrade')tryUpgrade(nodeAt(payload.node));
+    if(payload.action==='battery')tryBattery(nodeAt(payload.node));
+    if(payload.action==='tactic')useTactic();
+    game.network.applying=false;game.me=old;
+  },
+  snapshot(){
+    return {seed:game.seed,time:game.time,waveN:game.waveN,waveT:game.waveT,phase:game.phase,
+      nodes:game.nodes.map(n=>({id:n.id,owner:n.owner,troops:n.troops,hp:n.hp,hpMax:n.hpMax,level:n.level,batteries:n.batteries})),
+      fleets:game.fleets.filter(f=>!f.dead).map(f=>({owner:f.owner,troops:f.troops,x:f.x,y:f.y,targetNode:f.targetNode,path:f.path,pi:f.pi,ang:f.ang}))};
+  },
+  applySnapshot(s){
+    if(!s||!game.nodes.length)return;
+    game.network.applying=true;
+    game.time=s.time;game.waveN=s.waveN;game.waveT=s.waveT;
+    for(const x of s.nodes||[]){const n=nodeAt(x.id);if(!n)continue;
+      n.owner=x.owner;n.troops=x.troops;n.hp=x.hp;n.hpMax=x.hpMax;n.level=x.level;n.batteries=x.batteries;refreshNodeStats(n);}
+    game.fleets.length=0;game.ships.length=0;
+    for(const x of s.fleets||[]){const f=spawnFleet(x.owner,x.troops,x.path[0],x.targetNode,x.x,x.y);
+      if(f){f.path=x.path;f.pi=x.pi;f.ang=x.ang;}}
+    game.network.applying=false;
+  },
+  tick(dt){
+    if(!this.connected||!this.host)return;
+    game.network.snapshotT-=dt;
+    if(game.network.snapshotT<=0){game.network.snapshotT=.65;this.send({type:'snapshot',from:game.network.playerId,data:this.snapshot()});}
+  }
+};
 
 /* ------------------------------ 地图生成 ------------------------------ */
 function makeIslandPoly(rnd,r,irr,seedAng){
@@ -309,7 +524,8 @@ function genMap(seed){
   const rnd=mulberry32(seed);
   game.rnd=rnd; game.nodes=[]; game.edges=[]; game.fleets=[]; game.ships=[];
   game.bullets=[]; game.parts=[]; game.texts=[]; game.flagship=null;
-  game.sel=null; game.winner=-1; game.paused=false; game.time=0; game.stats.battles=0;
+  game.sel=null; game.winner=-1; game.paused=false; game.time=0; game.stats.battles=0; game.stats.suppressed=0;
+  game.waveN=0; game.waveT=WAVE_FIRST; game.touchMove=null; game.tacticCd=0; game.eventT=58; game.event=null;
 
   /* --- 1. 撒点 --- */
   const pts=[];
@@ -318,7 +534,7 @@ function genMap(seed){
     tries++;
     const x=70+rnd()*(MAPW-140), y=70+rnd()*(MAPH-140);
     let ok=true;
-    for(const p of pts){ if(dist2(x,y,p.x,p.y)<215*215){ok=false;break} }
+    for(const p of pts){ if(dist2(x,y,p.x,p.y)<145*145){ok=false;break} }
     if(ok)pts.push({x:x,y:y});
   }
   pts.sort(()=>rnd()-0.5);
@@ -344,9 +560,10 @@ function genMap(seed){
       r:r, rate:K.rate, max:K.max, vision:K.vision,
       poly:makeIslandPoly(rnd,r*1.62,0.26,rnd()*TAU),
       beach:makeIslandPoly(rnd,r*2.02,0.20,rnd()*TAU),
-      trees:[], depth:0, edgeDepth:new Float32Array(64).fill(0),
-      owner:-1, troops:0, hp:80, hpMax:80, cap:60,
-      grow:rnd()*1.5, level:0, nb:[], ang:0, flashT:0, rippleT:rnd()*4,
+      trees:[],
+      owner:-1, troops:0, hp:K.hp, hpMax:K.hp, cap:60, ships:[],
+      grow:rnd()*1.5, level:0, nb:[], ang:0, flashT:0,
+      batteries:0, guns:[], hitT:0, hpDelay:0,
     });
     const n=game.nodes[i];
     const nt=Math.floor(rnd()*7);
@@ -354,6 +571,7 @@ function genMap(seed){
       const a=rnd()*TAU, rr=r*(0.25+rnd()*0.62);
       n.trees.push({x:Math.cos(a)*rr,y:Math.sin(a)*rr,s:8+rnd()*10,h:rnd()*0.5});
     }
+    syncNodeGuns(n);
   }
 
   /* --- 4. 海路连线（kNN + 连通性修复） --- */
@@ -379,26 +597,29 @@ function genMap(seed){
       addEdge(i,c[1]); made++;
     }
   }
-  // 保证连通
-  for(let guard=0;guard<12;guard++){
-    const comp=new Int16Array(game.nodes.length).fill(-1); let nc=0;
-    for(let s=0;s<game.nodes.length;s++){
-      if(comp[s]>=0)continue;
-      const q=[s];comp[s]=nc;
-      while(q.length){const v=q.pop();for(const w of game.nodes[v].nb)if(comp[w]<0){comp[w]=nc;q.push(w)}}
-      nc++;
+  // 保证连通（灯塔修剪后还要再跑一遍，否则只连着灯塔的岛会被剪成孤岛）
+  const repairConnectivity=()=>{
+    for(let guard=0;guard<20;guard++){
+      const comp=new Int16Array(game.nodes.length).fill(-1); let nc=0;
+      for(let s=0;s<game.nodes.length;s++){
+        if(comp[s]>=0)continue;
+        const q=[s];comp[s]=nc;
+        while(q.length){const v=q.pop();for(const w of game.nodes[v].nb)if(comp[w]<0){comp[w]=nc;q.push(w)}}
+        nc++;
+      }
+      if(nc<=1)break;
+      let best=null;
+      for(let i=0;i<game.nodes.length;i++)for(let j=0;j<game.nodes.length;j++){
+        if(comp[i]===comp[j])continue;
+        const d=dist2(game.nodes[i].x,game.nodes[i].y,game.nodes[j].x,game.nodes[j].y);
+        if(!best||d<best.d)best={d:d,i:i,j:j};
+      }
+      if(!best)break;
+      game.nodes[best.i].nb.push(best.j); game.nodes[best.j].nb.push(best.i);
+      addEdge(best.i,best.j);
     }
-    if(nc<=1)break;
-    let best=null;
-    for(let i=0;i<game.nodes.length;i++)for(let j=0;j<game.nodes.length;j++){
-      if(comp[i]===comp[j])continue;
-      const d=dist2(game.nodes[i].x,game.nodes[i].y,game.nodes[j].x,game.nodes[j].y);
-      if(!best||d<best.d)best={d:d,i:i,j:j};
-    }
-    if(!best)break;
-    game.nodes[best.i].nb.push(best.j); game.nodes[best.j].nb.push(best.i);
-    addEdge(best.i,best.j);
-  }
+  };
+  repairConnectivity();
   // 灯塔降为单线：更孤立
   for(const n of game.nodes){
     if(n.kind!=='lighthouse'||n.nb.length<=1)continue;
@@ -411,6 +632,7 @@ function genMap(seed){
     }
     n.nb=[keep];
   }
+  repairConnectivity();
   game.edges=edges.filter(e=>eset.has(Math.min(e.a,e.b)+'-'+Math.max(e.a,e.b)));
   // 每岛朝向最近海路边界的角度（码头方向）
   for(const n of game.nodes){
@@ -420,23 +642,22 @@ function genMap(seed){
     n.ang=Math.atan2(by,bx);
   }
 
-  /* --- 5. 岛屿高度场 --- */
-  buildDepths(rnd);
-
-  /* --- 6. 势力与开局 --- */
+  /* --- 5. 势力与开局 --- */
   const starts=pickStarts(rnd);
+  // 随机分配出生点座位：pickStarts 的第一个点是地图正中（四面受敌），
+  // 之前固定给玩家等于让玩家一打三，这里改成随机抽签。
+  const seat=shuffle([0,1,2,3],rnd);
   game.factions=[];
   const names=['蓝鳍舰队','赤狐海团','紫电同盟','金鹰商团'];
   for(let i=0;i<4;i++){
-    const s=starts[i];
+    const s=starts[seat[i]];
     game.factions.push({
       id:i,name:names[i],color:FCOL[i],ai:i!==0,alive:true,
-      fog:newFog(),ships:0,portCount:0,nextThink:1+rnd()*2,mode:'expand',
-      launchT:0,
+      fog:newFog(),nextThink:1+rnd()*2,
     });
     const n=game.nodes[s];
     n.owner=i; n.troops=n.kind==='fort'?95:75;
-    n.hp=n.hpMax=n.troops*HP_PER_TROOP;
+    refreshNodeStats(n);
     // 开局各带一个相邻附属岛
     let bestJ=-1,bd=1e9;
     for(const j of n.nb){
@@ -446,7 +667,7 @@ function genMap(seed){
     }
     if(bestJ>=0&&game.nodes[bestJ].owner<0){
       const o=game.nodes[bestJ];
-      o.owner=i; o.troops=34; o.hp=o.hpMax=o.troops*HP_PER_TROOP;
+      o.owner=i; o.troops=34; refreshNodeStats(o);
     }
   }
   // 中立守军
@@ -458,13 +679,12 @@ function genMap(seed){
     else if(n.kind==='fort')base=78;
     else base=34;
     n.troops=Math.round(base*(0.8+rnd()*0.6));
-    n.hp=n.hpMax=n.troops*HP_PER_TROOP;
-    n.pawn=-1; // 中立无主
+    refreshNodeStats(n);
   }
   game.me=0;
   game.totalNodes=game.nodes.length;
-  // 初始相机
-  const pn=game.nodes[starts[0]];
+  // 初始相机（对准玩家自己的出生点）
+  const pn=game.nodes[starts[seat[0]]];
   let mx=pn.x,my=pn.y,mr=340;
   for(const j of pn.nb){const o=game.nodes[j];mx=(mx+o.x)/2;my=(my+o.y)/2;mr=Math.max(mr,dist(pn.x,pn.y,o.x,o.y)*1.5)}
   focusOn(mx,my,mr*0.78);
@@ -494,24 +714,6 @@ function pickStarts(rnd){
   }
   return chosen;
 }
-function buildDepths(rnd){
-  const cx=MAPW/2,cy=MAPH/2;
-  for(const n of game.nodes){
-    let mind=1e9;
-    for(const j of n.nb)mind=Math.min(mind,dist(n.x,n.y,game.nodes[j].x,game.nodes[j].y));
-    if(mind>1e8)mind=300;
-    const dl=dist(n.x,n.y,cx,cy)/(Math.hypot(MAPW,MAPH)/2);
-    const dir=Math.atan2(n.y-cy,n.x-cx);
-    for(let i=0;i<8;i++){
-      const w=Math.exp(-Math.pow(norm(i/8*TAU-dir),2)/(2*0.55*0.55));
-      n.edgeDepth[i]=clamp((dl*1.15+ (1-min_1(mind/300,1))*0.55+ w*0.5+rnd()*0.1)*3.2,0.4,9);
-    }
-    n.edgeDepth.set(n.edgeDepth); // 定型
-    n.depth=2.2;
-    n.seaAngle=dir;
-  }
-}
-function min_1(a,b){return a<b?a:b}
 
 /* ------------------------------ 视野 ------------------------------ */
 function stampCircle(f,x,y,rad,val){
@@ -538,7 +740,7 @@ function stampVision(f,full){
     if(n.owner===f.id){
       stampCircle(f,n.x,n.y,n.vision+(full?40:0),2);
       seen.push(n);
-      for(const j of n.nb){const o=game.nodes[j];stampCircle(f,o.x,o.y,Math.max(120,o.vision*0.72),2);o.exploredBy=o.exploredBy||{};o.exploredBy[f.id]=1}
+      for(const j of n.nb){const o=game.nodes[j];stampCircle(f,o.x,o.y,Math.max(120,o.vision*0.72),2)}
     }
   }
   for(const fl of game.fleets){
@@ -610,7 +812,7 @@ function spawnFleet(owner,troops,from,to,x,y){
   const fl={owner:owner,troops:troops,path:[from,to],pi:0,
     x:x,y:y,ang:Math.atan2(game.nodes[to].y-game.nodes[from].y,game.nodes[to].x-game.nodes[from].x),
     speed:0,ships:[],targetNode:to,combat:null,id:(game.fleetId=(game.fleetId||0)+1),
-    delay:0.45, hitT:0};
+    delay:0.45};
   const maxHp=troops*HP_PER_TROOP;
   const n=clamp(Math.ceil(troops/SHIP_PX),1,SHIP_CAP);
   for(let i=0;i<n;i++){
@@ -620,7 +822,7 @@ function spawnFleet(owner,troops,from,to,x,y){
     s.x=x+Math.cos(a)*rr; s.y=y+Math.sin(a)*rr; s.ang=fl.ang;
     fl.ships.push(s); game.ships.push(s);
   }
-  game.fleets.push(fl); game.stats.battles+=0;
+  game.fleets.push(fl);
   return fl;
 }
 function mergeFleetIntoNode(fl,n){
@@ -655,7 +857,6 @@ function fleetLoss(fl,hpAmount){
 }
 function spawnGarrisonShips(){
   for(const n of game.nodes){
-    if(n.owner<0)continue;
     const want=clamp(Math.ceil(n.troops/SHIP_PX),1,SHIP_CAP);
     n.ships=[];
     const dir=n.ang;
@@ -669,7 +870,7 @@ function spawnGarrisonShips(){
   }
 }
 function syncNodeShips(n,dt){
-  if(n.owner<0){ n.ships=n.ships||[]; return }
+  n.ships=n.ships||[];
   n.ships=n.ships.filter(s=>!s.dead);
   const want=clamp(Math.ceil(n.troops/SHIP_PX),1,SHIP_CAP);
   const hpEach=Math.max(14,(n.troops*HP_PER_TROOP)/Math.max(1,want));
@@ -692,10 +893,10 @@ function syncNodeShips(n,dt){
   for(const s of n.ships){
     if(s.spawnT>0)s.spawnT-=dt;
     const orbit=Math.max(n.r*1.5,s.len*1.4);
-    const ta=s.ang;
-    s.ang=angLerp(s.ang,ta,dt*0.4);
-    s.x=n.x+Math.cos(a0(s,t))*(orbit+Math.sin(game.time*0.5+s.phase)*4);
-    s.y=n.y+Math.sin(a0(s,t))*(orbit+Math.cos(game.time*0.43+s.phase)*4);
+    const oa=a0(s,game.time);
+    s.ang=angLerp(s.ang,oa+Math.PI/2,dt*1.2);
+    s.x=n.x+Math.cos(oa)*(orbit+Math.sin(game.time*0.5+s.phase)*4);
+    s.y=n.y+Math.sin(oa)*(orbit+Math.cos(game.time*0.43+s.phase)*4);
   }
 }
 function a0(s,t){ return s.phase + t*0.06*(1+s.phase%2*0.5) }
@@ -722,11 +923,16 @@ function fireBullet(sh,owner,ang,speed,dmg,life,type){
   game.bullets.push({x:bx,y:by,vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed,
     life:life||1.4,max:life||1.4,dmg:dmg,owner:owner,type:type||'shell',r:type==='torp'?3.2:1.6});
 }
+function fireBomb(sh,owner,ang,node,dmg){
+  const c=Math.cos(sh.ang),si=Math.sin(sh.ang);
+  const bx=sh.x+c*sh.len*0.3, by=sh.y+si*sh.len*0.3;
+  game.bullets.push({x:bx,y:by,vx:Math.cos(ang)*250,vy:Math.sin(ang)*250,life:2.4,max:2.4,
+    dmg:dmg,owner:owner,type:'bomb',r:2.4,tgtNode:node.id});
+}
 function updateShipsCombat(dt){
   // 1) 舰队状态与移动
   for(const fl of game.fleets){
     if(fl.dead)continue;
-    fl.hitT=Math.max(0,fl.hitT-dt);
     if(fl.delay>0){fl.delay-=dt}
     // 遭遇战判定
     if(!fl.combat){
@@ -794,48 +1000,61 @@ function updateShipsCombat(dt){
   for(const fl of game.fleets){
     if(fl.combat&&(fl.combat.dead||fl.combat.ships.length===0||dist(fl.x,fl.y,fl.combat.x,fl.combat.y)>460))fl.combat=null;
   }
-  // 2) 炮击
+  // 2) 炮击（网格加速：只查附近敌舰；无舰可打时转为对敌岛炮击）
+  rebuildShipGrid();
   for(const fl of game.fleets){
     if(fl.dead||fl.delay>0)continue;
     for(const s of fl.ships){
       if(s.dead)continue;
       if(s.hitT>0)s.hitT-=dt;
       let tgt=null,bd=1e9;
-      for(const o of game.fleets){
-        if(o===fl||o.dead||o.owner===fl.owner)continue;
-        for(const os of o.ships){
-          if(os.dead)continue;
-          const d=dist(s.x,s.y,os.x,os.y);
-          if(d<s.range&&d<bd){bd=d;tgt=os}
-        }
+      const cand=nearbyShips(s.x,s.y,s.range);
+      for(let i=0;i<cand.length;i++){
+        const e=cand[i];
+        if(e.fl===fl||e.fl.dead||e.fl.owner===fl.owner||e.s.dead)continue;
+        const d2=dist2(s.x,s.y,e.s.x,e.s.y);
+        if(d2<s.range*s.range&&d2<bd){bd=d2;tgt=e.s}
       }
-      updateShipGuns(s,tgt,dt,fl);
+      const tgtNode=tgt?null:pickBombTarget(s,fl);
+      updateShipGuns(s,tgt,dt,fl,tgtNode);
     }
   }
 }
-function updateShipGuns(s,tgt,dt,fl){
-  let aim=tgt?Math.atan2(tgt.y-s.y,tgt.x-s.x):s.ang;
-  const canFire=tgt&&dist(s.x,s.y,tgt.x,tgt.y)<s.range*0.98;
-  let ok=0;
+function pickBombTarget(s,fl){
+  let best=null,bd=1e9;
+  for(const n of game.nodes){
+    if(n.owner===fl.owner||n.hp<=0)continue;
+    const rr=s.range+n.r;
+    const d2=dist2(s.x,s.y,n.x,n.y);
+    if(d2<rr*rr&&d2<bd){bd=d2;best=n}
+  }
+  return best;
+}
+function updateShipGuns(s,tgt,dt,fl,tgtNode){
+  const shooting=tgt||tgtNode;
+  let aim=tgt?Math.atan2(tgt.y-s.y,tgt.x-s.x):(tgtNode?Math.atan2(tgtNode.y-s.y,tgtNode.x-s.x):s.ang);
+  const dd=tgt?dist(s.x,s.y,tgt.x,tgt.y):(tgtNode?dist(s.x,s.y,tgtNode.x,tgtNode.y):1e9);
+  const canFire=!!tgt&&dd<s.range*0.98;
+  const canBomb=!tgt&&!!tgtNode&&dd<tgtNode.r+s.range*0.9;
+  const owner=fl?fl.owner:(s.owner===undefined?-1:s.owner);
   for(const t of s.turrets){
     if(t.fire>0)t.fire-=dt;
     const local=norm(aim-s.ang);
     const reach=t.x>=0?1.15:1.45;
     let want=clamp(local,-reach,reach);
-    const prev=t.rel;
     t.rel=angLerp(t.rel,want,dt*(t.x>=0?1.9:1.5));
     t.ang=s.ang+t.rel;
-    if(canFire&&Math.abs(norm(t.ang-aim))<0.14){
+    if(shooting&&(canFire||canBomb)&&Math.abs(norm(t.ang-aim))<0.14){
       if(t.fire<=0){
         t.fire=s.reload*(0.9+Math.random()*0.2);
         const a=t.ang+(Math.random()-0.5)*0.045;
-        fireBullet(s,s._owner===undefined?-9:s._owner,a,330,s.dmg,1.5,'shell');
-        // 修正：owner 由上层赋值
-        const b=game.bullets[game.bullets.length-1]; b.owner=fl?fl.owner:s.owner;
-        b.dmg=s.dmg; b.fromShip=s;
+        if(canFire){
+          fireBullet(s,owner,a,330,s.dmg,1.5,'shell');
+        }else{
+          fireBomb(s,owner,a,tgtNode,s.dmg*BOMB_DMG_MUL);
+        }
         muzzle(s,t);
       }
-      ok++;
     }
   }
   if(canFire&&s.torpedo){
@@ -852,7 +1071,7 @@ function updateShipGuns(s,tgt,dt,fl){
 function muzzle(s,t){
   game.parts.push({x:s.x+Math.cos(t.ang)*s.len*0.32,y:s.y+Math.sin(t.ang)*s.len*0.32,vx:0,vy:0,
     life:0.09,max:0.09,col:'#fff3c4',r:5,kind:'flash'});
-  Snd.shot(0.5);
+  if(camNear(s.x,s.y,220))Snd.gun(0.5);
 }
 function arriveFleet(fl,n){
   if(n.owner===fl.owner){
@@ -862,22 +1081,28 @@ function arriveFleet(fl,n){
   const ratio = fl.path.length<=2 ? 1 : RATIO_FAR;
   if(ratio<1){ fl.troops=Math.max(1,fl.troops*ratio); }
   const def=n.troops;
+  const defEff=nodeDefense(n);          // 被压制的岛屿防御大幅下降
   game.stats.battles++;
-  if(fl.troops>def){
-    const surv=fl.troops-def;
+  if(fl.troops>defEff){
+    const surv=fl.troops-defEff;
     const old=n.owner;
+    const supp=nodeSuppressed(n);
     n.owner=fl.owner; n.troops=Math.round(surv); n.flashT=1.2;
-    for(const s of n.ships){if(s)s.dead=true}
-    n.ships=[]; spawnGarrisonShipsFor(n);
+    n.hp=Math.max(n.hp,Math.round(n.hpMax*0.4));   // 接手一座带伤但可用的岛
+    n.hpDelay=HP_REGEN_DELAY;
+    for(const s of (n.ships||[]))s.dead=true;
+    n.ships=[]; spawnGarrisonShipsFor(n); refreshNodeStats(n);
     fl.dead=true; for(const s of fl.ships)s.dead=true;
     explode(n.x,n.y,26,true); Snd.cap();
     if(old>=0&&F()[old]&&factionPortCount(old)===0){F()[old].alive=false;onFactionDead(old)}
-    pushTick((old<0?'占领 ':'夺取 ')+ownerName(fl.owner)+' → '+n.name);
+    pushTick((old<0?'占领 ':'夺取 ')+ownerName(fl.owner)+' → '+n.name+(supp?'（炮火压制下）':''));
     checkVictory();
     Snd.boom(1);
   }else{
     n.troops=Math.max(1,def-fl.troops);
-    n.hp=n.troops*HP_PER_TROOP; n.flashT=1.0;
+    n.hpDelay=HP_REGEN_DELAY;
+    damageNode(n,fl.troops*1.2,fl.owner);          // 强攻虽被击退，岛屿结构仍受损
+    n.flashT=1.0;
     explode(fl.x,fl.y,20,true); Snd.boom(0.8);
     splash(fl.x,fl.y,14);
     fl.dead=true; for(const s of fl.ships)s.dead=true;
@@ -905,16 +1130,27 @@ function updateBullets(dt){
     b.x+=b.vx*dt*arr; b.y+=b.vy*dt*arr;
     if(b.type==='torp')b.ang=Math.atan2(b.vy,b.vx);
     if(b.x<0||b.y<0||b.x>MAPW||b.y>MAPH){bs.splice(i,1);continue}
-    // 命中舰队舰船
-    let hit=null;
-    for(const fl of game.fleets){
-      if(fl.dead||fl.owner===b.owner)continue;
-      for(const s of fl.ships){
-        if(s.dead)continue;
-        const rr=b.type==='torp'?18:(s.len*0.45);
-        if(dist2(b.x,b.y,s.x,s.y)<rr*rr){hit={ship:s,fleet:fl};break}
+    // 岸轰炮弹：只结算岛屿结构
+    if(b.type==='bomb'){
+      const tn=game.nodes[b.tgtNode];
+      if(tn&&dist2(b.x,b.y,tn.x,tn.y)<(tn.r+8)*(tn.r+8)){
+        damageNode(tn,b.dmg,b.owner,b.x,b.y);
+        splash(b.x,b.y,6);
+        bs.splice(i,1);
+        continue;
       }
-      if(hit)break;
+      if(Math.random()<dt*6)splash(b.x,b.y,1);
+      continue;
+    }
+    // 命中舰队舰船（网格加速）
+    let hit=null;
+    const cand=nearbyShips(b.x,b.y,42);
+    for(let ci=0;ci<cand.length;ci++){
+      const e=cand[ci];
+      if(e.fl.dead||e.fl.owner===b.owner||e.s.dead)continue;
+      const s=e.s;
+      const rr=b.type==='torp'?18:(s.len*0.45);
+      if(dist2(b.x,b.y,s.x,s.y)<rr*rr){hit={ship:s,fleet:e.fl};break}
     }
     // 旗舰
     if(!hit&&game.flagship&&!game.flagship.dead&&game.flagship.owner!==b.owner){
@@ -973,20 +1209,120 @@ function damageFlagship(dmg,byOwner,x,y){
   }
 }
 
+/* --------------------- 岛屿防御（岸防炮台 / 结构血量） --------------------- */
+function nodeGunCount(n){ return clamp(KINDS[n.kind].gun.n + n.level + n.batteries,0,GUN_MAX) }
+function syncNodeGuns(n){
+  const cnt=nodeGunCount(n);
+  if(!n.guns)n.guns=[];
+  while(n.guns.length<cnt)n.guns.push({a:Math.random()*TAU,rel:0,fire:Math.random()*2});
+  if(n.guns.length>cnt)n.guns.length=cnt;
+}
+function refreshNodeStats(n){
+  const K=KINDS[n.kind];
+  n.hpMax=Math.round(K.hp*(1+n.level*HP_LV_BONUS));
+  if(n.hp>n.hpMax)n.hp=n.hpMax;
+  syncNodeGuns(n);
+}
+function nodeSuppressed(n){ return n.hp<=0 }
+function nodeDefense(n){ return n.troops*(nodeSuppressed(n)?SUPPRESS_DEF:1) }
+function nodeGunPower(n){
+  if(n.owner<0||nodeSuppressed(n))return 0;
+  return nodeGunCount(n)*KINDS[n.kind].gun.dmg*(1+n.level*GUN_LV_DMG);
+}
+function upgradeCost(n){ return UPGRADE_COST*(n.level+1) }
+function tryUpgrade(n){
+  if(game.network.connected&&!game.network.host&&!game.network.applying){
+    Network.send({type:'command',from:game.network.playerId,faction:game.me,action:'upgrade',node:n&&n.id});
+    pushTick('升级指令已发送给房主'); return true;
+  }
+  if(n.level>=3){ pushTick(n.name+' 已是最高等级 Lv3'); return false }
+  const cost=upgradeCost(n);
+  if(n.troops<cost){ pushTick('升级需要 '+cost+' 兵力（当前 '+Math.floor(n.troops)+'）'); return false }
+  n.troops-=cost; n.level++;
+  refreshNodeStats(n);
+  pushTick(n.name+' 升级至 Lv'+(n.level+1)+' · 消耗 '+cost+' 兵力 · 炮台 '+nodeGunCount(n)+' 门');
+  Snd.cap();
+  return true;
+}
+function tryBattery(n){
+  if(game.network.connected&&!game.network.host&&!game.network.applying){
+    Network.send({type:'command',from:game.network.playerId,faction:game.me,action:'battery',node:n&&n.id});
+    pushTick('建造指令已发送给房主'); return true;
+  }
+  if(n.batteries>=BATTERY_MAX){ pushTick('岸防炮台已达上限（'+BATTERY_MAX+' 座）'); return false }
+  if(n.troops<BATTERY_COST){ pushTick('建造炮台需要 '+BATTERY_COST+' 兵力（当前 '+Math.floor(n.troops)+'）'); return false }
+  n.troops-=BATTERY_COST; n.batteries++;
+  syncNodeGuns(n);
+  pushTick(n.name+' 建成岸防炮台 · 共 '+nodeGunCount(n)+' 门');
+  Snd.cap();
+  return true;
+}
+function damageNode(n,dmg,byOwner,x,y){
+  if(n.hp<=0)return;
+  n.hp=Math.max(0,n.hp-dmg);
+  n.hitT=0.3; n.hpDelay=HP_REGEN_DELAY;
+  if(x!==undefined)explode(x,y,3);
+  if(n.hp<=0)suppressNode(n,byOwner);
+}
+function suppressNode(n,byOwner){
+  n.hp=0;
+  game.stats.suppressed++;
+  const before=Math.round(n.troops);
+  n.troops=Math.max(1,Math.round(n.troops*0.55));   // 阵地被摧毁，守军减员
+  let sunk=0;
+  for(const s of n.ships){ if(Math.random()<0.55){ s.dead=true; sunk++; explode(s.x,s.y,Math.random()<0.4?16:8,true) } }
+  n.ships=n.ships.filter(s=>!s.dead);
+  explode(n.x,n.y,30,true); splash(n.x,n.y,20); Snd.boom(1.1);
+  if(nodeVisible(n))pushTick(n.name+' 被炮火压制！炮台失效 · 守军 '+before+'→'+Math.round(n.troops));
+}
+function updateNodeGuns(n,dt){
+  if(n.owner<0||nodeSuppressed(n))return;          // 中立无炮台；被压制则炮台失效
+  const K=KINDS[n.kind];
+  const range=K.gun.r*(1+n.level*GUN_LV_RANGE);
+  const dmg=K.gun.dmg*(1+n.level*GUN_LV_DMG);
+  let best=null,bd=1e9;
+  const cand=nearbyShips(n.x,n.y,range);
+  for(let i=0;i<cand.length;i++){
+    const e=cand[i];
+    if(e.fl.dead||e.fl.owner===n.owner||e.s.dead)continue;
+    const d2=dist2(n.x,n.y,e.s.x,e.s.y);
+    if(d2<range*range&&d2<bd){bd=d2;best=e.s}
+  }
+  for(const g of n.guns){
+    if(g.fire>0)g.fire-=dt;
+    const aim=best?Math.atan2(best.y-n.y,best.x-n.x):g.a;
+    g.rel=angLerp(g.rel,norm(aim-g.a),dt*2.2);
+    if(!best||g.fire>0)continue;
+    if(Math.abs(norm(g.a+g.rel-aim))>0.12)continue;
+    g.fire=K.gun.reload*(0.9+Math.random()*0.2);
+    const a=g.a+g.rel+(Math.random()-0.5)*0.045;
+    const bx=n.x+Math.cos(g.a)*(n.r*1.42), by=n.y+Math.sin(g.a)*(n.r*1.42);
+    game.bullets.push({x:bx,y:by,vx:Math.cos(a)*340,vy:Math.sin(a)*340,life:1.6,max:1.6,
+      dmg:dmg,owner:n.owner,type:'shell',r:1.8,fromNode:n.id});
+    game.parts.push({x:bx,y:by,vx:0,vy:0,life:0.09,max:0.09,col:'#ffe6a8',r:5,kind:'flash'});
+    if(camNear(n.x,n.y,260))Snd.gun(0.4);
+  }
+}
+
 /* ------------------------------ 岛屿更新 ------------------------------ */
 function updateNodes(dt){
   for(const n of game.nodes){
     n.flashT=Math.max(0,n.flashT-dt*1.6);
-    n.rippleT+=dt;
+    if(n.hitT>0)n.hitT=Math.max(0,n.hitT-dt);
+    // 结构自修：挨打静默 HP_REGEN_DELAY 秒后按上限比例恢复
+    if(n.hpDelay>0)n.hpDelay-=dt;
+    else if(n.hp<n.hpMax)n.hp=Math.min(n.hpMax,n.hp+n.hpMax*HP_REGEN*dt);
     if(n.owner<0){
       // 中立缓慢回血
-      const def=n.troops;
       const regen=n.kind==='fort'?0.9:n.kind==='lighthouse'?0.5:0.6;
-      if(n.troops<n.max){ n.troops=Math.min(n.max,n.troops+regen*dt); n.hp=n.troops*HP_PER_TROOP }
+      if(n.troops<n.max)n.troops=Math.min(n.max,n.troops+regen*dt);
+      syncNodeShips(n,dt);
       continue;
     }
     const cap = n.max*(1+n.level*0.55);
-    const inc = n.rate*(1+n.level*0.5)*(1+ (n.kind==='port'?0.15:0)) * F()[n.owner].econ;
+    const fc=F()[n.owner];
+    const econ = fc&&fc.ai ? DIFFS[game.diff].econ : 1;
+    const inc = n.rate*(1+n.level*0.5)*(1+ (n.kind==='port'?0.15:0)) * econ;
     if(n.troops<cap){
       n.grow+=inc*dt;
       if(n.grow>=1){
@@ -994,9 +1330,8 @@ function updateNodes(dt){
         n.troops=Math.min(cap,n.troops+add);
       }
     }
-    n.hpMax=n.troops*HP_PER_TROOP;
-    if(n.hp<n.hpMax)n.hp=Math.min(n.hpMax,n.hp+n.hpMax*0.06*dt);
     syncNodeShips(n,dt);
+    updateNodeGuns(n,dt);
   }
   // 舰队舰船清理
   game.ships=game.ships.filter(s=>!s.dead);
@@ -1058,6 +1393,10 @@ function findPath(a,b){
 }
 function playerSend(src,dst){
   if(!src||!dst||src.owner!==game.me)return;
+  if(game.network.connected&&!game.network.host&&!game.network.applying){
+    Network.send({type:'command',from:game.network.playerId,faction:game.me,action:'send',src:src.id,dst:dst.id});
+    pushTick('派兵指令已发送给房主'); return;
+  }
   if(src.troops<4)return;
   const send=Math.floor(src.troops*0.6);
   if(send<2)return;
@@ -1115,16 +1454,31 @@ function dockFlagship(){
   game.flagship=null;
   pushTick('旗舰已归港');
 }
+function fireFlagshipTorpedo(){
+  const f=game.flagship;
+  if(!f||f.dead||f.torpCt>0)return false;
+  f.torpCt=2.4;
+  const a=f.ang+(Math.random()-0.5)*0.1;
+  game.bullets.push({x:f.x+Math.cos(a)*24,y:f.y+Math.sin(a)*24,vx:Math.cos(a)*230,vy:Math.sin(a)*230,
+    life:3.0,max:3.0,dmg:26,owner:game.me,type:'torp',r:3.6,ang:a,fromShip:f.ship});
+  Snd.torp();
+  return true;
+}
 function updateFlagship(dt){
   const f=game.flagship; if(!f)return;
   if(f.dead){game.flagship=null;return}
   f.hitT=Math.max(0,f.hitT-dt);
   const k=Keys;
   let ax=0,ay=0;
-  if(k['w']||k['arrowup'])ay-=1;
-  if(k['s']||k['arrowdown'])ay+=1;
-  if(k['a']||k['arrowleft'])ax-=1;
-  if(k['d']||k['arrowright'])ax+=1;
+  if(game.touchMove){                       // 触屏：朝手指方向航行
+    const d=Math.hypot(game.touchMove.x-f.x,game.touchMove.y-f.y);
+    if(d>26){ ax=(game.touchMove.x-f.x)/d; ay=(game.touchMove.y-f.y)/d; }
+  }else{
+    if(k['w']||k['arrowup'])ay-=1;
+    if(k['s']||k['arrowdown'])ay+=1;
+    if(k['a']||k['arrowleft'])ax-=1;
+    if(k['d']||k['arrowright'])ax+=1;
+  }
   const l=Math.hypot(ax,ay)||1; ax/=l; ay/=l;
   const accel=210, maxSpd=190;
   f.vx+=ax*accel*dt; f.vy+=ay*accel*dt;
@@ -1139,12 +1493,12 @@ function updateFlagship(dt){
   const tgtPoint={x:Mouse.wx,y:Mouse.wy};
   let autoT=null,ad=1e9;
   if(game.autoFire){
-    for(const o of game.fleets){
-      if(o.owner===game.me)continue;
-      for(const s of o.ships){
-        const d=dist(f.x,f.y,s.x,s.y);
-        if(d<520&&d<ad){ad=d;autoT=s}
-      }
+    const cand=nearbyShips(f.x,f.y,520);
+    for(let i=0;i<cand.length;i++){
+      const e=cand[i];
+      if(e.fl.dead||e.fl.owner===game.me||e.s.dead)continue;
+      const d=dist(f.x,f.y,e.s.x,e.s.y);
+      if(d<520&&d<ad){ad=d;autoT=e.s}
     }
   }
   const aim=autoT?Math.atan2(autoT.y-f.y,autoT.x-f.x):ma;
@@ -1165,13 +1519,7 @@ function updateFlagship(dt){
   }
   if(sh.torpedo){
     f.torpCt-=dt;
-    if((Mouse.rdown||k[' '])&&f.torpCt<=0){
-      f.torpCt=2.4;
-      const a=f.ang+(Math.random()-0.5)*0.1;
-      game.bullets.push({x:f.x+Math.cos(a)*24,y:f.y+Math.sin(a)*24,vx:Math.cos(a)*230,vy:Math.sin(a)*230,
-        life:3.0,max:3.0,dmg:26,owner:game.me,type:'torp',r:3.6,ang:a,fromShip:sh});
-      Snd.torp();
-    }
+    if(Mouse.rdown||k[' '])fireFlagshipTorpedo();
   }
   // 撞岛：兵力不足以登陆则弹开
   for(const n of game.nodes){
@@ -1214,12 +1562,26 @@ function aiThink(f,dt){
   f.nextThink=D.think[0]+Math.random()*(D.think[1]-D.think[0]);
   const mine=game.nodes.filter(n=>n.owner===f.id);
   if(!mine.length){return}
-  // 升级
-  if(Math.random()<0.35){
+  // 升级 / 建造岸防（与玩家同规则：消耗驻军）
+  if(Math.random()<0.45){
     let best=null;
-    for(const n of mine)if(n.level<3&&(!best||n.rate*(1+n.level)>best.rate*(1+best.level)))best=n;
-    if(best&&best.level<3)best.level++;
+    for(const n of mine){
+      if(n.level>=3)continue;
+      const cost=upgradeCost(n);
+      if(n.troops<cost+30)continue;
+      const val=n.rate*(1+n.level*0.5)/(cost+1);
+      if(!best||val>best.val)best={n:n,val:val};
+    }
+    if(best){const n=best.n;n.troops-=upgradeCost(n);n.level++;refreshNodeStats(n)}
   }
+  if(Math.random()<0.3){
+    const cand=mine.filter(n=>n.batteries<BATTERY_MAX&&n.troops>BATTERY_COST+40&&n.nb.some(j=>game.nodes[j].owner!==f.id));
+    if(cand.length){
+      const n=cand[Math.floor(Math.random()*cand.length)];
+      n.troops-=BATTERY_COST; n.batteries++; syncNodeGuns(n);
+    }
+  }
+  if(game.time<AI_GRACE[game.diff])return;   // 开局保护期：AI 只发展经济，不出兵
   // 威胁判断
   const threats=[];
   for(const fl of game.fleets){
@@ -1230,7 +1592,7 @@ function aiThink(f,dt){
     }
   }
   for(const t of threats){
-    if(t.amt*D.hold>t.node.troops){
+    if(t.amt*D.hold>nodeDefense(t.node)){
       // 救援
       const src=mine.filter(n=>n!==t.node)
         .sort((a,b)=>dist(a.x,a.y,t.node.x,t.node.y)-dist(b.x,b.y,t.node.x,t.node.y))[0];
@@ -1259,8 +1621,11 @@ function aiThink(f,dt){
       const distFact=1/Math.max(0.4,dist(n.x,n.y,o.x,o.y)/300);
       const value=(o.kind==='port'?1.5:o.kind==='fort'?1.25:o.kind==='lighthouse'?1.1:1);
       const frontierBonus=o.nb.filter(k=>game.nodes[k].owner===f.id).length*0.22;
-      const score=(n.troops-o.troops*T.aggro*1.35)*value*(1+frontierBonus)*distFact;
-      if(n.troops>o.troops*T.aggro+6) cands.push({src:n,dst:o,score:score});
+      // 岸防炮台会杀伤进攻舰队：目标炮口总威力越高，需要的兵力余量越大
+      const gunPow=nodeGunPower(o);
+      const need=nodeDefense(o)*T.aggro+6+gunPow*0.55;
+      const score=(n.troops-need)*value*(1+frontierBonus)*distFact*(nodeSuppressed(o)?1.6:1);
+      if(n.troops>need) cands.push({src:n,dst:o,score:score});
     }
   }
   if(cands.length){
@@ -1292,6 +1657,108 @@ function aiThink(f,dt){
   }
 }
 
+/* --------------------- 波次突袭（yorg.io 式进攻节奏） --------------------- */
+function startWave(){
+  game.waveN++;
+  Snd.boom(1.2);
+  pushTick('⚔ 第 '+game.waveN+' 波突袭来袭！');
+  let launched=0;
+  for(const f of F()){
+    if(!f.ai||!f.alive)continue;
+    if(launchRaid(f))launched++;
+  }
+  if(!launched)pushTick('敌方尚未组织起有效攻势');
+}
+function launchRaid(f){
+  const T=DIFFS[game.diff];
+  const mine=game.nodes.filter(n=>n.owner===f.id);
+  let best=null;
+  for(const n of mine){
+    if(n.troops<20)continue;
+    for(const j of n.nb){
+      const o=game.nodes[j];
+      if(o.owner===f.id)continue;
+      // 突袭更激进：门槛按 aggro 打折，优先打玩家，但会顾忌岸防炮台
+      const need=nodeDefense(o)*T.aggro*0.85+6+nodeGunPower(o)*0.55;
+      if(n.troops<=need)continue;
+      const playerBonus=(o.owner===game.me?1.45:1);
+      const score=(n.troops-need)*(o.owner===game.me?playerBonus:1)/(1+dist(n.x,n.y,o.x,o.y)/420);
+      if(!best||score>best.score)best={src:n,dst:o,score:score};
+    }
+  }
+  if(!best)return false;
+  const send=Math.floor(best.src.troops*0.75);
+  if(send<8)return false;
+  best.src.troops-=send; best.src.grow=0;
+  const fl=spawnFleet(f.id,send,best.src.id,best.dst.id,best.src.x,best.src.y);
+  if(fl)fl.path=[best.src.id,best.dst.id];
+  return true;
+}
+
+function useTactic(){
+  if(game.phase!=='playing'||game.paused)return false;
+  if(game.network.connected&&!game.network.host&&!game.network.applying){
+    Network.send({type:'command',from:game.network.playerId,faction:game.me,action:'tactic'});
+    pushTick('战术指令已发送给房主'); return true;
+  }
+  if(game.tacticCd>0){pushTick('战术冷却中，还需 '+Math.ceil(game.tacticCd)+' 秒');return false}
+  const mine=game.nodes.filter(n=>n.owner===game.me);
+  if(!mine.length)return false;
+  let gained=0;
+  for(const n of mine){
+    const add=Math.max(8,Math.round(n.rate*12));
+    n.troops=Math.min(GROW_CAP,n.troops+add);
+    n.hp=Math.min(n.hpMax,n.hp+n.hpMax*0.12);
+    gained+=add;
+  }
+  game.tacticCd=48;
+  pushTick('紧急征募完成：全军补充 '+gained+' 兵力，结构修复 12%');
+  awardAchievement('tactician','临危不乱（首次使用战术）');
+  Snd.cap();
+  return true;
+}
+function triggerSeaEvent(){
+  const mine=game.nodes.filter(n=>n.owner===game.me);
+  if(!mine.length)return;
+  const pick=mine[Math.floor(game.rnd()*mine.length)];
+  const roll=Math.floor(game.rnd()*3);
+  if(roll===0){
+    const add=35+Math.round(pick.rate*10);
+    pick.troops=Math.min(GROW_CAP,pick.troops+add);
+    game.event={name:'潮汐补给',desc:pick.name+' 获得 '+add+' 兵力',t:18,color:'#8dffc4'};
+  }else if(roll===1){
+    for(const n of mine)n.hp=Math.min(n.hpMax,n.hp+n.hpMax*0.18);
+    game.event={name:'顺风潮',desc:'己方结构获得一次额外修复',t:18,color:'#8fd6ff'};
+  }else{
+    const enemy=F().find(f=>f.ai&&f.alive);
+    const source=enemy&&game.nodes.find(n=>n.owner===enemy.id);
+    if(source){
+      const target=mine[Math.floor(game.rnd()*mine.length)];
+      const send=Math.max(8,Math.floor(source.troops*0.18));
+      source.troops-=send;
+      const fl=spawnFleet(enemy.id,send,source.id,target.id,source.x,source.y);
+      if(fl)fl.path=[source.id,target.id];
+      game.event={name:'海盗伏击',desc:'敌方舰队正在袭击 '+target.name,t:18,color:'#ff9a86'};
+    }else{
+      game.event={name:'迷雾航道',desc:'本次事件没有形成有效袭击',t:12,color:'#cfe6f7'};
+    }
+  }
+  pushTick('海域事件：'+game.event.name+' · '+game.event.desc);
+  Snd.boom(0.5);
+}
+function updateSeaEvent(dt){
+  if(game.tacticCd>0)game.tacticCd=Math.max(0,game.tacticCd-dt);
+  if(game.event){
+    game.event.t-=dt;
+    if(game.event.t<=0)game.event=null;
+  }
+  game.eventT-=dt;
+  if(game.eventT<=0){
+    game.eventT=58+game.rnd()*22;
+    triggerSeaEvent();
+  }
+}
+
 /* ------------------------------ 胜负 ------------------------------ */
 function checkVictory(){
   let aliveCount=0;
@@ -1313,6 +1780,15 @@ function endGame(win,why){
   document.getElementById('ovSub').innerHTML=
     (why||'')+'<br>控制海域 '+own+' / '+game.nodes.length+' &nbsp;·&nbsp; 现存舰船 '+Math.floor(factionShipTotal(game.me))+
     '<br>交战次数 '+game.stats.battles+' &nbsp;·&nbsp; 用时 '+Math.floor(game.time)+' 秒';
+  if(win){
+    game.profile.wins++;
+    const stars=game.waveN>=4?3:(game.waveN>=2?2:1);
+    game.profile.stars+=stars;
+    awardAchievement('first-win','第一次制海');
+    if(own>=game.nodes.length-2)awardAchievement('domination','全域统治');
+    saveProfile();
+    document.getElementById('ovSub').innerHTML+='<br>战役评价：'+('★'.repeat(stars)+'☆'.repeat(3-stars))+' · 累计星章 '+game.profile.stars;
+  }
   ov.style.display='flex';
   if(win)Snd.cap(); else Snd.lose();
 }
@@ -1411,10 +1887,40 @@ function drawIsland(n,t){
     ctxG.beginPath(); ctxG.arc(0,0,n.r*z*1.42,0,TAU); ctxG.stroke();
     ctxG.setLineDash([]);
   }
+  // 岸防炮台
+  if(n.owner>=0&&n.guns.length&&z>0.3){
+    const down=nodeSuppressed(n);
+    const br=Math.max(2.2,3.6*z);
+    const reload=KINDS[n.kind].gun.reload;
+    for(const g of n.guns){
+      const gx=Math.cos(g.a)*n.r*z*1.42, gy=Math.sin(g.a)*n.r*z*1.42;
+      ctxG.save();
+      ctxG.translate(gx,gy);
+      ctxG.fillStyle=down?'rgba(88,98,108,.85)':'#39424e';
+      ctxG.beginPath(); ctxG.arc(0,0,br,0,TAU); ctxG.fill();
+      ctxG.strokeStyle=down?'rgba(120,130,140,.55)':'rgba(196,220,240,.55)';
+      ctxG.lineWidth=Math.max(1,1.1*z); ctxG.stroke();
+      ctxG.rotate(g.a+g.rel);
+      ctxG.fillStyle=down?'rgba(118,126,136,.9)':col;
+      ctxG.fillRect(0,-br*0.28,br*2.5,br*0.56);
+      ctxG.restore();
+      if(!down&&g.fire>reload*0.72){
+        const fx=gx+Math.cos(g.a+g.rel)*br*2.6, fy=gy+Math.sin(g.a+g.rel)*br*2.6;
+        ctxG.fillStyle='rgba(255,238,180,.9)';
+        ctxG.beginPath(); ctxG.arc(fx,fy,Math.max(1.6,br*0.9),0,TAU); ctxG.fill();
+      }
+    }
+  }
   // 占领闪光
   if(n.flashT>0){
     ctxG.globalAlpha=n.flashT*0.55;
     ctxG.fillStyle='#fff'; ctxG.beginPath(); ctxG.arc(0,0,n.r*z*2.2,0,TAU); ctxG.fill();
+    ctxG.globalAlpha=1;
+  }
+  // 被炮击的结构闪光
+  if(n.hitT>0){
+    ctxG.globalAlpha=Math.min(0.45,n.hitT*1.5);
+    ctxG.fillStyle='#ffd9a0'; ctxG.beginPath(); ctxG.arc(0,0,n.r*z*1.75,0,TAU); ctxG.fill();
     ctxG.globalAlpha=1;
   }
   // 类型标记
@@ -1438,11 +1944,17 @@ function drawIsland(n,t){
   ctxG.strokeText(label,sx,sy-n.r*z*3.0);
   ctxG.fillStyle=n.owner<0?'#e6eef6':col;
   ctxG.fillText(label,sx,sy-n.r*z*3.0);
-  if(n.owner>=0&&n.hp<n.hpMax-0.5){
+  if(n.hp<n.hpMax-0.5){          // 结构完整度：被压制(0)时炮台全部失效
     const w=Math.max(30,n.r*z*2.4), h=Math.max(2.5,4*z);
     const yy=sy+n.r*z*2.35;
     ctxG.fillStyle='rgba(4,10,18,.8)'; ctxG.fillRect(sx-w/2,yy,w,h);
-    ctxG.fillStyle=col; ctxG.fillRect(sx-w/2,yy,w*clamp(n.hp/n.hpMax,0,1),h);
+    ctxG.fillStyle=nodeSuppressed(n)?'#ff7a6a':(n.owner<0?'#9fb4c6':col);
+    ctxG.fillRect(sx-w/2,yy,w*clamp(n.hp/n.hpMax,0,1),h);
+    if(nodeSuppressed(n)){
+      ctxG.font='700 '+Math.round(clamp(11*z,9,14))+'px "Segoe UI",Microsoft YaHei,sans-serif';
+      ctxG.fillStyle='#ff9a86';
+      ctxG.fillText('压制',sx,yy+h+Math.max(9,11*z));
+    }
   }
   if(game.sel===n){
     ctxG.strokeStyle='rgba(160,240,255,.9)'; ctxG.lineWidth=2;
@@ -1777,27 +2289,49 @@ function updateHUD(){
       '<span class="sub">海域 '+pc+' · 舰船 '+st+'</span></span></div>';
   }
   if(chips.dataset.h!==html){chips.innerHTML=html;chips.dataset.h=html}
+  // 波次倒计时
+  const wv=document.getElementById('wave');
+  const tleft=Math.max(0,Math.ceil(game.waveT));
+  const wtxt=game.phase==='playing'
+    ? ('第 '+(game.waveN+1)+' 波突袭 · '+(game.waveN===0?'首波 ':'')+tleft+'s')
+    : '—';
+  if(wv.dataset.h!==wtxt){wv.textContent=wtxt;wv.dataset.h=wtxt}
+  wv.classList.toggle('soon',tleft<=15&&tleft>5&&game.phase==='playing');
+  wv.classList.toggle('now',tleft<=5&&game.phase==='playing');
+  const tactic=document.getElementById('btTactic');
+  const tacticText=game.tacticCd>0?'战术 '+Math.ceil(game.tacticCd)+'s':'战术 T';
+  tactic.textContent=tacticText;
+  tactic.classList.toggle('ready',game.tacticCd<=0&&game.phase==='playing');
   const n=game.hover||game.sel;
   const info=document.getElementById('info');
   let ih='';
   const own=game.nodes.filter(x=>x.owner===game.me).length;
   if(n){
     const vis=visibleAt(n.x,n.y);
+    const supp=nodeSuppressed(n);
     ih+='<div class="row"><span class="k">'+n.name+'</span><span class="v" style="color:'+ownerColor(n.owner)+'">'+ownerName(n.owner)+'</span></div>';
     ih+='<div class="row"><span class="k">类型</span><span class="v">'+KINDS[n.kind].name+' · 等级 '+(n.level+1)+'</span></div>';
-    ih+='<div class="row"><span class="k">驻军</span><span class="v">'+(vis?Math.round(n.troops):'?')+'</span></div>';
+    ih+='<div class="row"><span class="k">驻军</span><span class="v">'+(vis?Math.round(n.troops):'?')+(supp&&vis?' ×0.45':'')+'</span></div>';
+    ih+='<div class="row"><span class="k">结构</span><span class="v"'+(supp?' style="color:#ff9a86"':'')+'>'+Math.round(n.hp)+' / '+n.hpMax+(supp?' · 压制':'')+'</span></div>';
+    ih+='<div class="row"><span class="k">岸防炮台</span><span class="v">'+(n.owner<0?'—':nodeGunCount(n)+' 门'+(supp?' · 失效':''))+'</span></div>';
     ih+='<div class="row"><span class="k">产兵</span><span class="v">'+(vis?(n.rate*(1+n.level*0.5)).toFixed(2)+'/s':'?')+'</span></div>';
     ih+='<div class="row"><span class="k">海路</span><span class="v">'+n.nb.length+' 条</span></div>';
+    if(n.owner===game.me&&n.level<3)ih+='<div class="row"><span class="k">U 升级</span><span class="v">'+upgradeCost(n)+' 兵力</span></div>';
+    if(n.owner===game.me&&n.batteries<BATTERY_MAX)ih+='<div class="row"><span class="k">B 建炮台</span><span class="v">'+BATTERY_COST+' 兵力</span></div>';
   }else{
     ih+='<div class="row"><span class="k">海域控制</span><span class="v">'+own+' / '+game.nodes.length+'</span></div>';
     ih+='<div class="row"><span class="k">胜利条件</span><span class="v">≥65%</span></div>';
     ih+='<div class="row"><span class="k">时间</span><span class="v">'+Math.floor(game.time)+'s</span></div>';
+    ih+='<div class="row"><span class="k">战术</span><span class="v">'+tacticText+'</span></div>';
+  }
+  if(game.event){
+    ih+='<div class="row"><span class="k" style="color:'+game.event.color+'">事件</span><span class="v" style="color:'+game.event.color+'">'+game.event.name+' · '+Math.ceil(game.event.t)+'s</span></div>';
   }
   if(info.dataset.h!==ih){info.innerHTML=ih;info.dataset.h=ih}
 }
 
 /* ------------------------------ 主循环 ------------------------------ */
-const Mouse={x:0,y:0,wx:0,wy:0,rdown:false,down:false,panning:false,panX:0,panY:0,mid:false};
+const Mouse={x:0,y:0,wx:0,wy:0,rdown:false,panning:false,panX:0,panY:0};
 const Keys={};
 function updateMouseWorld(){Mouse.wx=s2wx(Mouse.x);Mouse.wy=s2wy(Mouse.y)}
 
@@ -1817,12 +2351,21 @@ function frame(ts){
 function step(dt){
   if(game.phase!=='playing'&&game.phase!=='over')return;
   if(game.paused)return;
+  if(game.network.connected&&!game.network.host)return;
   game.time+=dt;
+  Snd.frameStart();
+  rebuildShipGrid();
   updateNodes(dt);
   for(const f of F())aiThink(f,dt);
   updateShipsCombat(dt);
   updateBullets(dt);
   updateParticles(dt);
+  updateSeaEvent(dt);
+  // 波次突袭倒计时（仅对局进行中）
+  if(game.phase==='playing'){
+    game.waveT-=dt;
+    if(game.waveT<=0){ startWave(); game.waveT=WAVE_PERIOD[game.diff]; }
+  }
   if(!game.flagship&&!game.panning)updateFlagshipCamera();
   updateFlagship(dt);
   // 视野刷新
@@ -1834,6 +2377,7 @@ function step(dt){
   }
   // 相机缩放缓动
   cam.z=lerp(cam.z,cam.tz,Math.min(1,dt*7));
+  Network.tick(dt);
 }
 function updateFlagshipCamera(){
   if(game.keys)return;
@@ -1936,15 +2480,80 @@ function bindInput(){
     cam.x+=before.x-after.x; cam.y+=before.y-after.y;
     updateMouseWorld();
   },{passive:false});
+  /* ---------- 触屏：单指派兵/操舵，双指缩放平移 ---------- */
+  const TC={mode:null,a:null,dist:0,midx:0,midy:0,sx:0,sy:0,moved:0};
+  const tp=t=>({x:t.clientX,y:t.clientY});
+  stage.addEventListener('touchstart',e=>{
+    Snd.init(); e.preventDefault();
+    if(e.touches.length>=2){
+      const a=tp(e.touches[0]),b=tp(e.touches[1]);
+      TC.mode='pinch'; TC.dist=Math.hypot(a.x-b.x,a.y-b.y);
+      TC.midx=(a.x+b.x)/2; TC.midy=(a.y+b.y)/2;
+      game.drag={active:false,src:null};
+      return;
+    }
+    const p=tp(e.touches[0]);
+    Mouse.x=p.x; Mouse.y=p.y; updateMouseWorld();
+    TC.a=p; TC.sx=p.x; TC.sy=p.y; TC.moved=0;
+    if(game.phase==='playing'&&game.flagship){
+      TC.mode='steer'; game.touchMove={x:Mouse.wx,y:Mouse.wy};
+    }else if(game.phase==='playing'){
+      const n=nodeAtWorld(Mouse.wx,Mouse.wy);
+      if(n&&n.owner===game.me){ TC.mode='drag'; game.drag={active:true,src:n,sx:p.x,sy:p.y}; game.sel=n; }
+      else { TC.mode='pan'; game.sel=n||game.sel; }
+    }else TC.mode='pan';
+  },{passive:false});
+  stage.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(TC.mode==='pinch'&&e.touches.length>=2){
+      const a=tp(e.touches[0]),b=tp(e.touches[1]);
+      const d=Math.hypot(a.x-b.x,a.y-b.y), mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+      if(TC.dist>0){
+        const before={x:s2wx(mx),y:s2wy(my)};
+        cam.tz=clamp(cam.tz*(d/TC.dist),0.26,2.0); cam.z=cam.tz;
+        const after={x:s2wx(mx),y:s2wy(my)};
+        cam.x+=before.x-after.x; cam.y+=before.y-after.y;
+      }
+      cam.x-=(mx-TC.midx)/cam.z; cam.y-=(my-TC.midy)/cam.z;
+      TC.dist=d; TC.midx=mx; TC.midy=my;
+      return;
+    }
+    const t=e.touches[0]; if(!t)return;
+    const p=tp(t);
+    TC.moved=Math.max(TC.moved,Math.hypot(p.x-TC.sx,p.y-TC.sy));
+    Mouse.x=p.x; Mouse.y=p.y; updateMouseWorld();
+    if(TC.mode==='drag'){ game.hover=nodeAtWorld(Mouse.wx,Mouse.wy); }
+    else if(TC.mode==='steer'){ game.touchMove={x:Mouse.wx,y:Mouse.wy}; }
+    else {
+      const a=TC.a||p;
+      cam.x-=(p.x-a.x)/cam.z; cam.y-=(p.y-a.y)/cam.z;
+      TC.a=p;
+    }
+  },{passive:false});
+  stage.addEventListener('touchend',e=>{
+    e.preventDefault();
+    if(game.drag&&game.drag.active){
+      const src=game.drag.src, tgt=nodeAtWorld(Mouse.wx,Mouse.wy);
+      if(tgt&&tgt!==src&&TC.moved>10)playerSend(src,tgt);
+      else if(tgt)game.sel=tgt;
+      game.drag={active:false,src:null};
+    }else if(TC.mode==='steer'){
+      if(TC.moved<10)fireFlagshipTorpedo();      // 轻点 = 发射鱼雷
+      game.touchMove=null;
+    }else if(TC.mode==='pan'&&TC.moved<10){
+      game.sel=nodeAtWorld(Mouse.wx,Mouse.wy)||game.sel;
+    }
+    if(e.touches.length===0){ TC.mode=null; TC.a=null; TC.dist=0; game.touchMove=null; }
+    else { TC.a=tp(e.touches[0]); TC.mode='pan'; TC.dist=0; }
+  },{passive:false});
   window.addEventListener('keydown',e=>{
     const k=e.key.toLowerCase();
     Keys[k]=true; if(e.shiftKey)Keys['shift']=true;
     if(k===' '&&game.phase==='playing'){e.preventDefault();launchedFlagship();return}
     if(k==='f'&&game.phase==='playing'){launchedFlagship();return}
-    if(k==='u'&&game.sel&&game.sel.owner===game.me){
-      if(game.sel.level<3){game.sel.level++;pushTick(game.sel.name+' 升级至 Lv'+(game.sel.level+1));Snd.cap()}
-      return;
-    }
+    if(k==='u'&&game.sel&&game.sel.owner===game.me){tryUpgrade(game.sel);return}
+    if(k==='b'&&game.sel&&game.sel.owner===game.me){tryBattery(game.sel);return}
+    if(k==='t'){useTactic();return}
     if(k==='p'){togglePause();return}
     if(k==='escape'){game.sel=null;    document.getElementById('over').style.display=game.phase==='over'?'flex':'none';
       return}
@@ -1953,6 +2562,16 @@ function bindInput(){
   window.addEventListener('keyup',e=>{Keys[e.key.toLowerCase()]=false;if(!e.shiftKey)Keys['shift']=false});
   window.addEventListener('blur',()=>{for(const k in Keys)Keys[k]=false;Mouse.rdown=false;Mouse.panning=false});
   document.getElementById('btPause').onclick=togglePause;
+  document.getElementById('btFlag').onclick=()=>{launchedFlagship()};
+  document.getElementById('btUp').onclick=()=>{
+    if(game.sel&&game.sel.owner===game.me)tryUpgrade(game.sel);
+    else pushTick('先点选一座己方岛屿再升级');
+  };
+  document.getElementById('btBat').onclick=()=>{
+    if(game.sel&&game.sel.owner===game.me)tryBattery(game.sel);
+    else pushTick('先点选一座己方岛屿再建炮台');
+  };
+  document.getElementById('btTactic').onclick=useTactic;
   document.getElementById('btAuto').onclick=function(){
     game.autoFire=!game.autoFire; this.classList.toggle('on',game.autoFire);
   };
@@ -1968,9 +2587,10 @@ function togglePause(){
   b.classList.toggle('on',game.paused);
 }
 function alertHelp(){
-  pushTick('拖拽己方岛派兵 · F 出海亲自操船 · U 升级 · 滚轮缩放');
+  pushTick('拖拽己方岛派兵 · U 升级 · B 建岸防炮台 · F 出海亲自操船');
   pushTick('远程增援折损 50%，相邻 1:1 —— 尽量沿己方海域推进');
-  pushTick('港口产兵最快，要塞守军最厚，灯塔能开很大的图');
+  pushTick('先用舰队炮击把敌岛结构打到「压制」，再登陆伤亡最小');
+  pushTick('T 战术：全军紧急征募并修复结构；海域会周期性触发补给、顺风潮或海盗伏击');
 }
 
 /* ------------------------------ 启动 ------------------------------ */
@@ -1993,6 +2613,18 @@ function buildMenu(){
       game.diff=parseInt(b.dataset.d,10); Snd.click();};
   });
   const seedEl=document.getElementById('seed');
+  const campaign=document.getElementById('campaign');
+  campaign.textContent='战役档案：'+game.profile.wins+' 胜 · '+game.profile.stars+' 星章 · 已解锁成就 '+game.profile.achievements.length+' 项';
+  const roomEl=document.getElementById('roomId');
+  document.getElementById('btCreateRoom').onclick=async()=>{
+    const room=(roomEl.value.trim()||Math.random().toString(36).slice(2,8)).toUpperCase();
+    roomEl.value=room;
+    if(await Network.connect(room,true))startGame();
+  };
+  document.getElementById('btJoinRoom').onclick=async()=>{
+    const room=roomEl.value.trim().toUpperCase();
+    await Network.connect(room,false);
+  };
   document.getElementById('reseed').onclick=()=>{seedEl.value=Math.floor(Math.random()*1e6);Snd.click()};
   seedEl.value=Math.floor(Math.random()*1e6);
   document.getElementById('go').onclick=()=>{
@@ -2012,33 +2644,50 @@ function buildMenu(){
 function autotest(){
   const Q=new URLSearchParams(location.search);
   const steps=parseInt(Q.get('steps')||'9000',10);
-  const log=[];
   resetCanvas(); layoutFog();
   game.seed=parseInt(Q.get('seed')||'12345',10);
   genMap(game.seed);
   game.phase='playing'; game.autoRun=true; game.diff=parseInt(Q.get('diff')||'1',10);
   // 让玩家也交给 AI（临时接管）
   F()[0].ai=true;
-  let maxShips=0,bad=0;
+  let maxShips=0,bad=0,bombs=0,maxBombs=0,captures=0,lastOwners={};
   const t0=performance.now();
   for(let i=0;i<steps;i++){
     step(1/60);
     for(const s of game.ships)if(!isFinite(s.x)||!isFinite(s.y))bad++;
     for(const f of game.fleets)if(!isFinite(f.x)||!isFinite(f.troops))bad++;
-    for(const n of game.nodes)if(!isFinite(n.troops))bad++;
+    for(const n of game.nodes){
+      if(!isFinite(n.troops)||!isFinite(n.hp))bad++;
+      if(n.hp<0||n.hp>n.hpMax+0.5)bad++;
+    }
+    for(const b of game.bullets)if(b.type==='bomb')bombs++;
+    maxBombs=Math.max(maxBombs,bombs); bombs=0;
     maxShips=Math.max(maxShips,game.ships.length);
+    if(i%60===0){
+      for(const n of game.nodes){
+        if(lastOwners[n.id]!==undefined&&lastOwners[n.id]!==n.owner)captures++;
+        lastOwners[n.id]=n.owner;
+      }
+    }
     if(game.phase==='over')break;
   }
   const dt=(performance.now()-t0)/1000;
   const owners={};
-  for(const n of game.nodes)owners[n.owner]=(owners[n.owner]||0)+1;
+  let suppressed=0,guns=0;
+  for(const n of game.nodes){
+    owners[n.owner]=(owners[n.owner]||0)+1;
+    if(nodeSuppressed(n))suppressed++;
+    guns+=nodeGunCount(n);
+  }
   const res={
     ok:bad===0&&game.nodes.length>10&&game.edges.length>=game.nodes.length-1,
     seed:game.seed, steps:steps, simTime:+game.time.toFixed(1), wallSec:+dt.toFixed(2),
+    msPerStep:+(dt/Math.max(1,game.time*60)*1000).toFixed(2),
     badValues:bad,
     nodes:game.nodes.length, edges:game.edges.length,
     fleets:game.fleets.length, ships:game.ships.length, maxShips:maxShips, bullets:game.bullets.length,
-    battles:game.stats.battles,
+    battles:game.stats.battles, captures:captures, suppressed:suppressed, guns:guns, maxBombs:maxBombs,
+    suppressions:game.stats.suppressed, waves:game.waveN,
     owners:owners,
     phase:game.phase,
     winner:game.winner,
@@ -2058,6 +2707,7 @@ function autotest(){
 }
 
 /* ------------------------------ boot ------------------------------ */
+loadProfile();
 buildMenu();
 bindInput();
 resetCanvas();
