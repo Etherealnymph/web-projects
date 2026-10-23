@@ -65,6 +65,7 @@ file:///D:/Project/html/index.html
 
 | 项目 | 入口 | 说明 |
 |---|---|---|
+| 场海 · Field Drift | [field-drift/index.html](./field-drift/index.html) | 电磁场 3D 漂移游戏：唯一的运动方程 q(E+v×B)−kv，用洛伦兹变换解锁"速度门"；七关覆盖电场/磁场/霍耳角/E×B 漂移/不变量/动生电动势，另含可编辑的场实验室（放置电荷、偶极子、线/面/柱电流、螺线管……）与 φ / A 势切面 |
 | 怒海争锋 | [seawar.html](./seawar.html) | 海域领地战游戏（48 岛屿、Supabase 联网多人、战术技能、动态事件、战役星章） |
 | 铁血战线 | [WAR.html](./WAR.html) | 战争模拟和策略对抗 |
 | 幸运老虎机 | [Tiger.html](./Tiger.html) | 轻量老虎机小游戏 |

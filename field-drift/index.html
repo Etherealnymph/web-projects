@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>场海 · Field Drift —— 电磁场漂移者</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="view"></canvas>
+<div id="grain"></div>
+<div id="vignette"></div>
+
+<!-- ================= HUD ================= -->
+<div id="hud">
+  <div id="hud-left">
+    <div class="lvl" id="hud-level">LEVEL 01 · 电场之潮</div>
+    <div class="obj" id="hud-objective">收集电荷种子 0 / 3</div>
+  </div>
+
+  <div id="hud-right">
+    <div class="panel-title">场探针 · 实时读数<span class="frame-tag" id="hud-frame">站台系</span></div>
+    <div class="readrow"><span>|E|</span><b id="r-e">0.000</b></div>
+    <div class="readrow"><span>|B|</span><b id="r-b">0.000</b></div>
+    <div class="readrow"><span>E·B</span><b id="r-eb">0.000</b></div>
+    <div class="readrow"><span>|E|²−|B|²</span><b id="r-inv">0.000</b></div>
+    <div class="readrow"><span>β / γ</span><b id="r-beta">0.00 / 1.00</b></div>
+    <div class="readrow"><span>霍耳角 θ<sub>H</sub></span><b id="r-hall">0.0°</b></div>
+    <div class="readrow"><span>无受力速度 v*</span><b id="r-vstar">—</b></div>
+    <div class="readrow hi"><span>场力抵消 δ</span><b id="r-delta">1.000</b></div>
+    <div class="deltabar"><i id="r-deltabar"></i></div>
+    <div class="readrow pot"><span>φ 电势</span><b id="r-phi">—</b></div>
+    <div class="readrow pot"><span>|A| 磁矢势</span><b id="r-avec">—</b></div>
+    <div class="note" id="r-note"></div>
+  </div>
+
+  <div id="hud-bottom">
+    <div class="gauge">
+      <div class="glabel"><span>场能</span><b id="r-energy">100%</b></div>
+      <div class="bar"><i id="r-energybar"></i></div>
+    </div>
+    <div class="charge" id="hud-charge">⊕</div>
+    <div class="hints" id="hud-hints">
+      <kbd>W</kbd><kbd>S</kbd> 推进 · <kbd>A</kbd><kbd>D</kbd> 横移 · <kbd>空格</kbd> 换系冲刺 · <kbd>Q</kbd> 极性 · <kbd>F</kbd> 参考系视图 · <kbd>Shift</kbd> 慢动作 · <kbd>H</kbd> 手册
+    </div>
+  </div>
+
+  <div id="crosshair"></div>
+  <div id="gatehud" class="hidden">
+    <div class="gh-head">静默门 <b id="gh-name">门 1</b></div>
+    <div class="gh-body">
+      <span>δ</span><b id="gh-delta">0.00</b>
+      <div class="gh-bar"><i id="gh-fill"></i></div>
+    </div>
+    <div class="gh-note" id="gh-note"></div>
+  </div>
+  <div id="lockhint" class="hidden">点击画面锁定鼠标视角</div>
+
+  <!-- ================= 实验室工具栏 ================= -->
+  <div id="labbar" class="hidden">
+    <div class="lab-head">
+      <span class="lab-kicker">场实验室</span>
+      <span class="lab-brush" id="lab-brush-name">点电荷 ⊕</span>
+      <span class="lab-scale" id="lab-scale">×1.0</span>
+    </div>
+    <div class="lab-row" id="lab-tools"></div>
+    <div class="lab-row presets" id="lab-presets"></div>
+    <div class="lab-tip">拖动鼠标转视角 · <b>单击空间放源</b> · <kbd>E</kbd> 也可放置 · <kbd>X</kbd> 删除最近的源 · <kbd>[</kbd><kbd>]</kbd> 强度 · <kbd>V</kbd> 势切面 · <kbd>Esc</kbd> 退出</div>
+  </div>
+
+  <div id="toast-wrap"></div>
+  <div id="fps" class="hidden">60</div>
+</div>
+
+<!-- ================= 标题 ================= -->
+<section class="screen active" id="scr-title">
+  <div class="title-inner">
+    <div class="eyebrow">A GAME ABOUT ELECTROMAGNETISM &amp; INERTIAL FRAMES</div>
+    <h1>场 海</h1>
+    <div class="sub">FIELD&nbsp;DRIFT</div>
+    <p class="blurb">
+      你是一枚带电探针。你没有强引擎，只有一片电磁场。<br>
+      沿着电场线奔跑，被磁场拧开角度，在洛伦兹变换里换一个自己。<br>
+      <em>你能抵达的，不只是位置，还有速度。</em>
+    </p>
+    <div class="btnrow">
+      <button class="btn primary" id="btn-start">开始漂流</button>
+      <button class="btn" id="btn-levels">关卡选择</button>
+      <button class="btn" id="btn-lab">场实验室</button>
+      <button class="btn" id="btn-manual">原理手册</button>
+    </div>
+    <div class="foot">鼠标点击画面锁定视角 · 建议全屏 · 支持键盘操作</div>
+  </div>
+</section>
+
+<!-- ================= 关卡选择 ================= -->
+<section class="screen" id="scr-levels">
+  <div class="panel wide">
+    <h2>选择关卡</h2>
+    <div id="level-grid" class="level-grid"></div>
+    <div class="btnrow"><button class="btn" id="btn-levels-back">返回</button></div>
+  </div>
+</section>
+
+<!-- ================= 关卡简报 ================= -->
+<section class="screen" id="scr-brief">
+  <div class="panel">
+    <div class="brief-tag" id="brief-tag">LEVEL 01</div>
+    <h2 id="brief-title">电场之潮</h2>
+    <div id="brief-body" class="brief-body"></div>
+    <div class="brief-goal" id="brief-goal"></div>
+    <div class="btnrow">
+      <button class="btn primary" id="btn-begin">进入场区</button>
+      <button class="btn" id="btn-brief-back">返回</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 暂停 ================= -->
+<section class="screen" id="scr-pause">
+  <div class="panel">
+    <h2>暂停</h2>
+    <div class="btnrow col">
+      <button class="btn primary" id="btn-resume">继续</button>
+      <button class="btn" id="btn-restart">重开本关</button>
+      <button class="btn" id="btn-pause-manual">原理手册</button>
+      <button class="btn" id="btn-pause-title">回到标题</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 通关 ================= -->
+<section class="screen" id="scr-complete">
+  <div class="panel">
+    <div class="brief-tag" id="done-tag">LEVEL 01</div>
+    <h2 id="done-title">穿越成功</h2>
+    <div class="medal" id="done-medal">★</div>
+    <div class="stats" id="done-stats"></div>
+    <div class="btnrow">
+      <button class="btn primary" id="btn-next">下一关</button>
+      <button class="btn" id="btn-replay">再来一次</button>
+      <button class="btn" id="btn-done-title">标题</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 手册 ================= -->
+<section class="screen" id="scr-manual">
+  <div class="panel huge manual">
+    <div class="manual-head">
+      <h2>原理手册</h2>
+      <button class="btn small" id="btn-manual-close">关闭 [H]</button>
+    </div>
+    <div class="manual-body">
+
+      <h3>0 · 你在玩什么</h3>
+      <p>你驾驶一枚带电探针，在一片充满电磁场的空间里漂移。你没有强引擎，只有一个很弱的推进器；
+      真正让你移动、转向、加速的，是<b>场</b>。每关目标：收集散落的<b>电荷种子</b>，穿过<b>场锁门</b>，抵达出口。</p>
+      <p class="q">为什么不是"沿电场线走、看到电荷就标记"？<br>
+      因为那只是一个观测任务，你不需要做任何决策。真正好玩的问题不是<b>你在哪</b>，而是<b>你以什么速度、在什么参考系里</b>。
+      本作把它做成了核心机制：有些门，只认速度。</p>
+
+      <h3>1 · 唯一的运动方程</h3>
+      <p>探针质量 m、电荷 q，在黏滞介质中受到正比于速度的阻力。整个游戏只有这一条方程：</p>
+      <p class="eq">m·d<b>v</b>/dt = q(<b>E</b> + <b>v</b>×<b>B</b>) − k<b>v</b></p>
+      <p>稳态（dv/dt = 0）时令 μ = q/k，有 <b>v</b> = μ(<b>E</b> + <b>v</b>×<b>B</b>)。解得的速度既不沿 E 也不沿 B，
+      而是从 <b>E</b> 方向被拧开一个角度：</p>
+      <p class="eq">tan θ<sub>H</sub> = μB = qB/k</p>
+      <p>这叫 <b>霍耳角</b>。磁场唯一能做的事，就是把你的速度从电场方向"拧"开。B 越大拧得越多，B 反向则往另一边拧。
+      HUD 里的 θ<sub>H</sub> 就是它。</p>
+      <p class="note">游戏采用自然单位 c = 1，所以 β 与速度数值相同；高 β 时加速度会乘 1/γ，速度被硬性限制在 c 以下。</p>
+
+      <h3>2 · 磁场不做功</h3>
+      <p>磁场力 q<b>v</b>×<b>B</b> 永远垂直于 <b>v</b>，所以功率 P = <b>F</b>·<b>v</b> = 0。
+      磁场<span class="hl">无法改变你的速率</span>，只能改变方向。你所有的加速都来自电场和推进器，
+      而两者都要花<b>场能</b>。仔细观察能量条：关掉 B 只会改变轨迹，不会改变能量收支。</p>
+
+      <h3>3 · 无受力速度与静默门</h3>
+      <p>找一个速度使电场力与磁场力恰好抵消：</p>
+      <p class="eq">q(<b>E</b> + <b>v</b>×<b>B</b>) = 0 &nbsp;⟹&nbsp; <b>v</b>* = (<b>E</b>×<b>B</b>) / B²</p>
+      <p>以这个速度飞行时，你<b>感受不到场</b>——两股力互相抵消，探针沿直线滑行。这就是等离子体物理里的
+      <b>E×B 漂移速度</b>，也是"磁场能把粒子冻在磁力线上"的经典图像的另一面。</p>
+      <p><b>静默门</b>只在你通过时"场力≈0"才解锁，判定量：</p>
+      <p class="eq">δ = |<b>E</b> + <b>v</b>×<b>B</b>| / (|<b>E</b>| + |<b>v</b>×<b>B</b>|)</p>
+      <p>δ → 0 即静默。门会先亮起一圈进度，稳定 0.6 秒后永久解锁。</p>
+
+      <h3>4 · 为什么有些门永远打不开：不变量</h3>
+      <p>如果你无论怎么飞 δ 都降不下去，HUD 会提示 <span class="hl">E·B ≠ 0</span>。原因是：</p>
+      <p class="eq">(<b>E</b> + <b>v</b>×<b>B</b>)·<b>B</b> = <b>E</b>·<b>B</b></p>
+      <p>只要 E·B ≠ 0，无论取什么速度，磁场方向的电场分量都消不掉。<b>E·B 是洛伦兹不变量</b>。
+      另一族不变量决定 E 和 B 谁能被"消掉"：</p>
+      <p class="eq">E·B = 不变 &nbsp;&nbsp; |E|² − |B|² = 不变 &nbsp;&nbsp; (c = 1)</p>
+      <ul>
+        <li>|E| &gt; |B| 且 E·B = 0 → 存在 <b>E′ = 0</b> 的参考系（纯磁场系）</li>
+        <li>|E| &lt; |B| 且 E·B = 0 → 存在 <b>B′ = 0</b> 的参考系（纯电场系）</li>
+        <li>E·B = 0 且 |E| = |B| → 任何参考系都消不掉，只剩一个以 c 传播的平面波</li>
+      </ul>
+
+      <h3>5 · 换系：同一个场，两副面孔</h3>
+      <p>按 <kbd>空格</kbd> 你瞬间改变速度 Δ<b>v</b>。这不只是冲刺——<b>你换了一个参考系</b>，
+      于是你看到的场全部变了：</p>
+      <p class="eq"><b>E</b>′<sub>∥</sub> = <b>E</b><sub>∥</sub> &nbsp;&nbsp;
+        <b>E</b>′<sub>⊥</sub> = γ(<b>E</b><sub>⊥</sub> + <b>v</b>×<b>B</b>)<br>
+        <b>B</b>′<sub>∥</sub> = <b>B</b><sub>∥</sub> &nbsp;&nbsp;
+        <b>B</b>′<sub>⊥</sub> = γ(<b>B</b><sub>⊥</sub> − <b>v</b>×<b>E</b>)<br>
+        γ = 1/√(1 − β²)</p>
+      <p>按 <kbd>F</kbd> 在"站台系"与"我的参考系"之间切换可视化：同一片空间，箭头完全变了样。
+      哪一个是"真的"？都不是。<b>E</b> 和 <b>B</b> 只是同一个电磁场张量 F<sup>μν</sup> 在不同参考系下的两组分量。</p>
+
+      <h3>6 · 磁场就是电场的相对论效应</h3>
+      <p>取一根通电导线：静止晶格带正电、电子以速度 u 漂移，整体电中性。站台系里你看到电流产生 <b>B</b>，
+      旁边的运动电荷受<b>磁力</b> q<b>v</b>×<b>B</b>。</p>
+      <p>换到电荷自己的参考系：晶格与电子的洛伦兹收缩比例不同，净电荷密度 ρ′ ≠ 0——导线居然<b>带电了</b>。
+      电荷受到的是<b>纯电力</b> q<b>E</b>′。同一个力，两种说法。</p>
+      <p>因为 γ ≈ 1 + ½β² 中的 β² 很小，磁力比电力小约 v²/c² 倍——这就是"磁场是电力的相对论修正"的准确含义。
+      在近光速的场海里，这个修正不再微小，于是你随时可以切换视角去读它。</p>
+      <p class="note">关于 <b>D</b> 与 <b>H</b>：真空中 <b>D</b> = ε₀<b>E</b>、<b>H</b> = <b>B</b>/μ₀，只是换了个常数；
+      只有在介质中它们才携带独立信息（极化与磁化）。本作的场海是近真空等离子体，所以直接读 <b>E</b> 和 <b>B</b>。</p>
+
+      <h3>7 · 动生电动势：你的燃料</h3>
+      <p>你在磁场中飞行时，在你自己的参考系里出现了电场 <b>E</b>′ ≈ γ<b>v</b>×<b>B</b>。收集器把它整流成能量：</p>
+      <p class="eq">P<sub>充能</sub> ∝ |<b>v</b>×<b>B</b>| · γ</p>
+      <p>所以：<b>想充电，就垂直于 B 高速飞行</b>。这正是法拉第电磁感应定律的动生形式 ε = ∮(<b>v</b>×<b>B</b>)·d<b>l</b>。
+      靠近通电导线绕圈，就是本作最好的充电桩。</p>
+
+      <h3>8 · 势：φ 与 A</h3>
+      <p>场来自源。源一旦摆好，场和势就同时被确定：</p>
+      <p class="eq">φ(<b>r</b>) = Σ k q<sub>i</sub>/r<sub>i</sub> &nbsp;&nbsp; <b>E</b> = −∇φ<br>
+        <b>A</b>(<b>r</b>) = Σ k I<sub>i</sub> ∫ d<b>l</b>/|<b>r</b>−<b>r</b>′| &nbsp;&nbsp; <b>B</b> = ∇×<b>A</b></p>
+      <p>按 <kbd>V</kbd> 在探针处切一个垂直于视线的平面：第一次是 <b>φ 电势</b>（蓝负红正，附等势线），
+      第二次是 <b>A 磁矢势</b>（大小热图 + 方向箭头），第三次关闭。</p>
+      <p>看 A 最有意思的地方：它绕着电流打圈，螺线管<b>轴线上 A 最小、B 最大</b>——两个势与场并不"同向"。
+      A 不对应任何可感知的力，却决定了整个磁场，在量子力学里还直接与相位耦合（A–B 效应）。</p>
+      <p class="note">切面跟着探针走，所以它像一台"场的显微镜"：飞到哪里，就在哪里采样。</p>
+
+      <h3>9 · 场源与实验室</h3>
+      <p>从标题页进入<b>场实验室</b>，可以在空间里直接放置源，场线与势会立刻重算：</p>
+      <table class="keys">
+        <tr><td>点电荷 ⊕ / ⊖</td><td>E = kq<b>r̂</b>/r²</td></tr>
+        <tr><td>电偶极子</td><td>E = k[3(<b>p</b>·<b>r̂</b>)<b>r̂</b>−<b>p</b>]/r³</td></tr>
+        <tr><td>线电荷 / 带电面 / 带电柱</td><td>由源离散叠加；柱外场等价于轴线线电荷 λ=ρπr²</td></tr>
+        <tr><td>线电流 / 电流环</td><td>毕奥–萨伐尔积分（长直导线用解析解）</td></tr>
+        <tr><td>面电流 / 柱电流</td><td>面电流 = 一排平行导线；空心柱电流内部 B≈0</td></tr>
+        <tr><td>螺线管</td><td>N 个同轴电流环，内部近似匀强</td></tr>
+        <tr><td>磁偶极子</td><td><b>B</b> = k[3(<b>m</b>·<b>r̂</b>)<b>r̂</b>−<b>m</b>]/r³</td></tr>
+        <tr><td>匀强电场区 / 磁场区</td><td>盒形区域内的常矢量场，边界软过渡</td></tr>
+      </table>
+      <table class="keys">
+        <tr><td><kbd>左键</kbd></td><td>把选中的元素放到准星处（先点画面锁定鼠标）</td></tr>
+        <tr><td><kbd>E</kbd> / <kbd>X</kbd></td><td>放置 / 删除准星附近的源</td></tr>
+        <tr><td><kbd>[</kbd> <kbd>]</kbd></td><td>调整待放置源的强度 ×0.25 – ×4</td></tr>
+        <tr><td><kbd>V</kbd></td><td>切换 φ / A 势切面</td></tr>
+        <tr><td>示例按钮</td><td>电偶极子 / 平行板 / 螺线管 / 直导线 / 四极场</td></tr>
+      </table>
+
+      <h3>10 · 操作</h3>
+      <table class="keys">
+        <tr><td><kbd>鼠标</kbd></td><td>视角（点击画面锁定）</td></tr>
+        <tr><td><kbd>W</kbd> <kbd>S</kbd></td><td>沿视线推进 / 反推（耗场能）</td></tr>
+        <tr><td><kbd>A</kbd> <kbd>D</kbd></td><td>横向微调</td></tr>
+        <tr><td><kbd>空格</kbd></td><td>换系冲刺：瞬间改变速度 Δv（贵）</td></tr>
+        <tr><td><kbd>Q</kbd></td><td>电荷极性翻转 ⊕ ↔ ⊖（整个洛伦兹力反向）</td></tr>
+        <tr><td><kbd>F</kbd></td><td>切换参考系视图（看你自己的系里的场）</td></tr>
+        <tr><td><kbd>V</kbd></td><td>φ / A 势切面</td></tr>
+        <tr><td><kbd>Shift</kbd></td><td>慢动作（精调速度用）</td></tr>
+        <tr><td><kbd>R</kbd></td><td>重置到起点</td></tr>
+        <tr><td><kbd>Esc</kbd> / <kbd>H</kbd></td><td>暂停 / 手册</td></tr>
+        <tr><td><kbd>M</kbd></td><td>静音</td></tr>
+      </table>
+
+      <h3>11 · 判分</h3>
+      <p>通关时间决定评价：金 / 银 / 铜。收集全部电荷种子是通关前提（出口会锁住）。
+      场能耗尽会解体，在起点重构——已收集的种子不会丢。</p>
+    </div>
+  </div>
+</section>
+
+<script src="js/core.js"></script>
+<script src="js/field.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/render.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
