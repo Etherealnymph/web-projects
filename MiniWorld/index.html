@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>迷你世界 · 像素宇宙 | Web 3D Sandbox</title>
+<meta name="description" content="一个可在浏览器里运行的 3D 像素世界：紫禁城、唐长安、清水河校园、珠海一中、台湾海峡。AI 建造、战斗、便签、载具与存档导入导出。" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b0e14'/%3E%3Crect x='12' y='28' width='18' height='18' fill='%23ff9d3c'/%3E%3Crect x='32' y='16' width='20' height='30' fill='%2358e6d9'/%3E%3Crect x='20' y='12' width='10' height='12' fill='%23e8b64f'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="app">
+  <canvas id="game-canvas"></canvas>
+  <div id="scanlines"></div>
+  <div id="vignette"></div>
+  <div id="hurt-flash"></div>
+
+  <!-- ============ 开始界面 ============ -->
+  <section id="start-screen">
+    <div class="menu-bg">
+      <canvas id="menu-canvas"></canvas>
+      <div class="menu-grid"></div>
+      <div class="menu-glow"></div>
+      <div class="menu-blocks" aria-hidden="true">
+        <span class="mb mb1"></span><span class="mb mb2"></span><span class="mb mb3"></span>
+        <span class="mb mb4"></span><span class="mb mb5"></span><span class="mb mb6"></span>
+      </div>
+    </div>
+    <header class="menu-header">
+      <div class="logo">
+        <span class="logo-mark"><i></i><i></i><i></i><i></i></span>
+        <div>
+          <h1>迷你世界</h1>
+          <p>PIXEL UNIVERSE · 像素宇宙</p>
+        </div>
+      </div>
+      <div class="menu-actions">
+        <button class="btn ghost" id="btn-continue">↻ 继续上次</button>
+        <button class="btn ghost" id="btn-sample-world">✧ 示例世界</button>
+        <button class="btn ghost" id="btn-import-menu">⇪ 导入世界</button>
+        <button class="btn ghost" id="btn-settings-menu">⚙ 设置</button>
+      </div>
+    </header>
+
+    <main class="menu-main">
+      <section class="hero">
+        <p class="kicker"><span></span> WEB · 3D · SANDBOX</p>
+        <h2>一座由你<br /><em>随手创造</em>的世界</h2>
+        <p class="hero-desc">在紫禁城的黄昏御道上散步，去唐长安看一夜灯火，或登上巡逻艇驶入海峡。用对话让 AI 建造，留下便签、招募小队，再把整个世界存成一个文件。</p>
+        <div class="hero-stats">
+          <div><b>6</b><span>手工案例世界</span></div>
+          <div><b>∞</b><span>可编辑方块</span></div>
+          <div><b>3</b><span>探索 / 建造 / 战斗</span></div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn primary big" id="btn-play">▶ 选择世界开始</button>
+          <button class="btn ghost big" id="btn-help-menu">玩法说明</button>
+        </div>
+        <p class="hero-note">纯前端运行 · 无需安装 · 支持世界文件导入导出</p>
+      </section>
+
+      <section class="worlds">
+        <div class="section-head">
+          <h3><span>01</span> 选择世界</h3>
+          <span class="section-sub">点击卡片直接进入</span>
+        </div>
+        <div class="world-grid" id="world-grid"></div>
+        <div class="menu-tip">
+          <span class="dot"></span>
+          <p>提示：进入世界后按 <kbd>B</kbd> 呼出 AI 建筑师，输入「建一座大雁塔」即可现场施工。</p>
+          <button class="link" id="btn-help-menu2">全部操作 →</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="menu-footer">
+      <span>MINI WORLD · v1.0.0</span>
+      <span>Made for the web · Three.js · 无需联网也能玩</span>
+      <span id="menu-status">系统就绪</span>
+    </footer>
+  </section>
+
+  <!-- ============ 加载 ============ -->
+  <section id="loading" class="hidden">
+    <div class="load-card">
+      <div class="load-logo"><span></span><span></span><span></span><span></span></div>
+      <h2 id="load-title">正在生成世界</h2>
+      <p id="load-sub">搬运方块中……</p>
+      <div class="load-bar"><i id="load-progress"></i></div>
+      <div class="load-meta"><span id="load-percent">0%</span><span id="load-count">0 方块</span></div>
+      <p class="load-quote" id="load-quote">“先搭一座桥，再考虑要不要过河。”</p>
+    </div>
+  </section>
+
+  <!-- ============ HUD ============ -->
+  <section id="hud" class="hidden">
+    <div class="hud-top-left">
+      <div class="player-card glass">
+        <div class="avatar"><span id="hud-avatar">旅</span></div>
+        <div class="pinfo">
+          <div class="pname-row"><span id="hud-name">旅行者</span><span class="lvl">LV.<b id="hud-level">1</b></span></div>
+          <div class="bar health"><i id="hud-hp-fill"></i><em id="hud-hp-text">100</em></div>
+          <div class="bar armor"><i id="hud-armor-fill"></i></div>
+        </div>
+        <div class="coin-box" title="金币"><span>◈</span><b id="hud-coins">120</b></div>
+      </div>
+      <div class="objectives glass" id="objectives">
+        <div class="obj-head"><span>◆ 当前目标</span><b id="hud-kills">0 击杀</b></div>
+        <p id="hud-objective">探索世界，寻找补给</p>
+        <ul id="objective-list"></ul>
+      </div>
+    </div>
+
+    <div class="hud-top-center">
+      <div class="world-chip">
+        <span id="hud-world">紫禁城</span>
+        <small id="hud-tagline">黄昏 · 宫阙</small>
+      </div>
+      <div class="mode-switch" id="mode-switch">
+        <button data-mode="explore" class="active"><span>◈</span>探索 <kbd>Z</kbd></button>
+        <button data-mode="build"><span>▦</span>建造 <kbd>X</kbd></button>
+        <button data-mode="combat"><span>✹</span>战斗 <kbd>C</kbd></button>
+      </div>
+      <div class="env-row">
+        <button id="btn-weather" title="切换天气 (T)">☀ <span>晴朗</span> <kbd>T</kbd></button>
+        <button id="btn-season" title="切换季节 (Y)">🍂 <span>秋</span> <kbd>Y</kbd></button>
+        <span class="clock" id="hud-clock">17:20</span>
+      </div>
+    </div>
+
+    <div class="hud-top-right">
+      <div class="toolbar">
+        <button data-panel="ai" title="AI 建筑师 (B)"><span class="ico">✦</span><em>AI 建造</em></button>
+        <button data-panel="inventory" title="背包 (I)"><span class="ico">▣</span><em>背包</em></button>
+        <button data-panel="squad" title="军团 (K)"><span class="ico">⚑</span><em>军团</em></button>
+        <button data-panel="notes" title="便签与留言 (L)"><span class="ico">✎</span><em>便签</em></button>
+        <button data-panel="workshop" title="模型工坊 (O)"><span class="ico">◫</span><em>工坊</em></button>
+        <button data-panel="map" title="世界全图 (P)"><span class="ico">◈</span><em>全图</em></button>
+        <button data-panel="settings" title="设置"><span class="ico">⚙</span><em>设置</em></button>
+        <button data-panel="help" title="帮助 (H)"><span class="ico">?</span><em>帮助</em></button>
+      </div>
+      <div class="kill-feed" id="kill-feed"></div>
+      <div class="squad-strip" id="squad-strip">
+        <span class="sq-label">小队</span>
+        <div id="squad-dots"></div>
+        <button class="mini" id="btn-dispatch" title="派遣小队占领最近据点">派遣</button>
+      </div>
+    </div>
+
+    <div class="hud-bottom-left">
+      <div class="minimap-wrap glass">
+        <div class="mini-head"><span id="mini-world">紫禁城</span><b id="mini-coord">0, 0</b></div>
+        <canvas id="minimap" width="200" height="200"></canvas>
+        <div class="compass" id="compass"><span>N</span><i></i><b id="compass-dir">北</b></div>
+      </div>
+    </div>
+
+    <div class="hud-bottom-right">
+      <div class="weapon-hud glass">
+        <div class="weapon-meta">
+          <span id="hud-backpack">背包 3/12</span>
+          <span id="hud-weapon-name">M9 手枪</span>
+        </div>
+        <div class="ammo-row">
+          <div class="ammo"><b id="hud-mag">12</b><span>/</span><i id="hud-reserve">72</i></div>
+          <div class="ammo-type" id="hud-ammo-type">5.56mm</div>
+        </div>
+        <div class="weapon-belt" id="weapon-belt"></div>
+        <div class="weapon-tip" id="hud-weapon-desc">可靠、轻便的随身武器。</div>
+      </div>
+    </div>
+
+    <div id="interact-prompt" class="interact hidden"><kbd>E</kbd><span>拾取</span></div>
+
+    <div id="build-bar" class="build-bar glass hidden">
+      <div class="build-title">
+        <span>建造调色板 <em>1–0 选择</em></span>
+        <span class="build-actions">
+          <button id="build-action-place" class="active">▣ 放置</button>
+          <button id="build-action-destroy">✕ 摧毁</button>
+          <em>F 切换</em>
+        </span>
+      </div>
+      <div id="build-colors"></div>
+      <div class="build-hint">左键执行当前操作 · 右键快速拆除 · <b>[</b> <b>]</b> 笔刷 <span id="brush-size">1×1×1</span></div>
+    </div>
+
+    <div id="combat-keys" class="combat-keys glass hidden">
+      <span class="ck-title">战斗快捷键</span>
+      <span><kbd>左键</kbd>射击</span>
+      <span><kbd>右键</kbd>瞄准</span>
+      <span><kbd>R</kbd>换弹</span>
+      <span><kbd>G</kbd>手雷</span>
+      <span><kbd>M</kbd>地雷</span>
+      <span><kbd>1–7</kbd>武器</span>
+      <button id="combat-bag" type="button"><kbd>I</kbd> 背包</button>
+      <span><kbd>Esc</kbd>菜单</span>
+    </div>
+
+    <div id="vehicle-hud" class="vehicle-hud glass hidden">
+      <div class="vh-main">
+        <span class="vh-name" id="vh-name">载具</span>
+        <b id="vh-speed">0</b><small>km/h</small>
+        <span class="vh-alt" id="vh-alt">高度 0m</span>
+      </div>
+      <div class="vh-hint" id="vh-hint">A/D 转向 · W/S 前后 · Shift 加速 · E 离开</div>
+    </div>
+
+    <div id="danger-warning" class="danger-warning hidden"><b>⚠</b><span>夜行尸接近</span></div>
+    <div id="damage-indicator" class="damage-indicator"><i></i></div>
+
+    <div id="crosshair" class="crosshair">
+      <i class="ch-t"></i><i class="ch-b"></i><i class="ch-l"></i><i class="ch-r"></i><b class="ch-dot"></b>
+    </div>
+    <div id="scope-overlay" class="scope hidden">
+      <div class="scope-ring"></div><div class="scope-cross"></div>
+      <span class="scope-tip">AWM · 右键退出瞄准</span>
+    </div>
+    <div id="hit-marker" class="hit-marker"></div>
+    <div id="hud-hints" class="hud-hints">WASD 移动 · 鼠标视角 · E 交互 · N 便签 · Esc 菜单</div>
+    <div id="pointer-hint" class="pointer-hint hidden">点击画面锁定鼠标 · 按 Esc 打开菜单</div>
+    <div id="fps" class="fps">60</div>
+  </section>
+
+  <!-- ============ 死亡 / 胜利 ============ -->
+  <section id="death-screen" class="hidden">
+    <div class="death-card">
+      <p class="kicker">YOU DIED</p>
+      <h2>你被夜行尸击倒了</h2>
+      <p>装备会留在背包里，3 秒后在据点重新集结。</p>
+      <div class="respawn-bar"><i></i></div>
+    </div>
+  </section>
+
+  <section id="victory-screen" class="hidden">
+    <div class="victory-card">
+      <p class="kicker">WORLD CLEARED</p>
+      <h2>这片世界，暂时安全了</h2>
+      <p id="victory-desc">所有据点已占领。</p>
+      <div class="victory-stats" id="victory-stats"></div>
+      <div class="victory-actions">
+        <button class="btn primary" id="btn-victory-continue">继续闲逛</button>
+        <button class="btn ghost" id="btn-victory-menu">返回主菜单</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AI 建筑师 ============ -->
+  <aside id="panel-ai" class="drawer hidden">
+    <header class="drawer-head">
+      <div>
+        <span class="kicker">AI ARCHITECT</span>
+        <h2>世界建筑师</h2>
+      </div>
+      <button class="icon-btn" data-close="ai">✕</button>
+    </header>
+    <div class="ai-status">
+      <span class="status-dot" id="ai-status-dot"></span>
+      <span id="ai-status-text">本地模式 · 内置世界图谱</span>
+      <label class="switch"><input type="checkbox" id="ai-web-toggle" checked /><i></i><span>联网资料</span></label>
+    </div>
+    <div class="ai-log" id="ai-log"></div>
+    <div class="ai-image hidden" id="ai-image-wrap">
+      <img id="ai-image" alt="联网检索参考图" />
+      <span id="ai-image-caption">联网参考</span>
+    </div>
+    <div class="ai-progress hidden" id="ai-progress-wrap">
+      <div class="ai-progress-bar"><i id="ai-progress-fill"></i></div>
+      <span id="ai-progress-text">0 / 0</span>
+    </div>
+    <div class="ai-chips" id="ai-chips">
+      <button>建一座大雁塔</button>
+      <button>盖一栋带玻璃幕墙的图书馆</button>
+      <button>修一座跨河石拱桥</button>
+      <button>造一座金字塔</button>
+      <button>建一个带喷泉的公园</button>
+      <button>做一座赛博朋克大厦</button>
+    </div>
+    <form class="ai-input" id="ai-form">
+      <textarea id="ai-text" rows="2" placeholder="描述你想建的东西，例如：在广场中央建一座有灯的中式宫殿……"></textarea>
+      <button type="submit" id="ai-send">建造 <span>↵</span></button>
+    </form>
+    <p class="ai-note">建筑会出现在你前方 15 格处。配置 API Key 后可调用大模型自由设计；否则使用本地结构图谱。</p>
+  </aside>
+
+  <!-- ============ 背包 ============ -->
+  <div id="panel-inventory" class="modal hidden">
+    <div class="modal-card wide">
+      <header class="modal-head">
+        <div><span class="kicker">INVENTORY</span><h2>背包与军械</h2></div>
+        <button class="icon-btn" data-close="inventory">✕</button>
+      </header>
+      <div class="inv-layout">
+        <div class="inv-left">
+          <div class="inv-meta"><span id="inv-backpack-name">帆布背包</span><b id="inv-capacity">0 / 12</b></div>
+          <div class="inv-grid" id="inv-grid"></div>
+          <p class="inv-tip">容量由背包等级决定 · 拾取更高级背包可扩容</p>
+        </div>
+        <div class="inv-right">
+          <h3>武器栏 <small>最多 7 件</small></h3>
+          <div class="inv-weapons" id="inv-weapons"></div>
+          <h3>当前装备</h3>
+          <div class="equipped" id="inv-equipped"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 军团 ============ -->
+  <div id="panel-squad" class="modal hidden">
+    <div class="modal-card wide">
+      <header class="modal-head">
+        <div><span class="kicker">SQUAD &amp; CAPTURE</span><h2>小队与据点</h2></div>
+        <button class="icon-btn" data-close="squad">✕</button>
+      </header>
+      <div class="squad-layout">
+        <div>
+          <div class="squad-top">
+            <div><b id="squad-count">0 / 6</b><span>名士兵</span></div>
+            <button class="btn primary" id="btn-recruit">招募士兵 <em>◈ 60</em></button>
+          </div>
+          <div class="soldier-list" id="soldier-list"></div>
+          <button class="btn ghost wide-btn" id="btn-dispatch-2">⚑ 派遣小队占领最近据点</button>
+        </div>
+        <div>
+          <h3>据点进度</h3>
+          <div class="zone-list" id="zone-list"></div>
+          <p class="inv-tip">靠近据点并清理其中的僵尸即可占领。士兵在据点内会加快进度。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 便签 ============ -->
+  <div id="panel-notes" class="modal hidden">
+    <div class="modal-card wide">
+      <header class="modal-head">
+        <div><span class="kicker">NOTES &amp; BOARD</span><h2>便签与留言</h2></div>
+        <button class="icon-btn" data-close="notes">✕</button>
+      </header>
+      <div class="tabs" id="note-tabs">
+        <button data-tab="world" class="active">世界便签</button>
+        <button data-tab="global">全球留言</button>
+        <button data-tab="author">给作者</button>
+      </div>
+      <div class="note-panel" id="note-world">
+        <div class="note-compose">
+          <textarea id="note-text" rows="2" maxlength="160" placeholder="在这个位置留下一张便签……"></textarea>
+          <button class="btn primary" id="btn-add-note">钉在此处</button>
+        </div>
+        <div class="note-list" id="note-list"></div>
+      </div>
+      <div class="note-panel hidden" id="note-global">
+        <div class="note-compose">
+          <input id="msg-name" maxlength="12" placeholder="你的昵称" />
+          <textarea id="msg-text" rows="2" maxlength="200" placeholder="对这个世界说点什么……"></textarea>
+          <button class="btn primary" id="btn-add-msg" data-channel="global">发布</button>
+        </div>
+        <div class="note-list" id="msg-list-global"></div>
+      </div>
+      <div class="note-panel hidden" id="note-author">
+        <div class="note-compose">
+          <input id="author-name" maxlength="12" placeholder="你的昵称" />
+          <textarea id="author-text" rows="2" maxlength="240" placeholder="给作者的建议、bug 或新玩法……"></textarea>
+          <button class="btn primary" id="btn-add-author" data-channel="author">提交建议</button>
+        </div>
+        <div class="note-list" id="msg-list-author"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 工坊 ============ -->
+  <div id="panel-workshop" class="modal hidden">
+    <div class="modal-card wide">
+      <header class="modal-head">
+        <div><span class="kicker">MODEL WORKSHOP</span><h2>模型工坊</h2></div>
+        <button class="icon-btn" data-close="workshop">✕</button>
+      </header>
+      <div class="tabs" id="workshop-tabs">
+        <button data-tab="weapons" class="active">武器建模</button>
+        <button data-tab="characters">人物建模</button>
+      </div>
+      <div class="workshop-layout" id="workshop-weapons">
+        <div class="model-list" id="weapon-model-list"></div>
+        <div class="model-stage">
+          <canvas id="workshop-canvas" width="520" height="360"></canvas>
+          <div class="model-badge" id="model-name">M9 手枪</div>
+          <div class="model-desc" id="model-desc">可靠、轻便的随身武器。</div>
+          <div class="model-stats" id="model-stats"></div>
+          <div class="model-actions">
+            <button class="btn primary" id="btn-equip-weapon">装备到武器栏</button>
+            <button class="btn ghost" id="btn-export-weapon">导出此模型</button>
+          </div>
+        </div>
+      </div>
+      <div class="workshop-layout hidden" id="workshop-characters">
+        <div class="model-list" id="character-model-list"></div>
+        <div class="model-stage">
+          <div class="character-preview" id="character-preview">
+            <div class="cp-head"></div><div class="cp-body"></div><div class="cp-legs"></div>
+          </div>
+          <div class="model-desc" id="character-desc">玩家皮肤会应用在第三人称模型上。</div>
+          <div class="model-actions">
+            <button class="btn primary" id="btn-apply-character">应用此皮肤</button>
+            <button class="btn ghost" id="btn-export-character">导出人物模型</button>
+          </div>
+        </div>
+      </div>
+      <div class="workshop-tools">
+        <input id="model-ai-input" placeholder="AI 生成武器模型，例如：一把会发光的电磁狙击枪" />
+        <button class="btn primary" id="btn-ai-weapon">✦ AI 生成武器</button>
+        <button class="btn ghost" id="btn-import-weapon">⇪ 导入武器 JSON</button>
+        <button class="btn ghost" id="btn-import-character">⇪ 导入人物 JSON</button>
+        <input type="file" id="file-weapon" accept=".json,application/json" hidden />
+        <input type="file" id="file-character" accept=".json,application/json" hidden />
+      </div>
+      <p class="inv-tip">模型文件存放在 <code>weapons/</code> 与 <code>characters/</code> 文件夹，格式为方块零件 JSON；AI 生成会优先调用已配置的 API，失败时使用本地生成器。</p>
+    </div>
+  </div>
+
+  <!-- ============ 设置 ============ -->
+  <div id="panel-settings" class="modal hidden">
+    <div class="modal-card">
+      <header class="modal-head">
+        <div><span class="kicker">SETTINGS</span><h2>设置</h2></div>
+        <button class="icon-btn" data-close="settings">✕</button>
+      </header>
+      <div class="settings-body">
+        <h3>玩家</h3>
+        <label class="field"><span>昵称</span><input id="set-name" maxlength="12" /></label>
+        <h3>大模型 API <small>OpenAI 兼容格式</small></h3>
+        <label class="field"><span>API 地址</span><input id="set-api-base" placeholder="https://api.deepseek.com" /></label>
+        <label class="field"><span>API Key</span><input id="set-api-key" type="password" placeholder="sk-..." autocomplete="off" /></label>
+        <label class="field"><span>模型</span><input id="set-model" placeholder="deepseek-chat" /></label>
+        <div class="inline-row">
+          <label class="switch"><input type="checkbox" id="set-web" /><i></i><span>联网检索资料</span></label>
+          <label class="switch"><input type="checkbox" id="set-audio" /><i></i><span>音效</span></label>
+        </div>
+        <p class="field-note">Key 仅保存在本机 localStorage，用于直接向你的 API 端点发起请求。不填也能完整体验本地模式。</p>
+        <div class="inline-row">
+          <button class="btn ghost" id="btn-test-api">测试连接</button>
+          <span class="api-test" id="api-test-result">未测试</span>
+        </div>
+        <h3>世界文件</h3>
+        <div class="inline-row wrap">
+          <button class="btn ghost" id="btn-export-world">⇪ 导出当前世界</button>
+          <button class="btn ghost" id="btn-import-world">⇩ 导入世界文件</button>
+          <button class="btn ghost danger" id="btn-reset-world">重置本世界进度</button>
+          <input type="file" id="file-world" accept=".json,application/json" hidden />
+        </div>
+        <p class="field-note" id="save-info">存档会自动保存到本机浏览器。</p>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn ghost" data-close="settings">取消</button>
+        <button class="btn primary" id="btn-save-settings">保存设置</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ============ 帮助 ============ -->
+  <div id="panel-map" class="modal hidden">
+    <div class="modal-card wide map-card">
+      <header class="modal-head">
+        <div><span class="kicker">WORLD ATLAS</span><h2>世界全图</h2></div>
+        <button class="icon-btn" data-close="map">✕</button>
+      </header>
+      <div class="map-stage">
+        <canvas id="world-map-canvas" width="900" height="900"></canvas>
+        <div class="map-legend">
+          <span><i class="dot player"></i>你</span>
+          <span><i class="dot zone"></i>据点</span>
+          <span><i class="dot vehicle"></i>载具</span>
+          <span><i class="dot ship"></i>敌舰</span>
+          <span><i class="dot zombie"></i>夜行尸</span>
+        </div>
+      </div>
+      <div class="map-foot">
+        <span>滚轮缩放 · 拖动平移 · <kbd>P</kbd> 关闭</span>
+        <span class="map-actions">
+          <button class="mini" id="map-zoom-in">＋</button>
+          <button class="mini" id="map-zoom-out">－</button>
+          <button class="mini" id="map-reset">复位</button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-elevator" class="modal hidden">
+    <div class="modal-card elevator-card">
+      <header class="modal-head">
+        <div><span class="kicker">VERTICAL TRANSIT</span><h2 id="elevator-title">电梯</h2></div>
+        <button class="icon-btn" data-close="elevator">✕</button>
+      </header>
+      <p class="field-note" id="elevator-info">选择楼层</p>
+      <div id="elevator-floors" class="elevator-floors"></div>
+    </div>
+  </div>
+
+  <div id="panel-help" class="modal hidden">
+    <div class="modal-card wide">
+      <header class="modal-head">
+        <div><span class="kicker">FIELD MANUAL</span><h2>玩法说明</h2></div>
+        <button class="icon-btn" data-close="help">✕</button>
+      </header>
+      <div class="help-grid">
+        <div>
+          <h3>移动</h3>
+          <ul class="key-list">
+            <li><kbd>W A S D</kbd><span>移动</span></li>
+            <li><kbd>Space</kbd><span>跳跃 / 上浮</span></li>
+            <li><kbd>Shift</kbd><span>疾跑</span></li>
+            <li><kbd>V</kbd><span>第一 / 第三人称</span></li>
+            <li><kbd>P</kbd><span>世界全图</span></li>
+            <li><kbd>鼠标</kbd><span>视角</span></li>
+          </ul>
+          <h3>三种模式</h3>
+          <ul class="key-list">
+            <li><kbd>Z</kbd><span>探索 · 闲逛与交互</span></li>
+            <li><kbd>X</kbd><span>建造 · 左键放置右键拆除</span></li>
+            <li><kbd>C</kbd><span>战斗 · 武器与僵尸</span></li>
+          </ul>
+          <h3>交互</h3>
+          <ul class="key-list">
+            <li><kbd>E</kbd><span>开关门 / 城门吊桥 / 电梯 / 开炮 / 驾驶</span></li>
+            <li><kbd>R</kbd><span>落水时返回最近岸边</span></li>
+            <li><kbd>滚轮 ↑↓</kbd><span>靠近火炮时调整俯仰</span></li>
+            <li><kbd>F</kbd><span>建造模式切换放置/摧毁</span></li>
+          </ul>
+        </div>
+        <div>
+          <h3>战斗</h3>
+          <ul class="key-list">
+            <li><kbd>左键</kbd><span>射击 / 开炮</span></li>
+            <li><kbd>右键</kbd><span>瞄准（狙击开镜）</span></li>
+            <li><kbd>R</kbd><span>换弹</span></li>
+            <li><kbd>G</kbd><span>投掷手雷</span></li>
+            <li><kbd>M</kbd><span>放置地雷</span></li>
+            <li><kbd>1–7</kbd><span>切换武器</span></li>
+            <li><kbd>E</kbd><span>拾取 / 驾驶 / 读便签</span></li>
+          </ul>
+          <h3>载具</h3>
+          <ul class="key-list">
+            <li><kbd>A / D</kbd><span>转向</span></li>
+            <li><kbd>W / S</kbd><span>前进 / 倒车 · 飞机油门</span></li>
+            <li><kbd>Shift</kbd><span>汽车加速 / 飞机下降</span></li>
+            <li><kbd>Space</kbd><span>刹车 / 飞机上升</span></li>
+            <li><kbd>滚轮 ↑↓</kbd><span>坦克炮口俯仰</span></li>
+            <li><kbd>鼠标上下</kbd><span>战斗机俯仰</span></li>
+            <li><kbd>V</kbd><span>无人机 / 战斗机切换视角</span></li>
+            <li><kbd>E</kbd><span>操控 / 降落 / 离开</span></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3>世界</h3>
+          <ul class="key-list">
+            <li><kbd>T</kbd><span>切换天气</span></li>
+            <li><kbd>Y</kbd><span>切换季节</span></li>
+            <li><kbd>N</kbd><span>在此处留便签</span></li>
+            <li><kbd>L</kbd><span>便签 / 留言板</span></li>
+            <li><kbd>K</kbd><span>小队与据点</span></li>
+            <li><kbd>B</kbd><span>AI 建筑师</span></li>
+            <li><kbd>O</kbd><span>模型工坊</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="help-bottom">
+        <p>提示：战斗模式会持续刷新夜行尸；占领全部据点并完成击杀目标即可通关。世界会不时空投坦克、战斗机或重炮，重炮可以缓慢推动；落水后按 <kbd>R</kbd> 回到最近岸边。紫禁城四座主门可按 <kbd>E</kbd> 左右对开，吊桥同步升降；护城河是深水，不能直接行走。按 <kbd>P</kbd> 查看全图。</p>
+        <button class="btn primary" data-close="help">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 暂停 ============ -->
+  <div id="panel-pause" class="modal hidden">
+    <div class="modal-card narrow">
+      <header class="modal-head">
+        <div><span class="kicker">PAUSED</span><h2>世界暂停</h2></div>
+      </header>
+      <div class="pause-actions">
+        <button class="btn primary" id="btn-resume">▶ 继续游戏</button>
+        <button class="btn ghost" data-panel="settings">⚙ 设置</button>
+        <button class="btn ghost" data-panel="workshop">◫ 模型工坊</button>
+        <button class="btn ghost" id="btn-save-now">▣ 保存世界</button>
+        <button class="btn ghost danger" id="btn-exit-menu">⇤ 返回主菜单</button>
+      </div>
+      <p class="pause-tip">点击画面可重新锁定鼠标。</p>
+    </div>
+  </div>
+
+  <!-- ============ 便签阅读 ============ -->
+  <div id="panel-note-read" class="modal hidden">
+    <div class="modal-card narrow note-read-card">
+      <header class="modal-head">
+        <div><span class="kicker">FIELD NOTE</span><h2>世界便签</h2></div>
+        <button class="icon-btn" data-close="note-read">✕</button>
+      </header>
+      <p class="note-body" id="note-read-body"></p>
+      <p class="note-meta" id="note-read-meta"></p>
+      <footer class="modal-foot">
+        <button class="btn ghost danger" id="btn-delete-note">撕掉便签</button>
+        <button class="btn primary" data-close="note-read">合上</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+</div>
+
+<script src="vendor/three.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/util.js"></script>
+<script src="js/world.js"></script>
+<script src="js/worldgen.js"></script>
+<script src="js/models.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/combat.js"></script>
+<script src="js/player.js"></script>
+<script src="js/architect.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
