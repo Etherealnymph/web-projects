@@ -498,6 +498,7 @@ $$ declare v_uid uuid := auth.uid();
 begin
   if v_uid is null then raise exception 'not_authenticated'; end if;
   perform set_config('app.internal', 'on', true);
+  perform pg_advisory_xact_lock(hashtextextended('insight-space:first-superadmin', 0));
   if exists (select 1 from public.profiles where role = 'superadmin') then
     raise exception 'superadmin_exists';
   end if;
@@ -744,13 +745,52 @@ grant execute on function public.admin_set_role(uuid, text) to authenticated;
 grant execute on function public.increment_view(uuid) to authenticated;
 
 -- ------------------------------------------------------------
--- 6. 媒体存储桶（public bucket，登录用户可上传到自己的目录）
+-- 6. 媒体存储桶（private bucket，访问通过 RLS + 短期 signed URL）
 -- ------------------------------------------------------------
-insert into storage.buckets (id, name, public) values ('media', 'media', true)
-on conflict (id) do update set public = true;
+insert into storage.buckets (id, name, public) values ('media', 'media', false)
+on conflict (id) do update set public = false;
 
 drop policy if exists media_read on storage.objects;
-create policy media_read on storage.objects for select using (bucket_id = 'media');
+create policy media_read on storage.objects for select to authenticated
+  using (
+    bucket_id = 'media'
+    and (
+      (storage.foldername(name))[1] = auth.uid()::text
+      or exists (
+        select 1 from public.contents c
+        where c.media::text like '%' || name || '%'
+          and (
+            c.author_id = auth.uid()
+            or (c.status = 'published' and c.visibility = 'public')
+            or (c.visibility = 'selected' and auth.uid() = any(c.visible_user_ids))
+            or exists (
+              select 1 from public.grants g
+              where g.user_id = auth.uid()
+                and (g.module_id is null or g.module_id = c.module_id)
+                and g.read = true
+                and (g.expires_at is null or g.expires_at > now())
+            )
+          )
+      )
+      or exists (
+        select 1
+        from public.comments cm
+        join public.contents c on c.id = cm.content_id
+        where cm.media::text like '%' || name || '%'
+          and (
+            cm.author_id = auth.uid()
+            or c.author_id = auth.uid()
+            or (c.status = 'published' and c.visibility = 'public')
+            or (c.visibility = 'selected' and auth.uid() = any(c.visible_user_ids))
+          )
+      )
+      or exists (
+        select 1 from public.messages m
+        where m.media::text like '%' || name || '%'
+          and (m.from_id = auth.uid() or m.to_id = auth.uid())
+      )
+    )
+  );
 
 drop policy if exists media_insert on storage.objects;
 create policy media_insert on storage.objects for insert to authenticated

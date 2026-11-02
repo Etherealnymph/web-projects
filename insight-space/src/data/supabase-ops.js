@@ -1,6 +1,6 @@
 /** Supabase：邀请码 / 授权 / 后台统计 / 媒体 */
 
-import { CONFIG, rewriteSupabaseUrls, toUpstreamSupabaseUrl } from '../config.js';
+import { CONFIG, rewriteSupabaseUrls } from '../config.js';
 import { fail, mapInvite, mapUser, mapContent, mapComment, serializeInvitePerms } from './sb-core.js';
 import { randomCode, hotScore, formatDay } from '../core/util.js';
 
@@ -477,16 +477,26 @@ export function createMediaApi(sb) {
       const { error } = await client.storage.from(CONFIG.storageBucket)
         .upload(path, file, { cacheControl: '31536000', upsert: false });
       if (error) throw fail('content.uploadFail');
-      const { data } = client.storage.from(CONFIG.storageBucket).getPublicUrl(path);
-      // 入库的是 SDK 按当前基地址生成的绝对地址；这里还原成上游地址，
-      // 这样以后更换代理域名不需要迁移历史数据（读取时再统一重写）。
-      return { id: path, kind, name: file.name, size: file.size, type: file.type, url: toUpstreamSupabaseUrl(data.publicUrl) };
+      return { id: path, kind, name: file.name, size: file.size, type: file.type, url: '' };
     },
     async resolve(ref) {
-      const url = typeof ref === 'string' ? ref : ref?.url || '';
-      return rewriteSupabaseUrls(url);
+      const path = mediaPathOf(ref);
+      if (!path) return rewriteSupabaseUrls(typeof ref === 'string' ? ref : ref?.url || '');
+      const { data, error } = await client.storage.from(CONFIG.storageBucket).createSignedUrl(path, 3600);
+      if (error) throw fail('msg.networkError');
+      return data.signedUrl;
     },
-    async resolveText(text) { return rewriteSupabaseUrls(text); },
+    async resolveText(text) {
+      const source = rewriteSupabaseUrls(text);
+      const pattern = new RegExp(`https?://[^\\s)"']+/storage/v1/object/(?:public|sign)/${CONFIG.storageBucket}/([^\\s)"']+)`, 'g');
+      const matches = Array.from(source.matchAll(pattern));
+      const replacements = await Promise.all(matches.map(async (match) => {
+        const { data, error } = await client.storage.from(CONFIG.storageBucket).createSignedUrl(decodeURIComponent(match[1]), 3600);
+        if (error) throw fail('msg.networkError');
+        return data.signedUrl;
+      }));
+      return replacements.reduce((result, url, index) => result.replace(matches[index][0], url), source);
+    },
     async remove(ref) {
       const path = mediaPathOf(ref);
       if (path) await purgeMedia(sb, [path]);

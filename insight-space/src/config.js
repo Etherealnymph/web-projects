@@ -26,7 +26,7 @@ export const CONFIG = {
   supabaseProxyUrl: 'https://insight-space-api.netlify.app',
   /** Supabase publishable/anon public key（公开密钥，可安全放在前端） */
   supabaseAnonKey: 'sb_publishable_lM1FncNduX2y0PXDowgiQA_bvnbQE0q',
-  /** 媒体存储桶名称（需要是 public bucket） */
+  /** 媒体存储桶名称（私有 bucket，由登录用户权限和短期 signed URL 保护） */
   storageBucket: 'media',
 
   /** 单文件上传体积上限（MB） */
