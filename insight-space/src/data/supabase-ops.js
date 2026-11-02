@@ -273,6 +273,15 @@ export function createPermissionRequestsApi(sb) {
 
 export function createAdminApi(sb, modulesApi) {
   const { client } = sb;
+  const fetchAll = async (table, columns = '*') => {
+    const rows = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await client.from(table).select(columns).range(from, from + 999);
+      if (error) throw fail('msg.error');
+      rows.push(...(data || []));
+      if (!data || data.length < 1000) return rows;
+    }
+  };
 
   return {
     async stats() {
@@ -404,6 +413,24 @@ export function createAdminApi(sb, modulesApi) {
           content: contentMap.get(row.contentId) || null,
         };
       });
+    },
+
+    async exportAll() {
+      sb.requireAdmin();
+      const [profiles, modules, contents, comments] = await Promise.all([
+        fetchAll('profiles', 'id,username,nickname,bio,avatar,role,status,created_at'),
+        fetchAll('modules'),
+        fetchAll('contents'),
+        fetchAll('comments'),
+      ]);
+      return {
+        exportedAt: new Date().toISOString(),
+        source: 'insight-space',
+        profiles,
+        modules,
+        contents,
+        comments,
+      };
     },
   };
 }

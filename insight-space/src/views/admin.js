@@ -2,7 +2,7 @@
 
 import { t } from '../core/i18n.js';
 import { icon, emptyState, loadingState, toastOk, toastErr, confirmDialog, avatarHtml } from '../core/ui.js';
-import { esc, fromNow, formatDate, bytesText } from '../core/util.js';
+import { esc, fromNow, formatDate, bytesText, downloadText } from '../core/util.js';
 import { errText } from '../data/index.js';
 import { statCard, rankedItemHtml, moduleName, authorName, roleBadge, countChips } from '../components/widgets.js';
 import { renderModulesTab, renderInvitesTab } from './admin-modules.js';
@@ -93,7 +93,11 @@ async function renderOverview(ctx, panel) {
       </div>
 
       <section class="panel">
-        <div class="panel__head"><span class="panel__title">${icon('clock', 15)} ${esc(t('admin.last7'))}</span></div>
+        <div class="panel__head">
+          <span class="panel__title">${icon('clock', 15)} ${esc(t('admin.last7'))}</span>
+          <span class="grow"></span>
+          <button class="btn btn--xs" data-export-content>${icon('download', 13)} 导出全部内容</button>
+        </div>
         <div class="panel__body">
           <div class="row" style="align-items:flex-end;gap:6px;height:120px">
             ${series.map((s) => {
@@ -198,6 +202,24 @@ async function renderOverview(ctx, panel) {
       </section>
     </div>
   `;
+  panel.querySelector('[data-export-content]')?.addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    const ok = await confirmDialog({
+      message: '将导出所有文章、评论、模块和公开资料（不包含密码）。确定继续吗？',
+      okText: '导出',
+    });
+    if (!ok) return;
+    button.disabled = true;
+    try {
+      const archive = await api.admin.exportAll();
+      downloadText(`insight-space-export-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(archive, null, 2));
+      toastOk('内容导出完成');
+    } catch (error) {
+      toastErr(errText(error));
+    } finally {
+      button.disabled = false;
+    }
+  });
 }
 
 /* ------------------------------ 内容管理 ------------------------------ */

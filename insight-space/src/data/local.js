@@ -692,6 +692,22 @@ export async function createLocalApi() {
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .map((c) => ({ ...c, counts: countsOf(index, 'comment', c.id), author: map.get(c.authorId) || null, content: contentsById.get(c.contentId) || null }));
     },
+
+    async exportAll() {
+      const db = await refresh();
+      requireAdmin();
+      return {
+        exportedAt: new Date().toISOString(),
+        source: 'insight-space',
+        profiles: db.users.map((user) => {
+          const { password, secret, ...profile } = user;
+          return profile;
+        }),
+        modules: db.modules,
+        contents: db.contents,
+        comments: db.comments,
+      };
+    },
   };
 
   /* ------------------------------- 媒体 ------------------------------- */
