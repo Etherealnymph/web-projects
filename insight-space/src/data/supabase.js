@@ -22,9 +22,13 @@ export async function createSupabaseApi() {
     client,
     async init() {
       await sb.loadProfile();
-      client.auth.onAuthStateChange(async (event) => {
-        if (event === 'SIGNED_OUT') { sb.profile = null; sb.grants = []; }
-        if (event === 'SIGNED_IN') await sb.loadProfile();
+      client.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT') sb.clearSession();
+        if (event === 'SIGNED_IN' && session?.user?.id !== sb.profile?.id) sb.clearSession();
+        // Keep the auth callback synchronous; old auth-js versions hold a session lock here.
+        if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+          setTimeout(() => sb.loadProfile().catch((error) => console.warn('[insight-space] 资料刷新失败', error)), 0);
+        }
       });
       return true;
     },

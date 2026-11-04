@@ -37,6 +37,7 @@
   --radius-l: 20px;
   --radius-pill: 999px;
   --topbar-h: 60px;
+  --sticky-offset: 60px;
   --content-w: 1160px;
   --read-w: 760px;
   --font-scale: 1;
@@ -146,7 +147,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .grid { display: grid; gap: 16px; }
 .grid--cards { grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); }
 .grid--stats { grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); }
-.grid--2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
 .center { display: grid; place-items: center; }
 .muted { color: var(--muted); }
 .small { font-size: 13px; }
@@ -158,6 +159,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.skip-link { position: fixed; top: -80px; left: 16px; z-index: 200; padding: 10px 16px; border-radius: var(--radius-s); background: var(--ink); color: var(--bg); }
+.skip-link:focus { top: 12px; }
+.connection-status { padding: 8px 18px; text-align: center; font-size: 13px; color: var(--warn); background: var(--warn-soft); border-bottom: 1px solid var(--line); }
+.global-search { position: relative; width: 190px; flex-shrink: 1; }
+.global-search .input { width: 100%; height: 36px; padding: 5px 36px 5px 11px; font-size: 13px; }
+.global-search .icon-btn { position: absolute; top: 1px; right: 1px; width: 34px; height: 34px; }
+.topbar__actions { flex-shrink: 0; }
 
 /* ---------- 顶栏 ---------- */
 .topbar {
@@ -256,4 +265,4 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .hidden { display: none !important; }
 .divider { height: 1px; background: var(--line); margin: 16px 0; }
 .scroll-x { overflow-x: auto; }
-.sticky-side { position: sticky; top: calc(var(--topbar-h) + 12px); }
+.sticky-side { position: sticky; top: calc(var(--sticky-offset) + 12px); }

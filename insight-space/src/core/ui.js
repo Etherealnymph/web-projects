@@ -96,21 +96,53 @@ export const toastErr = (msg) => toast(msg, 'err');
 
 /* ------------------------------ 模态框 ------------------------------ */
 
+const modalStack = [];
+let modalSeq = 0;
+let originalOverflow = '';
+let fieldSeq = 0;
+
+export function labelFields(root) {
+  root.querySelectorAll('.field__label').forEach((label) => {
+    if (label.tagName !== 'LABEL' || label.htmlFor) return;
+    const input = label.parentElement.querySelector('input:not([type="hidden"]),select,textarea');
+    if (!input || label.contains(input)) return;
+    if (!input.id) input.id = `field-${++fieldSeq}`;
+    label.htmlFor = input.id;
+  });
+}
+
+export function closePopovers() { activePopover?.close(); }
+
 export function openModal({ title = '', body = '', footer = '', wide = false, full = false, onClose = null, className = '' } = {}) {
   const host = document.getElementById('modals');
+  const previousFocus = document.activeElement;
+  const app = document.getElementById('app');
   const backdrop = el('div', { class: 'modal-backdrop' });
   const sizeClass = full ? 'modal--full' : wide ? 'modal--wide' : '';
-  const modal = el('div', { class: `modal ${sizeClass} ${className}`.trim(), role: 'dialog', 'aria-modal': 'true' });
+  const titleId = `modal-title-${++modalSeq}`;
+  const modal = el('div', { class: `modal ${sizeClass} ${className}`.trim(), role: 'dialog', 'aria-modal': 'true', tabindex: '-1',
+    ...(title ? { 'aria-labelledby': titleId } : { 'aria-label': t('common.preview') }) });
   modal.innerHTML = `
-    ${title ? `<div class="modal__head"><div class="modal__title">${esc(title)}</div><div class="grow"></div><button class="icon-btn" data-modal-close aria-label="${esc(t('common.close'))}">${icon('close', 18)}</button></div>` : ''}
+    ${title ? `<div class="modal__head"><div class="modal__title" id="${titleId}">${esc(title)}</div><div class="grow"></div><button class="icon-btn" data-modal-close aria-label="${esc(t('common.close'))}">${icon('close', 18)}</button></div>` : ''}
     <div class="modal__body">${body}</div>
     ${footer ? `<div class="modal__foot">${footer}</div>` : ''}
   `;
+  labelFields(modal);
   host.appendChild(backdrop);
   host.appendChild(modal);
+  if (!modalStack.length) {
+    originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    if (app) app.inert = true;
+  } else {
+    modalStack.at(-1).inert = true;
+  }
+  modalStack.push(modal);
   requestAnimationFrame(() => {
+    if (closed) return;
     backdrop.style.opacity = '1';
     modal.classList.add('is-open');
+    (modal.querySelector('input:not([type="hidden"]), textarea, [data-role="cancel"], button, a[href]') || modal).focus({ preventScroll: true });
   });
 
   let closed = false;
@@ -119,11 +151,32 @@ export function openModal({ title = '', body = '', footer = '', wide = false, fu
     closed = true;
     backdrop.style.opacity = '0';
     modal.classList.remove('is-open');
+    modal.inert = true;
+    modalStack.splice(modalStack.indexOf(modal), 1);
+    const top = modalStack.at(-1);
+    if (top) top.inert = false;
+    else {
+      if (app) app.inert = false;
+      document.body.style.overflow = originalOverflow;
+    }
     setTimeout(() => { backdrop.remove(); modal.remove(); }, 190);
     document.removeEventListener('keydown', onKey);
+    if (previousFocus?.isConnected && (!top || top.contains(previousFocus))) previousFocus.focus({ preventScroll: true });
+    else top?.focus({ preventScroll: true });
     if (onClose) onClose(result);
   };
-  const onKey = (event) => { if (event.key === 'Escape') close(null); };
+  const onKey = (event) => {
+    if (modalStack.at(-1) !== modal || event.defaultPrevented) return;
+    if (event.key === 'Escape') { event.preventDefault(); close(null); return; }
+    if (event.key !== 'Tab') return;
+    const focusable = [...modal.querySelectorAll('a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])')]
+      .filter((node) => !node.disabled && !node.hidden && node.getClientRects().length);
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (!first) { event.preventDefault(); modal.focus(); }
+    else if (event.shiftKey && (document.activeElement === first || document.activeElement === modal)) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  };
   document.addEventListener('keydown', onKey);
   backdrop.addEventListener('click', () => close(null));
   modal.querySelectorAll('[data-modal-close]').forEach((btn) => btn.addEventListener('click', () => close(null)));
@@ -141,7 +194,7 @@ export function confirmDialog({ title = t('msg.confirmTitle'), message = '', okT
     });
     handle.footer.querySelector('[data-role="cancel"]').addEventListener('click', () => { settled = true; resolve(false); handle.close(); });
     handle.footer.querySelector('[data-role="ok"]').addEventListener('click', () => { settled = true; resolve(true); handle.close(); });
-    setTimeout(() => handle.footer.querySelector('[data-role="ok"]')?.focus(), 60);
+    setTimeout(() => handle.footer.querySelector(danger ? '[data-role="cancel"]' : '[data-role="ok"]')?.focus(), 60);
   });
 }
 
@@ -166,22 +219,22 @@ export function promptDialog({ title = '', label = '', value = '', placeholder =
 /* ------------------------------ 灯箱 ------------------------------ */
 
 export function lightbox(src, type = 'image') {
-  const node = el('div', { class: 'lightbox' });
-  node.innerHTML = type === 'video'
+  const body = type === 'video'
     ? `<video src="${esc(src)}" controls autoplay playsinline></video>`
     : `<img src="${esc(src)}" alt="" />`;
-  const close = () => { node.remove(); document.removeEventListener('keydown', onKey); };
-  const onKey = (event) => { if (event.key === 'Escape') close(); };
-  node.addEventListener('click', close);
-  document.addEventListener('keydown', onKey);
-  document.body.appendChild(node);
+  const handle = openModal({
+    title: t('common.preview'), body, full: true, className: 'media-modal',
+    onClose: () => { handle.body.querySelector('video')?.pause(); },
+  });
+  return handle;
 }
 
 /* ------------------------------ 浮动面板 ------------------------------ */
 
+let activePopover = null;
+
 export function popover(anchor, contentNode, { align = 'left', onClose = null } = {}) {
-  const existing = document.querySelector('.popover');
-  if (existing) existing.remove();
+  activePopover?.close();
   const node = el('div', { class: 'popover' });
   node.appendChild(contentNode);
   anchor.parentElement.style.position = 'relative';
@@ -204,11 +257,19 @@ export function popover(anchor, contentNode, { align = 'left', onClose = null } 
     closed = true;
     node.remove();
     document.removeEventListener('mousedown', onOutside, true);
+    document.removeEventListener('keydown', onKey);
+    clearTimeout(outsideTimer);
+    if (activePopover?.node === node) activePopover = null;
     if (onClose) onClose();
   };
   const onOutside = (event) => { if (!node.contains(event.target) && !anchor.contains(event.target)) close(); };
-  setTimeout(() => document.addEventListener('mousedown', onOutside, true), 0);
-  return { node, close, width };
+  const onKey = (event) => {
+    if (event.key === 'Escape') { event.preventDefault(); close(); anchor.focus(); }
+  };
+  document.addEventListener('keydown', onKey);
+  const outsideTimer = setTimeout(() => { if (!closed) document.addEventListener('mousedown', onOutside, true); }, 0);
+  activePopover = { node, close, width };
+  return activePopover;
 }
 
 /* ------------------------------ 小部件 ------------------------------ */
@@ -218,13 +279,13 @@ export function emptyState(text = t('common.empty'), mark = '空') {
 }
 
 export function loadingState(text = t('common.loading')) {
-  return `<div class="empty"><div class="spinner" style="margin:0 auto 10px"></div><div class="small">${esc(text)}</div></div>`;
+  return `<div class="empty" role="status"><div class="spinner" aria-hidden="true" style="margin:0 auto 10px"></div><div class="small">${esc(text)}</div></div>`;
 }
 
 export function avatarHtml(user, size = '') {
   const cls = `avatar ${size}`.trim();
   const name = user?.nickname || user?.username || '?';
-  if (user?.avatar) return `<div class="${cls}"><img src="${esc(user.avatar)}" alt="" /></div>`;
+  if (user?.avatar) return `<div class="${cls}"><img src="${esc(user.avatar)}" alt="" loading="lazy" decoding="async" /></div>`;
   const text = /[\u4e00-\u9fa5]/.test(name) ? name.slice(-2) : name.slice(0, 2).toUpperCase();
   return `<div class="${cls}">${esc(text)}</div>`;
 }
@@ -234,13 +295,27 @@ export function segmented(items, active, dataAttr = 'data-value') {
 }
 
 export function mountMenu(anchor, items) {
-  const content = el('div');
+  const content = el('div', { role: 'menu', 'aria-label': anchor.getAttribute('aria-label') || t('common.more') });
   items.forEach((item) => {
-    if (item.separator) { content.appendChild(el('div', { class: 'menu__sep' })); return; }
-    const btn = el('button', { class: `menu__item ${item.danger ? 'menu__item--danger' : ''}` }, `${item.icon ? icon(item.icon, 15) : ''}<span>${esc(item.label)}</span>`);
-    btn.addEventListener('click', () => { handle.close(); item.onClick?.(); });
+    if (item.separator) { content.appendChild(el('div', { class: 'menu__sep', role: 'separator' })); return; }
+    const btn = el('button', { type: 'button', role: 'menuitem', class: `menu__item ${item.danger ? 'menu__item--danger' : ''}` }, `${item.icon ? icon(item.icon, 15) : ''}<span>${esc(item.label)}</span>`);
+    btn.addEventListener('click', () => {
+      handle.close();
+      Promise.resolve().then(() => item.onClick?.()).catch((error) => toastErr(error.message || t('msg.error')));
+    });
     content.appendChild(btn);
   });
-  const handle = popover(anchor, content, { align: 'right' });
+  anchor.setAttribute('aria-expanded', 'true');
+  const handle = popover(anchor, content, { align: 'right', onClose: () => anchor.setAttribute('aria-expanded', 'false') });
+  const buttons = [...content.querySelectorAll('[role="menuitem"]')];
+  buttons[0]?.focus();
+  content.addEventListener('keydown', (event) => {
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const index = buttons.indexOf(document.activeElement);
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 :
+      (index + (event.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length;
+    buttons[next]?.focus();
+  });
   return handle;
 }

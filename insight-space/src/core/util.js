@@ -13,13 +13,38 @@ export function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, 
 
 export function debounce(fn, wait = 250) {
   let timer = 0;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), wait);
+  let pending = null;
+  const invoke = () => {
+    timer = 0;
+    const args = pending;
+    pending = null;
+    if (args) return fn(...args);
   };
+  const debounced = (...args) => {
+    clearTimeout(timer);
+    pending = args;
+    timer = setTimeout(invoke, wait);
+  };
+  debounced.cancel = () => { clearTimeout(timer); timer = 0; pending = null; };
+  debounced.flush = () => { clearTimeout(timer); return invoke(); };
+  return debounced;
 }
 
 export function uniq(list) { return Array.from(new Set(list)); }
+
+/** Limit concurrent media/network work without changing result order. */
+export async function mapConcurrent(items, limit, mapper) {
+  const results = new Array(items.length);
+  let next = 0;
+  const workers = Math.min(items.length, Math.max(1, Math.floor(limit) || 1));
+  await Promise.all(Array.from({ length: workers }, async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await mapper(items[index], index);
+    }
+  }));
+  return results;
+}
 
 /** 经验值来源（与后端触发器保持一致） */
 export const EXP = {
@@ -213,7 +238,9 @@ export function downloadText(filename, text, type = 'application/json') {
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  document.body.appendChild(a);
   a.click();
+  a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 

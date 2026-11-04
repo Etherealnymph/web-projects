@@ -9,7 +9,7 @@
 // 说明：--no-verify-jwt 表示函数自行校验调用者，而不是依赖 Supabase 网关的 JWT 校验。
 //       SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 由 Supabase 自动注入为环境变量。
 
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,10 +47,10 @@ Deno.serve(async (req) => {
 
   const { data: profile } = await admin
     .from("profiles")
-    .select("role")
+    .select("role,status")
     .eq("id", user.id)
     .maybeSingle();
-  if (profile?.role !== "superadmin") return json({ error: "forbidden" }, 403);
+  if (profile?.role !== "superadmin" || profile?.status !== "active") return json({ error: "forbidden" }, 403);
 
   // 2. 解析请求体
   let body: { action?: string; userId?: string; password?: string };

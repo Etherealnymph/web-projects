@@ -49,7 +49,7 @@
         let homing = null;
         if (def.homing) {
           let bestDot = 0.3, bestDist = 280;
-          for (const s of this.game.ships) {
+          for (const s of [...this.game.ships, ...(this.game.advanced?.units || []).filter(u=>u.team==='enemy')]) {
             if (s.dead) continue;
             const to = s.pos.clone().add(new THREE.Vector3(0, 3, 0)).sub(origin);
             const dist = to.length();
@@ -142,6 +142,14 @@
         }
       }
 
+      for (const unit of this.game.advanced?.units || []) {
+        if (unit.dead || unit.team !== 'enemy') continue;
+        const center = unit.pos.clone().add(new THREE.Vector3(0,unit.height*0.5,0));
+        V.copy(center).sub(origin); const t = V.dot(dir);
+        if (t<0 || t>bestT) continue;
+        if (origin.clone().addScaledVector(dir,t).distanceToSquared(center)<unit.radius**2) { best={type:'machine',entity:unit,t}; bestT=t; headshot=false; }
+      }
+
       const hitPoint = origin.clone().addScaledVector(dir, Math.min(bestT, maxDist));
       if (best) {
         const dmg = headshot ? damage * 2.2 : damage;
@@ -149,7 +157,7 @@
           best.entity.hit(dmg, dir, { knockback: opts.shotgun ? 0.35 : 0.2 });
           this.game.ui.hitMarker(headshot ? 'head' : 'hit');
           if (headshot) MW.SFX.headshot();
-        } else if (best.type === 'ship') {
+        } else if (best.type === 'ship' || best.type === 'machine') {
           best.entity.damage(dmg * 0.8);
           this.game.ui.hitMarker('hit');
           this.spark(hitPoint, 0xffd27a, 5);
@@ -217,6 +225,7 @@
     explode(pos, radius, damage, opts) {
       opts = opts || {};
       const source = opts.source || 'player';
+      if (opts.visualOnly) damage = 0;
       const visual = MW.Models.explosion(0xffb347, radius);
       visual.position.copy(pos);
       visual.scale.setScalar(0.4);
@@ -226,7 +235,7 @@
       this.explosionLight.intensity = 8;
       this.lightT = 0.25;
 
-      MW.SFX.explosion(radius / 6);
+      MW.SFX.explosion(radius / 6, pos);
       const distPlayer = this.game.player.pos.distanceTo(pos);
 
       for (const z of this.game.zombies) {
@@ -240,10 +249,10 @@
       for (const s of this.game.soldiers) {
         if (s.dead) continue;
         const d = s.pos.distanceTo(pos);
-        if (d < radius && source !== 'player') s.damage(damage * (1 - d / radius) * 0.5);
+        if (d < radius && source !== 'player' && source !== 'support') s.damage(damage * (1 - d / radius) * 0.5);
       }
       const p = this.game.player;
-      if (p.alive && distPlayer < radius) {
+      if (p.alive && distPlayer < radius && source !== 'support') {
         let f = 1 - (distPlayer / radius) * 0.7;
         if (source === 'player') f *= 0.28;
         if (source === 'enemy' || source === 'ship') f *= 0.6;
@@ -252,12 +261,18 @@
       for (const v of this.game.vehicles) {
         if (v.dead) continue;
         const d = v.pos.distanceTo(pos);
-        if (d < radius * 1.3) v.damage(damage * 0.6 * (1 - d / (radius * 1.4)));
+        if (d < radius * 1.3 && source !== 'support') v.damage(damage * 0.6 * (1 - d / (radius * 1.4)));
       }
       for (const s of this.game.ships || []) {
         if (s.dead) continue;
         const d = s.pos.distanceTo(pos);
         if (d < radius * 1.6) s.damage(damage * 1.3 * (1 - d / (radius * 1.8)));
+      }
+      for (const unit of this.game.advanced?.units || []) {
+        if(unit.dead || damage<=0 || (unit.team==='friendly' && source==='support')) continue;
+        if(unit.team==='enemy' && (source==='enemy'||source==='ship')) continue;
+        const d=unit.pos.clone().add(new THREE.Vector3(0,unit.height*0.5,0)).distanceTo(pos);
+        if(d<radius*1.4) unit.damage(damage*(1-d/(radius*1.5)));
       }
       this.spark(pos, 0xffc46b, Math.floor(radius * 3));
       this.spark(pos, 0x6b6b6b, Math.floor(radius * 2));
@@ -269,11 +284,14 @@
 
     /* ---------- 特效 ---------- */
     tracer(from, to, color, life, laser) {
+      if (this.tracers.length >= 96) return;
       const geo = new THREE.BufferGeometry().setFromPoints([from, to]);
       const mat = new THREE.LineBasicMaterial({
         color, transparent: true, opacity: laser ? 0.95 : 0.7,
         blending: THREE.AdditiveBlending, depthWrite: false
       });
+      geo.userData.mwOwned = true;
+      mat.userData.mwOwned = true;
       const line = new THREE.Line(geo, mat);
       this.game.scene.add(line);
       this.tracers.push({ line, life: life || 0.06, max: life || 0.06, laser });
@@ -319,11 +337,10 @@
     }
 
     spawnParticle(pos, vel, color, life, size, gravity) {
-      if (this.particles.length > 220) {
-        const old = this.particles.shift();
-        this.game.scene.remove(old.mesh);
-      }
-      const mesh = new THREE.Mesh(MW.BOX_GEO, MW.Models.glowMat(color));
+      const budget = this.game.settings.graphics === 'low' ? 90 : 220;
+      if (this.particles.length >= budget) return;
+      const mesh = this.pool.pop() || new THREE.Mesh(MW.BOX_GEO, MW.Models.glowMat(color));
+      mesh.material = MW.Models.glowMat(color);
       mesh.scale.setScalar(size);
       mesh.position.copy(pos);
       this.game.scene.add(mesh);
@@ -337,8 +354,7 @@
         t.line.material.opacity = Math.max(0, (t.life / t.max)) * (t.laser ? 0.95 : 0.7);
         if (t.life <= 0) {
           this.game.scene.remove(t.line);
-          t.line.geometry.dispose();
-          t.line.material.dispose();
+          MW.Models.disposeOwned(t.line);
           this.tracers.splice(i, 1);
         }
       }
@@ -347,6 +363,7 @@
         p.life -= dt;
         if (p.life <= 0) {
           this.game.scene.remove(p.mesh);
+          if(this.pool.length<220) this.pool.push(p.mesh);
           this.particles.splice(i, 1);
           continue;
         }
@@ -369,6 +386,7 @@
         e.obj.userData.core.scale.setScalar(0.5 + t * 0.8);
         if (e.life <= 0) {
           this.game.scene.remove(e.obj);
+          MW.Models.disposeOwned(e.obj);
           this.explosions.splice(i, 1);
         }
       }
@@ -376,6 +394,24 @@
         this.lightT -= dt;
         this.explosionLight.intensity = Math.max(0, this.explosionLight.intensity - dt * 35);
       }
+    }
+
+    dispose() {
+      for (const tracer of this.tracers) {
+        this.game.scene.remove(tracer.line);
+        MW.Models.disposeOwned(tracer.line);
+      }
+      for (const explosion of this.explosions) {
+        this.game.scene.remove(explosion.obj);
+        MW.Models.disposeOwned(explosion.obj);
+      }
+      // Particle meshes borrow shared BOX_GEO and glow materials; only detach
+      // them and drop the bounded pool when leaving a world.
+      for (const particle of this.particles) this.game.scene.remove(particle.mesh);
+      this.tracers.length = this.explosions.length = this.particles.length = this.pool.length = 0;
+      this.lightT = 0;
+      this.explosionLight.intensity = 0;
+      this.game.scene.remove(this.explosionLight);
     }
   }
 

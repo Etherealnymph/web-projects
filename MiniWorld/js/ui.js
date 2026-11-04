@@ -64,7 +64,7 @@
       const grid = this.$('world-grid');
       if (!grid) return;
       grid.innerHTML = '';
-      MW.WORLDS.forEach((w, i) => {
+      [...MW.WORLDS].sort((a,b)=>Number(['beijing','washington','tokyo','earth'].includes(b.id))-Number(['beijing','washington','tokyo','earth'].includes(a.id))).forEach((w, i) => {
         const el = document.createElement('button');
         el.className = 'world-card';
         el.dataset.world = w.id;
@@ -926,7 +926,7 @@
       document.body.classList.toggle('underwater', !!on);
     }
 
-    setFps(n) { const el = this.$('fps'); if (el) el.textContent = n + ' FPS'; }
+    setFps(n, details) { const el = this.$('fps'); if (el) el.textContent = n + ' FPS' + (details || ''); }
 
     setSaveInfo(text) { const el = this.$('save-info'); if (el) el.textContent = text; }
 
@@ -1232,6 +1232,14 @@
       this.$('set-model').value = s.model || '';
       this.$('set-web').checked = !!s.webSearch;
       this.$('set-audio').checked = !!s.audio;
+      this.$('set-graphics').value = s.graphics || 'auto';
+      this.$('set-motion').checked = !!s.reducedMotion;
+      this.$('set-performance').checked = s.performanceHUD !== false;
+      for (const key of ['master','effects','ambience','engine']) {
+        const input=this.$('set-volume-'+key), output=this.$('volume-value-'+key);
+        input.value=Math.round((s[key+'Volume'] ?? MW.DEFAULT_SETTINGS[key+'Volume'])*100);
+        output.textContent=input.value+'%';
+      }
       this.updateName();
       if (!s.apiKey) {
         const r = this.$('api-test-result');
@@ -1463,6 +1471,7 @@
       altEl.textContent = (v.type === 'jet' || v.type === 'drone') ? `高度 ${alt}m` : '';
       let hint = 'A/D 转向 · W/S 前后 · E 离开';
       if (v.type === 'car') hint = 'A/D 转向 · W/S 前后 · Shift 加速 · Space 刹车 · E 离开';
+      else if (v.type === 'train') hint = '自动环线巡航 · Space 刹车 · E 下车 · U 指挥台';
       else if (v.type === 'apc') hint = 'A/D 转向 · W/S 前后 · 左键机炮 · Shift 加速 · E 离开';
       else if (v.type === 'boat') hint = 'A/D 转向 · W/S 前后 · 左键舰炮 · Shift 加速 · E 离开';
       else if (v.type === 'tank') hint = 'A/D 转向 · W/S 前后 · 滚轮/↑↓ 炮口俯仰 · 左键开火 · E 离开';
@@ -1526,13 +1535,14 @@
       ctx.fillRect(0, 0, w, h);
 
       const px = g.player.pos.x, pz = g.player.pos.z;
-      const radius = 34;
+      const radius = g.world.meta.terrain ? 112 : 34;
+      const sampleStep = g.world.meta.terrain ? 4 : 1;
       const scale = w / (radius * 2);
       const wl = g.world.meta.waterLevel;
-      for (let dx = -radius; dx < radius; dx++) {
-        for (let dz = -radius; dz < radius; dz++) {
+      for (let dx = -radius; dx < radius; dx += sampleStep) {
+        for (let dz = -radius; dz < radius; dz += sampleStep) {
           const bx = Math.floor(px + dx), bz = Math.floor(pz + dz);
-          const top = g.world.topBlock(bx, bz);
+          const top = g.world.mapSampleAt ? g.world.mapSampleAt(bx,bz) : g.world.topBlock(bx, bz);
           let color = '#141c24';
           if (top) {
             if (wl != null && top.y <= wl) color = '#1d4b66';
@@ -1546,7 +1556,7 @@
           ctx.globalAlpha = 0.9;
           const sx = (bx - px + radius) * scale;
           const sz = (bz - pz + radius) * scale;
-          ctx.fillRect(sx, sz, scale + 0.4, scale + 0.4);
+          ctx.fillRect(sx, sz, scale * sampleStep + 0.4, scale * sampleStep + 0.4);
         }
       }
       ctx.globalAlpha = 1;

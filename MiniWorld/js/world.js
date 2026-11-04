@@ -1,5 +1,5 @@
 /* ===========================================================
-   体素世界：分块 InstancedMesh 渲染 / 碰撞 / 射线
+   体素世界：分块可见面合并 / 连续地形 / 碰撞 / 射线
    =========================================================== */
 (function () {
   const MW = window.MW;
@@ -59,11 +59,10 @@
     const img = ctx.createImageData(64, 64);
     for (let y = 0; y < 64; y++) {
       for (let x = 0; x < 64; x++) {
-        const cx = (x / 16) | 0, cy = (y / 16) | 0;
-        const cell = 0.90 + ((cx * 7 + cy * 13) % 9) * 0.012;
-        const seam = (x % 16 === 0 || y % 16 === 0) ? 0.78 : 1.0;
-        const noise = 0.98 + Math.random() * 0.02;
-        const v = Math.max(0, Math.min(255, (cell * seam * noise * 255) | 0));
+        // Fine grain without a dark grid: neighbouring surfaces read as one
+        // material instead of disconnected quarter-metre squares.
+        const noise = 0.975 + ((x * 17 + y * 29 + x * y * 3) % 19) / 760;
+        const v = Math.max(0, Math.min(255, (noise * 255) | 0));
         const i = (y * 64 + x) * 4;
         img.data[i] = v;
         img.data[i + 1] = v;
@@ -73,7 +72,7 @@
     }
     ctx.putImageData(img, 0, 0);
     const tex = new THREE.CanvasTexture(c);
-    tex.magFilter = THREE.NearestFilter;
+    tex.magFilter = THREE.LinearFilter;
     tex.minFilter = THREE.LinearMipmapLinearFilter;
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
     tex.encoding = THREE.sRGBEncoding;
@@ -82,15 +81,14 @@
 
   const SHARED = {
     box: new THREE.BoxGeometry(1, 1, 1),
-    chamfer: makeChamferBox(0.22),
-    matSolid: new THREE.MeshLambertMaterial({ color: 0xffffff, map: makePixelTexture() }),
-    matGlow: new THREE.MeshBasicMaterial({ color: 0xffffff }),
+    matSolid: new THREE.MeshLambertMaterial({ color: 0xffffff, map: makePixelTexture(), vertexColors: true }),
+    matGlow: new THREE.MeshBasicMaterial({ color: 0xffffff, vertexColors: true }),
     matGlass: new THREE.MeshPhongMaterial({
-      color: 0x9fdfef, transparent: true, opacity: 0.26, shininess: 95,
+      color: 0xffffff, vertexColors: true, transparent: true, opacity: 0.26, shininess: 95,
       specular: 0xbfefff, depthWrite: false, side: THREE.DoubleSide
     }),
     matWater: new THREE.MeshPhongMaterial({
-      color: 0x3b90bd, transparent: true, opacity: 0.7, shininess: 45,
+      color: 0xffffff, vertexColors: true, transparent: true, opacity: 0.7, shininess: 45,
       specular: 0x3f6f86, depthWrite: false, flatShading: true, side: THREE.DoubleSide
     })
   };
@@ -106,10 +104,11 @@
       this.group.name = 'world';
       this.dirty = new Set();
       this.editLog = new Map();
+      this.revision = 0;
       this.recordEdits = false;
       this.chunkSize = 16;
-      this.minY = -6;
-      this.maxY = 96;
+      this.minY = this.meta.minY == null ? -6 : this.meta.minY;
+      this.maxY = this.meta.maxY == null ? 96 : this.meta.maxY;
       this.bounds = this.meta.bounds || 96;
       this.fallbackY = this.meta.fallbackY != null
         ? this.meta.fallbackY
@@ -126,6 +125,8 @@
       this.matGlow = SHARED.matGlow;
       this.matGlass = SHARED.matGlass;
       this.matWater = SHARED.matWater;
+      this.terrain = this.meta.terrain && MW.StreamedTerrain ? new MW.StreamedTerrain(this) : null;
+      this.renderStats = { triangles: 0, chunks: 0 };
     }
 
     key(x, y, z) { return x + '|' + y + '|' + z; }
@@ -136,7 +137,7 @@
     }
 
     getBlock(x, y, z) {
-      return this.blocks.get(this.key(Math.round(x), Math.round(y), Math.round(z)));
+      return this.blocks.get(this.key(Math.floor(x), Math.floor(y), Math.floor(z)));
     }
 
     isSolid(x, y, z) {
@@ -152,13 +153,30 @@
 
     /* 顶面高度（可站立表面 y）；地图之外返回无限地面高度 */
     surfaceAt(x, z) {
-      const t = this.topMap.get(Math.round(x) + ',' + Math.round(z));
-      return t ? t.y + 1 : this.fallbackY;
+      const t = this.topMap.get(Math.floor(x) + ',' + Math.floor(z));
+      const ground = this.terrain ? this.terrain.surfaceAt(x, z) : this.fallbackY;
+      return t ? (this.terrain ? Math.max(t.y + 1, ground) : t.y + 1) : ground;
     }
 
     topBlock(x, z) {
-      return this.topMap.get(Math.round(x) + ',' + Math.round(z)) || null;
+      return this.topMap.get(Math.floor(x) + ',' + Math.floor(z)) || null;
     }
+
+    terrainGroundAt(x, z) { return this.terrain ? this.terrain.heightAt(x, z) : this.fallbackY; }
+
+    mapSampleAt(x, z) {
+      const top = this.topBlock(x, z);
+      if (top) return top;
+      if (this.terrain) {
+        const sample = this.terrain.sample(x, z);
+        return { y: sample.height - 1, c: sample.water ? 0x246c88 : sample.color, t: sample.water ? TYPE_WATER : TYPE_SOLID };
+      }
+      return { y: this.fallbackY - 1, c: this.meta.fallbackColor == null ? 0x77a83e : this.meta.fallbackColor, t: TYPE_SOLID };
+    }
+
+    prepareAt(x, z) { if (this.terrain) this.terrain.prepareAt(x, z); }
+
+    setQuality(quality) { if (this.terrain) this.terrain.setQuality(quality); }
 
     set(x, y, z, color, type, record) {
       x = Math.round(x); y = Math.round(y); z = Math.round(z);
@@ -168,7 +186,9 @@
       const prev = this.blocks.get(k);
       if (prev && prev.c === color && prev.t === type) return false;
       this.blocks.set(k, { x, y, z, c: color, t: type });
+      this.revision++;
       this._addToChunk(x, y, z, k);
+      if (type === TYPE_WATER && prev && prev.t !== TYPE_WATER) this._untrackTop(x, y, z);
       this._trackTop(x, y, z, color, type);
       this._markDirty(x, z);
       if (record !== false && this.recordEdits) this.editLog.set(k, [x, y, z, color, type]);
@@ -181,6 +201,7 @@
       const prev = this.blocks.get(k);
       if (!prev) return false;
       this.blocks.delete(k);
+      this.revision++;
       this._removeFromChunk(x, z, k);
       this._untrackTop(x, y, z);
       this._markDirty(x, z);
@@ -192,7 +213,7 @@
       if (type === TYPE_WATER) return;
       const k = x + ',' + z;
       const cur = this.topMap.get(k);
-      if (!cur || y > cur.y) this.topMap.set(k, { y, c: color, t: type });
+      if (!cur || y >= cur.y) this.topMap.set(k, { y, c: color, t: type });
     }
 
     _untrackTop(x, y, z) {
@@ -209,6 +230,12 @@
     _markDirty(x, z) {
       const [cx, cz] = this.chunkOf(x, z);
       this.dirty.add(this.cKey(cx, cz));
+      // Exposed-face meshing needs both sides of a chunk-boundary edit rebuilt.
+      const lx = x - cx * this.chunkSize, lz = z - cz * this.chunkSize;
+      if (lx === 0) this.dirty.add(this.cKey(cx - 1, cz));
+      if (lx === this.chunkSize - 1) this.dirty.add(this.cKey(cx + 1, cz));
+      if (lz === 0) this.dirty.add(this.cKey(cx, cz - 1));
+      if (lz === this.chunkSize - 1) this.dirty.add(this.cKey(cx, cz + 1));
     }
 
     _addToChunk(x, y, z, k) {
@@ -231,62 +258,107 @@
       const ck = this.cKey(cx, cz);
       const old = this.chunks.get(ck);
       if (old) {
-        for (const m of old.meshes) {
-          this.group.remove(m);
-          if (m.dispose) m.dispose();
-        }
+        for (const m of old.meshes) { this.group.remove(m); m.geometry.dispose(); }
+        this.renderStats.triangles -= old.triangles || 0;
+        this.chunks.delete(ck);
       }
       const x0 = cx * this.chunkSize, z0 = cz * this.chunkSize;
-      const buckets = { solid: [], glow: [], deco: [], water: [], glass: [] };
       const set = this.chunkBlocks.get(ck);
-      if (set) {
-        for (const k of set) {
-          const b = this.blocks.get(k);
-          if (!b) continue;
-          if (b.t === TYPE_GLOW) buckets.glow.push(b);
-          else if (b.t === TYPE_WATER) buckets.water.push(b);
-          else if (b.t === TYPE_DECO) buckets.deco.push(b);
-          else if (b.t === TYPE_GLASS) buckets.glass.push(b);
-          else buckets.solid.push(b);
+      if (!set || !set.size) {
+        this.chunkBlocks.delete(ck);
+        this.renderStats.chunks = this.chunks.size;
+        return;
+      }
+      const normals = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+      const planes = new Map();
+      const opaque = t => t === TYPE_SOLID || t === TYPE_GLOW || t === TYPE_LEAF;
+      const quantize = c => (((c >> 19) & 31) << 19) | (((c >> 11) & 31) << 11) | (((c >> 3) & 31) << 3);
+      for (const k of set) {
+        const b = this.blocks.get(k);
+        if (!b) continue;
+        const kind = b.t === TYPE_GLOW ? 'glow' : b.t === TYPE_GLASS ? 'glass' : b.t === TYPE_WATER ? 'water' : 'solid';
+        for (let dir = 0; dir < 6; dir++) {
+          const n = normals[dir];
+          const other = this.blocks.get(this.key(b.x + n[0], b.y + n[1], b.z + n[2]));
+          if (other && (opaque(other.t) || (other.t === b.t && (b.t === TYPE_GLASS || b.t === TYPE_WATER)))) continue;
+          const plane = dir < 2 ? b.x + (dir === 0 ? 1 : 0) : dir < 4 ? b.y + (dir === 2 ? 1 : 0) : b.z + (dir === 4 ? 1 : 0);
+          const u = dir < 2 ? b.z : b.x, v = dir < 2 || dir >= 4 ? b.y : b.z;
+          const pk = dir + '|' + plane + '|' + kind;
+          if (!planes.has(pk)) planes.set(pk, { dir, plane, kind, cells: new Map() });
+          planes.get(pk).cells.set(u + ',' + v, { u, v, color: quantize(b.c) });
         }
       }
-
-      const meshes = [];
-      const make = (list, mat, scale, order) => {
-        if (!list.length) return;
-        const mesh = new THREE.InstancedMesh(SHARED.chamfer, mat, list.length);
-        const m = new THREE.Matrix4();
-        const q = new THREE.Quaternion();
-        const s = new THREE.Vector3(scale, scale, scale);
-        const p = new THREE.Vector3();
-        const col = new THREE.Color();
-        for (let i = 0; i < list.length; i++) {
-          const b = list[i];
-          p.set(b.x + 0.5, b.y + 0.5, b.z + 0.5);
-          m.compose(p, q, s);
-          mesh.setMatrixAt(i, m);
-          col.setHex(b.c >>> 0);
-          mesh.setColorAt(i, col);
+      const buckets = {};
+      const col = new THREE.Color();
+      const topColor = (x, y, z, fallback) => {
+        let r = 0, g = 0, b = 0, count = 0;
+        const fr = fallback >> 16 & 255, fg = fallback >> 8 & 255, fb = fallback & 255;
+        for (let dx = -1; dx <= 0; dx++) for (let dz = -1; dz <= 0; dz++) {
+          const item = this.blocks.get(this.key(x + dx, y - 1, z + dz));
+          if (!item || !opaque(item.t)) continue;
+          const rr = item.c >> 16 & 255, gg = item.c >> 8 & 255, bb = item.c & 255;
+          // Blend only the same-looking material, preserving road/grass borders.
+          if (Math.max(Math.abs(rr - fr), Math.abs(gg - fg), Math.abs(bb - fb)) > 32) continue;
+          r += rr; g += gg; b += bb; count++;
         }
-        mesh.instanceMatrix.needsUpdate = true;
-        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-        // 分块已经足够小，直接关闭实例网格的视锥剔除，避免错误的包围球裁掉整块地形
-        mesh.frustumCulled = false;
+        return count ? (Math.round(r / count) << 16) | (Math.round(g / count) << 8) | Math.round(b / count) : fallback;
+      };
+      for (const face of planes.values()) {
+        const { dir, plane, kind, cells } = face;
+        const bucket = buckets[kind] || (buckets[kind] = { position: [], normal: [], uv: [], color: [], indices: [] });
+        const coordinates = Array.from(cells.values()).sort((a, b) => a.v - b.v || a.u - b.u);
+        const same = (u, v, color) => { const c = cells.get(u + ',' + v); return !!c && c.color === color; };
+        for (const cell of coordinates) {
+          if (!cells.has(cell.u + ',' + cell.v)) continue;
+          let width = 1, height = 1;
+          while (same(cell.u + width, cell.v, cell.color)) width++;
+          let grow = true;
+          while (grow) {
+            for (let u = 0; u < width; u++) if (!same(cell.u + u, cell.v + height, cell.color)) { grow = false; break; }
+            if (grow) height++;
+          }
+          for (let v = 0; v < height; v++) for (let u = 0; u < width; u++) cells.delete((cell.u + u) + ',' + (cell.v + v));
+          const uv = [[cell.u, cell.v], [cell.u + width, cell.v], [cell.u + width, cell.v + height], [cell.u, cell.v + height]];
+          const first = bucket.position.length / 3;
+          for (const [u, v] of uv) {
+            const p = dir < 2 ? [plane, v, u] : dir < 4 ? [u, plane, v] : [u, v, plane];
+            bucket.position.push(p[0] - x0, p[1], p[2] - z0);
+            bucket.normal.push(...normals[dir]);
+            const offsetU = dir < 2 ? z0 : x0, offsetV = dir < 2 || dir >= 4 ? 0 : z0;
+            bucket.uv.push((u - offsetU) / 8, (v - offsetV) / 8);
+            col.setHex(dir === 2 && kind === 'solid' ? topColor(p[0], p[1], p[2], cell.color) : cell.color);
+            bucket.color.push(col.r, col.g, col.b);
+          }
+          const reverse = dir === 0 || dir === 2 || dir === 5;
+          if (reverse) bucket.indices.push(first, first + 2, first + 1, first, first + 3, first + 2);
+          else bucket.indices.push(first, first + 1, first + 2, first, first + 2, first + 3);
+        }
+      }
+      const meshes = [];
+      let triangles = 0;
+      const materials = { solid: this.matSolid, glow: this.matGlow, glass: this.matGlass, water: this.matWater };
+      for (const [kind, data] of Object.entries(buckets)) {
+        if (!data.indices.length) continue;
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(data.position, 3));
+        geo.setAttribute('normal', new THREE.Float32BufferAttribute(data.normal, 3));
+        geo.setAttribute('uv', new THREE.Float32BufferAttribute(data.uv, 2));
+        geo.setAttribute('color', new THREE.Float32BufferAttribute(data.color, 3));
+        geo.setIndex(data.indices);
+        geo.computeBoundingSphere();
+        const mesh = new THREE.Mesh(geo, materials[kind]);
+        mesh.position.set(x0, 0, z0);
         mesh.matrixAutoUpdate = false;
         mesh.updateMatrix();
-        mesh.renderOrder = order || 0;
+        mesh.renderOrder = kind === 'glass' ? 2 : kind === 'water' ? 1 : 0;
         mesh.userData.chunk = ck;
         this.group.add(mesh);
         meshes.push(mesh);
-      };
-
-      make(buckets.solid, this.matSolid, 1);
-      make(buckets.deco, this.matSolid, 1);
-      make(buckets.glow, this.matGlow, 1);
-      make(buckets.glass, this.matGlass, 1, 2);
-      make(buckets.water, this.matWater, 1, 1);
-
-      this.chunks.set(ck, { meshes, count: buckets.solid.length + buckets.glow.length + buckets.deco.length + buckets.water.length + buckets.glass.length });
+        triangles += data.indices.length / 3;
+      }
+      this.chunks.set(ck, { meshes, count: set.size, triangles });
+      this.renderStats.triangles += triangles;
+      this.renderStats.chunks = this.chunks.size;
       if (this.onChunkBuilt) this.onChunkBuilt(ck);
     }
 
@@ -321,24 +393,48 @@
       this.markAllDirty();
       this.createWater();
       this.createEndlessGround();
+      if (this.terrain) {
+        const spawn = this.meta.spawn || [0, 3, 0];
+        this.terrain.prepareAt(spawn[0], spawn[2]);
+      }
     }
 
     /* ---------- 水面 ---------- */
     createWater() {
-      if (this.meta.waterLevel == null) return;
-      const size = 2000;
-      const geo = new THREE.PlaneGeometry(size, size, 72, 72);
+      if (this.meta.waterLevel == null || this.waterPlane) return;
+      const size = Math.max(2000, (this.meta.drawDistance || 800) * 2.4);
+      const geo = new THREE.PlaneGeometry(size, size, 48, 48);
       geo.rotateX(-Math.PI / 2);
-      const mat = new THREE.MeshBasicMaterial({
-        color: 0x1d6f99, transparent: true, opacity: 0.92, depthWrite: false
+      const mat = new THREE.MeshPhongMaterial({
+        color: 0x276f8c, transparent: true, opacity: 0.9, depthWrite: false,
+        shininess: 78, specular: 0x86a7bd
       });
+      this._waterUniforms = { uWaterTime: { value: 0 }, uWaterPhase: { value: new THREE.Vector2() } };
+      mat.onBeforeCompile = shader => {
+        Object.assign(shader.uniforms, this._waterUniforms);
+        shader.vertexShader = 'uniform float uWaterTime;\nuniform vec2 uWaterPhase;\n' + shader.vertexShader;
+        shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', `
+          #include <begin_vertex>
+          transformed.y += sin(position.x * 0.05 + uWaterPhase.x + uWaterTime * 0.9) * 0.10
+            + cos(position.z * 0.07 + uWaterPhase.y + uWaterTime * 0.6) * 0.06;
+        `);
+        shader.vertexShader = shader.vertexShader.replace('#include <beginnormal_vertex>', `
+          #include <beginnormal_vertex>
+          objectNormal.x -= cos(position.x * 0.05 + uWaterPhase.x + uWaterTime * 0.9) * 0.005;
+          objectNormal.z += sin(position.z * 0.07 + uWaterPhase.y + uWaterTime * 0.6) * 0.0042;
+        `);
+      };
+      mat.customProgramCacheKey = () => 'miniworld-water-v2';
       const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.y = this.meta.waterLevel + 0.28;
+      mesh.position.y = this.meta.waterLevel + 0.12;
+      if (this.meta.spawn) {
+        mesh.position.x = Math.floor(this.meta.spawn[0] / 128) * 128;
+        mesh.position.z = Math.floor(this.meta.spawn[2] / 128) * 128;
+      }
       mesh.renderOrder = 2;
       mesh.frustumCulled = false;
       this.waterPlane = mesh;
       this.group.add(mesh);
-      this._waterBase = geo.attributes.position.array.slice();
     }
 
     /* ---------- 无限地面 ---------- */
@@ -359,13 +455,6 @@
         const s = 1 + Math.floor(Math.random() * 3);
         ctx.fillRect(Math.random() * 128, Math.random() * 128, s, s);
       }
-      ctx.globalAlpha = 0.10;
-      ctx.strokeStyle = dark;
-      ctx.lineWidth = 1;
-      for (let i = 0; i <= 128; i += 16) {
-        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 128); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(128, i); ctx.stroke();
-      }
       const tex = new THREE.CanvasTexture(c);
       tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
       tex.repeat.set(120, 120);
@@ -376,7 +465,7 @@
     }
 
     createEndlessGround() {
-      if (this.meta.waterLevel != null || this.endlessPlane) return;
+      if (this.meta.waterLevel != null || this.endlessPlane || this.terrain) return;
       const color = this.meta.fallbackColor != null ? this.meta.fallbackColor : 0x77a83e;
       const outer = 1000;
       const hole = this.meta.groundSize || 70;
@@ -412,23 +501,15 @@
 
     update(dt, cameraPos) {
       this.rebuildDirty();
+      if (this.terrain) this.terrain.update(dt, cameraPos);
       if (this.waterPlane) {
         this.waterTime += dt;
-        const pos = this.waterPlane.geometry.attributes.position;
-        const base = this._waterBase;
-        if (base) {
-          const t = this.waterTime;
-          for (let i = 0; i < pos.count; i++) {
-            const bx = base[i * 3], bz = base[i * 3 + 2];
-            pos.array[i * 3 + 1] = Math.sin(bx * 0.16 + t * 1.1) * 0.09 +
-              Math.cos(bz * 0.2 + t * 0.8) * 0.07;
-          }
-          pos.needsUpdate = true;
-        }
         if (cameraPos) {
-          this.waterPlane.position.x = cameraPos.x;
-          this.waterPlane.position.z = cameraPos.z;
+          this.waterPlane.position.x = Math.floor(cameraPos.x / 128) * 128;
+          this.waterPlane.position.z = Math.floor(cameraPos.z / 128) * 128;
         }
+        this._waterUniforms.uWaterTime.value = this.waterTime;
+        this._waterUniforms.uWaterPhase.value.set((this.waterPlane.position.x * 0.05) % (Math.PI * 2), (this.waterPlane.position.z * 0.07) % (Math.PI * 2));
       }
       if (this.endlessPlane && cameraPos) {
         // 无限地面是静态环形面，中心留出真实地图，不随相机移动
@@ -437,7 +518,8 @@
     }
 
     /* ---------- 碰撞 ---------- */
-    collidesBox(x, y, z, radius, height) {
+    collidesBox(x, y, z, radius, height, ignoreTerrainFloor) {
+      if (this.terrain && this.terrain.collidesBox(x, y, z, radius, height, ignoreTerrainFloor)) return true;
       const x0 = Math.floor(x - radius), x1 = Math.floor(x + radius);
       const z0 = Math.floor(z - radius), z1 = Math.floor(z + radius);
       const y0 = Math.floor(y + 0.001), y1 = Math.floor(y + height - 0.001);
@@ -453,6 +535,14 @@
 
     /* 从 from 到 to 的体素射线，返回首个实体方块 */
     raycast(origin, dir, maxDist) {
+      maxDist = maxDist || 60;
+      const voxelHit = this._raycastVoxels(origin, dir, maxDist);
+      const groundHit = this.terrain ? this.terrain.raycast(origin, dir, voxelHit ? voxelHit.dist : maxDist) : null;
+      return groundHit && (!voxelHit || groundHit.dist < voxelHit.dist) ? groundHit : voxelHit;
+    }
+
+    _raycastVoxels(origin, dir, maxDist) {
+      if (!this.blocks.size) return null;
       let x = Math.floor(origin.x), y = Math.floor(origin.y), z = Math.floor(origin.z);
       const stepX = dir.x > 0 ? 1 : -1, stepY = dir.y > 0 ? 1 : -1, stepZ = dir.z > 0 ? 1 : -1;
       const tDeltaX = Math.abs(1 / (dir.x || 1e-9));
@@ -499,8 +589,12 @@
       for (const e of edits) {
         if (!e || e.length < 4) continue;
         const [x, y, z, c, t] = e;
+        if (![x, y, z, c].every(Number.isFinite)) continue;
+        if (y < this.minY || y > this.maxY || Math.abs(x) > this.bounds + 40 || Math.abs(z) > this.bounds + 40) continue;
         if (c === -1) this.remove(x, y, z, false);
         else this.set(x, y, z, c, t || 0, false);
+        // Restored edits must survive the next autosave as well.
+        this.editLog.set(this.key(Math.round(x), Math.round(y), Math.round(z)), [Math.round(x), Math.round(y), Math.round(z), c, t || 0]);
       }
       this.recordEdits = true;
       this.markAllDirty();
@@ -521,6 +615,7 @@
     }
 
     loadSerialized(data) {
+      this.revision++;
       this.recordEdits = false;
       this.blocks.clear();
       this.chunkBlocks.clear();
@@ -528,9 +623,11 @@
       this.editLog.clear();
       for (const ck of this.chunks.keys()) {
         const ch = this.chunks.get(ck);
-        for (const m of ch.meshes) { this.group.remove(m); if (m.dispose) m.dispose(); }
+        for (const m of ch.meshes) { this.group.remove(m); m.geometry.dispose(); }
       }
       this.chunks.clear();
+      this.renderStats.triangles = 0;
+      this.renderStats.chunks = 0;
       for (const b of data.blocks || []) {
         if (b.length < 4) continue;
         const k = this.key(b[0], b[1], b[2]);
@@ -543,6 +640,10 @@
       this.rebuildAllSync(400);
       if (this.meta.waterLevel != null && !this.waterPlane) this.createWater();
       this.createEndlessGround();
+      if (this.terrain) {
+        const spawn = this.meta.spawn || [0, 3, 0];
+        this.terrain.prepareAt(spawn[0], spawn[2]);
+      }
     }
 
     /* 统计 */
@@ -550,10 +651,15 @@
 
     dispose() {
       for (const ch of this.chunks.values()) {
-        for (const m of ch.meshes) { this.group.remove(m); if (m.dispose) m.dispose(); }
+        for (const m of ch.meshes) { this.group.remove(m); m.geometry.dispose(); }
       }
       this.chunks.clear();
       this.chunkBlocks.clear();
+      this.blocks.clear();
+      this.topMap.clear();
+      this.dirty.clear();
+      this.editLog.clear();
+      if (this.terrain) this.terrain.dispose();
       if (this.waterPlane) {
         this.group.remove(this.waterPlane);
         this.waterPlane.geometry.dispose();
@@ -564,6 +670,7 @@
         this.endlessPlane.geometry.dispose();
         this.endlessPlane.material.dispose();
       }
+      if (this._groundTexCache) { for (const texture of this._groundTexCache.values()) texture.dispose(); this._groundTexCache.clear(); }
       if (this.group.parent) this.group.parent.remove(this.group);
     }
   }

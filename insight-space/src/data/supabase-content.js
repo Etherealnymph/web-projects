@@ -1,8 +1,8 @@
 /** Supabase：内容 / 评论 / 互动 */
 
-import { purgeMedia } from './supabase-ops.js';
-import { fail, mapContent, mapComment } from './sb-core.js';
-import { sortContents } from '../core/util.js';
+import { purgeMedia, mediaPathOf } from './supabase-ops.js';
+import { fail, mapContent, mapComment, mapUser } from './sb-core.js';
+import { feedOptions, queryError } from './query.js';
 
 export function createContentsApi(sb, modulesApi) {
   const { client } = sb;
@@ -12,59 +12,51 @@ export function createContentsApi(sb, modulesApi) {
       const all = await modulesApi.list();
       const visible = new Set(all.filter((m) => m.access.visible).map((m) => m.id));
       if (options.moduleId && !visible.has(options.moduleId)) throw fail('module.noAccess');
-      if (!visible.size) return { items: [], total: 0 };
+      if (!visible.size) return { items: [], total: 0, hasMore: false };
 
       const moduleIds = Array.isArray(options.moduleIds) && options.moduleIds.length
         ? options.moduleIds.filter((id) => visible.has(id))
         : null;
-      if (moduleIds && !moduleIds.length) return { items: [], total: 0 };
-
-      let query = client.from('contents').select('*');
-      if (options.moduleId) query = query.eq('module_id', options.moduleId);
-      else if (moduleIds) query = query.in('module_id', moduleIds);
-      else query = query.in('module_id', Array.from(visible));
-      if (options.authorId) query = query.eq('author_id', options.authorId);
-      if (options.dateFrom) query = query.gte('created_at', options.dateFrom);
-      if (options.dateTo) query = query.lte('created_at', options.dateTo);
-      if (options.tag) query = query.contains('tags', [options.tag]);
-      if (options.q) query = query.or(`title.ilike.%${options.q}%,body_md.ilike.%${options.q}%`);
-      const { data, error } = await query.limit(500);
-      if (error) throw fail('msg.error');
-
-      let items = (data || []).map(mapContent).filter((c) => (c.status === 'draft' ? c.authorId === sb.uid() : true));
-      const accessMap = new Map(all.map((m) => [m.id, m.access]));
-      items = items.filter((c) => {
-        const accessDays = accessMap.get(c.moduleId)?.readDays;
-        return !(accessDays > 0) || c.authorId === sb.uid() || sb.isStaff()
-          || new Date(c.createdAt).getTime() >= Date.now() - accessDays * 86400000;
-      });
-      if (options.favoritesOf) {
-        const { data: favRows } = await client.from('reactions').select('target_id')
-          .eq('user_id', options.favoritesOf).eq('target_type', 'content').eq('kind', 'favorite');
-        const favIds = new Set((favRows || []).map((r) => r.target_id));
-        items = items.filter((c) => favIds.has(c.id));
-      }
-      items = await sb.attachCounts(items);
-      const authors = await sb.attachAuthors(data || []);
+      if (moduleIds && !moduleIds.length) return { items: [], total: 0, hasMore: false };
+      if (options.favoritesOf && options.favoritesOf !== sb.uid()) throw fail('common.noPermission');
       const moduleMap = new Map(all.map((m) => [m.id, m]));
-      items = items.map((c) => ({ ...c, author: authors.get(c.authorId) || null, module: moduleMap.get(c.moduleId) || null }));
       const scoped = options.moduleId || (moduleIds?.length === 1 ? moduleIds[0] : null);
       const module = scoped ? moduleMap.get(scoped) : null;
-      items = sortContents(items, options.sort || (module?.hot ? 'hot' : 'new'));
-      const total = items.length;
-      const offset = options.offset || 0;
-      const limit = options.limit || 0;
-      return { items: limit ? items.slice(offset, offset + limit) : items.slice(offset), total };
+      const { data, error } = await client.rpc('insight_content_page', {
+        p_options: feedOptions({ ...options, moduleIds: moduleIds || [...visible], sort: options.sort || (module?.hot ? 'hot' : 'new') }),
+      });
+      if (error) throw queryError(error);
+      const items = (data?.items || []).map((row) => ({
+        ...mapContent(row),
+        counts: row.counts,
+        mine: row.mine,
+        author: mapUser(row.author),
+        module: moduleMap.get(row.module_id) || null,
+      }));
+      return { items, total: Number(data?.total) || 0, hasMore: Boolean(data?.has_more) };
+    },
+
+    async facets(options = {}) {
+      if (options.favoritesOf && options.favoritesOf !== sb.uid()) throw fail('common.noPermission');
+      const { data, error } = await client.rpc('insight_content_facets', { p_options: feedOptions(options) });
+      if (error) throw queryError(error);
+      return { authors: data?.authors || [], tags: data?.tags || [] };
+    },
+
+    async summary(options = {}) {
+      if (options.favoritesOf && options.favoritesOf !== sb.uid()) throw fail('common.noPermission');
+      const { data, error } = await client.rpc('insight_content_summary', { p_options: feedOptions(options) });
+      if (error) throw queryError(error);
+      return { total: Number(data?.total) || 0, likes: Number(data?.likes) || 0, favorites: Number(data?.favorites) || 0 };
     },
 
     async get(id) {
       const { data, error } = await client.from('contents').select('*').eq('id', id).maybeSingle();
       if (error) throw fail('msg.error');
       if (!data) throw fail('content.notFound');
-      const [decorated] = await sb.attachCounts([mapContent(data)]);
-      const authors = await sb.attachAuthors([data]);
-      const { data: moduleRow } = await client.from('modules').select('*').eq('id', data.module_id).maybeSingle();
-      const all = await modulesApi.list();
+      const [[decorated], authors, all] = await Promise.all([
+        sb.attachCounts([mapContent(data)]), sb.attachAuthors([data]), modulesApi.list(),
+      ]);
       const module = all.find((m) => m.id === data.module_id) || null;
       return {
         ...decorated,
@@ -230,14 +222,23 @@ export function createCommentsApi(sb) {
       return mapComment(data);
     },
 
-    async update(id, { bodyMd }) {
+    async update(id, { bodyMd, media }) {
       sb.requireUser();
+      if (media !== undefined && !Array.isArray(media)) throw fail('msg.error');
+      const before = media === undefined ? { data: null } : await client.from('comments').select('media').eq('id', id).maybeSingle();
+      if (before.error) throw queryError(before.error);
+      const patch = { body_md: String(bodyMd || '').slice(0, 4000) };
+      if (media !== undefined) patch.media = media;
       const { data, error } = await client.from('comments')
-        .update({ body_md: String(bodyMd || '').slice(0, 4000) })
+        .update(patch)
         .eq('id', id)
         .select()
         .single();
       if (error) throw fail('common.noPermission');
+      if (media !== undefined) {
+        const keep = new Set(media.map(mediaPathOf).filter(Boolean));
+        await purgeMedia(sb, (before.data?.media || []).filter((ref) => !keep.has(mediaPathOf(ref))));
+      }
       return mapComment(data);
     },
 
@@ -265,18 +266,9 @@ export function createReactionsApi(sb) {
   const api = {
     async toggle({ targetType, targetId, kind }) {
       sb.requireUser();
-      const { data: existing } = await client.from('reactions').select('id')
-        .eq('user_id', sb.uid()).eq('target_type', targetType).eq('target_id', targetId).eq('kind', kind).maybeSingle();
-      if (existing) {
-        await client.from('reactions').delete().eq('id', existing.id);
-      } else {
-        if (kind !== 'favorite') {
-          const opposite = kind === 'like' ? 'dislike' : 'like';
-          await client.from('reactions').delete()
-            .eq('user_id', sb.uid()).eq('target_type', targetType).eq('target_id', targetId).eq('kind', opposite);
-        }
-        await client.from('reactions').insert({ user_id: sb.uid(), target_type: targetType, target_id: targetId, kind });
-      }
+      if (!['content', 'comment'].includes(targetType) || !['like', 'dislike', 'favorite'].includes(kind)) throw fail('common.noPermission');
+      const { error } = await client.rpc('insight_toggle_reaction', { p_target_type: targetType, p_target_id: targetId, p_kind: kind });
+      if (error) throw queryError(error);
       return api.state(targetType, [targetId]);
     },
 
@@ -290,13 +282,14 @@ export function createReactionsApi(sb) {
           ? client.from('reactions').select('target_id, kind').eq('user_id', sb.uid()).eq('target_type', targetType).in('target_id', ids)
           : Promise.resolve({ data: [] }),
       ]);
+      if (stats.error || mine.error) throw queryError(stats.error || mine.error);
       const out = {};
       for (const id of ids) out[id] = { like: 0, dislike: 0, favorite: 0, comment: 0, mine: { like: false, dislike: false, favorite: false } };
       for (const row of stats.data || []) {
         const id = row[key];
         out[id] = { ...out[id], like: row.like_count || 0, dislike: row.dislike_count || 0, favorite: row.favorite_count || 0 };
       }
-      for (const row of mine.data || []) out[row.target_id].mine[row.kind] = true;
+      for (const row of mine.data || []) if (out[row.target_id]) out[row.target_id].mine[row.kind] = true;
       return out;
     },
   };

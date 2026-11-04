@@ -1,6 +1,6 @@
 /** 列表筛选条：模块 / 作者 / 日期 / 标签 */
 
-import { t } from '../core/i18n.js';
+import { t, tl } from '../core/i18n.js';
 import { esc } from '../core/util.js';
 import { icon } from '../core/ui.js';
 
@@ -26,7 +26,10 @@ export function dateRange(preset, from = '', to = '') {
     begin = from ? new Date(`${from}T00:00:00`) : null;
     end = to ? new Date(`${to}T23:59:59.999`) : null;
   }
-  return { dateFrom: begin ? begin.toISOString() : null, dateTo: end ? end.toISOString() : null };
+  return {
+    dateFrom: begin && !Number.isNaN(begin.getTime()) ? begin.toISOString() : null,
+    dateTo: end && !Number.isNaN(end.getTime()) ? end.toISOString() : null,
+  };
 }
 
 /** 筛选状态 → api.contents.list() 参数 */
@@ -100,9 +103,9 @@ export function filterBarHtml(state, facets) {
         <select class="select" data-role="f-date">${optionsHtml(dateOptions, state.datePreset)}</select>
       </label>
       <span class="filter" data-role="f-range">
-        <input class="input" type="date" data-role="f-from" value="${esc(state.dateFrom)}" />
+        <input class="input" type="date" data-role="f-from" aria-label="${esc(tl('开始日期', 'Start date'))}" value="${esc(state.dateFrom)}" />
         <span class="muted">–</span>
-        <input class="input" type="date" data-role="f-to" value="${esc(state.dateTo)}" />
+        <input class="input" type="date" data-role="f-to" aria-label="${esc(tl('结束日期', 'End date'))}" value="${esc(state.dateTo)}" />
       </span>
       <label class="filter">
         <span class="filter__label">${icon('bookmark', 13)} ${esc(t('common.tags'))}</span>
@@ -141,6 +144,8 @@ export function wireFilterBar(root, state, onChange, baselineModuleId = '') {
   const toNode = bar.querySelector('[data-role="f-to"]');
   const rangeNode = bar.querySelector('[data-role="f-range"]');
   const resetNode = bar.querySelector('[data-role="f-reset"]');
+  const controller = new AbortController();
+  const { signal } = controller;
 
   const sync = () => {
     rangeNode.classList.toggle('is-open', state.datePreset === 'custom');
@@ -158,6 +163,10 @@ export function wireFilterBar(root, state, onChange, baselineModuleId = '') {
 
   let timer = 0;
   const commit = (immediate) => {
+    const invalidRange = bar.querySelector('[data-role="f-date"]').value === 'custom'
+      && fromNode.value && toNode.value && fromNode.value > toNode.value;
+    toNode.setCustomValidity(invalidRange ? tl('结束日期应不早于开始日期', 'End date must not precede start date') : '');
+    if (invalidRange) { toNode.reportValidity(); return; }
     read();
     sync();
     clearTimeout(timer);
@@ -167,14 +176,14 @@ export function wireFilterBar(root, state, onChange, baselineModuleId = '') {
 
   bar.addEventListener('change', (event) => {
     commit(event.target !== fromNode && event.target !== toNode);
-  });
+  }, { signal });
 
   // 作者是文本输入框，回车即确认；未在表单内，需阻止默认行为并让 change 事件接手
   bar.querySelector('[data-role="f-author"]').addEventListener('keydown', (event) => {
     if (event.key !== 'Enter') return;
     event.preventDefault();
     event.target.blur();
-  });
+  }, { signal });
 
   resetNode.addEventListener('click', () => {
     Object.assign(state, emptyFilters(baselineModuleId));
@@ -184,11 +193,14 @@ export function wireFilterBar(root, state, onChange, baselineModuleId = '') {
     bar.querySelector('[data-role="f-tag"]').value = '';
     fromNode.value = '';
     toNode.value = '';
+    toNode.setCustomValidity('');
+    clearTimeout(timer);
     sync();
     onChange();
-  });
+  }, { signal });
 
   sync();
+  return () => { clearTimeout(timer); controller.abort(); };
 }
 
 /** 从内容列表提取作者与标签候选（用于筛选下拉） */

@@ -3,6 +3,7 @@
 import { CONFIG, resolveSupabaseUrl } from '../config.js';
 import { loadSupabaseSdk } from './supabase-sdk.js';
 import { fail, mapUser, mapModule, usernameToEmail } from './sb-core.js';
+import { queryError } from './query.js';
 
 /** 从 Edge Function 的 FunctionsHttpError 中提取业务错误码（如 self_delete / last_superadmin） */
 async function fnErrorCode(error) {
@@ -95,9 +96,9 @@ export function createAuthApi(sb) {
     },
 
     async logout() {
-      await client.auth.signOut();
-      sb.profile = null;
-      sb.grants = [];
+      const { error } = await client.auth.signOut();
+      if (error) throw queryError(error);
+      sb.clearSession();
       return true;
     },
 
@@ -272,22 +273,22 @@ export function createAuthApi(sb) {
 
 export function createModulesApi(sb) {
   const { client } = sb;
+  let inFlight = null;
 
   const api = {
     async list() {
-      const { data, error } = await client.from('modules').select('*').order('sort', { ascending: true });
-      if (error) throw fail('msg.error');
-      const { data: contentRows } = await client.from('contents').select('id, module_id, status');
-      const counts = new Map();
-      for (const row of contentRows || []) {
-        if (row.status === 'draft') continue;
-        counts.set(row.module_id, (counts.get(row.module_id) || 0) + 1);
+      if (!sb.uid()) return [];
+      // Coalesce concurrent header/feed requests, without keeping permissions in a timed cache.
+      if (!inFlight) {
+        inFlight = (async () => {
+          const { data, error } = await client.rpc('insight_modules');
+          if (error) throw queryError(error);
+          return (data || []).map((row) => mapModule(row, {
+            ...sb.accessFor(row.id), visible: Boolean(row.can_read), write: Boolean(row.can_write),
+          }, { contents: Number(row.content_count) || 0 }));
+        })().finally(() => { inFlight = null; });
       }
-      return (data || []).map((row) => mapModule(
-        row,
-        sb.profile ? sb.accessFor(row.id) : { visible: false, write: false, expiresAt: null },
-        { contents: counts.get(row.id) || 0 },
-      ));
+      return inFlight;
     },
 
     async accessible() {

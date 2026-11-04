@@ -1,5 +1,5 @@
 /* ===========================================================
-   程序化世界生成：紫禁城 / 唐长安 / 电子科大 / 珠海一中 / 台湾
+   程序化世界生成：六个紧凑案例 / 三座大型城市区域 / 世界大陆
    =========================================================== */
 (function () {
   const MW = window.MW;
@@ -1390,6 +1390,165 @@
     };
   }
 
+  /* A compact editable district anchors a much larger streamed landscape.
+     Landmarks are deliberately stylised; no claim of surveyed city geometry. */
+  function cityInfrastructure(b, meta) {
+    const y = 3;
+    // A walkable square, clear approach road and usable flight strip.
+    b.fill(-66, 2, -74, 66, 2, 68, 0xa6b0ab, { jitter: 0.01 });
+    b.fill(-14, 2, -180, 14, 2, 180, 0x57646a, { jitter: 0 });
+    b.fill(-180, 2, -12, 180, 2, 12, 0x57646a, { jitter: 0 });
+    for (let z = -176; z < 178; z += 14) b.fill(-1, 2, z, 1, 2, z + 5, 0xd5d6bd, { jitter: 0 });
+    b.fill(-379, 2, -340, -341, 2, 340, 0x46535c, { jitter: 0 });
+    for (let z = -328; z < 330; z += 24) b.fill(-361, 2, z, -359, 2, z + 11, 0xe0e0c8, { jitter: 0 });
+    for (let z = -324; z <= 324; z += 54) {
+      b.set(-378, 3, z, 0x8ce8ef, MW.BLOCK_TYPES.GLOW);
+      b.set(-342, 3, z, 0x8ce8ef, MW.BLOCK_TYPES.GLOW);
+    }
+    b.modern(-316, -100, 22, 24, y, 16, { wall: 0x8199a0, name: '飞行中心', stairs: false, rooms: false, desk: false });
+    // Rail route avoids the central landmarks and is entirely on flat terrain.
+    b.fill(-241, 3, 60, -226, 3, 132, 0xb6c1bf, { jitter: 0.01 });
+    b.modern(-258, 95, 20, 34, y, 8, { wall: 0xadb9b6, name: '城际车站', stairs: false, rooms: false, desk: false });
+    for (const x of [-160, -96, 96, 160]) for (const z of [-150, 150]) {
+      b.tree(x, z, 7, meta.id === 'tokyo' ? 0xa6bd8d : 0x668b55, { y });
+      b.lamp(x + 12, z, y, 0xffdc99, 5);
+    }
+    return {
+      spawn: [0, 3, 100], spawnYaw: 0, spawnPitch: -0.04, killTarget: 18,
+      fallbackColor: 0x739366,
+      vehicles: [
+        { type: 'car', x: 6, z: 82, name: '城市探索车' },
+        { type: 'tank', x: -88, z: 110, name: '远征坦克' },
+        { type: 'apc', x: -112, z: 110, name: '支援装甲车' },
+        { type: 'drone', x: 21, z: 92, name: '城市侦察机' },
+        { type: 'jet', x: -360, z: 260, name: '远征战斗机' }
+      ],
+      zones: [
+        { name: '中央广场', x: 28, z: 36, r: 16, enemy: true },
+        { name: '城际车站', x: -232, z: 95, r: 14, enemy: true },
+        { name: '飞行中心', x: -315, z: -75, r: 14, enemy: true }
+      ],
+      pickups: [
+        { item: 'rifle', x: 6, z: 93 }, { item: 'missile', x: 9, z: 93 },
+        { item: 'ammo_rocket', x: 12, z: 93 }, { item: 'medkit', x: -6, z: 93 },
+        { item: 'armor', x: -9, z: 93 }
+      ],
+      labels: [
+        { text: meta.name, x: 0, y: 27, z: -12, color: 0xc3e7df, width: 18 },
+        { text: '城际车站', x: -235, y: 17, z: 95, color: 0x9be0d4, width: 12 },
+        { text: '飞行中心', x: -360, y: 15, z: 260, color: 0x8bdbe8, width: 12 }
+      ],
+      destinations: [
+        { name: '中央广场', x: 0, z: 100 }, { name: '城际车站', x: -231, z: 128 },
+        { name: '飞行跑道', x: -360, z: 280 }, { name: '城市街区', x: 576, z: 0 },
+        { name: '郊野公路', x: 0, z: 4000 }, { name: '远郊山地', x: -7000, z: -5000 }
+      ],
+      advanced: {
+        rail: [[-220, -160], [-160, -220], [160, -220], [220, -160], [220, 160], [160, 220], [-160, 220], [-220, 160]],
+        base: [-90, 110]
+      }
+    };
+  }
+
+  function genBeijing(b, meta) {
+    const result = cityInfrastructure(b, meta);
+    b.hall(0, -52, 48, 30, 3, { wall: 0x9f4e43, roof: 0xcfa45a, columns: true });
+    b.gate(0, 42, 36, 12, 3, { wall: 0xa95746, roof: 0xd0a052 });
+    b.pavilion(-100, -75, 3, 16, { roof: 0xc49a56 });
+    b.pavilion(100, -75, 3, 16, { roof: 0xc49a56 });
+    b.modern(-95, -130, 30, 30, 3, 36, { wall: 0xb2b9b4, glass: 0x91b7bf, name: '城市文化馆', rooms: false, desk: false });
+    b.modern(95, -130, 30, 30, 3, 56, { wall: 0x91a0a5, glass: 0x81b9c5, name: '中轴商务中心', rooms: false, desk: false });
+    b.modern(100, 86, 32, 28, 3, 24, { wall: 0xc4b8a2, name: '城市图书馆', rooms: false });
+    b.fill(-35, 3, -9, -29, 13, -3, 0xc4bfae, { jitter: 0.01 });
+    result.labels.push({ text: '中轴宫阙 · 风格化地标', x: 0, y: 28, z: -52, color: 0xf0cf88, width: 17 });
+    result.destinations.push({ name: '环城公路', x: 1100, z: 0 }, { name: '东郊河岸', x: 2800, z: 350 });
+    return result;
+  }
+
+  function genWashington(b, meta) {
+    const result = cityInfrastructure(b, meta);
+    // A tapered stone obelisk and civic buildings around a walkable mall.
+    for (let y = 3; y < 57; y++) {
+      const r = y < 48 ? 3 : Math.max(0, Math.floor((57 - y) / 3));
+      b.fill(-43 - r, y, -33 - r, -43 + r, y, -33 + r, 0xd6d8ca, { jitter: 0.01 });
+    }
+    b.modern(70, -70, 50, 34, 3, 16, { wall: 0xd0d5cd, glass: 0x9eb5bf, roof: 0xb4c1bd, name: '穹顶大厅', rooms: false, desk: false });
+    for (let y = 20; y <= 35; y++) {
+      const radius = Math.sqrt(Math.max(0, 15 * 15 - (y - 20) * (y - 20)));
+      for (let x = -Math.ceil(radius); x <= Math.ceil(radius); x++) for (let z = -Math.ceil(radius); z <= Math.ceil(radius); z++) {
+        const d = Math.hypot(x, z);
+        if (d <= radius && d >= radius - 1.5) b.set(70 + x, y, -70 + z, 0xdce0d8, 0);
+      }
+    }
+    b.modern(-105, -112, 46, 26, 3, 12, { wall: 0xd9ded4, glass: 0x8ba5ad, name: '白色行政馆', rooms: false, desk: false });
+    for (let x = -122; x <= -88; x += 6) b.fill(x, 4, -96, x, 12, -96, 0xe4e7de, { jitter: 0 });
+    b.modern(98, 92, 36, 30, 3, 20, { wall: 0xbfc4bc, name: '博物馆', rooms: false, desk: false });
+    b.modern(-102, 38, 32, 28, 3, 16, { wall: 0xbdc3bc, name: '艺术中心', rooms: false, desk: false });
+    result.labels.push({ text: '纪念碑 · 风格化地标', x: -43, y: 64, z: -33, color: 0xf1e5bf, width: 16 });
+    result.labels.push({ text: '穹顶大厅', x: 70, y: 43, z: -70, color: 0xd5eee6, width: 13 });
+    result.destinations.push({ name: '纪念碑草坪', x: -43, z: -10 }, { name: '西南河岸', x: -730, z: 500 });
+    return result;
+  }
+
+  function genTokyo(b, meta) {
+    const result = cityInfrastructure(b, meta);
+    // Open lattice tower: a recognisable silhouette with walkable space below.
+    for (let y = 3; y < 84; y++) {
+      const r = Math.max(1, Math.round(12 * (1 - (y - 3) / 85)));
+      const color = Math.floor(y / 9) % 2 ? 0xe4e5d8 : 0xd97a60;
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) b.set(78 + sx * r, y, -56 + sz * r, color, 0);
+      if (y % 8 === 0) b.fillRing(78 - r, y, -56 - r, 78 + r, y, -56 + r, color, { jitter: 0 });
+    }
+    b.fill(68, 43, -66, 88, 44, -46, 0xddddd0, { jitter: 0 });
+    b.fillRing(68, 45, -66, 88, 47, -46, 0x91bdc5, { type: MW.BLOCK_TYPES.GLASS, jitter: 0 });
+    b.fill(68, 48, -66, 88, 48, -46, 0xd87b65, { jitter: 0 });
+    b.fill(78, 84, -56, 78, 94, -56, 0xe1e4d5, { jitter: 0 });
+    b.set(78, 95, -56, 0xffa98a, MW.BLOCK_TYPES.GLOW);
+    for (const [x, z, h] of [[-102, -110, 52], [-56, -105, 32], [127, -125, 60], [-100, 62, 40], [104, 97, 32]]) {
+      b.modern(x, z, 28, 28, 3, h, { wall: 0x788c9a, glass: 0x7da8c2, roof: 0x647d8a, name: '湾岸街区', rooms: false, desk: false });
+      b.fill(x - 8, 8, z + 15, x + 8, 10, z + 15, z < 0 ? 0xa4d9e4 : 0xe6a1a8, { type: MW.BLOCK_TYPES.GLOW, jitter: 0 });
+    }
+    for (let i = -10; i <= 10; i += 3) {
+      b.fill(i, 2, 14, i + 1, 2, 22, 0xdce0d4, { jitter: 0 });
+      b.fill(-22, 2, i, -14, 2, i + 1, 0xdce0d4, { jitter: 0 });
+    }
+    // Pier joins the eastern arterial; berth is over the continuous bay.
+    b.fill(914, 2, -5, 1032, 2, 5, 0xb3b2a0, { jitter: 0.01 });
+    for (let x = 920; x <= 1030; x += 22) b.fill(x, -12, -4, x + 1, 1, -3, 0x6e7470, { jitter: 0 });
+    result.labels.push({ text: '湾岸高塔 · 风格化地标', x: 78, y: 104, z: -56, color: 0xf8c0a6, width: 19 });
+    result.destinations.push({ name: '高塔广场', x: 52, z: -36 }, { name: '海湾码头', x: 1018, z: 0 });
+    result.vehicles.push({ type: 'boat', x: 1048, z: 48, name: '海湾巡逻艇' });
+    result.advanced.carrier = [1470, 330];
+    return result;
+  }
+
+  function genEarth(b, meta) {
+    const destinations = MW.Geography.destinations();
+    for (const dest of destinations) {
+      if (b.w.terrainGroundAt(dest.x, dest.z) > 1) continue;
+      const origin = { x: dest.x, z: dest.z };
+      let found = false;
+      for (const radius of [2000, 10000, 30000, 60000]) {
+        for (let i = 0; i < 12; i++) {
+          const x = origin.x + Math.cos(i / 6 * Math.PI) * radius;
+          const z = origin.z + Math.sin(i / 6 * Math.PI) * radius;
+          if (b.w.terrainGroundAt(x, z) > 1) { dest.x = x; dest.z = z; found = true; break; }
+        }
+        if (found) break;
+      }
+    }
+    const spawn = destinations[0], y = b.w.terrainGroundAt(spawn.x, spawn.z);
+    return {
+      spawn: [spawn.x, y, spawn.z], spawnYaw: -0.6, spawnPitch: -0.08, destinations,
+      killTarget: 18, labels: [], zones: [], pickups: [],
+      vehicles: [
+        { type: 'car', x: spawn.x + 8, z: spawn.z + 8, name: '大陆远征车' },
+        { type: 'jet', x: spawn.x + 24, z: spawn.z + 24, name: '地理探索机' },
+        { type: 'drone', x: spawn.x - 10, z: spawn.z + 8, name: '测绘无人机' }
+      ],
+      advanced: { base: [spawn.x - 30, spawn.z + 20], rail: [] }
+    };
+  }
 
   const GENERATORS = {
     forbidden: genForbidden,
@@ -1397,15 +1556,19 @@
     uestc: genUestc,
     zh1z: genZh1z,
     taiwan: genTaiwan,
-    japan: genJapan
+    japan: genJapan,
+    beijing: genBeijing,
+    washington: genWashington,
+    tokyo: genTokyo,
+    earth: genEarth
   };
 
   MW.WorldGen = {
     generate(def, options) {
       options = options || {};
       const meta = JSON.parse(JSON.stringify(def));
-      meta.bounds = def.id === 'japan' ? 116 : def.id === 'taiwan' ? 80 : 74;
-      if (def.id !== 'taiwan' && def.id !== 'japan') meta.groundSize = def.id === 'zh1z' ? 68 : 70;
+      meta.bounds = def.bounds || (def.id === 'japan' ? 116 : def.id === 'taiwan' ? 80 : 74);
+      if (!def.terrain && def.id !== 'taiwan' && def.id !== 'japan') meta.groundSize = def.id === 'zh1z' ? 68 : 70;
       if (def.id === 'taiwan') meta.waterLevel = 4;
       if (def.id === 'japan') meta.waterLevel = 1;
       const world = new MW.VoxelWorld(meta);

@@ -41,13 +41,13 @@ export function reactBarHtml(targetType, entity, options = {}) {
   const link = options.permalink ? `<a class="react react--count" href="#/c/${id}">${icon('comment', 16)}<span>${counts.comment || 0}</span></a>` : '';
   return `
     <div class="reactbar" data-reactbar data-target-type="${esc(targetType)}" data-target-id="${id}">
-      <button type="button" class="react ${mine.like ? 'is-on' : ''}" data-react="like" title="${esc(t('react.like'))}">
+      <button type="button" class="react ${mine.like ? 'is-on' : ''}" data-react="like" aria-pressed="${Boolean(mine.like)}" aria-label="${esc(t('react.like'))}" title="${esc(t('react.like'))}">
         ${mine.like ? iconFilled('like', 16) : icon('like', 16)}<span data-count="like">${counts.like || 0}</span>
       </button>
-      <button type="button" class="react ${mine.dislike ? 'is-on--down' : ''}" data-react="dislike" title="${esc(t('react.dislike'))}">
+      <button type="button" class="react ${mine.dislike ? 'is-on--down' : ''}" data-react="dislike" aria-pressed="${Boolean(mine.dislike)}" aria-label="${esc(t('react.dislike'))}" title="${esc(t('react.dislike'))}">
         ${mine.dislike ? iconFilled('dislike', 16) : icon('dislike', 16)}<span data-count="dislike">${counts.dislike || 0}</span>
       </button>
-      <button type="button" class="react ${mine.favorite ? 'is-on--star' : ''}" data-react="favorite" title="${esc(t('react.favorite'))}">
+      <button type="button" class="react ${mine.favorite ? 'is-on--star' : ''}" data-react="favorite" aria-pressed="${Boolean(mine.favorite)}" aria-label="${esc(t('react.favorite'))}" title="${esc(t('react.favorite'))}">
         ${mine.favorite ? iconFilled('star', 16) : icon('star', 16)}<span data-count="favorite">${counts.favorite || 0}</span>
       </button>
       ${link || `<span class="react react--count">${icon('comment', 16)}<span data-count="comment">${counts.comment || 0}</span></span>`}
@@ -69,11 +69,11 @@ export function countChips(items, size = 12) {
 
 /** 网格卡片 */
 export function contentCardHtml(item) {
-  const cover = item.coverUrl || firstImage(item.bodyMd);
+  const cover = Object.prototype.hasOwnProperty.call(item, 'coverUrl') ? item.coverUrl : firstImage(item.bodyMd);
   const text = excerpt(item.bodyMd, 96);
   return `
     <a class="card card--link content-card" href="#/c/${esc(item.id)}">
-      ${cover ? `<img class="content-card__cover" src="${esc(cover)}" alt="" loading="lazy" />` : ''}
+      ${cover ? `<img class="content-card__cover" src="${esc(cover)}" alt="" loading="lazy" decoding="async" width="640" height="360" />` : ''}
       <div class="content-card__meta">
         <span class="badge">${esc(item.module?.icon || '')} ${esc(moduleName(item.module, document.documentElement.dataset.lang))}</span>
         <span class="tiny muted">${esc(fromNow(item.createdAt, document.documentElement.dataset.lang))}</span>
@@ -181,7 +181,7 @@ export function answerHtml(comment, options = {}) {
         ${isDeleted ? `<div class="comment__body muted">${esc(t('comment.authorDeleted'))}</div>` : `
           <div class="answer__preview muted" data-answer-preview>${esc(short) || esc(t('answer.noPreview'))}</div>
           <div class="answer__body prose" data-answer-body hidden>${body}${mediaGalleryHtml(comment.media, { compact: true })}</div>
-          <button type="button" class="link tiny" data-toggle-answer="${esc(comment.id)}">${esc(t('answer.expand'))}</button>
+          <button type="button" class="link tiny" data-toggle-answer="${esc(comment.id)}" aria-expanded="false">${esc(t('answer.expand'))}</button>
         `}
         <div class="comment__actions" ${isDeleted ? 'hidden' : ''}>
           ${reactBarHtml('comment', comment)}
@@ -217,13 +217,13 @@ export function mediaGalleryHtml(media, options = {}) {
   const showUnresolved = options.showUnresolved ?? false;
   const items = media.map((item, index) => {
     if (item.kind === 'image') {
-      return `<div class="gallery__item" data-open-media="${esc(item.url)}" data-media-kind="image"><img src="${esc(item.displayUrl || item.url)}" alt="${esc(item.name || '')}" loading="lazy" /></div>`;
+      return `<button type="button" class="gallery__item" data-open-media="${esc(item.displayUrl || item.url)}" data-media-kind="image" aria-label="${esc(item.name || t('content.image'))}"><img src="${esc(item.displayUrl || item.url)}" alt="${esc(item.name || '')}" loading="lazy" decoding="async" /></button>`;
     }
     if (item.kind === 'video') {
-      return `<div class="gallery__item" data-open-media="${esc(item.url)}" data-media-kind="video" style="position:relative"><video src="${esc(item.displayUrl || item.url)}" muted preload="metadata"></video><span style="position:absolute;inset:0;display:grid;place-items:center;color:#fff;background:rgba(0,0,0,.25)">${icon('play', 22)}</span></div>`;
+      return `<button type="button" class="gallery__item" data-open-media="${esc(item.displayUrl || item.url)}" data-media-kind="video" aria-label="${esc(item.name || t('content.video'))}" style="position:relative"><video src="${esc(item.displayUrl || item.url)}" muted playsinline preload="none"></video><span style="position:absolute;inset:0;display:grid;place-items:center;color:#fff;background:rgba(0,0,0,.25)">${icon('play', 22)}</span></button>`;
     }
     if (item.kind === 'audio') {
-      return `<div class="upload-item" style="width:100%">${icon('mic', 16)}<span class="grow ellipsis">${esc(item.name || t('content.voice'))}</span><audio class="media-audio" controls src="${esc(item.displayUrl || item.url)}"></audio></div>`;
+      return `<div class="upload-item" style="width:100%">${icon('mic', 16)}<span class="grow ellipsis">${esc(item.name || t('content.voice'))}</span><audio class="media-audio" controls preload="none" src="${esc(item.displayUrl || item.url)}"></audio></div>`;
     }
     return `<a class="file-chip" href="${esc(item.displayUrl || item.url)}" target="_blank" rel="noopener noreferrer" download>${icon('file', 17)}<span class="file-chip__name">${esc(item.name || 'file')}</span></a>`;
   }).filter(Boolean);

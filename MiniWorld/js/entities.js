@@ -18,6 +18,7 @@
     );
     fill.position.z = 0.002;
     fill.renderOrder = 21;
+    for (const mesh of [bg, fill]) { mesh.geometry.userData.mwOwned = true; mesh.material.userData.mwOwned = true; }
     g.add(bg, fill);
     g.userData.fill = fill;
     g.visible = false;
@@ -25,7 +26,7 @@
   }
   MW.makeHealthBar = makeHealthBar;
 
-  function moveMob(game, ent, dx, dz) {
+  function moveMob(game, ent, dx, dz, dt) {
     const w = game.world;
     const r = ent.radius, h = ent.height;
     const solid = (x, y, z) => w.collidesBox(x, y, z, r, h) || game.collidesDoor(x, y, z, r, h);
@@ -35,9 +36,9 @@
     else if (!solid(ent.pos.x, ent.pos.y + 1.05, ent.pos.z + dz)) { ent.pos.z += dz; ent.pos.y += 1; }
     const surf = w.surfaceAt(ent.pos.x, ent.pos.z);
     if (ent.pos.y < surf - 0.2 && surf - ent.pos.y < 2.2) ent.pos.y = surf;
-    if (ent.pos.y > surf + 0.4) ent.pos.y -= 8 * 0.016;
+    if (ent.pos.y > surf + 0.4) ent.pos.y = Math.max(surf, ent.pos.y - 8 * (dt || 1/60));
     ent.pos.x = MW.clamp(ent.pos.x, -game.travelBounds, game.travelBounds);
-    ent.pos.z = MW.clamp(ent.pos.z, -game.travelBounds, game.travelBounds);
+    ent.pos.z = MW.clamp(ent.pos.z, -(game.travelBoundsZ || game.travelBounds), game.travelBoundsZ || game.travelBounds);
   }
 
   /* =========================================================
@@ -88,20 +89,20 @@
       this.growlT -= dt;
       if (this.growlT < 0) {
         this.growlT = 5 + Math.random() * 8;
-        if (this.game.distToPlayer(this.pos) < 28) MW.SFX.growl();
+        if (this.game.distToPlayer(this.pos) < 28) MW.SFX.growl(this.pos);
       }
 
       if (this.stun <= 0 && !this.game.combatPaused) {
         const target = this.pickTarget();
         this.target = target;
         if (target) {
-          TMP.subVectors(target, this.pos);
+          TMP.subVectors(target.pos, this.pos);
           const dist = TMP.length();
           const dx = TMP.x / (dist || 1), dz = TMP.z / (dist || 1);
           const attackRange = this.elite ? 2.7 : 2.05;
           if (dist > attackRange) {
             const sp = this.speed * (this.game.season === 'winter' ? 0.86 : 1);
-            moveMob(this.game, this, (dx + Math.sin(this.phase * 1.3) * 0.18) * sp * dt, (dz + Math.cos(this.phase * 1.1) * 0.18) * sp * dt);
+            moveMob(this.game, this, (dx + Math.sin(this.phase * 1.3) * 0.18) * sp * dt, (dz + Math.cos(this.phase * 1.1) * 0.18) * sp * dt, dt);
             this.phase += dt * 5;
           } else if (this.attackCd <= 0) {
             this.attackCd = this.elite ? 1.1 : 1.25;
@@ -110,11 +111,11 @@
               const zEye = this.pos.clone().add(new THREE.Vector3(0, 1.4, 0));
               const pEye = this.game.player.pos.clone().add(new THREE.Vector3(0, 1.0, 0));
               const blocked = this.game.world.lineBlocked(zEye, pEye) || this.game.doorLineBlocked(zEye, pEye);
-              if (blocked) { this.atkCd = 0.5; return; }
+              if (blocked) { this.attackCd = 0.5; return; }
               if (this.game.inVehicle) this.game.inVehicle.damage(this.dmg * 2.2);
               else this.game.player.damage(this.dmg, { sourcePos: this.pos });
             } else if (target.soldier) target.soldier.damage(this.dmg);
-            MW.SFX.growl();
+            MW.SFX.growl(this.pos);
           }
           const wantYaw = Math.atan2(-dx, -dz);
           let diff = ((wantYaw - this.yaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
@@ -122,7 +123,7 @@
         } else {
           // 游荡
           const sp = this.speed * 0.4;
-          moveMob(this.game, this, this.wander.x * 0.1, this.wander.z * 0.1);
+          moveMob(this.game, this, this.wander.x * dt * 6, this.wander.z * dt * 6, dt);
           this.phase += dt * 3;
         }
       }
@@ -186,6 +187,7 @@
 
     remove() {
       this.game.scene.remove(this.model.group);
+      MW.Models.disposeOwned(this.model.group);
       this.game.removeZombie(this);
     }
   }
@@ -228,6 +230,7 @@
         this.model.group.rotation.z = MW.lerp(this.model.group.rotation.z, Math.PI / 2, dt * 5);
         if (this.deadT > 2.5) {
           this.game.scene.remove(this.model.group);
+          MW.Models.disposeOwned(this.model.group);
           this.game.removeSoldier(this);
         }
         return;
@@ -496,6 +499,7 @@
     update(dt) {
       if (this.dead) return;
       this.fireCd = Math.max(0, this.fireCd - dt);
+      MW.Models.animateVehicle?.(this.model, dt, this.currentSpeed || 0, this.game.time);
       if (this.game.inVehicle === this) {
         this.updateDriven(dt);
       } else if (this.type === 'boat') {
@@ -543,7 +547,7 @@
         const dx = -Math.sin(this.yaw) * this.airSpeed * dt;
         const dz = -Math.cos(this.yaw) * this.airSpeed * dt;
         const nx = this.pos.x + dx, nz = this.pos.z + dz;
-        const surf = w.surfaceAt(nx, nz);
+        const surf = this.game.groundAt(nx, nz);
         let vy;
         if (this.airSpeed < 9) {
           vy = -7 * (1 - this.airSpeed / 9) + p.pitch * 3.5;
@@ -552,7 +556,7 @@
         }
         let ny = this.pos.y + vy * dt;
         const wl = w.meta.waterLevel;
-        if (wl != null && ny <= wl + 0.45) {
+        if (wl != null && ny <= wl + 0.45 && surf <= wl + 0.5) {
           this.crash('坠入海中');
           return;
         }
@@ -580,8 +584,8 @@
           return;
         }
         this.pos.x = MW.clamp(nx, -this.game.travelBounds, this.game.travelBounds);
-        this.pos.z = MW.clamp(nz, -this.game.travelBounds, this.game.travelBounds);
-        this.pos.y = MW.clamp(ny, -4, 90);
+        this.pos.z = MW.clamp(nz, -(this.game.travelBoundsZ || this.game.travelBounds), this.game.travelBoundsZ || this.game.travelBounds);
+        this.pos.y = MW.clamp(ny, -4, w.meta.terrain ? 12000 : 600);
       } else if (this.type === 'drone') {
         const sp = this.speed;
         const step = sp * input.fwd * dt;
@@ -590,9 +594,9 @@
         if (!w.collidesBox(nx, this.pos.y, this.pos.z, 0.8, 0.8)) this.pos.x = nx;
         if (!w.collidesBox(this.pos.x, this.pos.y, nz, 0.8, 0.8)) this.pos.z = nz;
         this.pos.y += (input.up - input.down) * 9 * dt;
-        this.pos.y = MW.clamp(this.pos.y, w.surfaceAt(this.pos.x, this.pos.z) + 0.8, 60);
+        this.pos.y = MW.clamp(this.pos.y, w.surfaceAt(this.pos.x, this.pos.z) + 0.8, w.meta.terrain ? 12000 : 600);
         this.pos.x = MW.clamp(this.pos.x, -this.game.travelBounds, this.game.travelBounds);
-        this.pos.z = MW.clamp(this.pos.z, -this.game.travelBounds, this.game.travelBounds);
+        this.pos.z = MW.clamp(this.pos.z, -(this.game.travelBoundsZ || this.game.travelBounds), this.game.travelBoundsZ || this.game.travelBounds);
         this.currentSpeed = Math.abs(input.fwd) * sp;
         this.model.wheels.forEach((r, i) => r.rotation.y += dt * 26 * (i % 2 ? 1 : -1));
       } else if (this.type === 'boat') {
@@ -613,18 +617,21 @@
         if (canSail(nx, this.pos.z)) this.pos.x = nx;
         if (canSail(this.pos.x, nz)) this.pos.z = nz;
         this.pos.x = MW.clamp(this.pos.x, -this.game.travelBounds, this.game.travelBounds);
-        this.pos.z = MW.clamp(this.pos.z, -this.game.travelBounds, this.game.travelBounds);
+        this.pos.z = MW.clamp(this.pos.z, -(this.game.travelBoundsZ || this.game.travelBounds), this.game.travelBoundsZ || this.game.travelBounds);
         this.pos.y = wl + 0.1 + Math.sin(this.game.time * 1.6) * 0.1;
       } else {
-        let sp = this.speed * (input.boost ? 1.8 : 1) * (input.brake ? 0.2 : 1);
-        if (input.fwd < 0) sp *= 0.45;
-        this.currentSpeed = Math.abs(sp * input.fwd);
-        const dx = -Math.sin(this.yaw) * sp * input.fwd * dt;
-        const dz = -Math.cos(this.yaw) * sp * input.fwd * dt;
+        const targetSpeed = this.speed * (input.boost ? 1.8 : 1) * input.fwd * (input.fwd < 0 ? 0.45 : 1);
+        this.signedSpeed = MW.lerp(this.signedSpeed || 0, input.brake ? 0 : targetSpeed, Math.min(1, dt * (input.brake ? 9 : 2.8)));
+        this.currentSpeed = Math.abs(this.signedSpeed);
+        const dx = -Math.sin(this.yaw) * this.signedSpeed * dt;
+        const dz = -Math.cos(this.yaw) * this.signedSpeed * dt;
         const bodyH = this.type === 'car' ? 1.55 : this.type === 'tank' ? 2.5 : this.type === 'apc' ? 2.5 : this.type === 'artillery' ? 2.3 : 1.9;
         const blocked = (x, z) => {
-          if (w.collidesBox(x, this.pos.y + bodyH / 2, z, this.radius, bodyH)) return true;
-          if (this.game.collidesDoor(x, this.pos.y + bodyH / 2, z, this.radius, bodyH)) return true;
+          const ground = this.game.groundAt(x, z);
+          if (ground - this.pos.y > 1.1 || (w.meta.waterLevel != null && ground < w.meta.waterLevel - 0.2)) return true;
+          const y = Math.max(this.pos.y, ground) + 0.06;
+          if (w.collidesBox(x, y, z, this.radius * 0.75, bodyH)) return true;
+          if (this.game.collidesDoor(x, y, z, this.radius * 0.75, bodyH)) return true;
           for (const v of this.game.vehicles) {
             if (v === this || v.dead) continue;
             if (Math.hypot(v.pos.x - x, v.pos.z - z) < this.radius + v.radius) return true;
@@ -634,7 +641,9 @@
         const nx = this.pos.x + dx, nz = this.pos.z + dz;
         if (!blocked(nx, this.pos.z)) this.pos.x = nx;
         if (!blocked(this.pos.x, nz)) this.pos.z = nz;
-        this.pos.y = w.surfaceAt(this.pos.x, this.pos.z);
+        this.pos.y = this.game.groundAt(this.pos.x, this.pos.z);
+        this.pos.x = MW.clamp(this.pos.x,-this.game.travelBounds,this.game.travelBounds);
+        this.pos.z = MW.clamp(this.pos.z,-(this.game.travelBoundsZ || this.game.travelBounds),this.game.travelBoundsZ || this.game.travelBounds);
       }
 
       this.model.group.position.copy(this.pos);
@@ -811,7 +820,15 @@
         const aim = this.aimAtShip(origin, dir, 180);
         for (const side of [-1, 1]) {
           const start = origin.clone().add(new THREE.Vector3(side * 2, -0.1, 0));
-          this.game.combat.launchShell(start, aim, 180, 6.5, 220, 'player');
+          let target = null, best = 0.9;
+          for (const candidate of [...this.game.ships, ...(this.game.advanced?.units || []).filter(u=>u.team==='enemy')]) {
+            if (candidate.dead) continue;
+            const to = candidate.pos.clone().sub(origin), distance = to.length();
+            const dot = to.normalize().dot(dir);
+            if (distance < 550 && dot > best) { best=dot; target=candidate; }
+          }
+          const missile = new MW.Entities.Projectile(this.game,start,aim.clone().multiplyScalar(130),{type:'missile',homing:target,fuse:7,radius:6.5,damage:220,source:'player',gravity:0});
+          this.game.projectiles.push(missile);
         }
         MW.SFX.explosion(0.6);
         this.game.shake(0.35, 0.2);
@@ -1074,7 +1091,7 @@
       this.vel = vel.clone();
       this.type = opts.type || 'grenade';
       this.radius = opts.radius || 6;
-      this.damage = opts.damage || 100;
+      this.damage = opts.damage ?? 100;
       this.fuse = opts.fuse == null ? 2.4 : opts.fuse;
       this.source = opts.source || 'player';
       this.dead = false;
@@ -1084,10 +1101,15 @@
       this.homing = opts.homing || null;
       const size = this.type === 'shell' ? 0.28 : (this.type === 'rocket' || this.type === 'missile') ? 0.34 : 0.22;
       const color = this.type === 'missile' ? 0xd8d2c4 : this.type === 'rocket' ? 0xff8a3d : 0x3d4a35;
-      this.mesh = new THREE.Mesh(
+      const modeledMissile = this.type === 'missile' && MW.Models.missile;
+      this.mesh = modeledMissile ? MW.Models.missile() : new THREE.Mesh(
         new THREE.SphereGeometry(size, 8, 6),
         new THREE.MeshLambertMaterial({ color })
       );
+      if (!modeledMissile) {
+        this.mesh.geometry.userData.mwOwned = true;
+        this.mesh.material.userData.mwOwned = true;
+      }
       this.mesh.position.copy(pos);
       if (this.type === 'rocket' || this.type === 'shell' || this.type === 'missile') {
         const halo = MW.Models.glowSprite(this.type === 'missile' ? 0xffd27a : 0xffa347, 1.1);
@@ -1095,7 +1117,7 @@
       }
       game.scene.add(this.mesh);
       this.trailT = 0;
-      if (this.type === 'missile') this.gravity = 3.2;
+      if (this.type === 'missile' && opts.gravity == null) this.gravity = 3.2;
     }
 
     update(dt) {
@@ -1121,6 +1143,10 @@
       const sdt = dt / steps;
       for (let i = 0; i < steps; i++) {
         this.pos.addScaledVector(this.vel, sdt);
+        for (const unit of this.game.advanced?.units || []) {
+          if (unit.dead || unit.team !== ((this.source === 'enemy' || this.source === 'ship') ? 'friendly' : 'enemy')) continue;
+          if (this.pos.distanceTo(unit.pos.clone().add(new THREE.Vector3(0,unit.height*0.5,0))) < unit.radius+0.3) { this.explode(); return; }
+        }
         // 命中战舰/大型载具
         if (this.type === 'shell' || this.type === 'rocket' || this.type === 'missile') {
           for (const s of this.game.ships) {
@@ -1157,8 +1183,9 @@
         return;
       }
       this.mesh.position.copy(this.pos);
+      if (this.type === 'missile') this.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,-1), this.vel.clone().normalize());
       this.trailT += dt;
-      if ((this.type === 'rocket' || this.type === 'shell' || this.type === 'missile') && this.trailT > 0.02) {
+      if ((this.type === 'rocket' || this.type === 'shell' || this.type === 'missile') && this.trailT > 0.06) {
         this.trailT = 0;
         this.game.combat.smoke(this.pos, this.type === 'missile' ? 0xd8d2c4 : 0xffa347, 1);
       }
@@ -1169,15 +1196,16 @@
 
     explode() {
       if (this.dead) return;
-      this.dead = true;
-      this.game.scene.remove(this.mesh);
+      this.remove();
       this.game.combat.explode(this.pos.clone(), this.radius, this.damage, { source: this.source });
-      this.game.removeProjectile(this);
     }
 
     remove() {
+      if (this.dead) return;
       this.dead = true;
+      this.homing = null;
       this.game.scene.remove(this.mesh);
+      MW.Models.disposeOwned(this.mesh);
       this.game.removeProjectile(this);
     }
   }

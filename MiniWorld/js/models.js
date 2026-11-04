@@ -75,19 +75,32 @@
   const spriteCache = new Map();
   function glowSprite(color, size) {
     const key = color + '_' + size;
-    if (spriteCache.has(key)) {
-      return new THREE.Sprite(spriteCache.get(key));
+    if (!spriteCache.has(key)) {
+      spriteCache.set(key, new THREE.SpriteMaterial({
+        map: getRadial(), color, transparent: true, blending: THREE.AdditiveBlending,
+        depthWrite: false, opacity: 0.55
+      }));
     }
-    const m = new THREE.SpriteMaterial({
-      map: getRadial(), color, transparent: true, blending: THREE.AdditiveBlending,
-      depthWrite: false, opacity: 0.55
-    });
-    spriteCache.set(key, m);
-    const s = new THREE.Sprite(m);
+    const s = new THREE.Sprite(spriteCache.get(key));
     s.scale.set(size, size, 1);
     return s;
   }
-  MW.Models = { mat, glowMat, addBox, glowSprite, partsGroup };
+
+  // Only per-instance resources opt in. Box geometry, cached materials, sprite
+  // geometry and the radial texture remain shared for the lifetime of the app.
+  const disposedResources = new WeakSet();
+  function disposeOwned(root) {
+    const release = resource => {
+      if (!resource?.userData?.mwOwned || disposedResources.has(resource)) return;
+      disposedResources.add(resource);
+      resource.dispose();
+    };
+    root?.traverse(object => {
+      release(object.geometry);
+      for (const material of Array.isArray(object.material) ? object.material : [object.material]) release(material);
+    });
+  }
+  MW.Models = { mat, glowMat, addBox, glowSprite, partsGroup, disposeOwned };
 
   /* ---------- 武器视图模型 ---------- */
   MW.Models.weaponView = function (weaponId) {
@@ -452,8 +465,14 @@
       new THREE.SphereGeometry(1, 12, 10),
       new THREE.MeshBasicMaterial({ color: color || 0xffb347, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false })
     );
+    core.geometry.userData.mwOwned = true;
+    core.material.userData.mwOwned = true;
     g.add(core);
     const halo = glowSprite(color || 0xffb347, radius * 2.6);
+    // Opacity changes each frame, so each explosion owns its material while
+    // retaining the shared radial texture and Sprite geometry.
+    halo.material = halo.material.clone();
+    halo.material.userData.mwOwned = true;
     g.add(halo);
     g.userData.core = core;
     g.userData.halo = halo;

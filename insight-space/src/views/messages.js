@@ -1,8 +1,8 @@
 /** 信息中心：好友、好友请求与私聊 */
 
-import { t } from '../core/i18n.js';
+import { t, tl } from '../core/i18n.js';
 import { icon, avatarHtml, emptyState, loadingState, toast, toastOk, toastErr, confirmDialog, openModal } from '../core/ui.js';
-import { esc, fromNow } from '../core/util.js';
+import { esc, fromNow, mapConcurrent } from '../core/util.js';
 import { renderMarkdown } from '../core/markdown.js';
 import { errText } from '../data/index.js';
 import { emit } from '../core/store.js';
@@ -37,6 +37,13 @@ export function createInbox(root, ctx) {
   let requests = [];
   let outgoing = [];
   let chat = null;
+  let conversationVersion = 0;
+  let messageVersion = 0;
+  let messagesLoading = false;
+  let oldestMessage = null;
+  let messageIds = new Set();
+  let sending = false;
+  ctx.onLeave(() => { conversationVersion += 1; messageVersion += 1; chat?.destroy(); });
 
   root.innerHTML = `
     <aside class="inbox__side">
@@ -156,6 +163,14 @@ export function createInbox(root, ctx) {
   /* ---------------- 会话 ---------------- */
 
   function renderMain() {
+    if (ctx.signal?.aborted) return;
+    conversationVersion += 1;
+    messageVersion += 1;
+    messagesLoading = false;
+    oldestMessage = null;
+    messageIds = new Set();
+    chat?.destroy();
+    chat = null;
     if (!peerId) {
       mainEl.innerHTML = `<div class="inbox__placeholder">${emptyState(t('msg.pickPeer'), '✉')}</div>`;
       return;
@@ -173,11 +188,20 @@ export function createInbox(root, ctx) {
           <div class="friend-row__name">${esc(authorName(peer))}</div>
           <div class="tiny muted">@${esc(peer.username)}</div>
         </div>
+        <button class="btn btn--sm" type="button" data-role="refresh-messages">${icon('clock', 15)} ${esc(tl('刷新消息', 'Refresh'))}</button>
         <button class="icon-btn" type="button" data-role="remove-friend" title="${esc(t('friend.remove'))}">${icon('trash', 16)}</button>
       </header>
-      <div class="chat__body" data-role="messages"></div>
+      <div class="chat__body" data-role="messages" tabindex="0" aria-label="${esc(tl('聊天记录', 'Message history'))}">
+        <div class="center" data-role="older-messages"></div>
+        <div class="chat__rows" data-role="message-rows"></div>
+      </div>
       <div class="chat__foot" data-role="composer"></div>
     `;
+    mainEl.querySelector('[data-role="refresh-messages"]').addEventListener('click', () => renderMessagesList());
+    mainEl.querySelector('[data-role="older-messages"]').addEventListener('click', (event) => {
+      if (event.target.closest('[data-load-earlier]')) renderMessagesList(true);
+      if (event.target.closest('[data-retry-messages]')) renderMessagesList(Boolean(oldestMessage));
+    });
     mainEl.querySelector('[data-role="remove-friend"]').addEventListener('click', async () => {
       const ok = await confirmDialog({ message: t('friend.removeConfirm'), danger: true, okText: t('friend.remove') });
       if (!ok) return;
@@ -190,10 +214,10 @@ export function createInbox(root, ctx) {
       } catch (error) { toastErr(errText(error)); }
     });
 
-    chat = createComposer({ compact: true, placeholder: t('msg.placeholder') });
+    chat = createComposer({ api, compact: true, placeholder: t('msg.placeholder') });
     mainEl.querySelector('[data-role="composer"]').appendChild(chat.root);
     chat.input.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }
+      if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); sendMessage(); }
     });
     const sendBtn = document.createElement('button');
     sendBtn.type = 'button';
@@ -204,56 +228,83 @@ export function createInbox(root, ctx) {
     renderMessagesList();
   }
 
-  async function renderMessagesList() {
+  async function renderMessagesList(earlier = false) {
     const box = mainEl.querySelector('[data-role="messages"]');
-    if (!box) return;
-    box.innerHTML = loadingState();
+    if (!box || messagesLoading || ctx.signal?.aborted) return;
+    const targetPeer = peerId;
+    const conversation = conversationVersion;
+    const request = ++messageVersion;
+    const rowBox = box.querySelector('[data-role="message-rows"]');
+    const olderBox = box.querySelector('[data-role="older-messages"]');
+    const previousHeight = box.scrollHeight;
+    const previousScroll = box.scrollTop;
+    messagesLoading = true;
+    olderBox.innerHTML = `<span class="tiny muted" role="status">${esc(t('common.loading'))}</span>`;
+    if (!earlier && !messageIds.size) rowBox.innerHTML = loadingState();
+    const current = () => request === messageVersion && conversation === conversationVersion && !ctx.signal?.aborted;
     let rows = [];
     try {
-      rows = await api.messages.list(peerId, { limit: 200 });
+      rows = await api.messages.list(targetPeer, { limit: 50, ...(earlier && oldestMessage ? { before: { createdAt: oldestMessage.createdAt, id: oldestMessage.id } } : {}) });
+      if (!current()) return;
+      const parts = await mapConcurrent(rows, 4, async (message) => {
+        const mine = message.fromId === ctx.user.id;
+        const media = message.media || [];
+        await Promise.all(media.map(async (item) => { item.displayUrl = await api.media.resolve(item); }));
+        const body = message.bodyMd ? renderMarkdown(await api.media.resolveText(message.bodyMd)) : '';
+        return { id: message.id, html: `<div class="bubble ${mine ? 'bubble--mine' : ''}">
+          <div class="bubble__body prose">${body}</div>
+          ${mediaGalleryHtml(media)}
+          <div class="bubble__meta tiny muted">${mine ? esc(t('msg.you')) : ''} ${esc(fromNow(message.createdAt))}</div>
+        </div>` };
+      });
+      if (!current()) return;
+      if (!earlier) { messageIds = new Set(); rowBox.innerHTML = ''; }
+      const html = parts.filter((part) => { if (messageIds.has(part.id)) return false; messageIds.add(part.id); return true; }).map((part) => part.html).join('');
+      rowBox.insertAdjacentHTML(earlier ? 'afterbegin' : 'beforeend', html);
+      if (!messageIds.size) rowBox.innerHTML = `<div class="tiny muted inbox__hint">${esc(t('msg.threadEmpty'))}</div>`;
+      if (rows.length) oldestMessage = rows[0];
+      olderBox.innerHTML = rows.length === 50
+        ? `<button class="btn btn--sm btn--ghost" type="button" data-load-earlier>${esc(tl('加载更早的消息', 'Load earlier messages'))}</button>` : '';
+      box.scrollTop = earlier ? previousScroll + box.scrollHeight - previousHeight : box.scrollHeight;
+      api.messages.markRead(targetPeer).then(() => emit('social:changed')).catch(() => {});
     } catch (error) {
-      box.innerHTML = `<div class="tiny muted inbox__hint">${esc(errText(error))}</div>`;
-      return;
+      if (!current()) return;
+      if (!messageIds.size) rowBox.innerHTML = '';
+      olderBox.innerHTML = `<div class="tiny muted inbox__hint" role="alert">${esc(errText(error))} <button class="btn btn--sm" data-retry-messages>${esc(tl('重试', 'Retry'))}</button></div>`;
+    } finally {
+      if (current()) messagesLoading = false;
     }
-    if (!rows.length) {
-      box.innerHTML = `<div class="tiny muted inbox__hint">${esc(t('msg.threadEmpty'))}</div>`;
-      return;
-    }
-    const parts = [];
-    for (const message of rows) {
-      const mine = message.fromId === ctx.user.id;
-      const media = message.media || [];
-      for (const item of media) item.displayUrl = await api.media.resolve(item);
-      const body = message.bodyMd ? renderMarkdown(await api.media.resolveText(message.bodyMd)) : '';
-      parts.push(`<div class="bubble ${mine ? 'bubble--mine' : ''}">
-        <div class="bubble__body prose">${body}</div>
-        ${mediaGalleryHtml(media)}
-        <div class="bubble__meta tiny muted">${mine ? esc(t('msg.you')) : ''} ${esc(fromNow(message.createdAt))}</div>
-      </div>`);
-    }
-    box.innerHTML = parts.join('');
-    box.scrollTop = box.scrollHeight;
   }
 
   async function sendMessage() {
-    if (!chat || !peerId) return;
-    const bodyMd = chat.getValue().trim();
-    const media = chat.media || [];
+    if (!chat || !peerId || sending || chat.busy) return;
+    const currentChat = chat;
+    const recipient = peerId;
+    const bodyMd = currentChat.getValue().trim();
+    const media = currentChat.media.slice();
     if (!bodyMd && !media.length) { toastErr(t('msg.empty')); return; }
-    const btn = chat.root.querySelector('button.btn--primary');
+    const btn = currentChat.root.querySelector('button.btn--primary');
+    sending = true;
+    currentChat.input.disabled = true;
     if (btn) btn.disabled = true;
     try {
-      await api.messages.send(peerId, { bodyMd, media });
-      chat.setValue('');
-      chat.media.length = 0;
-      const item = threads.find((x) => x.user.id === peerId);
+      await api.messages.send(recipient, { bodyMd, media });
+      currentChat.setValue('');
+      currentChat.media.length = 0;
+      const item = threads.find((x) => x.user.id === recipient);
       if (item) item.last = { bodyMd, media: [], createdAt: new Date().toISOString(), fromId: ctx.user.id };
       emit('social:changed');
-      await renderMessagesList();
+      if (chat === currentChat && peerId === recipient) {
+        messageVersion += 1;
+        messagesLoading = false;
+        await renderMessagesList();
+      }
       renderList();
     } catch (error) {
       toastErr(errText(error));
     } finally {
+      sending = false;
+      currentChat.input.disabled = false;
       if (btn) btn.disabled = false;
     }
   }
@@ -279,6 +330,7 @@ export function createInbox(root, ctx) {
         api.friends.requests(),
         api.friends.outgoing(),
       ]);
+      if (ctx.signal?.aborted) return;
     } catch (error) {
       listEl.innerHTML = `<div class="tiny muted inbox__hint">${esc(errText(error))}</div>`;
       return;
@@ -322,32 +374,40 @@ export function friendActionHtml(relation, userId) {
 }
 
 export async function openAddFriend(ctx, onChanged) {
+  let timer = 0;
+  let version = 0;
+  let closed = false;
   const handle = openModal({
     title: t('friend.addTitle'),
     body: `<div class="stack gap-1">
       <input class="input" data-role="q" placeholder="${esc(t('friend.searchPh'))}" />
       <div data-role="results"><div class="tiny muted">${esc(t('friend.searchPh'))}</div></div>
     </div>`,
+    onClose: () => { closed = true; version += 1; clearTimeout(timer); },
   });
   const qEl = handle.body.querySelector('[data-role="q"]');
   const results = handle.body.querySelector('[data-role="results"]');
-  let timer = 0;
 
   async function run() {
+    clearTimeout(timer);
+    const request = ++version;
     const q = qEl.value.trim();
     if (!q) { results.innerHTML = `<div class="tiny muted">${esc(t('friend.searchPh'))}</div>`; return; }
     results.innerHTML = loadingState();
     try {
       const rows = await ctx.api.friends.search(q);
+      if (closed || request !== version) return;
       results.innerHTML = rows.length
         ? `<div class="stack gap-1">${rows.map(searchRowHtml).join('')}</div>`
         : `<div class="tiny muted">${esc(t('friend.searchEmpty'))}</div>`;
     } catch (error) {
+      if (closed || request !== version) return;
       results.innerHTML = `<div class="tiny muted">${esc(errText(error))}</div>`;
     }
   }
 
-  qEl.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 280); });
+  qEl.addEventListener('input', (event) => { clearTimeout(timer); if (!event.isComposing) timer = setTimeout(run, 280); });
+  qEl.addEventListener('compositionend', () => { clearTimeout(timer); timer = setTimeout(run, 280); });
   qEl.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); run(); } });
 
   results.addEventListener('click', async (event) => {

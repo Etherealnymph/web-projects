@@ -1,6 +1,7 @@
 /** 本地模式：内容 / 评论 / 互动的读写 */
 
-import { uid, nowIso, sortContents, EXP } from '../core/util.js';
+import { uid, nowIso, SORTS, EXP } from '../core/util.js';
+import { pageOptions, facetsOf } from './query.js';
 import {
   buildIndex, countsOf, decorateContent, decorateComment, authorMapOf,
   visibleModules, accessFor, canEditContent, canWriteModule, myReactions, resolveText,
@@ -22,7 +23,7 @@ function accessTable(db, user) {
 
 function matchQuery(content, q) {
   if (!q) return true;
-  const needle = q.toLowerCase();
+  const needle = String(q).trim().slice(0, 200).toLowerCase();
   return `${content.title || ''} ${content.bodyMd || ''} ${(content.tags || []).join(' ')}`.toLowerCase().includes(needle);
 }
 
@@ -31,6 +32,33 @@ function canSeeContent(content, user) {
   if (user.role === 'superadmin' || user.role === 'owner' || content.authorId === user.id) return true;
   if (!content.visibility || content.visibility === 'public') return true;
   return content.visibility === 'selected' && (content.visibleUserIds || []).includes(user.id);
+}
+
+function filterContents(db, user, options = {}) {
+  const access = accessTable(db, user);
+  const module = options.moduleId ? db.modules.find((m) => m.id === options.moduleId) : null;
+  if (options.moduleId && !access.get(options.moduleId)?.visible) throw fail('module.noAccess');
+  if (options.favoritesOf && options.favoritesOf !== user?.id) throw fail('common.noPermission');
+  const privileged = user?.role === 'superadmin' || user?.role === 'owner';
+  const favorites = options.favoritesOf ? new Set(db.reactions
+    .filter((r) => r.userId === options.favoritesOf && r.kind === 'favorite' && r.targetType === 'content')
+    .map((r) => r.targetId)) : null;
+  const cutoff = Date.now();
+  const items = db.contents.filter((c) => {
+    if (!access.get(c.moduleId)?.visible || !canSeeContent(c, user)) return false;
+    if (options.moduleId && c.moduleId !== options.moduleId) return false;
+    if (!options.moduleId && options.moduleIds?.length && !options.moduleIds.includes(c.moduleId)) return false;
+    if (c.status === 'draft' && c.authorId !== user?.id) return false;
+    const days = access.get(c.moduleId)?.readDays;
+    if (days > 0 && !privileged && c.authorId !== user?.id && new Date(c.createdAt).getTime() < cutoff - days * 86400000) return false;
+    if (options.authorId && c.authorId !== options.authorId) return false;
+    if (!matchQuery(c, options.q)) return false;
+    if (options.tag && !(c.tags || []).includes(options.tag)) return false;
+    if (options.dateFrom && new Date(c.createdAt) < new Date(options.dateFrom)) return false;
+    if (options.dateTo && new Date(c.createdAt) > new Date(options.dateTo)) return false;
+    return !favorites || favorites.has(c.id);
+  });
+  return { items, module };
 }
 
 export function createContentsApi(ctx) {
@@ -44,36 +72,38 @@ export function createContentsApi(ctx) {
       const db = await ctx.db();
       const user = ctx.user();
       const index = buildIndex(db);
-      const access = accessTable(db, user);
-      const module = options.moduleId ? db.modules.find((m) => m.id === options.moduleId) : null;
-      if (options.moduleId && module && !access.get(module.id)?.visible) throw fail('module.noAccess');
-
-      let items = db.contents.filter((c) => access.get(c.moduleId)?.visible && canSeeContent(c, user));
-      if (options.moduleId) items = items.filter((c) => c.moduleId === options.moduleId);
-      else if (options.moduleIds?.length) items = items.filter((c) => options.moduleIds.includes(c.moduleId));
-      items = items.filter((c) => (c.status === 'draft' ? c.authorId === user?.id : true));
-      items = items.filter((c) => {
-        const readDays = access.get(c.moduleId)?.readDays;
-        return !(readDays > 0) || new Date(c.createdAt).getTime() >= Date.now() - readDays * 86400000;
-      });
-      if (options.authorId) items = items.filter((c) => c.authorId === options.authorId);
-      if (options.includeDrafts) items = items.filter((c) => c.status !== 'draft' || c.authorId === user?.id);
-      if (options.q) items = items.filter((c) => matchQuery(c, options.q));
-      if (options.tag) items = items.filter((c) => (c.tags || []).includes(options.tag));
-      if (options.dateFrom) items = items.filter((c) => new Date(c.createdAt) >= new Date(options.dateFrom));
-      if (options.dateTo) items = items.filter((c) => new Date(c.createdAt) <= new Date(options.dateTo));
-      if (options.favoritesOf) {
-        const ids = new Set(db.reactions.filter((r) => r.userId === options.favoritesOf && r.kind === 'favorite' && r.targetType === 'content').map((r) => r.targetId));
-        items = items.filter((c) => ids.has(c.id));
-      }
+      let { items, module } = filterContents(db, user, options);
+      const sort = sortFor(module, options.sort);
+      // Counts are needed to rank hot/liked items, but date-sorted pages only decorate the current page.
+      if (sort === 'hot' || sort === 'like') items = items.map((c) => decorateContent(db, index, c));
+      const compare = SORTS[sort] || SORTS.new;
+      items.sort((a, b) => compare(a, b) || new Date(b.createdAt) - new Date(a.createdAt) || String(b.id).localeCompare(String(a.id)));
+      const total = items.length;
+      const { offset, limit } = pageOptions(options);
+      items = items.slice(offset, offset + limit);
       const authors = authorMapOf(db);
       const modulesById = new Map(db.modules.map((m) => [m.id, m]));
       items = items.map((c) => ({ ...decorateContent(db, index, c), author: authors.get(c.authorId) || null, module: modulesById.get(c.moduleId) || null }));
-      items = sortContents(items, sortFor(module, options.sort));
-      const total = items.length;
-      const offset = options.offset || 0;
-      const limit = options.limit || 0;
-      return { items: limit ? items.slice(offset, offset + limit) : items.slice(offset), total };
+      return { items, total, hasMore: offset + items.length < total };
+    },
+
+    async facets(options = {}) {
+      const db = await ctx.db();
+      const { items } = filterContents(db, ctx.user(), options);
+      return facetsOf(items, authorMapOf(db));
+    },
+
+    async summary(options = {}) {
+      const db = await ctx.db();
+      const { items } = filterContents(db, ctx.user(), options);
+      const ids = new Set(items.map((item) => item.id));
+      const result = { total: items.length, likes: 0, favorites: 0 };
+      for (const reaction of db.reactions) {
+        if (reaction.targetType !== 'content' || !ids.has(reaction.targetId)) continue;
+        if (reaction.kind === 'like') result.likes += 1;
+        if (reaction.kind === 'favorite') result.favorites += 1;
+      }
+      return result;
     },
 
     async get(id) {
@@ -277,15 +307,22 @@ export function createCommentsApi(ctx) {
       return comment;
     },
 
-    async update(id, { bodyMd }) {
+    async update(id, { bodyMd, media }) {
       const db = await ctx.db();
       const user = ctx.user();
       if (!user) throw fail('common.loginRequired');
       const comment = db.comments.find((c) => c.id === id);
       if (!comment) throw fail('content.notFound');
       if (user.id !== comment.authorId && user.role !== 'superadmin' && user.role !== 'owner') throw fail('common.noPermission');
+      if (media !== undefined && !Array.isArray(media)) throw fail('msg.error');
+      const oldMedia = comment.media || [];
       comment.bodyMd = String(bodyMd || '').slice(0, 4000);
+      if (media !== undefined) comment.media = media.map((ref) => ({ ...ref }));
       await ctx.save();
+      if (media !== undefined) {
+        const keep = new Set(media.map((ref) => ref.id || ref.url));
+        for (const ref of oldMedia) if (!keep.has(ref.id || ref.url)) await ctx.removeMedia(ref);
+      }
       return comment;
     },
 

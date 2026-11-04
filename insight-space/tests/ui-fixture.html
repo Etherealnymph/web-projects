@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'" />
+  <title>Insight · Synthetic UI fixture</title>
+  <link rel="stylesheet" href="../assets/css/base.css" />
+  <link rel="stylesheet" href="../assets/css/components.css" />
+  <link rel="stylesheet" href="../assets/css/views.css" />
+</head>
+<body>
+  <div id="app" class="app-root">
+    <div class="banner banner--warn" style="border-radius:0;margin:0;justify-content:center" role="note">
+      <strong>合成数据 UI 测试 / Synthetic fixture</strong>
+      <span class="small">无真实账号和内容；禁止网络连接；刷新后数据重置。</span>
+    </div>
+    <header class="topbar"><div class="topbar__inner">
+      <a class="brand" href="#/"><span class="brand__mark">体</span><span>体悟集</span></a>
+      <nav class="navtabs" aria-label="测试页面">
+        <a class="navtab" href="#/">首页</a>
+        <a class="navtab" href="#/m/diary">日记</a>
+        <a class="navtab" href="#/c/demo-1">阅读示例</a>
+        <a class="navtab" href="#/edit">写文章</a>
+        <a class="navtab" href="#/favorites">收藏</a>
+        <a class="navtab" href="#/rank">排行榜</a>
+        <a class="navtab" href="#/me">个人页</a>
+        <a class="navtab" href="#/msg/demo-friend">私信</a>
+      </nav>
+      <div class="topbar__actions">
+        <form role="search" class="global-search" id="fixture-search"><input class="input" aria-label="搜索合成内容" name="q" type="search" placeholder="搜索合成内容" /></form>
+        <button class="btn btn--sm" id="fixture-theme" type="button">日 / 夜</button>
+      </div>
+    </div></header>
+    <main class="page" id="view" tabindex="-1"></main>
+  </div>
+  <div id="toasts" class="toast-stack" role="status" aria-live="polite"></div>
+  <div id="modals" class="modal-layer"></div>
+  <script type="module" src="./ui-fixture.js"></script>
+</body>
+</html>

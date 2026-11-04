@@ -46,6 +46,7 @@
       this.time = 0;
       this.bounds = 70;
       this.travelBounds = 600;
+      this.travelBoundsZ = 600;
       this.killTarget = 12;
       this.panelOpen = null;
       this.firing = false;
@@ -89,7 +90,7 @@
       this.initScene();
       this.ui = new MW.UI(this);
       this.ui.init();
-      MW.SFX.enabled = this.settings.audio !== false;
+      MW.SFX.configure(this.settings);
       this.bindEvents();
       this.loadSkillFile();
       this.ui.setAPIStatus(!!this.settings.apiKey);
@@ -120,6 +121,34 @@
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
       this.renderer.toneMappingExposure = 1.06;
       this.renderer.setClearColor(0x0a0f16, 1);
+      this.applyGraphics();
+    }
+
+    applyGraphics() {
+      const caps = { low: 1, balanced: 1.35, high: 2, auto: 1.5 };
+      this.pixelCap = caps[this.settings.graphics] || 1.5;
+      this.pixelRatio = Math.min(window.devicePixelRatio || 1, this.pixelCap);
+      this.renderer.setPixelRatio(this.pixelRatio);
+      this.qualityTimer = 0;
+      document.body.classList.toggle('reduce-motion', !!this.settings.reducedMotion);
+      this.world?.setQuality(this.settings.graphics);
+    }
+
+    groundAt(x, z) {
+      return Math.max(this.world.surfaceAt(x, z), this.advanced?.groundAt(x, z) ?? -Infinity);
+    }
+
+    travelTo(destination) {
+      if (!this.player || !this.world || !destination) return;
+      const x = Number(destination.x), z = Number(destination.z);
+      if (!Number.isFinite(x) || !Number.isFinite(z) || Math.abs(x)>this.travelBounds || Math.abs(z)>(this.travelBoundsZ || this.travelBounds)) return;
+      if (this.inVehicle) { this.inVehicle.exit(); if (this.inVehicle) return; }
+      this.player.pos.set(x, this.groundAt(x,z) + 0.08, z);
+      this.player.vel.set(0,0,0); this.player.spawnProtect = 6;
+      this.camera.position.copy(this.player.eyePos);
+      this.world.prepareAt(x,z);
+      this.closeAllPanels(); this.saveLater();
+      this.ui.toast(`已抵达 ${destination.name || '目的地'}`, 'good');
     }
 
     initScene() {
@@ -144,11 +173,13 @@
         uniforms: this.skyUniforms,
         side: THREE.BackSide,
         depthWrite: false,
+        depthTest: false,
         vertexShader: `
           varying vec3 vWorld;
           void main() {
-            vec4 wp = modelMatrix * vec4(position, 1.0);
-            vWorld = wp.xyz;
+            // Direction comes from local sphere coordinates, independent of
+            // a continent-sized camera translation.
+            vWorld = position;
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
           }`,
         fragmentShader: `
@@ -173,6 +204,11 @@
       });
       this.sky = new THREE.Mesh(skyGeo, skyMat);
       this.sky.frustumCulled = false;
+      this.sky.renderOrder = -1000;
+      this.sky.onBeforeRender = (_renderer, _scene, camera) => {
+        this.sky.position.copy(camera.position);
+        this.sky.updateMatrixWorld();
+      };
       this.scene.add(this.sky);
 
       // 星空
@@ -191,6 +227,14 @@
       this.stars = new THREE.Points(sGeo, new THREE.PointsMaterial({
         color: 0xdcecff, size: 2.4, sizeAttenuation: true, transparent: true, opacity: 0, depthWrite: false
       }));
+      this.stars.frustumCulled = false;
+      this.stars.onBeforeRender = (_renderer, _scene, camera) => {
+        const distance = camera.far * 0.9;
+        this.stars.position.copy(camera.position);
+        this.stars.scale.setScalar(distance / 560);
+        this.stars.material.size = 2.4 * distance / 560;
+        this.stars.updateMatrixWorld();
+      };
       this.scene.add(this.stars);
 
       // 太阳 / 月亮光晕
@@ -199,6 +243,13 @@
         blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.9
       }));
       this.sunSprite.scale.set(55, 55, 1);
+      this.sunSprite.frustumCulled = false;
+      this.sunSprite.onBeforeRender = (_renderer, _scene, camera) => {
+        const distance = camera.far * 0.88;
+        this.sunSprite.position.copy(this.skyUniforms.sunDir.value).multiplyScalar(distance).add(camera.position);
+        this.sunSprite.scale.set(55 * distance / 520, 55 * distance / 520, 1);
+        this.sunSprite.updateMatrixWorld();
+      };
       this.scene.add(this.sunSprite);
 
       // 灯光
@@ -253,8 +304,10 @@
        主循环
        ======================================================= */
     animate() {
-      requestAnimationFrame(() => this.animate());
+      if (!this._frame) this._frame = () => this.animate();
+      requestAnimationFrame(this._frame);
       const raw = this.clock.getDelta();
+      if (document.hidden || this.contextLost) return;
       const dt = Math.min(raw, 0.05);
       if (this.state === 'playing') {
         this.update(dt);
@@ -262,11 +315,21 @@
         this.updateMenuCamera(dt);
       }
       this.renderer.render(this.scene, this.camera);
+      MW.SFX.update(this);
       this.fpsSmooth = MW.lerp(this.fpsSmooth, 1 / Math.max(raw, 0.0001), 0.05);
       this.fpsT += raw;
       if (this.fpsT > 0.6) {
         this.fpsT = 0;
-        this.ui.setFps(Math.round(this.fpsSmooth));
+        const info = this.renderer.info.render;
+        const chunks = this.world?.terrain?.chunks?.size;
+        const details = this.settings.performanceHUD ? ` · ${info.calls} calls · ${Math.round(info.triangles / 1000)}k △${chunks == null ? '' : ' · ' + chunks + ' chunks'}` : '';
+        this.ui.setFps(Math.round(this.fpsSmooth), details);
+      }
+      this.qualityTimer += dt;
+      if (this.settings.graphics === 'auto' && this.state === 'playing' && !this.panelOpen && this.qualityTimer > 4) {
+        this.qualityTimer = 0;
+        const next = MW.clamp(this.pixelRatio + (this.fpsSmooth < 38 ? -0.12 : this.fpsSmooth > 58 ? 0.06 : 0), 0.7, Math.min(this.pixelCap, window.devicePixelRatio || 1));
+        if (Math.abs(next-this.pixelRatio) > 0.01) { this.pixelRatio=next; this.renderer.setPixelRatio(next); }
       }
     }
 
@@ -299,17 +362,18 @@
           for (const v of this.vehicles) if (v.type === 'artillery') v.pushByPlayer(this.player, dt);
         }
         for (const v of this.vehicles) if (v !== this.inVehicle) v.update(dt);
-        for (const z of this.zombies) z.update(dt);
-        for (const s of this.soldiers) s.update(dt);
+        for (let i=this.zombies.length-1;i>=0;i--) this.zombies[i].update(dt);
+        for (let i=this.soldiers.length-1;i>=0;i--) this.soldiers[i].update(dt);
         for (const p of this.pickups) p.update(dt);
         for (const n of this.notes) n.update(dt);
         for (const d of this.doors) d.update(dt);
         for (const c of this.cannons) c.update(dt);
         for (const e of this.elevators) e.update(dt);
         for (const zo of this.zones) zo.update(dt);
-        for (const p of this.projectiles) p.update(dt);
-        for (const m of this.mines) m.update(dt);
-        for (const s of this.ships) s.update(dt);
+        for (let i=this.projectiles.length-1;i>=0;i--) this.projectiles[i].update(dt);
+        for (let i=this.mines.length-1;i>=0;i--) this.mines[i].update(dt);
+        for (let i=this.ships.length-1;i>=0;i--) this.ships[i].update(dt);
+        this.advanced?.update(dt);
         this.updateAirdrops(dt);
         for (const b of this.bridges) b.update(dt);
 
@@ -441,7 +505,9 @@
       this.hemi.color.lerp(this.envTarget.top, k);
       this.hemi.groundColor.setHex(0x3a3a2e);
       this.stars.material.opacity = MW.lerp(this.stars.material.opacity, this.envTarget.star, k);
-      this.sunSprite.position.copy(this.skyUniforms.sunDir.value).multiplyScalar(520);
+      this.sky.position.copy(this.camera.position);
+      this.stars.position.copy(this.camera.position);
+      this.sunSprite.position.copy(this.skyUniforms.sunDir.value).multiplyScalar(this.camera.far * 0.88).add(this.camera.position);
       this.sun.position.copy(this.skyUniforms.sunDir.value).multiplyScalar(140);
       this.skyUniforms.sunPower.value = MW.lerp(this.skyUniforms.sunPower.value, this.weather === 'storm' ? 0.15 : 1, k);
 
@@ -555,6 +621,8 @@
        世界生命周期
        ======================================================= */
     async startWorld(id) {
+      if (this.state === 'loading') return;
+      this.state = 'loading';
       const def = MW.WORLDS.find(w => w.id === id) || MW.WORLDS[0];
       this.ui.closeAll();
       this.panelOpen = null;
@@ -572,13 +640,19 @@
         this.world = MW.WorldGen.generate(def);
       } catch (e) {
         console.error('世界生成失败', e);
+        this.state = 'menu';
         this.ui.hideLoading();
+        this.ui.showMenu();
         this.ui.toast('世界生成失败：' + e.message, 'bad');
         return;
       }
       this.scene.add(this.world.group);
+      this.world.setQuality(this.settings.graphics);
       this.bounds = (this.world.meta.bounds || 72) - 4;
-      this.travelBounds = Math.max(600, (this.world.meta.bounds || 72) * 5);
+      this.travelBounds = this.world.meta.travelBounds || Math.max(600, (this.world.meta.bounds || 72) * 5);
+      this.travelBoundsZ = this.world.meta.travelBoundsZ || this.travelBounds;
+      this.camera.far = this.world.meta.drawDistance || (this.world.meta.terrain ? 9000 : 1800);
+      this.camera.updateProjectionMatrix();
 
       const total = Math.max(1, this.world.dirty.size);
       let done = 0;
@@ -606,6 +680,7 @@
       this.setSeason(this.world.meta.season || def.season || 'summer', true);
       this.setSkyPreset(this.world.meta.sky || def.sky || 'day', true);
       this.loadProgress(def.id);
+      this.world.prepareAt(this.player.pos.x,this.player.pos.z);
       this.applyDebugSpawn();
       this.player.refreshViewmodel();
       this.ui.updateAll();
@@ -687,6 +762,7 @@
         if (br) br.setOpen(false);
       }
       this.loadNotes();
+      this.advanced = new MW.Advanced(this);
       this.spawnAmbientPickups();
       this.airdropT = 22;
       this.airdropSeq = 0;
@@ -702,6 +778,7 @@
       this.ui.setWorldInfo(meta, def);
       this.ui.updateSquad();
       this.ui.updateObjectives();
+      this.ui.renderDestinations();
     }
 
     spawnAmbientPickups() {
@@ -729,6 +806,9 @@
     }
 
     disposeWorld() {
+      clearTimeout(this._saveTimer);
+      MW.SFX.stopLoops();
+      this.advanced?.dispose(); this.advanced = null;
       this.inVehicle = null;
       this.interactTarget = null;
       if (this.player) {
@@ -736,11 +816,11 @@
         this.camera.remove(this.player.vmHolder);
         this.player = null;
       }
-      for (const z of this.zombies) this.scene.remove(z.model.group);
-      for (const s of this.soldiers) this.scene.remove(s.model.group);
+      for (const z of this.zombies) { this.scene.remove(z.model.group); MW.Models.disposeOwned(z.model.group); }
+      for (const s of this.soldiers) { this.scene.remove(s.model.group); MW.Models.disposeOwned(s.model.group); }
       for (const p of this.pickups) this.scene.remove(p.mesh);
-      for (const v of this.vehicles) this.scene.remove(v.model.group);
-      for (const s of this.ships) this.scene.remove(s.model.group);
+      for (const v of this.vehicles) { this.scene.remove(v.model.group); if (v.type !== 'train') MW.Models.disposeVehicle(v.model); }
+      for (const s of this.ships) { this.scene.remove(s.model.group); MW.Models.disposeVehicle(s.model); }
       for (const z of this.zones) {
         this.scene.remove(z.model);
         this.scene.remove(z.ring);
@@ -751,19 +831,11 @@
       for (const e of this.elevators) this.scene.remove(e.mesh);
       for (const a of this.airdrops) this.scene.remove(a.mesh);
       for (const b of this.bridges) this.scene.remove(b.mesh);
-      for (const l of this.labels || []) this.scene.remove(l);
+      for (const l of this.labels || []) { this.scene.remove(l); l.material.map?.dispose(); l.material.dispose(); }
       this.labels = [];
-      for (const p of this.projectiles) this.scene.remove(p.mesh);
+      for (const p of [...this.projectiles]) p.remove();
       for (const m of this.mines) this.scene.remove(m.mesh);
-      if (this.combat) {
-        for (const t of this.combat.tracers) this.scene.remove(t.line);
-        for (const p of this.combat.particles) this.scene.remove(p.mesh);
-        for (const e of this.combat.explosions) this.scene.remove(e.obj);
-        if (this.combat.explosionLight) this.scene.remove(this.combat.explosionLight);
-        this.combat.tracers = [];
-        this.combat.particles = [];
-        this.combat.explosions = [];
-      }
+      this.combat?.dispose();
       this.zombies = [];
       this.soldiers = [];
       this.pickups = [];
@@ -832,7 +904,7 @@
         const d = near ? 14 + Math.random() * 8 : 26 + Math.random() * 22;
         const x = p.pos.x + Math.cos(a) * d;
         const z = p.pos.z + Math.sin(a) * d;
-        if (Math.abs(x) > this.travelBounds || Math.abs(z) > this.travelBounds) continue;
+        if (Math.abs(x) > this.travelBounds || Math.abs(z) > (this.travelBoundsZ || this.travelBounds)) continue;
         const y = this.world.surfaceAt(x, z);
         if (this.world.meta.waterLevel != null && y <= this.world.meta.waterLevel + 0.6) continue;
         if (this.world.collidesBox(x, y + 0.1, z, 0.45, 2)) continue;
@@ -999,6 +1071,7 @@
     }
 
     collidesDoor(x, y, z, r, h) {
+      if (this.advanced?.collidesBox(x,y,z,r,h)) return true;
       for (const d of this.doors) {
         if (d.blocksAt(x, y, z, r, h)) return true;
       }
@@ -1143,10 +1216,11 @@
         this.highlightFill.visible = false;
         return;
       }
+      this.buildHit = hit;
       const bx = hit.x + hit.nx, by = hit.y + hit.ny, bz = hit.z + hit.nz;
       this.buildTarget = { x: bx, y: by, z: bz };
       this.highlight.visible = true;
-      this.highlight.position.set(bx + 0.5, by + 0.5, bz + 0.5);
+      this.highlight.position.set((this.buildAction==='destroy'?hit.x:bx) + 0.5, (this.buildAction==='destroy'?hit.y:by) + 0.5, (this.buildAction==='destroy'?hit.z:bz) + 0.5);
       this.highlightFill.visible = true;
       this.highlightFill.position.copy(this.highlight.position);
       const col = this.selectedBuild.c;
@@ -1165,7 +1239,7 @@
           for (let dz = -off; dz < n - off; dz++) {
             const x = this.buildTarget.x + dx, y = this.buildTarget.y + dy, z = this.buildTarget.z + dz;
             if (y < 0 && this.world.meta.waterLevel == null) continue;
-            if (Math.abs(x) > this.bounds + 4 || Math.abs(z) > this.bounds + 4) continue;
+            if (Math.abs(x) > (this.world.meta.terrain ? this.travelBounds : this.bounds + 4) || Math.abs(z) > (this.world.meta.terrain ? (this.travelBoundsZ || this.travelBounds) : this.bounds + 4)) continue;
             // 不要把自己砌进墙里
             if (x + 1 > p.pos.x - p.radius && x < p.pos.x + p.radius &&
               z + 1 > p.pos.z - p.radius && z < p.pos.z + p.radius &&
@@ -1183,14 +1257,16 @@
     }
 
     removeBlock() {
-      if (this.mode !== 'build' || !this.buildTarget) return;
+      if (this.mode !== 'build' || !this.buildTarget || !this.buildHit) return;
+      if (this.buildHit.terrain) { this.ui.toast('连续地表上可以建造；拆除工具用于建筑方块', 'info'); return; }
+      const target = this.buildHit;
       const n = this.buildBrush;
       const off = Math.floor((n - 1) / 2);
       let removed = 0;
       for (let dx = -off; dx < n - off; dx++)
         for (let dy = -off; dy < n - off; dy++)
           for (let dz = -off; dz < n - off; dz++) {
-            if (this.world.remove(this.buildTarget.x + dx, this.buildTarget.y + dy, this.buildTarget.z + dz, true)) removed++;
+            if (this.world.remove(target.x + dx, target.y + dy, target.z + dz, true)) removed++;
           }
       if (removed) {
         MW.SFX.build();
@@ -1254,6 +1330,7 @@
         const dist = 18 + Math.random() * 22;
         const x = this.player.pos.x + Math.cos(ang) * dist;
         const z = this.player.pos.z + Math.sin(ang) * dist;
+        if (Math.abs(x) > this.travelBounds - 5 || Math.abs(z) > (this.travelBoundsZ || this.travelBounds) - 5) continue;
         const surf = w.surfaceAt(x, z);
         if (wl != null && surf <= wl + 0.8) continue;
         if (w.collidesBox(x, surf + 1, z, 3.2, 2.4)) continue;
@@ -1628,6 +1705,7 @@
     }
 
     shake(amount, duration) {
+      if (this.settings.reducedMotion) return;
       this.shakeAmt = Math.max(this.shakeAmt || 0, amount);
     }
 
@@ -1656,6 +1734,8 @@
     bindEvents() {
       window.addEventListener('resize', () => this.onResize());
       window.addEventListener('blur', () => { this.keys = {}; this.firing = false; });
+      this.canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); this.contextLost=true; this.saveProgress(); this.ui.toast('图形连接暂时中断，进度已尝试保存；连接恢复后请刷新页面', 'info'); });
+      this.canvas.addEventListener('webglcontextrestored', () => { this.contextLost=false; this.ui.toast('图形连接已恢复，请刷新后继续上次世界', 'info'); });
 
       document.addEventListener('keydown', e => this.onKeyDown(e));
       document.addEventListener('keyup', e => this.onKeyUp(e));
@@ -1703,6 +1783,10 @@
         if (document.hidden && this.state === 'playing') {
           this.keys = {};
           this.firing = false;
+          this.saveProgress();
+          MW.SFX.suspend();
+        } else if (!document.hidden && MW.SFX.ctx) {
+          MW.SFX.init();
         }
       });
     }
@@ -1717,7 +1801,7 @@
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      this.renderer.setPixelRatio(this.pixelRatio || Math.min(window.devicePixelRatio || 1, 1.5));
       this.ui.resizeWorkshop();
     }
 
@@ -1753,6 +1837,7 @@
 
       const ctrl = e.ctrlKey || e.metaKey;
       if (ctrl) return;
+      if (e.repeat) return;
 
       switch (e.code) {
         case 'KeyZ': this.setMode('explore'); break;
@@ -1771,6 +1856,7 @@
         case 'KeyK': this.openPanel('squad'); break;
         case 'KeyB': this.openPanel('ai'); break;
         case 'KeyP': this.openPanel('map'); break;
+        case 'KeyU': this.openPanel('operations'); break;
         case 'ArrowUp':
           if (this.interactTarget && this.interactTarget.type === 'cannon') { e.preventDefault(); this.interactTarget.cannon.adjustPitch(0.05); }
           break;
@@ -1881,6 +1967,7 @@
       if (name === 'notes') { this.ui.renderNotes(); this.ui.renderMessages(); }
       if (name === 'workshop') this.ui.refreshWorkshop();
       if (name === 'settings') this.ui.fillSettings();
+      if (name === 'operations') this.advanced?.render();
       if (name === 'pause') this.paused = true;
     }
 
@@ -1945,13 +2032,15 @@
       if (!this.world || !this.player || !this.currentWorldDef) return;
       const p = this.player;
       const data = {
-        version: 1,
+        version: 2,
         worldId: this.currentWorldDef.id,
         name: this.world.meta.name,
         weather: this.weather,
         season: this.season,
         victory: this.victoryShown,
         player: {
+          position: p.pos.toArray(),
+          yaw: p.yaw,
           health: p.health,
           armor: p.armor,
           coins: p.coins,
@@ -1972,7 +2061,9 @@
       const ok = MW.store.set('save_' + this.currentWorldDef.id, data);
       if (ok) {
         if (this.currentWorldDef.id !== 'custom') MW.store.set('lastWorld', this.currentWorldDef.id);
-        this.ui.setSaveInfo(`已自动保存 · ${MW.nowStamp()} · ${this.world.exportEdits().length} 处改动`);
+        this.ui.setSaveInfo(`已自动保存 · ${MW.nowStamp()} · ${data.edits.length} 处改动`);
+      } else {
+        this.ui.setSaveInfo('自动保存失败：浏览器存储空间不足，请导出世界备份');
       }
     }
 
@@ -2007,6 +2098,13 @@
       this.shipsDestroyed = save.shipsDestroyed || 0;
       if (Array.isArray(save.edits) && save.edits.length) {
         this.world.applyEdits(save.edits);
+      }
+      if (Array.isArray(sp.position) && sp.position.length===3 && sp.position.every(Number.isFinite)) {
+        const [x,y,z]=sp.position;
+        if (Math.abs(x)<=this.travelBounds && Math.abs(z)<=(this.travelBoundsZ || this.travelBounds) && y>(this.world.fallbackY ?? -100)-16 && y<20000 && !this.world.collidesBox(x,y,z,p.radius,p.height)) {
+          p.pos.set(x,Math.max(y,this.groundAt(x,z)),z);
+          if(Number.isFinite(sp.yaw)) p.yaw=sp.yaw;
+        }
       }
       if (Array.isArray(save.zones)) {
         for (const zs of save.zones) {
@@ -2083,6 +2181,7 @@
         await this.startImportedWorld(data, file.name);
       } catch (e) {
         console.error(e);
+        this.state = 'menu';
         this.ui.hideLoading();
         this.ui.showMenu();
         this.ui.toast('导入失败：' + e.message, 'bad');
@@ -2098,6 +2197,7 @@
         const data = await res.json();
         await this.startImportedWorld(data, '示例小岛');
       } catch (e) {
+        this.state = 'menu';
         this.ui.hideLoading();
         this.ui.toast('示例世界加载失败：' + e.message, 'bad');
         this.ui.showMenu();
@@ -2105,6 +2205,8 @@
     }
 
     async startImportedWorld(data, filename) {
+      if (this.state === 'loading') return;
+      this.state = 'loading';
       this.ui.closeAll();
       this.panelOpen = null;
       this.paused = false;
@@ -2127,10 +2229,14 @@
       this.world = new MW.VoxelWorld(meta);
       this.scene.add(this.world.group);
       this.bounds = (meta.bounds || 80) - 4;
-      this.travelBounds = Math.max(600, (meta.bounds || 80) * 5);
+      this.travelBounds = meta.travelBounds || Math.max(600, (meta.bounds || 80) * 5);
+      this.travelBoundsZ = meta.travelBoundsZ || this.travelBounds;
+      this.camera.far = meta.drawDistance || (meta.terrain ? 9000 : 1800);
+      this.camera.updateProjectionMatrix();
       this.ui.setLoading(35, `正在堆叠 ${data.blocks.length.toLocaleString()} 个方块……`);
       await this.nextFrame();
       this.world.loadSerialized(data);
+      this.world.setQuality(this.settings.graphics);
       this.worldNotes = Array.isArray(data.notes) ? data.notes : [];
       this.world.meta.spawn = meta.spawn;
       if (!meta.spawn || meta.spawn[1] == null) {
@@ -2155,6 +2261,7 @@
       this.setSkyPreset(meta.sky || 'day', true);
       this.player.pos.set(meta.spawn[0], meta.spawn[1], meta.spawn[2]);
       this.player.spawnPoint.copy(this.player.pos);
+      this.world.prepareAt(this.player.pos.x,this.player.pos.z);
       this.ui.updateAll();
       this.ui.toast('世界文件导入成功', 'good');
     }
@@ -2170,8 +2277,13 @@
       this.settings.model = (g('set-model').value || 'deepseek-chat').trim();
       this.settings.webSearch = g('set-web').checked;
       this.settings.audio = g('set-audio').checked;
+      this.settings.graphics = g('set-graphics').value;
+      this.settings.reducedMotion = g('set-motion').checked;
+      this.settings.performanceHUD = g('set-performance').checked;
+      for (const key of ['master','effects','ambience','engine']) this.settings[key+'Volume']=Number(g('set-volume-'+key).value)/100;
       MW.store.set('settings', this.settings);
-      MW.SFX.toggle(this.settings.audio);
+      MW.SFX.configure(this.settings);
+      this.applyGraphics();
       this.ui.updateName();
       this.ui.setAPIStatus(!!this.settings.apiKey);
       if (this.world) this.saveProgress();
@@ -2435,6 +2547,15 @@
       console.error('启动失败', e);
       const el = document.getElementById('menu-status');
       if (el) { el.textContent = '启动失败：' + e.message; el.style.color = '#ff6b5a'; }
+      const host = document.getElementById('world-grid');
+      if (host) {
+        const notice = document.createElement('section'); notice.className='graphics-notice'; notice.setAttribute('role','alert');
+        const heading=document.createElement('h3'); heading.textContent='当前浏览器无法启动 3D 图形';
+        const text=document.createElement('p'); text.textContent='请在支持 WebGL 的桌面浏览器中打开，并在浏览器设置中启用硬件加速。远程预览、部分虚拟机或禁用 GPU 的环境可能不支持 3D 游戏。';
+        const detail=document.createElement('p'); detail.textContent=e.message; detail.className='field-note';
+        const retry=document.createElement('button'); retry.className='btn primary'; retry.textContent='重新尝试';retry.addEventListener('click',()=>location.reload());
+        notice.append(heading,text,detail,retry);host.replaceChildren(notice);
+      }
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

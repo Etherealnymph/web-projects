@@ -174,7 +174,7 @@ export function createInvitesApi(sb) {
             read: true,
             write: invite.write !== false,
             upload: true,
-            readDays: p.readDays,
+            readDays: null,
             expiresAt: invite.expiresAt,
           }));
       return { ...invite, modulePerms, modules: moduleIds };

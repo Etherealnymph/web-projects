@@ -3,6 +3,7 @@
 import { uid, nowIso } from '../core/util.js';
 import { publicUser, relationOf, areFriends } from './local-core.js';
 import { fail } from './local-content.js';
+import { pageOptions } from './query.js';
 
 function requireLogin(ctx) {
   const user = ctx.user();
@@ -168,8 +169,14 @@ export function createMessagesApi(ctx) {
       const db = await ctx.db();
       const me = requireLogin(ctx);
       if (!areFriends(db, me.id, userId)) throw fail('friend.needFriend');
-      let rows = threadMessages(db, me.id, userId).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-      if (options.limit) rows = rows.slice(-options.limit);
+      let rows = threadMessages(db, me.id, userId);
+      if (options.before?.createdAt) {
+        const cutoff = new Date(options.before.createdAt).getTime();
+        rows = rows.filter((m) => new Date(m.createdAt).getTime() < cutoff
+          || (new Date(m.createdAt).getTime() === cutoff && options.before.id && m.id < options.before.id));
+      }
+      rows.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt) || a.id.localeCompare(b.id));
+      rows = rows.slice(-pageOptions(options, 100).limit);
       return rows.map((m) => ({ ...m }));
     },
 

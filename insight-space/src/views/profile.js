@@ -6,8 +6,8 @@ import { esc, formatDate, formatDay, fromNow, remainingText, squareImage, bytesT
 import { CONFIG } from '../config.js';
 import { errText } from '../data/index.js';
 import { emit } from '../core/store.js';
-import { contentCardHtml, commentHtml, moduleName, levelBadge } from '../components/widgets.js';
-import { resolveMediaUrls } from './home.js';
+import { moduleName, levelBadge } from '../components/widgets.js';
+import { createContentFeed } from '../components/content-feed.js';
 
 export async function renderProfile(ctx) {
   const { api, user, container } = ctx;
@@ -15,20 +15,19 @@ export async function renderProfile(ctx) {
   const langNow = document.documentElement.dataset.lang;
   container.innerHTML = loadingState();
 
-  const [modules, grants, mine, favorites, comments] = await Promise.all([
+  const [modules, grants, mine, favorites, comments, summary] = await Promise.all([
     api.modules.list(),
     api.grants.list(user.id).catch(() => []),
-    api.contents.list({ authorId: user.id, sort: 'new' }),
-    api.contents.list({ favoritesOf: user.id, sort: 'new' }),
+    api.contents.list({ authorId: user.id, sort: 'new', limit: 12 }),
+    api.contents.list({ favoritesOf: user.id, sort: 'new', limit: 12 }),
     api.comments.mine(),
+    api.contents.summary({ authorId: user.id }),
   ]);
-  await resolveMediaUrls(api, mine.items);
-  await resolveMediaUrls(api, favorites.items);
+  if (ctx.signal?.aborted) return;
 
   const accessible = modules;
-  const ownContents = mine.items;
-  const totalLikes = ownContents.reduce((sum, c) => sum + (c.counts?.like || 0), 0);
-  const totalFavs = ownContents.reduce((sum, c) => sum + (c.counts?.favorite || 0), 0);
+  const totalLikes = summary.likes;
+  const totalFavs = summary.favorites;
 
   container.innerHTML = `
     <div class="stack gap-3">
@@ -46,7 +45,7 @@ export async function renderProfile(ctx) {
           ${user.bio ? `<p class="muted mt-1 mb-0">${esc(user.bio)}</p>` : ''}
         </div>
         <div class="grid grid--stats" style="min-width:280px;flex:1">
-          <div class="stat"><div class="stat__label">${esc(t('profile.statContent'))}</div><div class="stat__value">${ownContents.length}</div></div>
+          <div class="stat"><div class="stat__label">${esc(t('profile.statContent'))}</div><div class="stat__value">${mine.total}</div></div>
           <div class="stat"><div class="stat__label">${esc(t('profile.statComment'))}</div><div class="stat__value">${comments.length}</div></div>
           <div class="stat"><div class="stat__label">${esc(t('profile.statLike'))}</div><div class="stat__value">${totalLikes}</div></div>
           <div class="stat"><div class="stat__label">${esc(t('profile.statFavorite'))}</div><div class="stat__value">${totalFavs}</div></div>
@@ -132,17 +131,19 @@ export async function renderProfile(ctx) {
       <section class="panel">
         <div class="panel__head">
           <div class="tabs" data-role="tabs">
-            <button class="is-active" data-tab="contents">${esc(t('profile.myContents'))} · ${ownContents.length}</button>
-            <button data-tab="favorites">${esc(t('profile.myFavorites'))} · ${favorites.items.length}</button>
+            <button class="is-active" data-tab="contents">${esc(t('profile.myContents'))} · ${mine.total}</button>
+            <button data-tab="favorites">${esc(t('profile.myFavorites'))} · ${favorites.total}</button>
             <button data-tab="comments">${esc(t('profile.myComments'))} · ${comments.length}</button>
           </div>
         </div>
         <div class="panel__body">
-          <div data-pane="contents" class="grid grid--cards">
-            ${ownContents.length ? ownContents.map((item) => contentCardHtml(item)).join('') : emptyState(t('common.empty'), '文')}
+          <div data-pane="contents" class="stack gap-2">
+            <div class="grid grid--cards" data-profile-list="contents"></div>
+            <div class="center" data-profile-more="contents"></div>
           </div>
-          <div data-pane="favorites" class="grid grid--cards hidden">
-            ${favorites.items.length ? favorites.items.map((item) => contentCardHtml(item)).join('') : emptyState(t('common.empty'), '藏')}
+          <div data-pane="favorites" class="stack gap-2 hidden">
+            <div class="grid grid--cards" data-profile-list="favorites"></div>
+            <div class="center" data-profile-more="favorites"></div>
           </div>
           <div data-pane="comments" class="hidden">
             ${comments.length ? comments.map((c) => `
@@ -162,6 +163,17 @@ export async function renderProfile(ctx) {
       </section>
     </div>
   `;
+
+  const ownFeed = createContentFeed({
+    ctx, list: container.querySelector('[data-profile-list="contents"]'), more: container.querySelector('[data-profile-more="contents"]'),
+    options: () => ({ authorId: user.id, sort: 'new' }), initialResult: mine,
+  });
+  const favoritesFeed = createContentFeed({
+    ctx, list: container.querySelector('[data-profile-list="favorites"]'), more: container.querySelector('[data-profile-more="favorites"]'),
+    options: () => ({ favoritesOf: user.id, sort: 'new' }), initialResult: favorites, mark: '藏',
+  });
+  await ownFeed.load(true);
+  let favoritesLoaded = false;
 
   container.querySelectorAll('[data-request-permission]').forEach((button) => {
     button.addEventListener('click', async () => {
@@ -255,5 +267,6 @@ export async function renderProfile(ctx) {
     if (!btn) return;
     container.querySelectorAll('[data-role="tabs"] [data-tab]').forEach((node) => node.classList.toggle('is-active', node === btn));
     container.querySelectorAll('[data-pane]').forEach((pane) => pane.classList.toggle('hidden', pane.dataset.pane !== btn.dataset.tab));
+    if (btn.dataset.tab === 'favorites' && !favoritesLoaded) { favoritesLoaded = true; favoritesFeed.load(true); }
   });
 }

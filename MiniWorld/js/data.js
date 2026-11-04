@@ -290,7 +290,13 @@ MW.DEFAULT_SETTINGS = {
   model: 'deepseek-chat',
   webSearch: true,
   audio: true,
-  graphics: 'high'
+  graphics: 'auto',
+  masterVolume: 0.65,
+  effectsVolume: 0.8,
+  ambienceVolume: 0.35,
+  engineVolume: 0.45,
+  reducedMotion: false,
+  performanceHUD: true
 };
 
 /* ---------- 掉落表 ---------- */

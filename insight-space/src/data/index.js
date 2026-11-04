@@ -20,14 +20,9 @@ export function getApi() {
     loading = (async () => {
       let created;
       if (isCloudConfigured()) {
-        try {
-          const mod = await import('./supabase.js');
-          created = await mod.createSupabaseApi();
-        } catch (error) {
-          console.error('[体悟集] Supabase 初始化失败，回退到本地模式：', error);
-          const mod = await import('./local.js');
-          created = await mod.createLocalApi();
-        }
+        // A cloud outage must not create an unrelated, empty local account database.
+        const mod = await import('./supabase.js');
+        created = await mod.createSupabaseApi();
       } else {
         const mod = await import('./local.js');
         created = await mod.createLocalApi();
@@ -35,7 +30,10 @@ export function getApi() {
       await created.init();
       instance = created;
       return created;
-    })();
+    })().catch((error) => {
+      loading = null; // Retry after a network/CDN/configuration failure.
+      throw error;
+    });
   }
   return loading;
 }

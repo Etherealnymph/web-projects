@@ -1,28 +1,41 @@
 /** 首页 / 模块页 / 排行榜 / 收藏 / 搜索 */
 
 import { t, tl } from '../core/i18n.js';
-import { icon, emptyState, loadingState, avatarHtml } from '../core/ui.js';
-import { esc, fromNow } from '../core/util.js';
-import { firstImage } from '../core/markdown.js';
-import { emit } from '../core/store.js';
-import { errText } from '../data/index.js';
+import { icon, emptyState, loadingState } from '../core/ui.js';
+import { esc, debounce } from '../core/util.js';
+import { createContentFeed } from '../components/content-feed.js';
 import {
-  contentCardHtml, rankedItemHtml, sortControl, moduleName, moduleDesc, authorName, roleBadge,
+  rankedItemHtml, sortControl, moduleName, moduleDesc,
 } from '../components/widgets.js';
 import {
-  emptyFilters, toListOptions, filterBarHtml, fillFacetSelects, wireFilterBar, facetsOf, filtersActive,
+  emptyFilters, toListOptions, filterBarHtml, fillFacetSelects, wireFilterBar, filtersActive,
 } from '../components/filters.js';
 
-export async function resolveMediaUrls(api, items) {
-  for (const item of items) {
-    const cover = firstImage(item.bodyMd);
-    if (cover && cover.startsWith('idb://')) item.coverUrl = await api.media.resolve(cover);
-    else if (cover) item.coverUrl = cover;
-    for (const media of item.media || []) {
-      if (!media.displayUrl) media.displayUrl = await api.media.resolve(media);
+export { resolveMediaUrls } from '../components/content-feed.js';
+
+function attachFilters(ctx, filters, facets, feed, { baseline = '', extra = {} } = {}) {
+  let scope = null;
+  let version = 0;
+  async function refreshFacets() {
+    if (scope === filters.moduleId) return;
+    scope = filters.moduleId;
+    const request = ++version;
+    try {
+      const result = await ctx.api.contents.facets({ ...extra, ...(scope ? { moduleIds: [scope] } : {}) });
+      if (request !== version || ctx.signal?.aborted) return;
+      Object.assign(facets, result);
+      fillFacetSelects(ctx.container, filters, facets);
+    } catch (error) {
+      if (!ctx.signal?.aborted) console.warn('[Insight] Filter choices could not load', error);
+      scope = null;
     }
   }
-  return items;
+  const cleanup = wireFilterBar(ctx.container, filters, () => {
+    if (scope !== filters.moduleId) { filters.authorId = ''; filters.tag = ''; }
+    return Promise.all([refreshFacets(), feed.load(true)]);
+  }, baseline);
+  ctx.onLeave(() => { version += 1; cleanup?.(); });
+  return refreshFacets;
 }
 
 export function moduleNavHtml(modules, activeId) {
@@ -42,8 +55,7 @@ export async function renderHome(ctx) {
     api.contents.list({ sort: 'hot', limit: 6 }),
     api.contents.list({ sort: 'new', limit: 6 }),
   ]);
-  await resolveMediaUrls(api, hot.items);
-  await resolveMediaUrls(api, fresh.items);
+  if (ctx.signal?.aborted) return;
 
   container.innerHTML = `
     <div class="stack gap-3">
@@ -107,7 +119,7 @@ export async function renderHome(ctx) {
 }
 
 export async function renderModule(ctx) {
-  const { api, user, container, params } = ctx;
+  const { api, container, params } = ctx;
   const lang = document.documentElement.dataset.lang;
   container.innerHTML = loadingState();
   const modules = await api.modules.list();
@@ -129,9 +141,6 @@ export async function renderModule(ctx) {
 
   let sort = module.hot ? 'hot' : 'new';
   let query = '';
-  let offset = 0;
-  const pageSize = 12;
-  let all = [];
   const filters = emptyFilters(module.id);
   const facets = {
     modules: modules.filter((m) => m.access.visible).map((m) => ({ value: m.id, label: moduleName(m, lang) })),
@@ -158,11 +167,12 @@ export async function renderModule(ctx) {
           ${sortControl(sort)}
           <div class="grow"></div>
           <div class="row" style="min-width:220px">
-            <input class="input" data-role="search" placeholder="${esc(t('nav.search'))}" value="${esc(query)}" style="min-width:200px" />
+            <input class="input" type="search" data-role="search" aria-label="${esc(t('nav.search'))}" placeholder="${esc(t('nav.search'))}" value="${esc(query)}" maxlength="200" style="min-width:200px" />
           </div>
         </div>
         ${filterBarHtml(filters, facets)}
       </section>
+      <div class="tiny muted" data-role="count" role="status"></div>
       <div data-role="list" class="grid grid--cards"></div>
       <div class="center" data-role="more"></div>
     </div>
@@ -171,57 +181,33 @@ export async function renderModule(ctx) {
   const listBox = container.querySelector('[data-role="list"]');
   const moreBox = container.querySelector('[data-role="more"]');
 
-  async function load(reset = false) {
-    if (reset) { offset = 0; all = []; }
-    const result = await api.contents.list({ sort, q: query, ...toListOptions(filters), limit: pageSize, offset });
-    await resolveMediaUrls(api, result.items);
-    all = reset ? result.items : all.concat(result.items);
-    offset = all.length;
-    const narrowed = Boolean(query) || filtersActive(filters, module.id);
-    listBox.innerHTML = all.length
-      ? all.map((item) => contentCardHtml(item)).join('')
-      : emptyState(narrowed ? t('msg.noResults') : t('module.empty'), module.icon);
-    moreBox.innerHTML = all.length < result.total
-      ? `<button class="btn" data-role="load-more">${esc(t('common.loadMore'))} (${all.length}/${result.total})</button>`
-      : `<span class="tiny muted">${all.length ? `${all.length} / ${result.total}` : ''}</span>`;
-  }
-
-  let facetScope = null;
-  async function refreshFacets() {
-    const scope = filters.moduleId;
-    if (scope === facetScope) return;
-    facetScope = scope;
-    const result = await api.contents.list(scope ? { moduleIds: [scope] } : {});
-    Object.assign(facets, facetsOf(result.items));
-    fillFacetSelects(container, filters, facets);
-  }
+  const feed = createContentFeed({
+    ctx, list: listBox, more: moreBox, count: container.querySelector('[data-role="count"]'),
+    options: () => ({ sort, q: query, ...toListOptions(filters) }),
+    emptyText: () => Boolean(query) || filtersActive(filters, module.id) ? t('msg.noResults') : t('module.empty'),
+    mark: module.icon,
+  });
 
   container.querySelector('[data-sort]').addEventListener('click', (event) => {
     const btn = event.target.closest('[data-value]');
     if (!btn) return;
     sort = btn.dataset.value;
     container.querySelectorAll('[data-sort] [data-value]').forEach((node) => node.classList.toggle('is-active', node === btn));
-    load(true);
+    feed.load(true);
   });
 
-  let timer = 0;
+  const search = debounce(() => feed.load(true), 320);
   container.querySelector('[data-role="search"]').addEventListener('input', (event) => {
-    clearTimeout(timer);
     query = event.target.value.trim();
-    timer = setTimeout(() => load(true), 320);
+    if (!event.isComposing) search();
   });
-
-  moreBox.addEventListener('click', (event) => {
-    if (event.target.closest('[data-role="load-more"]')) load(false);
+  container.querySelector('[data-role="search"]').addEventListener('compositionend', (event) => {
+    query = event.target.value.trim();
+    search();
   });
-
-  wireFilterBar(container, filters, async () => {
-    await refreshFacets();
-    await load(true);
-  }, module.id);
-
-  await refreshFacets();
-  await load(true);
+  ctx.onLeave(search.cancel);
+  const refreshFacets = attachFilters(ctx, filters, facets, feed, { baseline: module.id });
+  await Promise.all([refreshFacets(), feed.load(true)]);
 }
 
 export async function renderRanking(ctx) {
@@ -230,8 +216,11 @@ export async function renderRanking(ctx) {
   const modules = await api.modules.list();
   const accessible = modules.filter((m) => m.access.visible).map((m) => m.id);
   let hot = { items: [], total: 0 };
-  if (accessible.length) hot = await api.contents.list({ sort: 'hot', limit: 20 });
-  await resolveMediaUrls(api, hot.items);
+  let liked = { items: [], total: 0 };
+  if (accessible.length) [hot, liked] = await Promise.all([
+    api.contents.list({ sort: 'hot', limit: 20 }),
+    api.contents.list({ sort: 'like', limit: 20 }),
+  ]);
   const ranking = hot.items.slice();
 
   container.innerHTML = `
@@ -250,8 +239,7 @@ export async function renderRanking(ctx) {
         <div class="panel">
           <div class="panel__head"><span class="panel__title">${icon('like', 15)} ${esc(t('sort.like'))}</span></div>
           <div class="panel__body panel__body--flush">
-            ${ranking.slice().sort((a, b) => (b.counts?.like || 0) - (a.counts?.like || 0))
-              .slice(0, 20).map((item, index) => rankedItemHtml(item, index)).join('') || emptyState(t('common.empty'), '榜')}
+            ${liked.items.map((item, index) => rankedItemHtml(item, index)).join('') || emptyState(t('common.empty'), '榜')}
           </div>
         </div>
       </div>
@@ -279,44 +267,27 @@ export async function renderFavorites(ctx) {
         <div class="panel__head">
           <span class="panel__title">${icon('star', 15)} ${esc(t('profile.myFavorites'))}</span>
           <span class="grow"></span>
-          <span class="tiny muted" data-role="count"></span>
+          <span class="tiny muted" data-role="count" role="status"></span>
         </div>
         <div class="panel__body">
           ${filterBarHtml(filters, facets)}
         </div>
       </section>
       <div data-role="list" class="grid grid--cards"></div>
+      <div class="center" data-role="more"></div>
     </div>
   `;
 
   const listBox = container.querySelector('[data-role="list"]');
   const countBox = container.querySelector('[data-role="count"]');
 
-  async function load() {
-    const result = await api.contents.list({ favoritesOf: user.id, sort: 'new', ...toListOptions(filters) });
-    await resolveMediaUrls(api, result.items);
-    countBox.textContent = t('filter.count', { n: result.total });
-    listBox.innerHTML = result.items.length
-      ? result.items.map((item) => contentCardHtml(item)).join('')
-      : emptyState(filtersActive(filters) ? t('msg.noResults') : t('common.empty'), '藏');
-  }
-
-  let facetScope = null;
-  async function refreshFacets() {
-    if (filters.moduleId === facetScope) return;
-    facetScope = filters.moduleId;
-    const result = await api.contents.list({ favoritesOf: user.id, ...(filters.moduleId ? { moduleIds: [filters.moduleId] } : {}) });
-    Object.assign(facets, facetsOf(result.items));
-    fillFacetSelects(container, filters, facets);
-  }
-
-  wireFilterBar(container, filters, async () => {
-    await refreshFacets();
-    await load();
+  const feed = createContentFeed({
+    ctx, list: listBox, more: container.querySelector('[data-role="more"]'), count: countBox,
+    options: () => ({ favoritesOf: user.id, sort: 'new', ...toListOptions(filters) }),
+    emptyText: () => filtersActive(filters) ? t('msg.noResults') : t('common.empty'), mark: '藏',
   });
-
-  await refreshFacets();
-  await load();
+  const refreshFacets = attachFilters(ctx, filters, facets, feed, { extra: { favoritesOf: user.id } });
+  await Promise.all([refreshFacets(), feed.load(true)]);
 }
 
 export async function renderSearch(ctx) {
@@ -339,42 +310,25 @@ export async function renderSearch(ctx) {
         <div class="panel__head">
           <span class="panel__title">${icon('search', 15)} ${esc(t('common.search'))} · ${esc(query || '-')}</span>
           <span class="grow"></span>
-          <span class="tiny muted" data-role="count"></span>
+          <span class="tiny muted" data-role="count" role="status"></span>
         </div>
         <div class="panel__body">
           ${filterBarHtml(filters, facets)}
         </div>
       </section>
       <div data-role="list" class="grid grid--cards"></div>
+      <div class="center" data-role="more"></div>
     </div>
   `;
 
   const listBox = container.querySelector('[data-role="list"]');
   const countBox = container.querySelector('[data-role="count"]');
 
-  async function load() {
-    const result = await api.contents.list({ q: query, sort: 'hot', ...toListOptions(filters) });
-    await resolveMediaUrls(api, result.items);
-    countBox.textContent = t('filter.count', { n: result.total });
-    listBox.innerHTML = result.items.length
-      ? result.items.map((item) => contentCardHtml(item)).join('')
-      : emptyState(t('msg.noResults'), '寻');
-  }
-
-  let facetScope = null;
-  async function refreshFacets() {
-    if (filters.moduleId === facetScope) return;
-    facetScope = filters.moduleId;
-    const result = await api.contents.list({ q: query, ...(filters.moduleId ? { moduleIds: [filters.moduleId] } : {}) });
-    Object.assign(facets, facetsOf(result.items));
-    fillFacetSelects(container, filters, facets);
-  }
-
-  wireFilterBar(container, filters, async () => {
-    await refreshFacets();
-    await load();
+  const feed = createContentFeed({
+    ctx, list: listBox, more: container.querySelector('[data-role="more"]'), count: countBox,
+    options: () => ({ q: query, sort: 'hot', ...toListOptions(filters) }),
+    emptyText: () => t('msg.noResults'), mark: '寻',
   });
-
-  await refreshFacets();
-  await load();
+  const refreshFacets = attachFilters(ctx, filters, facets, feed, { extra: { q: query } });
+  await Promise.all([refreshFacets(), feed.load(true)]);
 }

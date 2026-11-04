@@ -1,10 +1,12 @@
 /** Supabase：好友关系与私信 */
 
 import { fail, mapUser } from './sb-core.js';
+import { pageOptions, queryError } from './query.js';
 
 async function fetchUsers(client, ids) {
   if (!ids.length) return new Map();
-  const { data } = await client.from('profiles').select('*').in('id', ids);
+  const { data, error } = await client.from('profiles').select('id,username,nickname,avatar,bio,role,status,exp,created_at').in('id', [...new Set(ids)]);
+  if (error) throw queryError(error);
   return new Map((data || []).map((p) => [p.id, mapUser(p)]));
 }
 
@@ -80,15 +82,12 @@ export function createFriendsApi(sb) {
     },
 
     async search(q) {
-      const me = sb.requireUser();
-      const needle = String(q || '').trim();
+      sb.requireUser();
+      const needle = String(q || '').trim().slice(0, 80);
       if (!needle) return [];
-      const { data, error } = await client.from('profiles').select('*').neq('id', me.id)
-        .or(`username.ilike.%${needle}%,nickname.ilike.%${needle}%`).limit(20);
-      if (error) throw fail('msg.error');
-      const rows = data || [];
-      const rels = await Promise.all(rows.map((u) => api.relation(u.id)));
-      return rows.map((u, i) => ({ user: mapUser(u), relation: rels[i] }));
+      const { data, error } = await client.rpc('insight_search_members', { p_query: needle });
+      if (error) throw queryError(error);
+      return (data || []).map((row) => ({ user: mapUser(row.profile), relation: row.relation }));
     },
 
     async request(userId, note = '') {
@@ -166,7 +165,6 @@ export function createMessagesApi(sb) {
     return Boolean((data || []).length);
   }
 
-  const dial = (meId, otherId) => `and(from_id.eq.${meId},to_id.eq.${otherId}),and(from_id.eq.${otherId},to_id.eq.${meId})`;
   const mapMessage = (row) => ({
     id: row.id,
     fromId: row.from_id,
@@ -179,12 +177,17 @@ export function createMessagesApi(sb) {
 
   const api = {
     async list(userId, options = {}) {
-      const me = sb.requireUser();
-      let query = client.from('messages').select('*').or(dial(me.id, userId)).order('created_at', { ascending: true });
-      if (options.limit) query = query.limit(options.limit);
-      const { data, error } = await query;
-      if (error) throw fail('msg.error');
-      return (data || []).map(mapMessage);
+      sb.requireUser();
+      const { limit } = pageOptions(options, 100);
+      const { data, error } = await client.rpc('insight_message_page', {
+        p_peer: userId,
+        p_limit: limit,
+        p_before_time: options.before?.createdAt || null,
+        p_before_id: options.before?.id || null,
+      });
+      if (error) throw queryError(error);
+      // The database takes the latest page first. The conversation displays it oldest-to-newest.
+      return (data || []).map(mapMessage).reverse();
     },
 
     async send(userId, payload = {}) {
@@ -202,52 +205,26 @@ export function createMessagesApi(sb) {
 
     async markRead(userId) {
       const me = sb.requireUser();
-      await client.from('messages').update({ read_at: new Date().toISOString() })
+      const { error } = await client.from('messages').update({ read_at: new Date().toISOString() })
         .eq('from_id', userId).eq('to_id', me.id).is('read_at', null);
+      if (error) throw queryError(error);
       return true;
     },
 
     async unreadTotal() {
       const me = sb.uid();
       if (!me) return 0;
-      const { count } = await client.from('messages')
+      const { count, error } = await client.from('messages')
         .select('id', { count: 'exact', head: true }).eq('to_id', me).is('read_at', null);
+      if (error) throw queryError(error);
       return count || 0;
     },
 
     async threads() {
-      const me = sb.requireUser();
-      const [friendRes, msgRes] = await Promise.all([
-        client.from('friendships').select('*').eq('status', 'accepted')
-          .or(`requester_id.eq.${me.id},addressee_id.eq.${me.id}`),
-        client.from('messages').select('*')
-          .or(`from_id.eq.${me.id},to_id.eq.${me.id}`)
-          .order('created_at', { ascending: false }).limit(500),
-      ]);
-      if (friendRes.error) throw fail('msg.error');
-      const rows = friendRes.data || [];
-      const msgs = msgRes.data || [];
-      const users = await fetchUsers(client, rows.map((r) => pairOf(r, me.id)));
-      const out = new Map();
-      for (const f of rows) {
-        const other = pairOf(f, me.id);
-        out.set(other, { user: users.get(other) || null, last: null, unread: 0, since: f.updated_at || f.created_at });
-      }
-      for (const m of msgs) {
-        const other = m.from_id === me.id ? m.to_id : m.from_id;
-        if (!out.has(other)) out.set(other, { user: null, last: null, unread: 0, since: m.created_at });
-        const entry = out.get(other);
-        if (!entry.last) entry.last = { bodyMd: m.body_md, media: m.media || [], createdAt: m.created_at, fromId: m.from_id };
-        if (m.to_id === me.id && !m.read_at) entry.unread += 1;
-      }
-      const missing = Array.from(out.entries()).filter(([, v]) => !v.user).map(([k]) => k);
-      if (missing.length) {
-        const extra = await fetchUsers(client, missing);
-        for (const [key, value] of out) if (!value.user) value.user = extra.get(key) || null;
-      }
-      return Array.from(out.values())
-        .filter((t) => t.user)
-        .sort((a, b) => new Date(b.last?.createdAt || b.since) - new Date(a.last?.createdAt || a.since));
+      sb.requireUser();
+      const { data, error } = await client.rpc('insight_threads');
+      if (error) throw queryError(error);
+      return (data || []).map((row) => ({ ...row, user: mapUser(row.user), unread: Number(row.unread) || 0 }));
     },
   };
 

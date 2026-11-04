@@ -4,9 +4,15 @@
 
 纯静态前端（原生 ES Module，无需构建），支持两种数据后端：
 
+## 2026-11 升级
+
+本次加入数据库分页/筛选与完整计数、本地固定版本 Supabase SDK、路由按需加载、阅读辅助、编辑草稿恢复，以及长会话向前加载等改进。**已有 Supabase 项目先升级数据库，再发布前端。**
+
+完整操作指南：[Supabase 升级、验证、回滚与测试](docs/SUPABASE_UPGRADE_2026-11.md)。正式增量脚本是 [20261104_performance.sql](supabase/migrations/20261104_performance.sql)；检查与回滚脚本在 supabase/operations/，不会作为正常迁移自动执行。
+
 | 模式 | 说明 | 适用 |
 |---|---|---|
-| **本地模式**（默认） | 数据存在浏览器 IndexedDB 里，无需服务器 | 单人使用 / 演示 |
+| **本地模式**（云端配置留空） | 数据存在浏览器 IndexedDB 里，无需服务器 | 单人使用 / 演示 |
 | **Supabase 模式** | 真实多人账号、密码登录、跨设备同步 | 正式部署 |
 
 > 本地模式不需要任何配置，打开即可用；但它只是「一个人一台浏览器」的数据，**换设备 / 清缓存都会丢**，且没有真正的服务端权限校验。需要多人邀请码与后台，请按下文配置 Supabase。
@@ -21,7 +27,6 @@ python -m http.server 8123 --bind 127.0.0.1
 # 浏览器打开 http://127.0.0.1:8123/insight-space/
 ```
 
-首次打开会展示「初始化」或登录页。内置账号（`src/config.js` 中 `CONFIG.bootstrap`）：
 首次打开会展示「初始化」表单。**出于安全考虑，前端不预置任何账号或密码**，由你现场设置：
 
 1. 在「初始化」表单里填写你想要的超管用户名与密码（至少 6 位），提交后即成为超级管理员。
@@ -59,9 +64,8 @@ https://etherealnymph.github.io/web-projects/insight-space/
 ## 三、接入 Supabase（真正的多人 + 邀请码）
 
 1. 在 [supabase.com](https://supabase.com) 新建一个项目。
-2. 打开 **SQL Editor**，把 [`supabase/schema.sql`](./supabase/schema.sql) 全文粘贴执行一次（可重复执行）。
-   > **已经接入过 Supabase 的站点请重新执行一次**：新增了 `invites.module_perms`（邀请码的按模块权限）、`contents.visibility` / `contents.visible_user_ids`（内容可见范围），并更新了 `register_with_invite`（按权限写授权记录）与内容 RLS。脚本可重复执行，只补列与函数，不会清空数据。
-   > 未执行时前端仍可运行，只是邀请码保存会忽略按模块权限并降级为旧的全局权限（控制台会打印一条 `module_perms` 相关的警告）。
+2. 打开 **SQL Editor**，先执行 [`supabase/schema.sql`](./supabase/schema.sql)，再执行 [`supabase/migrations/20261104_performance.sql`](./supabase/migrations/20261104_performance.sql)。
+   > 已有项目使用上方升级指南的增量流程。新前端需要本次 RPC；缺少迁移时会给出明确提示，不会用被截断的数据冒充完整结果。
 3. **Authentication → Providers → Email**：关闭 `Confirm email`。
    本站把用户名映射成 `用户名@tiwu.local` 的合成邮箱，无法收信，必须关闭邮箱确认。
 4. **Project Settings → API**：复制 `Project URL` 与 `anon public` key。
@@ -80,11 +84,10 @@ export const CONFIG = {
 
 ```bash
 # 本地安装 Supabase CLI 并登录（首次）
-npm i -g supabase
-supabase login
+npm install supabase --save-dev
+npx supabase login
 # 关联到你的项目，然后部署（项目引用 ID 见 Project Settings → General）
-supabase link --project-ref <你的项目ID>
-supabase functions deploy admin-auth --no-verify-jwt
+npx supabase functions deploy admin-auth --project-ref <你的项目ID> --no-verify-jwt
 ```
 
    - 该函数代码在 [`supabase/functions/admin-auth/index.ts`](./supabase/functions/admin-auth/index.ts)。
@@ -93,7 +96,7 @@ supabase functions deploy admin-auth --no-verify-jwt
 
 7. 重新打开站点，用首页的「初始化」表单创建第一位超管（该入口只在系统还没有超管时出现）。
 
-`schema.sql` 会自动：建表、开启 RLS、建 `media` 公共存储桶、写入 5 个默认模块、注册触发器（新用户自动建资料）。若你的 Supabase 版本限制了向 `auth.users` 写入，可改在 **Authentication → Users → Add user** 手动建号（邮箱填 `用户名@tiwu.local`），再执行：
+`schema.sql` 会自动：建表、开启 RLS、建 `media` 私有存储桶、写入 6 个默认模块、注册触发器（新用户自动建资料）。若需手动建号，可在 **Authentication → Users → Add user** 添加（邮箱填 `用户名@tiwu.local`），再执行：
 
 ```sql
 update public.profiles set role = 'superadmin' where username = '你的用户名';
@@ -149,7 +152,7 @@ update public.profiles set role = 'superadmin' where username = '你的用户名
 
 - 前端**不含任何预置账号或密码**：`src/config.js` 只保留站点信息与后端地址，首次使用的超管账号由你在页面上现场设置。
 - 源仓库与文档中不记录任何口令；请勿把 `src/config.js` 之外的密钥、口令或私人内容写进代码或提交信息。
-- 本地模式下密码经 **PBKDF2(SHA-256，15 万次迭代 + 随机盐)** 哈希后存储，登录会话只保存用户 id，不保存口令。
+- 本地模式在 Web Crypto 可用时使用 **PBKDF2(SHA-256，6 万次迭代 + 随机盐)**，登录会话只保存用户 id，不保存口令。
 - Supabase 模式下密码由 Supabase Auth（bcrypt）托管，前端永远拿不到明文口令。
 
 **权限边界**
@@ -214,8 +217,7 @@ insight-space/
 只封 `*.supabase.co` 而不封 `supabase.com`，说明这是**基于 SNI 的定向 TLS 阻断**：
 DNS 能解析、TCP 能建连，ClientHello 一发出去就被 RST。
 
-> 因此失败时的表现是「数据为空」而不是报错 —— `src/data/index.js` 的 `isCloudConfigured()`
-> 发现 Supabase 初始化失败会自动回退到 IndexedDB 本地模式。
+> 上述是旧版排查记录。2026-11 版已取消云端失败后的自动本地回退，并把 SDK 放在站点自己的 vendor/ 目录；API 不通会明确报错，可检查项目或代理配置后重试。
 
 ### 解决：给 Supabase 套一层大陆可达的域名
 

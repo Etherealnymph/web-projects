@@ -319,7 +319,7 @@
 
       if (inVehicle) {
         this.pos.copy(this.game.inVehicle.pos);
-        this.pos.y += 1.6;
+        this.pos.y += this.game.inVehicle.seatHeight ?? 1.6;
         this.avatar.group.position.copy(this.game.inVehicle.pos);
         this.updateViewmodel(dt, false);
         return;
@@ -379,8 +379,10 @@
       }
 
       this.pos.x = MW.clamp(this.pos.x, -this.game.travelBounds, this.game.travelBounds);
-      this.pos.z = MW.clamp(this.pos.z, -this.game.travelBounds, this.game.travelBounds);
-      if (this.pos.y < -18) { this.pos.copy(this.spawnPoint); this.vel.set(0, 0, 0); }
+      const zBounds = this.game.travelBoundsZ || this.game.travelBounds;
+      this.pos.z = MW.clamp(this.pos.z, -zBounds, zBounds);
+      const rescueBelow = Math.min(-18, (this.game.world?.fallbackY ?? 0) - 24);
+      if (this.pos.y < rescueBelow) { this.pos.copy(this.spawnPoint); this.vel.set(0, 0, 0); }
 
       // 角色模型
       this.avatar.group.position.copy(this.pos);
@@ -393,7 +395,7 @@
       const w = this.game.world;
       if (!w) return;
       const r = this.radius, h = this.height;
-      const solid = (x, y, z) => w.collidesBox(x, y, z, r, h) || this.game.collidesDoor(x, y, z, r, h);
+      const solid = (x, y, z) => w.collidesBox(x, y, z, r, h, true) || this.game.collidesDoor(x, y, z, r, h);
       const stepH = this.inWater ? 1.35 : 1.05;
       let nx = this.pos.x + this.vel.x * dt;
       if (!solid(nx, this.pos.y, this.pos.z)) {
@@ -433,7 +435,7 @@
         }
       }
       if (this.inWater) this.onGround = false;
-      const fy = w.fallbackY;
+      const fy = w.terrain ? w.terrainGroundAt(this.pos.x,this.pos.z) : w.fallbackY;
       if (this.pos.y < fy) {
         this.pos.y = fy;
         this.vel.y = 0;

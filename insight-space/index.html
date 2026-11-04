@@ -6,11 +6,23 @@
   <title>体悟集 · Insight</title>
   <meta name="description" content="个人私人体悟网站：推荐、日记、诗歌、文案、评论。邀请码注册，超管后台，支持图文音视频与 Markdown。" />
   <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f6f3ec" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#14131a" media="(prefers-color-scheme: dark)" />
+  <script>
+    // Apply the saved appearance before CSS paints; no light flash on a dark visit.
+    try {
+      const saved = localStorage.getItem('tiwu.theme');
+      const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = saved === 'dark' || ((!saved || saved === 'auto') && dark) ? 'dark' : 'light';
+      const scale = localStorage.getItem('tiwu.fontScale');
+      if (['0.9', '1', '1.125', '1.25'].includes(scale)) document.documentElement.style.setProperty('--font-scale', scale);
+    } catch { /* Browsing with storage disabled still works. */ }
+  </script>
   <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="./assets/icon.svg" />
-  <link rel="stylesheet" href="./assets/css/base.css?v=c144d49" />
-  <link rel="stylesheet" href="./assets/css/components.css?v=c144d49" />
-  <link rel="stylesheet" href="./assets/css/views.css?v=c144d49" />
+  <link rel="stylesheet" href="./assets/css/base.css?v=20261104" />
+  <link rel="stylesheet" href="./assets/css/components.css?v=20261104" />
+  <link rel="stylesheet" href="./assets/css/views.css?v=20261104" />
 </head>
 <body>
   <div id="app" class="app-root">

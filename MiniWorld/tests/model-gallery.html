@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MiniWorld · 载具几何预览</title>
+<style>*{box-sizing:border-box}body{margin:0;padding:32px;background:#0a161f;color:#e0ecee;font:15px/1.65 system-ui,sans-serif}main{max-width:1250px;margin:auto}small{color:#76d0c5;letter-spacing:.15em}h1{font-size:34px;font-weight:500;letter-spacing:-.04em;margin:8px 0}header p{color:#a0b5c1;max-width:880px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}article{border:1px solid #29404b;background:#10212c;border-radius:13px;overflow:hidden}canvas{width:100%;display:block;background:radial-gradient(ellipse at 45% 35%,#1d3542,#10202c)}footer{padding:13px 17px;border-top:1px solid #29404b;display:flex;justify-content:space-between;gap:12px}footer span{font-size:12px;color:#8da7b4}a{color:#8ce3d7}@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){body{padding:18px}.grid{grid-template-columns:1fr}}</style></head>
+<body><main><header><small>MINIWORLD / EXPEDITION / GEOMETRY LAB</small><h1>新的远征装备</h1><p>直接读取游戏中的 Three.js 模型，以 Canvas 投影展示轮廓与细节。此页可在没有 WebGL 的环境中查看；它不模拟游戏光照、材质效果或真实运行帧率。</p></header><div class="grid" id="gallery"></div><p><a href="../">返回游戏</a> · 下方统计为模型近景网格数；远景均切换为 1 个简化网格。</p></main>
+<script src="../vendor/three.min.js"></script><script src="../js/data.js"></script><script src="../js/util.js"></script><script src="../js/world.js"></script><script src="../js/models.js"></script><script src="../js/vehicle-models.js"></script>
+<script>
+const examples=[['car','城市探索车'],['tank','远征坦克'],['jet','舰载战斗机'],['carrier','航空母舰'],['train','环线列车'],['mech','机械队员'],['drone','协同无人机'],['aa','防空单元'],['warship','护卫舰']];
+for(const [type,name] of examples){
+  const article=document.createElement('article'),canvas=document.createElement('canvas');canvas.width=700;canvas.height=460;article.append(canvas);
+  const model=MW.Models.vehicle(type),body=model.body;body.updateMatrixWorld(true);
+  const box=new THREE.Box3().setFromObject(body),center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
+  const radius=Math.max(size.x,size.y,size.z)*.63,aspect=canvas.width/canvas.height;
+  const camera=new THREE.OrthographicCamera(-radius*aspect,radius*aspect,radius,-radius,.1,10000);
+  camera.position.copy(center).add(new THREE.Vector3(10,7,-13).normalize().multiplyScalar(radius*6));camera.lookAt(center);camera.updateMatrixWorld(true);
+  const light=new THREE.Vector3(-.4,.9,-.6).normalize(),triangles=[];let count=0;
+  body.traverse(object=>{
+    if(!object.isMesh)return;count++;
+    const geometry=object.geometry,position=geometry.attributes.position,index=geometry.index;
+    const total=index?index.count:position.count;
+    const material=Array.isArray(object.material)?object.material[0]:object.material;
+    for(let i=0;i<total;i+=3){
+      const vertices=[];for(let j=0;j<3;j++){const k=index?index.getX(i+j):i+j;vertices.push(new THREE.Vector3().fromBufferAttribute(position,k).applyMatrix4(object.matrixWorld));}
+      const normal=vertices[1].clone().sub(vertices[0]).cross(vertices[2].clone().sub(vertices[0])).normalize();
+      const mid=vertices[0].clone().add(vertices[1]).add(vertices[2]).multiplyScalar(1/3);
+      if(normal.dot(camera.position.clone().sub(mid))<0)continue;
+      const projected=vertices.map(v=>v.clone().project(camera));
+      const brightness=material.isMeshBasicMaterial?1:.42+Math.max(0,normal.dot(light))*.58;
+      const color=material.color.clone().multiplyScalar(brightness).convertLinearToSRGB();
+      triangles.push({p:projected,z:mid.clone().applyMatrix4(camera.matrixWorldInverse).z,c:'#'+color.getHexString()});
+    }
+  });
+  triangles.sort((a,b)=>a.z-b.z);const ctx=canvas.getContext('2d');
+  ctx.fillStyle='rgba(0,0,0,.17)';ctx.beginPath();ctx.ellipse(canvas.width/2,canvas.height*.75,canvas.width*.28,canvas.height*.055,0,0,Math.PI*2);ctx.fill();
+  for(const tri of triangles){ctx.beginPath();tri.p.forEach((p,i)=>{const x=(p.x+1)*canvas.width/2,y=(1-p.y)*canvas.height/2;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.closePath();ctx.fillStyle=tri.c;ctx.fill();ctx.lineWidth=.35;ctx.strokeStyle=tri.c;ctx.stroke();}
+  const footer=document.createElement('footer'),title=document.createElement('b'),stats=document.createElement('span');title.textContent=name;stats.textContent=count+' 网格 · '+triangles.length+' 可见三角面';footer.append(title,stats);article.append(footer);document.getElementById('gallery').append(article);
+}
+</script></body></html>

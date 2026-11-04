@@ -2,6 +2,7 @@
 
 import { expLevel } from '../core/util.js';
 import { rewriteSupabaseUrls } from '../config.js';
+import { queryError } from './query.js';
 
 const EMAIL_DOMAIN = 'tiwu.local'; // 用户名 → 合成邮箱
 
@@ -144,6 +145,8 @@ export function mapInvite(row) {
 
 /** 创建共享上下文：登录用户、权限、统计与作者信息 */
 export function createContext(client) {
+  let profileLoadVersion = 0;
+  let profileRequest = null;
   const sb = {
     client,
     profile: null,
@@ -157,6 +160,7 @@ export function createContext(client) {
 
   sb.requireUser = () => {
     if (!sb.profile) throw fail('common.loginRequired');
+    if (sb.profile.status === 'disabled') throw fail('common.noPermission');
     return sb.profile;
   };
   sb.requireAdmin = () => {
@@ -165,30 +169,53 @@ export function createContext(client) {
     return sb.profile;
   };
 
-  sb.loadProfile = async () => {
-    const { data: sessionData } = await client.auth.getSession();
-    const user = sessionData?.session?.user;
-    if (!user) { sb.profile = null; sb.grants = []; sb.invites = []; return null; }
-    const { data, error } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
-    if (error) throw fail('msg.networkError');
-    sb.profile = mapUser(data);
+  sb.clearSession = () => {
+    profileLoadVersion += 1;
+    profileRequest = null;
+    sb.profile = null;
     sb.grants = [];
     sb.invites = [];
-    if (sb.profile) {
-      const { data: grantRows } = await client.from('grants').select('*').eq('user_id', user.id);
-      sb.grants = grantRows || [];
-      const ids = Array.from(new Set(sb.grants.map((g) => g.invite_id).filter(Boolean)));
-      if (ids.length) {
-        const { data: inviteRows } = await client.from('invites').select('*').in('id', ids);
-        sb.invites = inviteRows || [];
-      }
-    }
+  };
+
+  const loadProfile = async () => {
+    const version = profileLoadVersion;
+    const { data: sessionData, error: sessionError } = await client.auth.getSession();
+    if (sessionError) throw queryError(sessionError);
+    const user = sessionData?.session?.user;
+    if (!user) { if (version === profileLoadVersion) sb.clearSession(); return null; }
+    const [profileRes, grantRes] = await Promise.all([
+      client.from('profiles').select('*').eq('id', user.id).maybeSingle(),
+      client.from('grants').select('*').eq('user_id', user.id),
+    ]);
+    if (profileRes.error || grantRes.error) throw queryError(profileRes.error || grantRes.error);
+    const grants = grantRes.data || [];
+    const ids = Array.from(new Set(grants.map((g) => g.invite_id).filter(Boolean)));
+    const inviteRes = ids.length ? await client.from('invites').select('*').in('id', ids) : { data: [] };
+    if (inviteRes.error) throw queryError(inviteRes.error);
+    // A delayed request must not restore the account that has just signed out.
+    if (version !== profileLoadVersion) return sb.profile;
+    sb.profile = mapUser(profileRes.data);
+    sb.grants = grants;
+    sb.invites = inviteRes.data || [];
     return sb.profile;
+  };
+
+  sb.loadProfile = () => {
+    if (!profileRequest) {
+      const pending = loadProfile();
+      profileRequest = pending;
+      pending.then(() => {
+        if (profileRequest === pending) profileRequest = null;
+      }, () => {
+        if (profileRequest === pending) profileRequest = null;
+      });
+    }
+    return profileRequest;
   };
 
   /** 模块访问权限（与数据库 RLS 规则保持一致；邀请码被停用 / 过期会立即失效） */
   sb.accessFor = (moduleId) => {
-    if (!sb.profile) return { visible: false, write: false, expiresAt: null };
+    if (!sb.profile || sb.profile.status === 'disabled') return { visible: false, write: false, expiresAt: null };
     if (sb.isStaff()) return { visible: true, write: true, expiresAt: null, role: sb.profile.role };
     const now = Date.now();
     const inviteMap = new Map((sb.invites || []).map((i) => [i.id, i]));
@@ -231,31 +258,18 @@ export function createContext(client) {
 
   sb.attachCounts = async (contents) => {
     if (!contents.length) return contents;
-    const ids = contents.map((c) => c.id);
-    const [stats, comments, mine] = await Promise.all([
-      client.from('content_stats').select('*').in('content_id', ids),
-      client.from('comments').select('content_id').in('content_id', ids),
-      sb.uid() ? client.from('reactions').select('target_id, kind').eq('user_id', sb.uid()).eq('target_type', 'content').in('target_id', ids) : Promise.resolve({ data: [] }),
-    ]);
-    const statMap = new Map((stats.data || []).map((s) => [s.content_id, s]));
-    const commentMap = new Map();
-    for (const row of comments.data || []) commentMap.set(row.content_id, (commentMap.get(row.content_id) || 0) + 1);
-    const mineMap = new Map();
-    for (const row of mine.data || []) {
-      if (!mineMap.has(row.target_id)) mineMap.set(row.target_id, { like: false, dislike: false, favorite: false });
-      mineMap.get(row.target_id)[row.kind] = true;
+    const stats = new Map();
+    for (let from = 0; from < contents.length; from += 100) {
+      const { data, error } = await client.rpc('insight_content_metrics', { p_ids: contents.slice(from, from + 100).map((c) => c.id) });
+      if (error) throw queryError(error);
+      for (const row of data || []) stats.set(row.content_id, row);
     }
     return contents.map((c) => {
-      const stat = statMap.get(c.id) || {};
+      const stat = stats.get(c.id) || {};
       return {
         ...c,
-        counts: {
-          like: stat.like_count || 0,
-          dislike: stat.dislike_count || 0,
-          favorite: stat.favorite_count || 0,
-          comment: commentMap.get(c.id) || 0,
-        },
-        mine: mineMap.get(c.id) || { like: false, dislike: false, favorite: false },
+        counts: stat.counts || { like: 0, dislike: 0, favorite: 0, comment: 0 },
+        mine: stat.mine || { like: false, dislike: false, favorite: false },
       };
     });
   };
@@ -263,8 +277,13 @@ export function createContext(client) {
   sb.attachAuthors = async (rows, key = 'author_id') => {
     const ids = Array.from(new Set(rows.map((r) => r[key]).filter(Boolean)));
     if (!ids.length) return new Map();
-    const { data } = await client.from('profiles').select('*').in('id', ids);
-    return new Map((data || []).map((p) => [p.id, mapUser(p)]));
+    const users = new Map();
+    for (let from = 0; from < ids.length; from += 100) {
+      const { data, error } = await client.from('profiles').select('id,username,nickname,avatar,bio,role,status,exp,created_at').in('id', ids.slice(from, from + 100));
+      if (error) throw queryError(error);
+      for (const row of data || []) users.set(row.id, mapUser(row));
+    }
+    return users;
   };
 
   return sb;

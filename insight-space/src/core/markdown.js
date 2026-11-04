@@ -41,6 +41,8 @@ const SAFE_SCHEME = /^(https?:|mailto:|tel:|data:(image|audio|video)\/|blob:|idb
 export function safeUrl(raw) {
   const url = unescapeHtml(String(raw == null ? '' : raw)).trim().replace(/^<|>$/g, '');
   if (!url) return '';
+  // Browsers can strip embedded control characters before interpreting a scheme.
+  if (/[\u0000-\u001f\u007f]/.test(url)) return '';
   if (/^[a-z][a-z0-9+.-]*:/i.test(url)) {
     return SAFE_SCHEME.test(url) ? url : '';
   }
@@ -66,7 +68,7 @@ function renderDirective(name, payload) {
       const src = safeUrl(rawTarget);
       if (!src) return '';
       const cap = caption ? `<figcaption>${caption}</figcaption>` : '';
-      return `</p><figure class="media-figure"><video class="media-video" controls preload="metadata" src="${escapeHtml(src)}"></video>${cap}</figure><p>`;
+      return `</p><figure class="media-figure"><video class="media-video" controls playsinline preload="none" src="${escapeHtml(src)}"></video>${cap}</figure><p>`;
     }
     case 'audio': {
       const src = safeUrl(rawTarget);
@@ -76,13 +78,15 @@ function renderDirective(name, payload) {
     case 'file': {
       const src = safeUrl(rawTarget);
       if (!src) return '';
-      const name = caption || decodeURIComponent(src.split('/').pop() || 'document');
+      let decoded = src.split('/').pop() || 'document';
+      try { decoded = decodeURIComponent(decoded); } catch { /* a pasted filename can contain a literal % */ }
+      const name = caption || decoded;
       return `<a class="file-chip" href="${escapeHtml(src)}" target="_blank" rel="noopener noreferrer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><span class="file-chip__name">${escapeHtml(name)}</span></a>`;
     }
     case 'sticker': {
       const src = stickerUrl(rawTarget);
       if (!src) return '';
-      return `<img class="sticker" src="${escapeHtml(src)}" alt="sticker" loading="lazy" />`;
+      return `<img class="sticker" src="${escapeHtml(src)}" alt="sticker" loading="lazy" decoding="async" />`;
     }
     default:
       return '';
@@ -102,7 +106,7 @@ function renderInline(text, ctx) {
     const src = safeUrl(url);
     if (!src) return m;
     const t = title ? ` title="${title}"` : '';
-    return ctx.inline(`<img src="${escapeHtml(src)}" alt="${alt}"${t} loading="lazy" />`);
+    return ctx.inline(`<img src="${escapeHtml(src)}" alt="${alt}"${t} loading="lazy" decoding="async" />`);
   });
   // 链接
   out = out.replace(new RegExp(`\\[([^\\]]+)\\]\\(${URL_PART}(?:\\s+&quot;([^&]*)&quot;)?\\)`, 'g'), (m, label, url, title) => {

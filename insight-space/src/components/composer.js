@@ -4,10 +4,9 @@ import { t } from '../core/i18n.js';
 import { icon, toast, toastErr, popover } from '../core/ui.js';
 import { esc, debounce } from '../core/util.js';
 import { renderMarkdown } from '../core/markdown.js';
-import { getApi, errText } from '../data/index.js';
+import { getApi, getApiSync, errText } from '../data/index.js';
+import { CONFIG } from '../config.js';
 import { EMOJI_GROUPS, STICKERS } from './emoji.js';
-
-const MAX_MB = 30;
 
 function insertAt(textarea, before, after = '', placeholder = '') {
   const start = textarea.selectionStart;
@@ -46,7 +45,13 @@ export function createComposer(options = {}) {
     showPreview = !compact,
     media = [],
     canUpload = () => true,
+    api: composerApi = null,
   } = options;
+  let disposed = false;
+  let previewVersion = 0;
+  let uploading = false;
+  let recordingStream = null;
+  let uploadAsSticker = false;
 
   const root = document.createElement('div');
   root.className = compact ? 'composer' : 'editor';
@@ -54,11 +59,11 @@ export function createComposer(options = {}) {
     ${compact ? '<div class="avatar avatar--sm" data-role="avatar"></div>' : ''}
     <div class="${compact ? 'composer__box' : 'grow'}" style="min-width:0;display:flex;flex-direction:column;gap:8px">
       ${compact ? '' : '<div class="editor__toolbar" data-role="toolbar"></div>'}
-      <div class="${compact ? '' : 'editor__split'}">
+        <div class="${compact ? '' : 'editor__split'}">
         <div class="${compact ? '' : 'editor__pane'}">
-          <textarea class="${compact ? '' : 'editor__write'}" data-role="input" placeholder="${esc(placeholder)}" style="${compact ? '' : `min-height:${minHeight}px`}"></textarea>
+          <textarea class="${compact ? '' : 'editor__write'}" data-role="input" aria-label="${esc(placeholder || t('content.bodyPh'))}" placeholder="${esc(placeholder)}" style="${compact ? '' : `min-height:${minHeight}px`}" spellcheck="true"></textarea>
         </div>
-        <div class="${compact ? 'hidden' : 'editor__pane editor__preview prose'}" data-role="preview"></div>
+        ${compact ? '' : `<div class="editor__pane editor__preview prose ${showPreview ? '' : 'hidden'}" data-role="preview" aria-label="${esc(t('common.preview'))}"></div>`}
       </div>
       ${compact ? `<div class="composer__foot" data-role="toolbar"></div>` : ''}
       ${compact ? '<div class="composer__preview prose hidden" data-role="preview"></div>' : ''}
@@ -109,7 +114,7 @@ export function createComposer(options = {}) {
 
   toolbar.innerHTML = buttons.map((b) => (b.sep
     ? '<span class="editor__sep"></span>'
-    : `<button type="button" class="editor__tb" data-act="${b.act}" title="${esc(b.title)}">${icon(b.icon, 16)}</button>`)).join('');
+    : `<button type="button" class="editor__tb" data-act="${b.act}" title="${esc(b.title)}" aria-label="${esc(b.title)}">${icon(b.icon, 16)}</button>`)).join('');
 
   toolbar.addEventListener('click', (event) => {
     const btn = event.target.closest('[data-act]');
@@ -120,12 +125,17 @@ export function createComposer(options = {}) {
   /* ------------------------------ 预览 ------------------------------ */
 
   async function refreshPreview() {
-    if (!preview) return;
+    if (!preview || disposed || preview.classList.contains('hidden')) return;
+    const version = ++previewVersion;
     const text = input.value.trim();
     if (!text) { preview.innerHTML = `<p class="muted small">${esc(t('common.preview'))}…</p>`; return; }
-    const api = getApiSync();
-    const resolved = api ? await api.media.resolveText(text) : text;
-    preview.innerHTML = renderMarkdown(resolved);
+    try {
+      const api = composerApi || getApiSync();
+      const resolved = api ? await api.media.resolveText(text) : text;
+      if (!disposed && version === previewVersion) preview.innerHTML = renderMarkdown(resolved);
+    } catch (error) {
+      if (!disposed && version === previewVersion) preview.innerHTML = `<p class="muted small">${esc(errText(error))}</p>`;
+    }
   }
   const debouncedPreview = debounce(refreshPreview, 220);
   input.addEventListener('input', () => { debouncedPreview(); });
@@ -135,38 +145,48 @@ export function createComposer(options = {}) {
 
   const fileInput = document.createElement('input');
   fileInput.type = 'file';
+  fileInput.multiple = true;
   fileInput.style.display = 'none';
   root.appendChild(fileInput);
 
-  function getApiSync() { return getApiInstance(); }
-
-  async function uploadFiles(files, accept = '') {
+  async function uploadFiles(files, asSticker = false) {
+    if (disposed || uploading) return [];
     if (!canUpload()) { toastErr(t('common.noUpload')); return []; }
-    const api = await getApi();
+    const api = composerApi || await getApi();
     const list = Array.from(files || []);
     if (!list.length) return [];
     const added = [];
-    for (const file of list) {
-      if (file.size > MAX_MB * 1024 * 1024) { toastErr(t('content.tooLarge')); continue; }
+    uploading = true;
+    root.dispatchEvent(new CustomEvent('composer:busy', { bubbles: true }));
+    try { for (const file of list) {
+      if (disposed) break;
+      if (file.size > CONFIG.maxUploadMB * 1024 * 1024) { toastErr(t('content.tooLarge')); continue; }
       toast(t('content.uploading'), 'info', 1500);
       try {
         const ref = await api.media.upload(file);
         media.push(ref);
         added.push(ref);
-        if (ref.kind === 'image') insertAt(input, `![${file.name || ''}](${ref.url})\n`);
+        if (disposed) continue;
+        if (asSticker) insertAt(input, `::sticker[${ref.url}]`);
+        else if (ref.kind === 'image') insertAt(input, `![${(file.name || '').replace(/[\[\]]/g, '')}](${ref.url})\n`);
         else if (ref.kind === 'video') insertAt(input, `::video[${ref.url}]\n`);
         else if (ref.kind === 'audio') insertAt(input, `::audio[${ref.url}]\n`);
         else insertAt(input, `::file[${ref.url}|${file.name || ''}]\n`);
       } catch (error) {
         toastErr(`${t('content.uploadFail')}：${errText(error)}`);
       }
+    } } finally {
+      uploading = false;
+      if (!disposed) root.dispatchEvent(new CustomEvent('composer:busy', { bubbles: true }));
     }
-    if (added.length) root.dispatchEvent(new CustomEvent('media:added', { bubbles: true }));
+    if (added.length && !disposed) root.dispatchEvent(new CustomEvent('media:added', { bubbles: true }));
     return added;
   }
 
   fileInput.addEventListener('change', async () => {
-    if (fileInput.files?.length) await uploadFiles(Array.from(fileInput.files), fileInput.accept);
+    const asSticker = uploadAsSticker;
+    uploadAsSticker = false;
+    if (fileInput.files?.length) await uploadFiles(Array.from(fileInput.files), asSticker);
     fileInput.value = '';
   });
 
@@ -181,21 +201,28 @@ export function createComposer(options = {}) {
     if (!navigator.mediaDevices?.getUserMedia) { toastErr(t('msg.error')); return; }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (disposed) { stream.getTracks().forEach((track) => track.stop()); return; }
+      recordingStream = stream;
       recorder = new MediaRecorder(stream);
       chunks = [];
       recorder.ondataavailable = (event) => { if (event.data.size) chunks.push(event.data); };
       recorder.onstop = async () => {
         stream.getTracks().forEach((track) => track.stop());
+        recordingStream = null;
         btn?.classList.remove('is-recording');
+        if (disposed) return;
         const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
-        if (!blob.size) return;
+        if (!blob.size) { root.dispatchEvent(new CustomEvent('composer:busy', { bubbles: true })); return; }
         const file = new File([blob], `voice-${Date.now()}.webm`, { type: blob.type });
         await uploadFiles([file]);
       };
       recorder.start();
+      root.dispatchEvent(new CustomEvent('composer:busy', { bubbles: true }));
       btn?.classList.add('is-recording');
       toast(t('content.recording'), 'info', 2000);
     } catch {
+      recordingStream?.getTracks().forEach((track) => track.stop());
+      recordingStream = null;
       toastErr(t('msg.error'));
     }
   }
@@ -214,9 +241,9 @@ export function createComposer(options = {}) {
       case 'code': insertAt(input, '\n```\n', '\n```\n', '代码'); break;
       case 'link': insertAt(input, '[', '](https://)', '链接文字'); break;
       case 'hr': insertAt(input, '\n---\n'); break;
-      case 'image': fileInput.accept = 'image/*'; fileInput.click(); break;
-      case 'video': fileInput.accept = 'video/*'; fileInput.click(); break;
-      case 'file': fileInput.accept = ''; fileInput.click(); break;
+      case 'image': uploadAsSticker = false; fileInput.accept = 'image/*'; fileInput.click(); break;
+      case 'video': uploadAsSticker = false; fileInput.accept = 'video/*'; fileInput.click(); break;
+      case 'file': uploadAsSticker = false; fileInput.accept = ''; fileInput.click(); break;
       case 'voice': toggleRecording(btn); break;
       case 'emoji': openEmojiPanel(btn); break;
       case 'sticker': openStickerPanel(btn); break;
@@ -229,6 +256,7 @@ export function createComposer(options = {}) {
           pane.classList.toggle('hidden');
           const split = root.querySelector('.editor__split');
           if (split) split.style.gridTemplateColumns = pane.classList.contains('hidden') ? '1fr' : '';
+          if (!pane.classList.contains('hidden')) refreshPreview();
         }
         break;
       }
@@ -269,20 +297,8 @@ export function createComposer(options = {}) {
       if (item) { insertAt(input, `::sticker[${item.dataset.sticker}]`); return; }
       if (event.target.closest('[data-role="upload"]')) {
         if (!canUpload()) { toastErr(t('common.noUpload')); return; }
+        uploadAsSticker = true;
         fileInput.accept = 'image/*';
-        fileInput.onchange = async () => {
-          const files = Array.from(fileInput.files || []);
-          const api = await getApi();
-          for (const file of files) {
-            try {
-              const ref = await api.media.upload(file);
-              media.push(ref);
-              insertAt(input, `::sticker[${ref.url}]`);
-            } catch (error) { toastErr(errText(error)); }
-          }
-          fileInput.value = '';
-          fileInput.onchange = null;
-        };
         fileInput.click();
       }
     });
@@ -299,14 +315,18 @@ export function createComposer(options = {}) {
     focus: () => input.focus(),
     refreshPreview,
     addFiles: (files) => uploadFiles(files),
+    get busy() { return uploading || recorder?.state === 'recording'; },
+    destroy() {
+      disposed = true;
+      previewVersion += 1;
+      debouncedPreview.cancel();
+      if (recorder?.state === 'recording') recorder.stop();
+      recordingStream?.getTracks().forEach((track) => track.stop());
+      recordingStream = null;
+    },
     async resolveText() {
-      const api = await getApi();
+      const api = composerApi || await getApi();
       return api.media.resolveText(input.value);
     },
   };
 }
-
-/** 由 main.js 注入，避免循环依赖 */
-let apiInstance = null;
-export function setApiInstance(api) { apiInstance = api; }
-function getApiInstance() { return apiInstance; }
