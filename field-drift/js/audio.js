@@ -19,7 +19,7 @@
         this.ctx = new AC();
       } catch (e) { return; }
       this.master = this.ctx.createGain();
-      this.master.gain.value = 0.5;
+      this.master.gain.value = this.muted ? 0 : 0.5;
       this.master.connect(this.ctx.destination);
 
       // 推进器噪声
@@ -50,7 +50,11 @@
     },
 
     resume() {
-      if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+      if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+    },
+
+    suspend() {
+      if (this.ctx?.state === 'running') this.ctx.suspend().catch(() => {});
     },
 
     setMuted(m) {
@@ -80,6 +84,7 @@
       g.gain.exponentialRampToValueAtTime(gain || 0.12, t + 0.012);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       o.connect(g); g.connect(this.master);
+      o.onended = () => { o.disconnect(); g.disconnect(); };
       o.start(t); o.stop(t + dur + 0.02);
     },
 
@@ -96,6 +101,7 @@
       g.gain.exponentialRampToValueAtTime(gain, t + 0.02);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       s.connect(f); f.connect(g); g.connect(this.master);
+      s.onended = () => { s.disconnect(); f.disconnect(); g.disconnect(); };
       s.start(t); s.stop(t + dur + 0.05);
     },
 

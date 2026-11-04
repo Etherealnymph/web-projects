@@ -15,7 +15,7 @@ const context=vm.createContext({THREE,console,performance,Date,Math,Map,Set,Uint
   document:{readyState:'loading',hidden:false,createElement:element,getElementById:element,addEventListener:noop,body:element()},
   localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},location:{search:'',pathname:'/'}});
 context.window=context;
-for(const file of ['data','util','geography','terrain','world','worldgen','models','vehicle-models','audio','entities','advanced','combat','player','game'])vm.runInContext(fs.readFileSync(path.join(root,'js',file+'.js'),'utf8'),context,{filename:file+'.js'});
+for(const file of ['data','util','geography','terrain','circulation','world','places','worldgen','models','vehicle-models','audio','entities','advanced','combat','player','game'])vm.runInContext(fs.readFileSync(path.join(root,'js',file+'.js'),'utf8'),context,{filename:file+'.js'});
 const MW=context.MW;
 function game(meta={}) {
   const g=Object.create(MW.Game.prototype);

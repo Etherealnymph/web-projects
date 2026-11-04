@@ -1,0 +1,171 @@
+#intuition[hidden] {
+  display: none;
+}
+#intuition {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: auto;
+  background: #08131e;
+  color: #dbe9ed;
+  padding: 24px clamp(16px, 4vw, 64px);
+  font:
+    15px/1.65 system-ui,
+    sans-serif;
+}
+.intuition-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 1500px;
+  margin: 0 auto 20px;
+}
+.intuition-head span {
+  color: #6bdccf;
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+.intuition-head h2 {
+  margin: 3px 0;
+  font-size: 27px;
+}
+.intuition-layout {
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  gap: 30px;
+  max-width: 1500px;
+  margin: auto;
+}
+.intuition-layout aside {
+  padding: 20px;
+  background: #102330;
+  border: 1px solid #29414d;
+  border-radius: 16px;
+}
+.case-label {
+  display: block;
+  color: #9bb5c2;
+  font-size: 12px;
+}
+#intuition select,
+#intuition textarea {
+  display: block;
+  width: 100%;
+  background: #081923;
+  border: 1px solid #375563;
+  color: #e0f2f4;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 7px 0 18px;
+  font: inherit;
+  box-sizing: border-box;
+}
+#intuition textarea {
+  resize: vertical;
+}
+.intuition-question {
+  font-size: 18px;
+  line-height: 1.5;
+  color: #f1ddae;
+}
+#intuition-controls label {
+  display: block;
+  margin: 16px 0;
+  font-size: 13px;
+}
+#intuition-controls output {
+  float: right;
+  color: #64e1d0;
+  font-variant-numeric: tabular-nums;
+}
+#intuition-controls input {
+  width: 100%;
+  accent-color: #64e1d0;
+  margin-top: 12px;
+}
+.intuition-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0;
+}
+#intuition .btn {
+  padding: 9px 15px;
+  font-size: 13px;
+}
+#intuition-reveal {
+  border-left: 2px solid #64e1d0;
+  padding-left: 12px;
+  color: #b8d0db;
+  font-size: 14px;
+}
+#intuition-canvas {
+  width: 100%;
+  height: clamp(330px, 58vh, 630px);
+  display: block;
+  border: 1px solid #29414d;
+  border-radius: 16px;
+}
+#intuition-status {
+  margin: 9px 0 16px;
+  font-size: 12px;
+  color: #91afbc;
+}
+#intuition-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+#intuition-metrics div {
+  background: #112431;
+  border-radius: 9px;
+  padding: 12px;
+}
+#intuition-metrics span {
+  display: block;
+  color: #9eb7c2;
+  font-size: 11px;
+}
+#intuition-metrics b {
+  color: #e8f3f4;
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+}
+.intuition-equation {
+  color: #e6d6ac;
+  background: #14222b;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+.intuition-limits,
+.intuition-reference {
+  font-size: 12px;
+  color: #9fb4c0;
+}
+.intuition-reference a {
+  color: #77d3cf;
+}
+@media (max-width: 850px) {
+  .intuition-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .intuition-layout aside {
+    padding: 16px;
+  }
+  #intuition-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #intuition {
+    padding: 16px;
+  }
+  .intuition-head h2 {
+    font-size: 23px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #grain {
+    display: none;
+  }
+}

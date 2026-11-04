@@ -711,6 +711,7 @@
     }
 
     enter() {
+      for (const lift of this.game.elevators || []) lift.release(this.game.player);
       this.driver = this.game.player;
       this.game.inVehicle = this;
       this.fpv = false;
@@ -1263,93 +1264,7 @@
   /* =========================================================
      楼层电梯
      ========================================================= */
-  class Elevator {
-    constructor(game, spec) {
-      this.game = game;
-      this.spec = spec;
-      this.floors = Math.max(2, spec.floors || 2);
-      this.baseY = spec.y;
-      this.pos = new THREE.Vector3(spec.x, spec.y + 1, spec.z);
-      this.doorOpen = false;
-      this.doorAnim = 0;
-      this.moving = false;
-      this.travel = 0;
-      this.fromY = spec.y;
-      this.toY = spec.y;
-      this.targetFloor = 0;
-      this.phase = Math.random() * 3;
-
-      const g = new THREE.Group();
-      const metal = 0x3b4650, panel = 0x7f8c95, glass = 0x8fd8ff;
-      // 电梯间/轿厢：地面、三面墙与顶
-      MW.Models.addBox(g, 2.9, 0.18, 2.9, 0x59636a, 0, 0.09, 0);
-      MW.Models.addBox(g, 2.9, 2.6, 0.16, metal, 0, 1.35, -1.4);
-      MW.Models.addBox(g, 0.16, 2.6, 2.9, metal, -1.4, 1.35, 0);
-      MW.Models.addBox(g, 0.16, 2.6, 2.9, metal, 1.4, 1.35, 0);
-      MW.Models.addBox(g, 2.9, 0.16, 2.9, metal, 0, 2.7, 0);
-      MW.Models.addBox(g, 1.0, 1.9, 0.05, 0x28424e, 0, 1.4, -1.31);
-      const btn = MW.Models.addBox(g, 0.14, 0.14, 0.06, 0xffd27a, 1.12, 1.15, 1.3, true);
-      this.button = btn;
-      // 双开滑门
-      this.leftDoor = MW.Models.addBox(g, 1.22, 2.35, 0.12, panel, -0.7, 1.35, 1.42);
-      this.rightDoor = MW.Models.addBox(g, 1.22, 2.35, 0.12, panel, 0.7, 1.35, 1.42);
-      MW.Models.addBox(g, 1.1, 0.18, 0.08, 0x1c252b, -0.7, 2.03, 1.49);
-      MW.Models.addBox(g, 1.1, 0.18, 0.08, 0x1c252b, 0.7, 2.03, 1.49);
-      this.floorLight = MW.Models.addBox(g, 0.55, 0.2, 0.06, 0x64f0ff, 0, 2.55, 1.42, true);
-      // 井道导视
-      MW.Models.addBox(g, 0.08, 2.4, 0.08, 0x64f0ff, -1.55, 1.35, 1.3, true);
-      g.position.set(spec.x, spec.y, spec.z);
-      game.scene.add(g);
-      this.mesh = g;
-    }
-
-    update(dt) {
-      this.phase += dt;
-      const target = this.doorOpen ? 1 : 0;
-      this.doorAnim = MW.lerp(this.doorAnim, target, Math.min(1, dt * 5));
-      if (this.leftDoor) this.leftDoor.position.x = -0.7 - this.doorAnim * 1.05;
-      if (this.rightDoor) this.rightDoor.position.x = 0.7 + this.doorAnim * 1.05;
-      if (this.button) {
-        const s = 1 + Math.sin(this.phase * 3) * 0.2;
-        this.button.scale.set(s, s, 1);
-      }
-      if (this.moving) {
-        this.travel += dt / 1.25;
-        const t = MW.clamp(this.travel, 0, 1);
-        const ease = t * t * (3 - 2 * t);
-        this.mesh.position.y = MW.lerp(this.fromY, this.toY, ease);
-        if (this.game.player && this.game.player.elevatorRide) {
-          this.game.player.pos.set(this.spec.x, this.mesh.position.y + 1.05, this.spec.z + 0.35);
-        }
-        if (t >= 1) {
-          this.moving = false;
-          this.mesh.position.y = this.toY;
-          this.doorOpen = true;
-          if (this.game.player && this.game.player.elevatorRide) {
-            this.game.player.elevatorRide = false;
-            const sx = this.spec.spawnX != null ? this.spec.spawnX : this.spec.x;
-            const sz = this.spec.spawnZ != null ? this.spec.spawnZ : this.spec.z;
-            this.game.player.pos.set(sx, this.toY + 1.05, sz);
-            this.game.player.vel.set(0, 0, 0);
-          }
-          this.game.ui.toast(`电梯到达 ${this.targetFloor + 1}F`, 'good');
-          MW.SFX.click();
-        }
-      }
-    }
-
-    openDoors() { this.doorOpen = true; }
-    closeDoors() { this.doorOpen = false; }
-
-    travelTo(floor) {
-      this.closeDoors();
-      this.targetFloor = floor;
-      this.fromY = this.mesh.position.y;
-      this.toY = this.spec.y + floor * 4;
-      this.travel = 0;
-      this.moving = true;
-    }
-  }
+  const Elevator = MW.CabinLift;
 
   /* =========================================================
      城门吊桥

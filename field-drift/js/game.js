@@ -89,7 +89,12 @@
       const s = localStorage.getItem('fd.progress.v1');
       if (s) {
         const p = JSON.parse(s);
-        if (p && typeof p.unlocked === 'number') G.progress = p;
+        if (p && Number.isFinite(p.unlocked)) {
+          G.progress = {
+            unlocked: clamp(Math.floor(p.unlocked), 0, FD.LEVELS.length - 1),
+            medals: p.medals && typeof p.medals === 'object' ? p.medals : {}
+          };
+        }
       }
     } catch (e) { }
   }
@@ -129,13 +134,18 @@
   function loadDef(def) {
     G.level = def;
     G.sources = new FD.Sources(def.sources);
-    G.lines = FD.buildStreamlines(G.sources, def);
+    G.lines = null;
+    const source = G.sources;
+    FD.requestLines(source, def, lines => { if (G.sources === source) G.lines = lines; });
     G.walls = def.walls || [];
     G.seeds = (def.seeds || []).map(function (p, i) {
       return { p: V.from(p), taken: false, ph: i * 1.7 };
     });
     G.gates = (def.gates || []).map(function (g, i) {
+      const fieldE = V.mk(), fieldB = V.mk();
+      G.sources.sample(V.from(g.c), fieldE, fieldB);
       return {
+        fieldE, fieldB,
         c: g.c, n: g.n, r: g.r, tol: g.tol || 0.15, hold: g.hold || 0.6,
         triggerR: g.triggerR || 5,
         open: false, charge: 0, delta: 1, ebUnsolvable: false, eZero: false, seen: false, idx: i
@@ -185,7 +195,9 @@
   function rebuildLab() {
     if (!G.lab) return;
     G.sources = new FD.Sources(G.level.sources);
-    G.lines = FD.buildStreamlines(G.sources, G.level);
+    G.lines = null;
+    const source = G.sources;
+    FD.requestLines(source, G.level, lines => { if (G.sources === source) G.lines = lines; });
   }
 
   function cursorPoint(out) {
@@ -311,7 +323,7 @@
 
   function physicsStep(dt) {
     const pr = G.probe, lv = G.level;
-    const k = lv.k || 0.30, th = lv.thrust || 0.22;
+    const k = lv.k ?? 0.30, th = lv.thrust ?? 0.22;
     sampleFields();
 
     // 推进器
@@ -331,13 +343,10 @@
     const q = pr.q;
     const vxB = V.cross(pr.vel, FB);
     const g = G.field.gamma;
-    const ax = (q * (FE.x + vxB.x) - k * pr.vel.x + tx * th * tlevel) / g;
-    const ay = (q * (FE.y + vxB.y) - k * pr.vel.y + ty * th * tlevel) / g;
-    const az = (q * (FE.z + vxB.z) - k * pr.vel.z + tz * th * tlevel) / g;
-
     prevPos.x = pr.pos.x; prevPos.y = pr.pos.y; prevPos.z = pr.pos.z;
-
-    pr.vel.x += ax * dt; pr.vel.y += ay * dt; pr.vel.z += az * dt;
+    const velocity = FD.Physics.boris(pr.vel, FE, FB, q, k,
+      { x: tx * th * tlevel, y: ty * th * tlevel, z: tz * th * tlevel }, dt);
+    V.copy(pr.vel, velocity);
     let sp = Math.hypot(pr.vel.x, pr.vel.y, pr.vel.z);
     if (sp > MAX_SPEED) {
       const s = MAX_SPEED / sp;
@@ -528,13 +537,17 @@
     let iter = 0;
     while (G.acc >= SUB && iter < 8) {
       physicsStep(SUB);
+      G.time += SUB;
+      if (!G.lab && G.probe.alive) {
+        updateGates(SUB);
+        checkExit();
+      }
       G.acc -= SUB;
       iter++;
-      if (!G.probe.alive) break;
+      if (!G.probe.alive || (G.mode !== 'play' && G.mode !== 'lab')) break;
     }
     if (iter >= 8) G.acc = 0;
 
-    G.time += dt * scale;
 
     // 尾迹
     const tp = G.probe.pos;
@@ -546,9 +559,6 @@
 
     if (G.lab) {
       makeGhost();
-    } else {
-      updateGates(dt);
-      checkExit();
     }
     updateCameraOnly(dt);
     updateHud(dt);
@@ -571,26 +581,26 @@
       const g = G.gates[i];
       const gc = { x: g.c[0], y: g.c[1], z: g.c[2] };
       const dist = V.dist(pr.pos, gc);
-      G.sources.sample(gc, GE, GB);
-      FD.transformFields(GE, GB, pr.vel, GEp, GBp);
+      V.copy(GE, g.fieldE);
+      V.copy(GB, g.fieldB);
       const vB = V.cross(pr.vel, GB);
       const mE = Math.hypot(GE.x, GE.y, GE.z);
       const mV = Math.hypot(vB.x, vB.y, vB.z);
       const sx = GE.x + vB.x, sy = GE.y + vB.y, sz = GE.z + vB.z;
       const den = mE + mV;
-      g.delta = den < 1e-4 ? 1 : Math.hypot(sx, sy, sz) / den;
+      g.delta = den < 1e-12 ? 0 : Math.hypot(sx, sy, sz) / den;
       g.eZero = mE < 0.015;
       g.eb = Math.abs(GE.x * GB.x + GE.y * GB.y + GE.z * GB.z);
       g.ebUnsolvable = g.eb > 0.006 && !g.eZero;
 
       if (!g.seen && dist < g.triggerR + 1.5) {
         g.seen = true;
-        if (g.ebUnsolvable) toast('门 ' + (i + 1) + '：E·B ≠ 0 —— 永远无法静默', 'warn');
-        else if (g.eZero) toast('门 ' + (i + 1) + '：此处 E ≈ 0 —— δ 恒为 1', 'warn');
+        if (g.ebUnsolvable) toast('门 ' + (i + 1) + '：E·B ≠ 0 —— 无法精确抵消，仍以 δ 阈值判门', 'warn');
+        else if (g.eZero) toast('门 ' + (i + 1) + '：E ≈ 0，可静止或沿 B 运动', 'warn');
         else toast('门 ' + (i + 1) + '：把 δ 压到 ' + g.tol + ' 以下', '');
       }
 
-      if (!g.open && dist < g.triggerR && g.delta < g.tol && !g.ebUnsolvable) {
+      if (!g.open && dist < g.triggerR && g.delta < g.tol) {
         const before = g.charge;
         g.charge = clamp(g.charge + dt / g.hold, 0, 1);
         if (Math.floor(before * 6) !== Math.floor(g.charge * 6)) A.sfx('gateCharge');
@@ -669,8 +679,8 @@
     el.rEB.textContent = FD.fmt(eb, 4);
     el.rInv.textContent = FD.fmt(inv, 4);
     el.rBeta.textContent = f.beta.toFixed(2) + ' / ' + f.gamma.toFixed(2);
-    const k = G.level.k || 0.30;
-    const hall = Math.atan(Math.abs(pr.q) * mB / k) * 180 / Math.PI;
+    const k = G.level.k ?? 0.30;
+    const hall = Math.atan(Math.abs(pr.q) * V.len(FB) / Math.max(1e-12, k)) * 180 / Math.PI;
     el.rHall.textContent = hall.toFixed(1) + '°';
 
     // v*
@@ -688,7 +698,7 @@
     const mv = Math.hypot(vB.x, vB.y, vB.z);
     const dsum = Math.hypot(FE.x + vB.x, FE.y + vB.y, FE.z + vB.z);
     const den0 = Math.hypot(FE.x, FE.y, FE.z) + mv;
-    const delta = den0 < 1e-4 ? 1 : dsum / den0;
+    const delta = den0 < 1e-12 ? 0 : dsum / den0;
     f.delta = delta;
     el.rDelta.textContent = delta.toFixed(3);
     el.rDeltaBar.style.transform = 'scaleX(' + clamp(1 - delta, 0, 1) + ')';
@@ -697,15 +707,15 @@
     let note = '';
     const mEraw = Math.hypot(FE.x, FE.y, FE.z);
     const ebRaw = FE.x * FB.x + FE.y * FB.y + FE.z * FB.z;
-    if (mEraw < 0.015 && mB > 0.01) note = 'E ≈ 0：纯磁场在任何惯性系里都消不掉（δ 恒为 1）';
-    else if (Math.abs(ebRaw) > 0.006) note = 'E·B = ' + FD.fmt(ebRaw, 3) + ' ≠ 0：不变量，无法静默';
-    el.rNote.textContent = note;
+    if (mEraw < 0.015 && mB > 0.01) note = '纯磁场：静止或沿 B 运动时磁力为零；横向运动发生回旋';
+    else if (Math.abs(ebRaw) > 0.006) note = 'E·B = ' + FD.fmt(ebRaw, 3) + ' ≠ 0：平行场分量无法精确抵消';
+    el.rNote.textContent = note + (G.sources.potentialValid ? '' : ' 匀强盒的软边界用于关卡塑形，势切面已停用。');
 
     // 势
     const potOut = potScratch;
     G.sources.potential(pr.pos, potOut);
-    el.rPhi.textContent = FD.fmt(potOut.phi, 3);
-    el.rA.textContent = FD.fmt(Math.hypot(potOut.ax, potOut.ay, potOut.az), 3);
+    el.rPhi.textContent = G.sources.potentialValid ? FD.fmt(potOut.phi, 3) : '局部场边界未定义';
+    el.rA.textContent = G.sources.potentialValid ? FD.fmt(Math.hypot(potOut.ax, potOut.ay, potOut.az), 3) : '局部场边界未定义';
 
     el.rEnergy.textContent = Math.round(pr.energy * 100) + '%';
     el.rEnergyBar.style.width = (pr.energy * 100).toFixed(1) + '%';
@@ -812,6 +822,8 @@
   function loop(now) {
     const raw = Math.min(0.06, (now - lastT) / 1000 || 0.016);
     lastT = now;
+    if (document.hidden) { requestAnimationFrame(loop); return; }
+    if (FD.Intuition.active) { FD.Intuition.update(raw); requestAnimationFrame(loop); return; }
     if (FD.onFrame) FD.onFrame(raw);
     update(raw);
     render();
@@ -828,8 +840,10 @@
   /* ---------------- 输入 ---------------- */
   function setupInput() {
     window.addEventListener('keydown', function (e) {
+      if (FD.Intuition.active || e.target.closest('input,textarea,select,[contenteditable=true]')) return;
       const k = e.key.toLowerCase();
-      if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'tab'].indexOf(k) >= 0) e.preventDefault();
+      if (e.repeat && !['w', 'a', 's', 'd', 'shift'].includes(k)) return;
+      if ((G.mode === 'play' || G.mode === 'lab') && [' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
 
       if (k === 'escape') {
         if (G.mode === 'lab') { exitLab(); return; }
@@ -983,6 +997,7 @@
   }
   function closeManual() {
     if (G.manualReturn === 'pause') { G.mode = 'pause'; showScreen('pause'); }
+    else if (G.manualReturn === 'play') { G.mode = 'play'; showScreen(null); el.hud.classList.remove('hidden'); }
     else if (G.manualReturn === 'lab') { G.mode = 'lab'; showScreen(null); el.hud.classList.remove('hidden'); }
     else { G.mode = 'title'; showScreen('title'); el.hud.classList.add('hidden'); }
   }
@@ -1144,6 +1159,13 @@
     buildAttract();
     setupInput();
     setupUI();
+    FD.Intuition.init();
+    document.addEventListener('visibilitychange', function () {
+      G.keys.w = G.keys.a = G.keys.s = G.keys.d = 0;
+      G.slowKey = false; G.acc = 0; lastT = performance.now();
+      if (document.hidden) { A.suspend(); if (G.mode === 'play') pause(); }
+      else A.resume();
+    });
     if (location.search.indexOf('debug') >= 0) el.fps.classList.remove('hidden');
     el.hud.classList.add('hidden');
     showScreen('title');

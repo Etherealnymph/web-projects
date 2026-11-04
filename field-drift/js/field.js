@@ -89,7 +89,7 @@
       const d = this.raw[i];
       const T = d.type;
       if (T === 'q') {
-        this.charges.push({ p: V.from(d.p), q: d.q, soft: d.soft || 0.5 });
+        this.charges.push({ p: V.from(d.p), q: d.q, soft: d.soft ?? 0.5 });
       } else if (T === 'dipoleE') {
         this.dipolesE.push({ p: V.from(d.p), m: V.from(d.m || [0, 1, 0]), soft: 0.6 });
       } else if (T === 'dipoleB') {
@@ -98,13 +98,13 @@
         const a = V.from(d.a), b = V.from(d.b);
         const len = V.dist(a, b);
         const k = Math.min(16, Math.max(4, Math.round(len / 1.6)));
-        lineCharges(this.charges, a, b, (d.lambda || 1) * len, k);
+        lineCharges(this.charges, a, b, (d.lambda ?? 1) * len, k);
       } else if (T === 'sheetQ') {
         const c = V.from(d.c), n = V.norm(V.from(d.n));
         const u = V.norm(V.from(d.u || [1, 0, 0]));
         const v = V.cross(n, u);
         const N = 5;
-        const qTot = (d.sigma || 1) * (2 * d.hw) * (2 * d.hh);
+        const qTot = (d.sigma ?? 1) * (2 * d.hw) * (2 * d.hh);
         for (let ix = 0; ix < N; ix++) {
           for (let iy = 0; iy < N; iy++) {
             const a = -d.hw + (ix + 0.5) * (2 * d.hw / N);
@@ -121,10 +121,10 @@
           }
         }
       } else if (T === 'cylQ') {
-        // 均匀体电荷柱：外部场等价于轴线上的线电荷 λ = ρπr²
+        // 轴线近似 λ = ρπr²，仅作远离柱半径的外部定性观察；未积分有限柱内场。
         const a = V.from(d.a), b = V.from(d.b);
         const len = V.dist(a, b);
-        const lambda = (d.rho || 1) * Math.PI * d.r * d.r;
+        const lambda = (d.rho ?? 1) * Math.PI * d.r * d.r;
         const k = Math.min(16, Math.max(4, Math.round(len / 1.6)));
         lineCharges(this.charges, a, b, lambda * len, k);
       } else if (T === 'wire') {
@@ -152,10 +152,10 @@
           const mid = { x: c.x + v.x * b, y: c.y + v.y * b, z: c.z + v.z * b };
           const a0 = { x: mid.x - u.x * d.hw, y: mid.y - u.y * d.hw, z: mid.z - u.z * d.hw };
           const a1 = { x: mid.x + u.x * d.hw, y: mid.y + u.y * d.hw, z: mid.z + u.z * d.hw };
-          addWire(this.segs, a0, a1, (d.K || 1) * (2 * d.hh / N));
+          addWire(this.segs, a0, a1, (d.K ?? 1) * (2 * d.hh / N));
         }
       } else if (T === 'cylI') {
-        // 空心圆柱面电流：N 根轴向电流绕圆柱分布，内部 B≈0
+        // 有限根轴向电流近似长空心柱；内场仅在长柱与充分对称极限下近零。
         const a = V.from(d.a), b = V.from(d.b);
         const axis = V.norm(V.sub(b, a));
         const e1 = V.perp(axis), e2 = V.cross(axis, e1);
@@ -168,7 +168,7 @@
           addWire(this.segs,
             { x: a.x + ox * r, y: a.y + oy * r, z: a.z + oz * r },
             { x: b.x + ox * r, y: b.y + oy * r, z: b.z + oz * r },
-            (d.I || 1) / N);
+            (d.I ?? 1) / N);
         }
       } else if (T === 'E') {
         this.eRegions.push({ dir: V.norm(V.from(d.dir)), mag: d.mag, region: d.region || { type: 'all' }, c: (d.region && d.region.c) || [0, 0, 0] });
@@ -176,6 +176,13 @@
         this.bRegions.push({ dir: V.norm(V.from(d.dir)), mag: d.mag, region: d.region || { type: 'all' }, c: (d.region && d.region.c) || [0, 0, 0] });
       }
     }
+    // Geometry is constant across all field, potential and streamline samples.
+    this.segs.forEach(s => {
+      s.Lx = s.b.x - s.a.x; s.Ly = s.b.y - s.a.y; s.Lz = s.b.z - s.a.z;
+      s.L2 = s.Lx * s.Lx + s.Ly * s.Ly + s.Lz * s.Lz;
+      s.L = Math.sqrt(s.L2);
+    });
+    this.potentialValid = !this.raw.some(d => (d.type === 'E' || d.type === 'B') && d.region && d.region.type !== 'all');
   }
 
   /* ---------------- 采样 E / B ---------------- */
@@ -209,14 +216,14 @@
     for (let i = 0; i < sg.length; i++) {
       const s = sg[i];
       const ax = s.a.x, ay = s.a.y, az = s.a.z;
-      const Lx = s.b.x - ax, Ly = s.b.y - ay, Lz = s.b.z - az;
-      const L2 = Lx * Lx + Ly * Ly + Lz * Lz;
+      const Lx = s.Lx, Ly = s.Ly, Lz = s.Lz;
+      const L2 = s.L2;
       if (L2 < 1e-9) continue;
       const rx = p.x - ax, ry = p.y - ay, rz = p.z - az;
       const tt = (rx * Lx + ry * Ly + rz * Lz) / L2;
       const px = rx - tt * Lx, py = ry - tt * Ly, pz = rz - tt * Lz;
       let d2 = px * px + py * py + pz * pz + 0.3;
-      const L = Math.sqrt(L2);
+      const L = s.L;
       const ta = -tt * L, tb = (1 - tt) * L;
       const f = (tb / Math.sqrt(tb * tb + d2) - ta / Math.sqrt(ta * ta + d2)) / d2;
       const invL = 1 / L;
@@ -237,9 +244,11 @@
       const r = Math.sqrt(r2);
       const inv3 = 1 / (r2 * r);
       const mdotr = (d.m.x * dx + d.m.y * dy + d.m.z * dz) / r2;
-      B.x += (3 * mdotr * dx - d.m.x) * inv3;
-      B.y += (3 * mdotr * dy - d.m.y) * inv3;
-      B.z += (3 * mdotr * dz - d.m.z) * inv3;
+      // curl(m × r / (r²+s)^(3/2)), including the soft-core term.
+      const core = 3 * d.soft / r2 - 1;
+      B.x += (3 * mdotr * dx + core * d.m.x) * inv3;
+      B.y += (3 * mdotr * dy + core * d.m.y) * inv3;
+      B.z += (3 * mdotr * dz + core * d.m.z) * inv3;
     }
 
     const er = this.eRegions;
@@ -289,14 +298,14 @@
     for (let i = 0; i < sg.length; i++) {
       const s = sg[i];
       const ax0 = s.a.x, ay0 = s.a.y, az0 = s.a.z;
-      const Lx = s.b.x - ax0, Ly = s.b.y - ay0, Lz = s.b.z - az0;
-      const L2 = Lx * Lx + Ly * Ly + Lz * Lz;
+      const Lx = s.Lx, Ly = s.Ly, Lz = s.Lz;
+      const L2 = s.L2;
       if (L2 < 1e-9) continue;
       const rx = p.x - ax0, ry = p.y - ay0, rz = p.z - az0;
       const tt = (rx * Lx + ry * Ly + rz * Lz) / L2;
       const px = rx - tt * Lx, py = ry - tt * Ly, pz = rz - tt * Lz;
       const d = Math.sqrt(px * px + py * py + pz * pz + 0.3);
-      const L = Math.sqrt(L2);
+      const L = s.L;
       const ta = -tt * L, tb = (1 - tt) * L;
       const f = (Math.asinh(tb / d) - Math.asinh(ta / d)) / L;
       ax += s.I * f * Lx;
@@ -359,7 +368,8 @@
     if (b2 < 1e-8) { out.x = 0; out.y = 0; out.z = 0; return false; }
     const c = V.cross(E, B);
     out.x = c.x / b2; out.y = c.y / b2; out.z = c.z / b2;
-    return true;
+    const perpendicular = Math.abs(V.dot(E, B)) <= 1e-9 * Math.max(1, V.len(E) * V.len(B));
+    return perpendicular && V.len2(out) < 1;
   };
 
   /* ---------------- 稳态速度（霍耳） ---------------- */
@@ -420,7 +430,7 @@
     const push = (kind, line, seedPt) => {
       if (line.p.length < 6) return;
       const arr = kind === 'E' ? out.E : out.B;
-      if (arr.length > 100) return;
+      if (arr.length >= 100) return;
       line.off = Math.random();
       arr.push(line);
       seen.push({ kind: kind, x: seedPt.x, y: seedPt.y, z: seedPt.z });

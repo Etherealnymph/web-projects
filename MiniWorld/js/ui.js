@@ -315,14 +315,15 @@
     renderElevator(elevator) {
       if (!elevator) return;
       this.$('elevator-title').textContent = elevator.spec.name || '电梯';
-      this.$('elevator-info').textContent = `${elevator.floors} 层 · 选择要前往的楼层`;
+      this.$('elevator-info').textContent = `${elevator.floors} 个停靠层 · 选择目的地；轿厢不在本层时先呼叫 · 出口受阻时可换层`;
       const box = this.$('elevator-floors');
       box.innerHTML = '';
       const p = this.g.player;
-      const cur = p ? Math.round((p.pos.y - elevator.spec.y - 1) / 4) : -1;
+      const cur = elevator.floorNear(p);
       for (let i = 0; i < elevator.floors; i++) {
         const b = document.createElement('button');
-        b.textContent = `${i + 1}F`;
+        b.textContent = elevator.floorLabel(i);
+        b.disabled = elevator.moving;
         if (i === cur) b.classList.add('current');
         b.addEventListener('click', () => this.g.rideElevator(i));
         box.appendChild(b);

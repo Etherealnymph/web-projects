@@ -13,6 +13,7 @@
       this.grassTop = 0x77a83e;
       this.doors = [];
       this.elevators = [];
+      this.stairways = [];
       this.labels = [];
       this.loot = [];
       this.bridges = [];
@@ -435,92 +436,30 @@
       this.clear(cx - 2, y, z2 - 1, cx + 2, y + 3, z2);
       this.fill(cx - 3, y + 4, z2 + 1, cx + 3, y + 4, z2 + 2, 0x3e3f43, { jitter: 0.03 });
       this.set(cx, y + 4, z2 + 1, 0x8fd8ff, MW.BLOCK_TYPES.GLOW, 0.02);
-      // 外部楼梯塔（东侧，逐层折返，与建筑之间有桥接）
+      // A new open switchback stair: precision treads live outside voxel floors.
+      // Level zero and every upper landing connect directly through the east wall.
       if (opt.stairs !== false && d >= 6) {
-        const tx1 = x2 + 3, tx2 = x2 + 6;
-        const tz1 = z1 + 1, tz2 = tz1 + 6;
-        const topY = y + floors * 4;
-        this.fill(tx1, y, tz1, tx2, y, tz2, 0x8a857a, { jitter: 0.04 });
+        const sx = x2 + 3, sz = z1 + 4;
+        this.stairways.push({ x: sx, y: y + 1, z: sz, levels: floors, name: (opt.name || '大楼') + '观景楼梯' });
         for (let f = 0; f < floors; f++) {
-          const base = y + f * 4;
-          const even = f % 2 === 0;
-          const lane1 = even ? tx1 : tx2 - 1;
-          const lane2 = even ? tx1 + 1 : tx2;
-          for (let i = 0; i < 4; i++) {
-            const zz = even ? tz1 + 1 + i : tz2 - 1 - i;
-            const yy = base + i;
-            this.fill(lane1, yy, zz, lane2, yy, zz, 0xb9b2a4, { jitter: 0.03 });
-            // 楼梯两侧防坠护栏
-            this.set(lane1 - 1, yy + 1, zz, 0x7c7a70, 0, 0.03);
-            this.set(lane2 + 1, yy + 1, zz, 0x7c7a70, 0, 0.03);
-          }
-          // 楼层平台与通往室内的门洞
-          const ly = base + 4;
-          this.fill(tx1, ly, tz1, tx2, ly, tz2, 0x9a9488, { jitter: 0.03 });
-          // 楼梯上方留出上人口，避免被楼板封死
-          if (even) this.clear(lane1, ly, tz1 + 1, lane2, ly, tz1 + 4);
-          else this.clear(lane1, ly, tz2 - 4, lane2, ly, tz2 - 1);
-          // 楼梯塔与建筑之间的桥接
-          this.fill(x2, ly, tz1 + 2, tx1, ly, tz1 + 4, 0xa9a294, { jitter: 0.03 });
-          this.set(x2 + 1, ly + 1, tz1 + 2, 0x6f6e64, 0, 0.02);
-          this.set(x2 + 1, ly + 1, tz1 + 4, 0x6f6e64, 0, 0.02);
-          this.clear(x2, ly + 1, tz1 + 2, x2, ly + 3, tz1 + 3);
-          this.doors.push({
-            x: x2, z: tz1 + 2.5, y: ly, w: 2.8, h: 3, axis: 'x',
-            name: (opt.name || '大楼') + ` ${f + 1}F 楼梯桥门`
-          });
+          const fy = y + f * 4;
+          this.clear(x2 - 2, fy + 1, sz - 2, x2, fy + 3, sz - 1);
+          this.fill(x2 - 2, fy, sz - 2, x2, fy, sz - 1, floorC, { jitter: 0 });
         }
-        // 楼梯塔护栏与顶部小屋檐
-        for (let yy = y; yy <= topY; yy += 1) {
-          this.set(tx1 - 1, yy, tz1, 0x8d8a82, 0, 0.03);
-          this.set(tx2 + 1, yy, tz2, 0x8d8a82, 0, 0.03);
-          if (yy % 2 === 0) {
-            this.set(tx2 + 1, yy, tz1, 0x8d8a82, 0, 0.03);
-            this.set(tx1 - 1, yy, tz2, 0x8d8a82, 0, 0.03);
-          }
-        }
-        this.fill(tx1 - 1, topY + 1, tz1 - 1, tx2 + 1, topY + 1, tz2 + 1, 0x7b776e, { jitter: 0.03 });
-        this.set(tx1, y + 2, tz2 + 1, 0xffd27a, MW.BLOCK_TYPES.GLOW, 0.02);
-        // 楼梯导视灯带
-        for (let yy = y + 1; yy <= topY; yy += 2) {
-          this.set(tx2 + 1, yy, tz1 + 2, 0x64f0ff, MW.BLOCK_TYPES.GLOW, 0.02);
-        }
-        // 独立电梯井（建筑内部西南角，远离楼梯）
         if (floors >= 2) {
-          const ex = x1 + 3, ez = z2 - 4;
-          // 清空井道内部
-          this.clear(ex - 1, y, ez - 1, ex + 1, topY + 1, ez + 1);
-          // 玻璃/金属井道墙
-          for (let yy = y; yy <= topY + 1; yy++) {
-            for (let x = ex - 2; x <= ex + 2; x++) {
-              this.set(x, yy, ez - 2, 0x6b7c86, MW.BLOCK_TYPES.GLASS, 0.02);
-              this.set(x, yy, ez + 2, 0x6b7c86, MW.BLOCK_TYPES.GLASS, 0.02);
-            }
-            for (let z = ez - 2; z <= ez + 2; z++) {
-              this.set(ex - 2, yy, z, 0x6b7c86, MW.BLOCK_TYPES.GLASS, 0.02);
-              this.set(ex + 2, yy, z, 0x6b7c86, MW.BLOCK_TYPES.GLASS, 0.02);
-            }
-          }
-          // 每层电梯门洞
-          for (let f = 0; f < floors; f++) {
+          // Panoramic lift on the north facade. No shaft consumes a classroom.
+          const ex = x1 + 4, ez = z1 - 4;
+          for (let f = 0; f <= floors; f++) {
             const fy = y + f * 4;
-            this.clear(ex - 1, fy + 1, ez + 2, ex + 1, fy + 3, ez + 2);
-            this.set(ex - 1, fy + 4, ez + 2, 0x64f0ff, MW.BLOCK_TYPES.GLOW, 0.02);
+            this.fill(ex - 2, fy, ez + 2, ex + 2, fy, z1 + 2, floorC, { jitter: 0 });
+            this.clear(ex - 1, fy + 1, z1, ex + 1, fy + 3, z1 + 2);
           }
-          this.elevators.push({
-            x: ex, z: ez, y, floors,
-            name: (opt.name || '大楼') + '电梯',
-            spawnX: ex, spawnZ: ez + 3
-          });
-          if (this.elevators.length === 1) {
-            this.labels.push({ text: '电梯', x: ex, y: y + 6, z: ez + 3, color: 0x64f0ff, width: 5 });
-            this.labels.push({ text: '楼梯 · 桥', x: tx2 + 2, y: y + 6, z: tz2 + 1, color: 0x64f0ff, width: 6 });
-          }
+          this.elevators.push({ version: 2, x: ex, z: ez, y, floors: floors + 1,
+            name: (opt.name || '大楼') + '观景电梯', spawnX: ex, spawnZ: ez + 3.3 });
+          this.labels.push({ text: '观景电梯 · 全楼层', x: ex, y: y + 5, z: ez + 3, color: 0x9ee7d8, width: 6 });
         }
-        this.doors.push({ x: cx, z: z2, y: y, w: 4.8, h: 3, name: (opt.name || '大楼') + '入口' });
-      } else {
-        this.doors.push({ x: cx, z: z2, y: y, w: 4.8, h: 3, name: (opt.name || '大楼') + '入口' });
       }
+      this.doors.push({ x: cx, z: z2, y: y, w: 4.8, h: 3, name: (opt.name || '大楼') + '入口' });
       const topY = y + floors * 4;
       const roofC = opt.roof || 0x9a958c;
       this.fill(x1, topY, z1, x2, topY, z2, roofC, { jitter: 0.04 });
@@ -1462,7 +1401,7 @@
     b.fill(-35, 3, -9, -29, 13, -3, 0xc4bfae, { jitter: 0.01 });
     result.labels.push({ text: '中轴宫阙 · 风格化地标', x: 0, y: 28, z: -52, color: 0xf0cf88, width: 17 });
     result.destinations.push({ name: '环城公路', x: 1100, z: 0 }, { name: '东郊河岸', x: 2800, z: 350 });
-    return result;
+    return MW.WorldPlaces.city(b, meta, result);
   }
 
   function genWashington(b, meta) {
@@ -1487,7 +1426,7 @@
     result.labels.push({ text: '纪念碑 · 风格化地标', x: -43, y: 64, z: -33, color: 0xf1e5bf, width: 16 });
     result.labels.push({ text: '穹顶大厅', x: 70, y: 43, z: -70, color: 0xd5eee6, width: 13 });
     result.destinations.push({ name: '纪念碑草坪', x: -43, z: -10 }, { name: '西南河岸', x: -730, z: 500 });
-    return result;
+    return MW.WorldPlaces.city(b, meta, result);
   }
 
   function genTokyo(b, meta) {
@@ -1519,7 +1458,7 @@
     result.destinations.push({ name: '高塔广场', x: 52, z: -36 }, { name: '海湾码头', x: 1018, z: 0 });
     result.vehicles.push({ type: 'boat', x: 1048, z: 48, name: '海湾巡逻艇' });
     result.advanced.carrier = [1470, 330];
-    return result;
+    return MW.WorldPlaces.city(b, meta, result);
   }
 
   function genEarth(b, meta) {
@@ -1537,17 +1476,21 @@
         if (found) break;
       }
     }
-    const spawn = destinations[0], y = b.w.terrainGroundAt(spawn.x, spawn.z);
-    return {
-      spawn: [spawn.x, y, spawn.z], spawnYaw: -0.6, spawnPitch: -0.08, destinations,
-      killTarget: 18, labels: [], zones: [], pickups: [],
+    const result = { destinations: [], discoveries: [], labels: [], zones: [], pickups: [], expeditions: [], killTarget: 18 };
+    const heights = destinations.map((dest, index) => MW.WorldPlaces.camp(b, result, dest, index));
+    // Region shortcuts stay first; each has a nearby camp and field excursion.
+    result.destinations = destinations.concat(result.destinations);
+    const spawn = destinations[0], y = heights[0];
+    Object.assign(result, {
+      spawn: [spawn.x, y, spawn.z], spawnYaw: -0.6, spawnPitch: -0.08,
       vehicles: [
         { type: 'car', x: spawn.x + 8, z: spawn.z + 8, name: '大陆远征车' },
-        { type: 'jet', x: spawn.x + 24, z: spawn.z + 24, name: '地理探索机' },
+        { type: 'jet', x: spawn.x + 60, z: spawn.z + 50, name: '地理探索机' },
         { type: 'drone', x: spawn.x - 10, z: spawn.z + 8, name: '测绘无人机' }
       ],
       advanced: { base: [spawn.x - 30, spawn.z + 20], rail: [] }
-    };
+    });
+    return result;
   }
 
   const GENERATORS = {
@@ -1579,6 +1522,7 @@
       Object.assign(meta, result);
       meta.doors = b.doors;
       meta.elevators = b.elevators;
+      meta.stairways = b.stairways;
       meta.labels = (meta.labels || []).concat(b.labels || []);
       meta.pickups = (meta.pickups || []).concat(b.loot || []);
       meta.bridges = (meta.bridges || []).concat(b.bridges || []);

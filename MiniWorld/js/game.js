@@ -143,6 +143,7 @@
       const x = Number(destination.x), z = Number(destination.z);
       if (!Number.isFinite(x) || !Number.isFinite(z) || Math.abs(x)>this.travelBounds || Math.abs(z)>(this.travelBoundsZ || this.travelBounds)) return;
       if (this.inVehicle) { this.inVehicle.exit(); if (this.inVehicle) return; }
+      for (const lift of this.elevators || []) lift.release(this.player);
       this.player.pos.set(x, this.groundAt(x,z) + 0.08, z);
       this.player.vel.set(0,0,0); this.player.spawnProtect = 6;
       this.camera.position.copy(this.player.eyePos);
@@ -374,6 +375,7 @@
         for (let i=this.mines.length-1;i>=0;i--) this.mines[i].update(dt);
         for (let i=this.ships.length-1;i>=0;i--) this.ships[i].update(dt);
         this.advanced?.update(dt);
+        this.journal?.update(dt);
         this.updateAirdrops(dt);
         for (const b of this.bridges) b.update(dt);
 
@@ -747,7 +749,7 @@
         try { this.cannons.push(new MW.Entities.Cannon(this, cd)); }
         catch (e) { console.warn('火炮生成失败', e); }
       }
-      for (const ed of meta.elevators || []) {
+      for (const ed of (Array.isArray(meta.elevators) ? meta.elevators : []).slice(0, 64)) {
         try { this.elevators.push(new MW.Entities.Elevator(this, ed)); }
         catch (e) { console.warn('电梯生成失败', e); }
       }
@@ -763,6 +765,7 @@
       }
       this.loadNotes();
       this.advanced = new MW.Advanced(this);
+      this.journal = MW.FieldJournal ? new MW.FieldJournal(this) : null;
       this.spawnAmbientPickups();
       this.airdropT = 22;
       this.airdropSeq = 0;
@@ -809,6 +812,7 @@
       clearTimeout(this._saveTimer);
       MW.SFX.stopLoops();
       this.advanced?.dispose(); this.advanced = null;
+      this.journal = null;
       this.inVehicle = null;
       this.interactTarget = null;
       if (this.player) {
@@ -828,7 +832,8 @@
       for (const n of this.notes) this.scene.remove(n.mesh);
       for (const d of this.doors) this.scene.remove(d.mesh);
       for (const c of this.cannons) this.scene.remove(c.model);
-      for (const e of this.elevators) this.scene.remove(e.mesh);
+      for (const e of this.elevators) e.dispose();
+      this.activeElevator = null;
       for (const a of this.airdrops) this.scene.remove(a.mesh);
       for (const b of this.bridges) this.scene.remove(b.mesh);
       for (const l of this.labels || []) { this.scene.remove(l); l.material.map?.dispose(); l.material.dispose(); }
@@ -1000,6 +1005,7 @@
 
     respawnAtBase() {
       if (!this.player) return;
+      for (const lift of this.elevators || []) lift.release(this.player);
       this.player.pos.copy(this.player.spawnPoint);
       this.player.vel.set(0, 0, 0);
       this.health = 100;
@@ -1072,6 +1078,7 @@
 
     collidesDoor(x, y, z, r, h) {
       if (this.advanced?.collidesBox(x,y,z,r,h)) return true;
+      for (const e of this.elevators || []) if (e.collidesBox(x,y,z,r,h)) return true;
       for (const d of this.doors) {
         if (d.blocksAt(x, y, z, r, h)) return true;
       }
@@ -1445,10 +1452,10 @@
         }
       }
       for (const lift of this.elevators) {
-        const d = lift.pos.distanceTo(this.player.pos);
-        if (d < 3.6 && (!best || d < bd)) {
-          bd = d;
-          best = { type: 'elevator', elevator: lift, label: `乘坐电梯 · ${lift.floors} 层` };
+        const interaction = lift.interaction(this.player);
+        if (interaction && (!best || interaction.distance < bd)) {
+          bd = interaction.distance;
+          best = { type: 'elevator', elevator: lift, label: interaction.label };
         }
       }
       this.interactTarget = best;
@@ -1972,8 +1979,9 @@
     }
 
     openElevator(elevator) {
+      if (!elevator?.interaction(this.player)) return;
+      if (elevator.moving) { this.ui.toast('轿厢正在运行，请在候梯区稍候。', 'info'); return; }
       this.activeElevator = elevator;
-      elevator.openDoors();
       this.openPanel('elevator');
       this.ui.renderElevator(elevator);
     }
@@ -1981,16 +1989,12 @@
     rideElevator(floor) {
       const e = this.activeElevator;
       if (!e || !this.player) return;
-      floor = MW.clamp(floor, 0, e.floors - 1);
+      if (!e.requestRide(floor, this.player)) {
+        this.ui.toast('电梯正在运行，或你已离开候梯区。请在楼层入口稍候。', 'info');
+        return;
+      }
       this.closeAllPanels();
-      e.closeDoors();
-      this.player.elevatorRide = true;
-      this.player.pos.set(e.spec.x, e.mesh.position.y + 1.05, e.spec.z + 0.35);
-      this.player.vel.set(0, 0, 0);
-      this.player.yaw = Math.PI;
-      this.player.pitch = 0;
-      e.travelTo(floor);
-      this.ui.toast(`电梯门关闭 · 前往 ${floor + 1}F`, 'info');
+      this.ui.toast(e.pending ? '已呼叫轿厢，请在此等候。到达后自动前往所选楼层。' : '已选择楼层 · 观景电梯出发', 'info');
       MW.SFX.click();
     }
 
@@ -2033,13 +2037,14 @@
       const p = this.player;
       const data = {
         version: 2,
+        discoveries: Array.from(this.journal?.visited || []),
         worldId: this.currentWorldDef.id,
         name: this.world.meta.name,
         weather: this.weather,
         season: this.season,
         victory: this.victoryShown,
         player: {
-          position: p.pos.toArray(),
+          position: p.elevatorRide ? Object.values(p.elevatorRide.landing(p.elevatorRide.floor)) : p.pos.toArray(),
           yaw: p.yaw,
           health: p.health,
           armor: p.armor,
@@ -2075,6 +2080,7 @@
       }
       const p = this.player;
       const sp = save.player;
+      if (this.journal && Array.isArray(save.discoveries)) this.journal.visited = new Set(save.discoveries.filter(id => this.world.meta.discoveries?.some(place => place.id === id)));
       p.coins = sp.coins != null ? sp.coins : p.coins;
       p.kills = sp.kills || 0;
       p.deaths = sp.deaths || 0;
@@ -2102,7 +2108,7 @@
       if (Array.isArray(sp.position) && sp.position.length===3 && sp.position.every(Number.isFinite)) {
         const [x,y,z]=sp.position;
         if (Math.abs(x)<=this.travelBounds && Math.abs(z)<=(this.travelBoundsZ || this.travelBounds) && y>(this.world.fallbackY ?? -100)-16 && y<20000 && !this.world.collidesBox(x,y,z,p.radius,p.height)) {
-          p.pos.set(x,Math.max(y,this.groundAt(x,z)),z);
+          p.pos.set(x,Math.max(y,this.world.terrain ? this.world.terrainGroundAt(x,z) : this.world.fallbackY),z);
           if(Number.isFinite(sp.yaw)) p.yaw=sp.yaw;
         }
       }
@@ -2139,6 +2145,7 @@
       this.setWeather(this.weather, true);
       this.setSeason(this.season, true);
       this.setSkyPreset(this.world.meta.sky || this.skyPreset, true);
+      this.ui.renderDestinations();
       this.ui.setSaveInfo(`已读取存档 · 击杀 ${p.kills} · 金币 ${p.coins}`);
     }
 

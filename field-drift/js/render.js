@@ -29,7 +29,7 @@
   };
 
   R.resize = function () {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(3000000 / Math.max(1, window.innerWidth * window.innerHeight)));
     R.dpr = dpr;
     R.W = Math.floor(window.innerWidth);
     R.H = Math.floor(window.innerHeight);
@@ -1137,7 +1137,7 @@
      ============================================================ */
   const POT_RES = 44;
   const POT_RANGE = 9.5;
-  let potTimer = 0;
+  let potTimer = 0, potSource = null, potSignature = null;
   const potGrid = new Float32Array(POT_RES * POT_RES);
   const potA = [];
 
@@ -1236,7 +1236,7 @@
   }
 
   function drawPotential(st) {
-    if (!st.potMode) return;
+    if (!st.potMode || !st.sources.potentialValid) return;
     ensurePot();
     const c = R.cam;
     const pr = st.probe.pos;
@@ -1248,7 +1248,11 @@
     const S = Math.min(R.W, R.H) * 0.36;
     const range = zc * S / R.f;
     const now = st.t;
-    if (now - potTimer > 0.09) { potTimer = now; buildPotential(st, range); }
+    const signature = [pr.x, pr.y, pr.z, c.right.x, c.right.y, c.right.z, c.up.x, c.up.y, c.up.z, range, st.potMode];
+    const changed = !potSignature || signature.some((value, i) => Math.abs(value - potSignature[i]) > 0.002);
+    if (potSource !== st.sources || (changed && now - potTimer > 0.12)) {
+      potTimer = now; potSource = st.sources; potSignature = signature; buildPotential(st, range);
+    }
 
     const pc = R.projectWorld({ x: pr.x, y: pr.y, z: pr.z });
     if (!pc) return;

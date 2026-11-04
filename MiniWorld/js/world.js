@@ -390,6 +390,7 @@
     beginGeneration() { this.recordEdits = false; }
     endGeneration() {
       this.recordEdits = true;
+      this.rebuildPrecision();
       this.markAllDirty();
       this.createWater();
       this.createEndlessGround();
@@ -397,6 +398,11 @@
         const spawn = this.meta.spawn || [0, 3, 0];
         this.terrain.prepareAt(spawn[0], spawn[2]);
       }
+    }
+
+    rebuildPrecision() {
+      this.precision?.dispose();
+      this.precision = MW.PrecisionArchitecture ? new MW.PrecisionArchitecture(this, this.meta.stairways) : null;
     }
 
     /* ---------- 水面 ---------- */
@@ -519,6 +525,7 @@
 
     /* ---------- 碰撞 ---------- */
     collidesBox(x, y, z, radius, height, ignoreTerrainFloor) {
+      if (this.precision?.collidesBox(x, y, z, radius, height)) return true;
       if (this.terrain && this.terrain.collidesBox(x, y, z, radius, height, ignoreTerrainFloor)) return true;
       const x0 = Math.floor(x - radius), x1 = Math.floor(x + radius);
       const z0 = Math.floor(z - radius), z1 = Math.floor(z + radius);
@@ -616,6 +623,7 @@
 
     loadSerialized(data) {
       this.revision++;
+      this.rebuildPrecision();
       this.recordEdits = false;
       this.blocks.clear();
       this.chunkBlocks.clear();
@@ -650,6 +658,7 @@
     get blockCount() { return this.blocks.size; }
 
     dispose() {
+      this.precision?.dispose();
       for (const ch of this.chunks.values()) {
         for (const m of ch.meshes) { this.group.remove(m); m.geometry.dispose(); }
       }

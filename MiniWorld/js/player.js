@@ -276,6 +276,7 @@
     }
 
     respawn() {
+      for (const lift of this.game.elevators || []) lift.release(this);
       this.alive = true;
       this.health = this.maxHealth;
       this.armor = 0;
@@ -397,41 +398,39 @@
       const r = this.radius, h = this.height;
       const solid = (x, y, z) => w.collidesBox(x, y, z, r, h, true) || this.game.collidesDoor(x, y, z, r, h);
       const stepH = this.inWater ? 1.35 : 1.05;
-      let nx = this.pos.x + this.vel.x * dt;
-      if (!solid(nx, this.pos.y, this.pos.z)) {
-        this.pos.x = nx;
-      } else if ((this.onGround || this.inWater) && !solid(nx, this.pos.y + stepH, this.pos.z)) {
-        this.pos.x = nx;
-        this.pos.y += stepH;
-      } else {
-        this.vel.x = 0;
-      }
-      let nz = this.pos.z + this.vel.z * dt;
-      if (!solid(this.pos.x, this.pos.y, nz)) {
-        this.pos.z = nz;
-      } else if ((this.onGround || this.inWater) && !solid(this.pos.x, this.pos.y + stepH, nz)) {
-        this.pos.z = nz;
-        this.pos.y += stepH;
-      } else {
-        this.vel.z = 0;
-      }
-
-      let ny = this.pos.y + this.vel.y * dt;
-      if (solid(this.pos.x, ny, this.pos.z)) {
-        if (this.vel.y < 0) {
-          let yy = Math.floor(ny);
-          let guard = 0;
-          while (yy < this.pos.y + 2 && solid(this.pos.x, yy, this.pos.z) && guard++ < 8) yy++;
-          this.pos.y = yy;
-          this.onGround = true;
+      // Resolve the smallest possible riser first; fractional stairs should not
+      // trigger the old one-metre hop. Legacy voxel steps keep their old limit.
+      const moveAxis = axis => {
+        const next = this.pos[axis] + this.vel[axis] * dt;
+        const clear = rise => !solid(axis === 'x' ? next : this.pos.x, this.pos.y + rise, axis === 'z' ? next : this.pos.z);
+        if (clear(0)) { this.pos[axis] = next; return; }
+        if (this.onGround || this.inWater) for (const rise of [.21,.41,.61,.81,stepH]) {
+          if (clear(rise)) { this.pos[axis] = next; this.pos.y += rise; return; }
         }
+        this.vel[axis] = 0;
+      };
+      const wasGrounded = this.onGround;
+      moveAxis('x'); moveAxis('z');
+      const oldY = this.pos.y, ny = oldY + this.vel.y * dt;
+      if (solid(this.pos.x, ny, this.pos.z)) {
+        // Binary search the contact height, including 20 cm treads. Rounding to
+        // whole voxels here used to push feet through ceilings above stairs.
+        let safe = oldY, blocked = ny;
+        for (let i = 0; i < 14; i++) {
+          const mid = (safe + blocked) / 2;
+          if (solid(this.pos.x, mid, this.pos.z)) blocked = mid; else safe = mid;
+        }
+        this.pos.y = safe;
+        this.onGround = this.vel.y <= 0;
         this.vel.y = 0;
       } else {
-        this.pos.y = ny;
-        this.onGround = false;
-        if (this.vel.y <= 0.01 && solid(this.pos.x, this.pos.y - 0.08, this.pos.z)) {
-          this.onGround = true;
-          this.vel.y = 0;
+        this.pos.y = ny; this.onGround = false;
+        if (this.vel.y <= .01 && solid(this.pos.x, this.pos.y - .035, this.pos.z)) {this.onGround = true; this.vel.y = 0;}
+      }
+      if (wasGrounded && this.vel.y <= 0 && w.precision) {
+        const support = w.precision.supportAt(this.pos.x, this.pos.z, this.pos.y + .025, r);
+        if (support > this.pos.y - .26 && support <= this.pos.y + .025 && !solid(this.pos.x, support + .004, this.pos.z)) {
+          this.pos.y = support + .004; this.vel.y = 0; this.onGround = true;
         }
       }
       if (this.inWater) this.onGround = false;

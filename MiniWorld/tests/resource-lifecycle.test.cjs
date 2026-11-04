@@ -18,7 +18,7 @@ const context = vm.createContext({
   }
 });
 context.window = context;
-for (const name of ['models', 'vehicle-models', 'entities', 'combat', 'game']) {
+for (const name of ['circulation', 'models', 'vehicle-models', 'entities', 'combat', 'game']) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../js', name + '.js'), 'utf8'), context, { filename: name + '.js' });
 }
 const MW = context.MW;

@@ -13,10 +13,10 @@
     this.mapPan={x:0,y:0}; this.mapZoom=1; this.mapRaster=null;
     const host=this.$('atlas-destinations'); if(!host)return; host.replaceChildren();
     for(const destination of this.g.world?.meta.destinations || []) {
-      const b=document.createElement('button'); b.className='btn ghost'; b.textContent=destination.name;
+      const b=document.createElement('button'); b.className='btn ghost'; b.textContent=(this.g.journal?.visited.has(this.g.world.meta.discoveries?.find(p=>p.name===destination.name)?.id)?'✓ ':'')+destination.name; b.title=destination.description||'前往此地区';
       b.addEventListener('click',()=>this.g.travelTo(destination)); host.appendChild(b);
     }
-    const note=document.createElement('small'); note.textContent=this.g.world?.meta.terrain ? '米制程序化地形 · 点击地点快速旅行' : '点击“定位我”查看周边'; host.appendChild(note);
+    const note=document.createElement('small'); note.textContent=this.g.world?.meta.terrain ? `探索手册 ${this.g.journal?.visited.size||0}/${this.g.world.meta.discoveries?.length||0} · 步行到访地点可获得探索奖励 · 点击地点快速旅行` : '点击“定位我”查看周边'; host.appendChild(note);
   };
   UI.requestMapDraw=function () {
     if(this.mapFrame)return;

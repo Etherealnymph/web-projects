@@ -71,7 +71,22 @@
             const edge = this.sample(x + sx * (w / 2 + 3), z + sz * (d / 2 + 3));
             return !edge.water && !edge.road;
           });
-          if (clearFootprint) lot = { x, z, w, d, h, y: this.heightAt(x, z), color: MW.pick([0xb0b9b5, 0x9aa8ab, 0xc7bfae, 0x7a8a94, 0xb4bfbe], rand) };
+          if (clearFootprint) {
+            lot = { x, z, w, d, h, y: this.heightAt(x, z), color: MW.pick([0xb0b9b5, 0x9aa8ab, 0xc7bfae, 0x7a8a94, 0xb4bfbe], rand), props: [] };
+            // Street-level edges give a route past each block: paired benches,
+            // planted corners, a shop awning and a lit bus shelter. Their boxes
+            // are shared by rendering and collision and fit within the 96 m cell.
+            const add=(px,pz,pw,ph,pd,color,raise=0)=>lot.props.push({x:px,z:pz,w:pw,h:ph,d:pd,y:this.heightAt(px,pz)+raise,color});
+            const front=z+d/2+7;
+            for(const sign of [-1,1]) {
+              add(x+sign*(w/2+4),front,3.2,.45,1.05,0x9b835f);
+              add(x+sign*(w/2+4),front-.5,3.2,.65,.12,0x8f795a,.45);
+              add(x+sign*(w/2+5),z-d/2-5,3.4,.7,3.4,0x8a9480);
+              add(x+sign*(w/2+5),z-d/2-5,2.8,1.2,2.8,this.config.profile==='tokyo'?0xabbd9b:0x668c58,.7);
+            }
+            add(x,front,8,.18,3.4,0x71929b,3);
+            for(const sign of [-1,1])add(x+sign*3.8,front-1.4,.16,3,.16,0x526e77);
+          }
         }
       }
       this.lots.set(k, lot);
@@ -100,6 +115,7 @@
           if (lot && x + radius > lot.x - lot.w / 2 && x - radius < lot.x + lot.w / 2 &&
             z + radius > lot.z - lot.d / 2 && z - radius < lot.z + lot.d / 2 &&
             y < lot.y + lot.h - 0.01 && y + height > lot.y) return true;
+          for(const prop of lot?.props||[])if(x+radius>prop.x-prop.w/2&&x-radius<prop.x+prop.w/2&&z+radius>prop.z-prop.d/2&&z-radius<prop.z+prop.d/2&&y<prop.y+prop.h-.001&&y+height>prop.y+.001)return true;
         }
       }
       return false;
@@ -241,7 +257,6 @@
     }
 
     _scenery(cx, cz) {
-      if (this.config.profile === 'earth') return null;
       const x0 = cx * this.size, z0 = cz * this.size, positions = [], colors = [];
       const color = new THREE.Color();
       const triangle = (a, b, c, hex) => {
@@ -260,6 +275,7 @@
         for (let lz = Math.floor(z0 / 96); lz <= Math.floor((z0 + this.size) / 96); lz++) {
           const lot = this._lot(lx, lz);
           if (!lot || lot.x < x0 || lot.x >= x0 + this.size || lot.z < z0 || lot.z >= z0 + this.size) continue;
+          for (const p of lot.props || []) box(p.x,p.y,p.z,p.w,p.h,p.d,p.color);
           box(lot.x, lot.y - 1.5, lot.z, lot.w, lot.h + 1.5, lot.d, lot.color);
           box(lot.x, lot.y + lot.h, lot.z, lot.w + 0.7, 0.5, lot.d + 0.7, 0x6c7e84);
           for (let y = lot.y + 3; y < lot.y + lot.h - 1; y += 4) {
@@ -275,9 +291,20 @@
       for (let i = 0; i < 22; i++) {
         const x = x0 + rand() * this.size, z = z0 + rand() * this.size;
         if (Math.hypot(x, z) < 460 || this.structureAt(x, z)) continue;
+        if ((this.world.meta.expeditions || []).some(site => Math.hypot(x-site.x,z-site.z)<125)) continue;
         const s = this.sample(x, z);
         if (s.water || s.road) continue;
         const y = this.heightAt(x, z), h = 6 + rand() * 5, r = 2.4 + rand() * 1.8;
+        if (this.config.profile === 'earth') {
+          const ll=MW.Geography.toLatLon(x,z),polar=Math.abs(ll.lat)>65,desert=ll.lat>15&&ll.lat<34&&ll.lon>-18&&ll.lon<58;
+          if(polar||desert||i%5===0) {
+            const rock=polar?0xbcd2d7:desert?0xc0a375:0x87928b;
+            box(x,y-.2,z,r*2,1.2+r*.5,r*1.8,rock);box(x+r*.4,y+1,z,r,1.5,r,rock);
+            if(desert&&i%3===0){box(x+6,y,z+3,.5,4,.5,0x738958);box(x+5.4,y+2,z+3,1.8,.5,.5,0x738958);}
+            continue;
+          }
+          if(Math.abs(ll.lat)<18) {box(x,y,z,.5,h,.5,0x8d7857);for(const [a,c] of [[1,0],[-1,0],[0,1],[0,-1]])box(x+a*2,y+h,z+c*2,a?5:.6,.2,c?5:.6,0x629163);continue;}
+        }
         box(x, y, z, 0.6, h * 0.6, 0.6, 0x6f6250);
         for (let ring = 0; ring < 2; ring++) for (let side = 0; side < 7; side++) {
           const angle = side / 7 * Math.PI * 2, next = (side + 1) / 7 * Math.PI * 2;
