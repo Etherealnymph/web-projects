@@ -1,0 +1,3 @@
+export const SUPABASE_URL = 'https://udruenzjxexjogwmvscf.supabase.co';
+export const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkcnVlbnpqeGV4am9nd212c2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM4ODM1NjMsImV4cCI6MjEwOTQ1OTU2M30.TuiNg1kspTKdViqz1b4i38pyufCd-eSl4JXpoLafMs4';
+export const SUPABASE_PUBLIC_NOTES_TABLE = 'silicon_notes_public';

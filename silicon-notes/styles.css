@@ -1096,6 +1096,12 @@ main {
   border: 1px solid var(--line);
   background: var(--sheet);
 }
+.auth-card {
+  max-width: 520px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  background: var(--sheet);
+}
 .data-card h2 {
   font: 23px var(--serif);
 }

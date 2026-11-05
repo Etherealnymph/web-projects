@@ -22,6 +22,15 @@ import {
 } from './core.mjs';
 import { openNotebook } from './store.mjs';
 import { mountUptime } from './uptime.mjs';
+import {
+  currentUser,
+  listPublishedNotes,
+  publishNote,
+  restoreSession,
+  signIn,
+  signOut,
+  signUp,
+} from './auth.mjs';
 
 const $ = (selector) => document.querySelector(selector);
 const state = {
@@ -43,6 +52,7 @@ const state = {
   reviewShown: false,
   handoff: null,
   handoffError: '',
+  session: null,
 };
 mountUptime(document);
 const DATE = new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -67,6 +77,24 @@ function notify(message) {
   state.noticeTimer = setTimeout(() => {
     notice.hidden = true;
   }, 4500);
+}
+async function publishCloud() {
+  if (!state.session) {
+    location.hash = '#auth';
+    throw new Error('请先登录，再发布公开笔记');
+  }
+  if (state.editorBusy) return;
+  const note = normalizeNote(captureEditor());
+  state.editorBusy = true;
+  try {
+    const published = await publishNote(note);
+    state.publicNotes = [published, ...state.publicNotes.filter((item) => item.id !== published.id)];
+    state.dirty = false;
+    notify('公开笔记已发布到云端；草稿和私有数据仍只保存在本机。');
+    location.hash = `#note=${encodeURIComponent(published.id)}`;
+  } finally {
+    state.editorBusy = false;
+  }
 }
 function error(message) {
   const panel = $('#persistent-error');
@@ -211,7 +239,7 @@ function renderStudio() {
   const note = state.editing;
   const courses = [...new Set([...COURSES, note.course])];
   $('#main').innerHTML =
-    `<span class="eyebrow">THE WRITING DESK / PRIVATE BY DEFAULT</span><h1 class="page-title">写一页，留住一次推理。</h1><p class="page-lead">草稿自动保存在本机。“入本机书架”整理成正式记录，不会公开到互联网。公开阅读的内容请在备份与发布页单独选择。</p><div class="draft-strip"><label for="template-select">起笔模板</label><select id="template-select">${options(TYPES, note.type)}</select><button class="button small secondary" data-action="new-template">新建一页</button></div>${state.drafts.length ? `<div class="draft-strip"><label for="draft-select">草稿夹</label><select id="draft-select"><option value="">选择已有草稿…</option>${state.drafts.map((draft) => `<option value="${html(draft.id)}">${html(draft.title)} · ${date(draft.updatedAt)}</option>`).join('')}</select><button class="text-button" data-action="load-draft">打开</button>${state.drafts.some((draft) => draft.id === note.id) ? '<button class="text-button" data-action="delete-draft">删除当前草稿</button>' : ''}</div>` : ''}<form id="editor-form" class="editor-shell"><fieldset id="editor-fields"><input class="title-input" name="title" aria-label="笔记标题" placeholder="给这个问题一个名字" maxlength="160" value="${html(note.title)}"><div class="form-grid"><label class="form-field">记录类型<select name="type">${options(TYPES, note.type)}</select></label><label class="form-field">课程 / 领域<select name="course">${options(Object.fromEntries(courses.map((course) => [course, course])), note.course)}</select></label><label class="form-field">当前证据<select name="evidence">${options(EVIDENCE, note.evidence)}</select></label>${field('标签，以逗号分隔', 'tags', note.tags.join(', '), 'input', 'full')}${field('一段摘要', 'summary', note.summary, 'textarea', 'full')}</div><div class="editor-grid"><div><p class="editor-heading">MARKDOWN / $公式$ / [[双向链接]]</p><textarea id="editor-body" class="body-editor" name="body" aria-label="Markdown 正文" spellcheck="false">${html(note.body)}</textarea></div><div><p class="editor-heading">LIVE PREVIEW / 实时预览</p><div id="editor-preview" class="prose preview">${markdown(note.body)}</div></div></div><details class="details-panel" open><summary>问题、主张与适用边界</summary><div class="form-grid two">${field('研究 / 学习问题', 'question', note.question, 'textarea')}${field('当前主张；没有结果时可以留空', 'claim', note.claim, 'textarea')}${field('不确定性与外推边界', 'limitation', note.limitation, 'textarea')}${field('下一步可执行检查', 'nextStep', note.nextStep, 'textarea')}</div></details><details class="details-panel" open><summary>来源与结果：每一条结论都有落脚点</summary><div id="source-rows">${sourceRows(note)}</div><button type="button" class="text-button" data-action="add-source">＋ 添加来源</button><div id="result-rows">${resultRows(note)}</div><button type="button" class="text-button" data-action="add-result">＋ 添加结果 / 观察</button></details><details class="details-panel"><summary>温故卡片与图片附件</summary><div class="form-grid two">${field('闭卷回忆问题', 'recall-question', note.recall.question, 'textarea')}${field('核对答案', 'recall-answer', note.recall.answer, 'textarea')}</div><p class="inline-message">填写问题和答案后，入本机书架的记录会进入温故队列。每条记录 1 张卡片。</p><label class="form-field">图像附件（最多 3 张；每张原文件不超过 540 KB）<input type="file" id="attachment-file" accept="image/png,image/jpeg,image/webp"></label><div class="image-grid">${note.attachments.map((file, index) => `<figure><img src="${html(file.data)}" alt="${html(file.name)}"><figcaption>${html(file.name)} <button type="button" class="text-button" data-action="remove-attachment" data-index="${index}">移除</button></figcaption></figure>`).join('')}</div></details>${note.example ? '<div class="example-note">这份草稿来自示例。示例标记随副本保留，避免被误认为真实经历；可以新建空白记录填写自己的实际工作。</div>' : ''}</fieldset><div class="save-line"><span id="save-status" role="status">${state.dirty ? '尚有未保存修改' : '输入后自动保存草稿 · 仅在本机'}</span><div class="toolbar"><button type="button" class="button small secondary" data-action="save-draft">保存草稿</button><button type="button" class="button small secondary" data-action="export-working">导出 Markdown</button><button type="button" class="button small" data-action="publish-local">入本机书架 →</button></div></div></form>`;
+    `<span class="eyebrow">THE WRITING DESK / PRIVATE BY DEFAULT</span><h1 class="page-title">写一页，留住一次推理。</h1><p class="page-lead">草稿自动保存在本机。“入本机书架”只写入本机；登录后可将当前笔记单独发布到公开云端。</p><div class="draft-strip"><label for="template-select">起笔模板</label><select id="template-select">${options(TYPES, note.type)}</select><button class="button small secondary" data-action="new-template">新建一页</button></div>${state.drafts.length ? `<div class="draft-strip"><label for="draft-select">草稿夹</label><select id="draft-select"><option value="">选择已有草稿…</option>${state.drafts.map((draft) => `<option value="${html(draft.id)}">${html(draft.title)} · ${date(draft.updatedAt)}</option>`).join('')}</select><button class="text-button" data-action="load-draft">打开</button>${state.drafts.some((draft) => draft.id === note.id) ? '<button class="text-button" data-action="delete-draft">删除当前草稿</button>' : ''}</div>` : ''}<form id="editor-form" class="editor-shell"><fieldset id="editor-fields"><input class="title-input" name="title" aria-label="笔记标题" placeholder="给这个问题一个名字" maxlength="160" value="${html(note.title)}"><div class="form-grid"><label class="form-field">记录类型<select name="type">${options(TYPES, note.type)}</select></label><label class="form-field">课程 / 领域<select name="course">${options(Object.fromEntries(courses.map((course) => [course, course])), note.course)}</select></label><label class="form-field">当前证据<select name="evidence">${options(EVIDENCE, note.evidence)}</select></label>${field('标签，以逗号分隔', 'tags', note.tags.join(', '), 'input', 'full')}${field('一段摘要', 'summary', note.summary, 'textarea', 'full')}</div><div class="editor-grid"><div><p class="editor-heading">MARKDOWN / $公式$ / [[双向链接]]</p><textarea id="editor-body" class="body-editor" name="body" aria-label="Markdown 正文" spellcheck="false">${html(note.body)}</textarea></div><div><p class="editor-heading">LIVE PREVIEW / 实时预览</p><div id="editor-preview" class="prose preview">${markdown(note.body)}</div></div></div><details class="details-panel" open><summary>问题、主张与适用边界</summary><div class="form-grid two">${field('研究 / 学习问题', 'question', note.question, 'textarea')}${field('当前主张；没有结果时可以留空', 'claim', note.claim, 'textarea')}${field('不确定性与外推边界', 'limitation', note.limitation, 'textarea')}${field('下一步可执行检查', 'nextStep', note.nextStep, 'textarea')}</div></details><details class="details-panel" open><summary>来源与结果：每一条结论都有落脚点</summary><div id="source-rows">${sourceRows(note)}</div><button type="button" class="text-button" data-action="add-source">＋ 添加来源</button><div id="result-rows">${resultRows(note)}</div><button type="button" class="text-button" data-action="add-result">＋ 添加结果 / 观察</button></details><details class="details-panel"><summary>温故卡片与图片附件</summary><div class="form-grid two">${field('闭卷回忆问题', 'recall-question', note.recall.question, 'textarea')}${field('核对答案', 'recall-answer', note.recall.answer, 'textarea')}</div><p class="inline-message">填写问题和答案后，入本机书架的记录会进入温故队列。每条记录 1 张卡片。</p><label class="form-field">图像附件（最多 3 张；每张原文件不超过 540 KB）<input type="file" id="attachment-file" accept="image/png,image/jpeg,image/webp"></label><div class="image-grid">${note.attachments.map((file, index) => `<figure><img src="${html(file.data)}" alt="${html(file.name)}"><figcaption>${html(file.name)} <button type="button" class="text-button" data-action="remove-attachment" data-index="${index}">移除</button></figcaption></figure>`).join('')}</div></details>${note.example ? '<div class="example-note">这份草稿来自示例。示例标记随副本保留，避免被误认为真实经历；可以新建空白记录填写自己的实际工作。</div>' : ''}</fieldset><div class="save-line"><span id="save-status" role="status">${state.dirty ? '尚有未保存修改' : '输入后自动保存草稿 · 仅在本机'}</span><div class="toolbar"><button type="button" class="button small secondary" data-action="save-draft">保存草稿</button><button type="button" class="button small secondary" data-action="export-working">导出 Markdown</button><button type="button" class="button small" data-action="publish-local">入本机书架 →</button><button type="button" class="button small secondary" data-action="publish-cloud">发布到公开云端 →</button></div></div></form>`;
 }
 function editorValue(name) {
   return $(`#editor-form [name="${name}"]`)?.value || '';
@@ -338,6 +366,12 @@ function renderReflections() {
   const reflections = [...state.reflections].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   $('#main').innerHTML =
     `<span class="eyebrow">MARGINALIA / A PRIVATE CORNER</span><h1 class="page-title">留白，也是一种记录。</h1><p class="page-lead">今天哪里想通了，哪里还不确定？留一句给下一次打开书本的自己。这里是本机私密随记，不是公开留言板，其他访客看不到，也不会收到消息。</p><form id="reflection-form" class="reflection-form"><label class="form-field">写给下次的自己<textarea id="reflection-body" maxlength="3000" placeholder="比如：下次比较之前，先确认两次仿真使用了同一份模型。"></textarea></label><div class="toolbar"><button class="button" type="submit">存入本机留白 →</button><span class="inline-message">不上传 · 可随备份迁移</span></div></form><div class="reflection-list">${reflections.length ? reflections.map((reflection) => `<article class="reflection"><p>${html(reflection.body)}</p><small>${date(reflection.createdAt)} · 仅本机</small><button class="text-button" data-action="delete-reflection" data-id="${html(reflection.id)}">删除</button></article>`).join('') : '<div class="empty">这一角留给尚未成篇的思考。</div>'}</div>`;
+}
+function renderAuth() {
+  const user = currentUser();
+  $('#main').innerHTML = user
+    ? `<span class="eyebrow">ACCOUNT / PUBLIC NOTEBOOK</span><h1 class="page-title">你的公开身份。</h1><p class="page-lead">当前登录账号：${html(user.email || '已登录用户')}。公开发布只会上传你明确点击发布的那一篇；草稿、私有笔记、复习卡和留白仍在本机。</p><div class="data-card auth-card"><h2>已登录</h2><p class="inline-message">可以回到书写台发布公开笔记。</p><button class="button secondary" data-action="sign-out">退出登录</button></div>`
+    : `<span class="eyebrow">ACCOUNT / PUBLIC NOTEBOOK</span><h1 class="page-title">登录，发布一页公开笔记。</h1><p class="page-lead">阅读公开内容不需要账号。注册或登录后，只有你明确点击“发布到公开云端”的笔记才会上传；草稿和私有数据不会自动同步。</p><form id="auth-form" class="auth-card"><label class="form-field">邮箱<input name="email" type="email" autocomplete="email" required maxlength="254"></label><label class="form-field">密码<input name="password" type="password" autocomplete="current-password" required minlength="6" maxlength="128"></label><div class="toolbar"><button class="button" type="submit" data-auth-mode="signin">登录</button><button class="button secondary" type="submit" data-auth-mode="signup">注册</button></div><p id="auth-status" class="inline-message" role="status">注册后若收到确认邮件，请先完成邮箱确认再登录。</p></form>`;
 }
 function renderData() {
   $('#main').innerHTML =
@@ -518,7 +552,7 @@ function route() {
     notify('尚未找到对应笔记；已按链接文本搜索。');
     return;
   }
-  if (!['library', 'note', 'studio', 'ideas', 'review', 'reflections', 'data'].includes(view))
+  if (!['library', 'note', 'studio', 'ideas', 'review', 'reflections', 'data', 'auth'].includes(view))
     view = 'library';
   state.view = view;
   document
@@ -526,7 +560,8 @@ function route() {
     .forEach((link) =>
       link.classList.toggle('active', link.dataset.view === (view === 'note' ? 'library' : view)),
     );
-  if (view === 'note') {
+  if (view === 'auth') renderAuth();
+  else if (view === 'note') {
     let id;
     try {
       id = decodeURIComponent(fragment.slice(5));
@@ -571,6 +606,14 @@ const actions = {
   },
   'save-draft': () => saveDraft(),
   'publish-local': publishLocal,
+  'publish-cloud': publishCloud,
+  'sign-out': async () => {
+    await signOut();
+    state.session = null;
+    updateAuthLink();
+    renderAuth();
+    notify('已退出登录。');
+  },
   'export-working': () => {
     const note = captureEditor();
     download(
@@ -732,6 +775,21 @@ $('#main').addEventListener('submit', (event) => {
       renderReflections();
       notify('已存入本机留白，其他访客看不到。');
     });
+  if (event.target.id === 'auth-form')
+    attempt(async () => {
+      const email = event.target.elements.email.value.trim();
+      const password = event.target.elements.password.value;
+      const mode = event.submitter?.dataset.authMode || 'signin';
+      const data = mode === 'signup' ? await signUp(email, password) : await signIn(email, password);
+      state.session = data.access_token ? data : null;
+      updateAuthLink();
+      if (state.session) {
+        notify('登录成功，可以发布公开笔记。');
+        location.hash = '#studio';
+      } else {
+        $('#auth-status').textContent = '注册成功。请检查邮箱完成确认后，再返回这里登录。';
+      }
+    });
 });
 $('.sidebar').addEventListener('click', (event) => {
   const course = event.target.closest('[data-course]');
@@ -787,6 +845,12 @@ window.addEventListener('storage', (event) => {
       if (state.view === 'library') renderLibrary();
     });
 });
+function updateAuthLink() {
+  const link = $('#auth-link');
+  if (!link) return;
+  link.textContent = state.session?.user?.email ? '账号' : '登录';
+  link.title = state.session?.user?.email || '登录或注册';
+}
 document.addEventListener('keydown', (event) => {
   if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
     event.preventDefault();
@@ -807,15 +871,20 @@ async function initialize() {
   } catch {
     /* Reading public notes does not require localStorage. */
   }
+  const loadPublic = async () => {
+    const response = await fetch('data/library.json', { cache: 'no-cache' });
+    if (!response.ok) throw new Error(`公开目录请求失败 (${response.status})`);
+    const raw = await response.text();
+    state.publicNotes = parseBundle(raw).notes;
+    try {
+      const notes = await listPublishedNotes();
+      state.publicNotes = [...state.publicNotes, ...notes.map((note) => normalizeNote(note))];
+    } catch (reason) {
+      throw new Error(`公开云端目录暂时不可用：${reason.message}`);
+    }
+  };
   const results = await Promise.allSettled([
-    fetch('data/library.json', { cache: 'no-cache' })
-      .then((response) => {
-        if (!response.ok) throw new Error(`公开目录请求失败 (${response.status})`);
-        return response.text();
-      })
-      .then((raw) => {
-        state.publicNotes = parseBundle(raw).notes;
-      }),
+    loadPublic(),
     openNotebook().then(async (store) => {
       state.store = store;
       await reloadLocal();
@@ -824,6 +893,8 @@ async function initialize() {
   ]);
   for (const result of results) if (result.status === 'rejected') error(result.reason.message);
   if (!state.store) $('#storage-status').textContent = '本机保存不可用 · 请导出编辑内容';
+  state.session = await restoreSession();
+  updateAuthLink();
   await inspectHandoff();
   route();
 }

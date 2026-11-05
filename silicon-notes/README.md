@@ -1,6 +1,6 @@
 # 硅间札记 / SILICON NOTES
 
-一个无需构建、无需账户和后端的芯片设计学习与研究笔记站。使用原生 HTML/CSS/ES Modules、IndexedDB。页面的纸张、墨绿与铜色视觉为独立设计；不加载外部字体、统计服务或远程脚本。
+一个无需构建的芯片设计学习与研究笔记站。使用原生 HTML/CSS/ES Modules、IndexedDB 与 Supabase Auth。页面的纸张、墨绿与铜色视觉为独立设计；不加载外部字体、统计服务或远程脚本。
 
 ## 启动与入口
 
@@ -33,17 +33,28 @@ python3 -m http.server 8123
 | 内容 | 存储位置 | 谁能看到 |
 | --- | --- | --- |
 | 随站点发布的文章 | `data/library.json` | 所有访问网站的人 |
+| 登录后明确发布的文章 | Supabase `silicon_notes_public` | 所有访问网站的人 |
 | 编辑中的草稿 | 当前浏览器 IndexedDB `drafts` | 此浏览器的使用者 |
 | “入本机书架”后的文章 | IndexedDB `notes` | 此浏览器的使用者，仍未公开 |
 | 温故计划与留白 | IndexedDB `cards` / `reflections` | 此浏览器的使用者 |
+| 登录会话 | localStorage `silicon-notes.auth.v1` | 当前浏览器 |
 | 主题偏好 | localStorage `silicon-notes.theme` | 当前浏览器 |
 | 跨工具内容 | 共用 localStorage handoff key；确认后存入草稿 | 同一网站来源下的浏览器应用可以访问 |
 
-“本机私有”表示不上传，不表示加密。共享同一个浏览器配置、同源网页脚本或能访问设备的人可能读取本机记录。应用不保存 API 密钥或账户凭据。
+“本机私有”表示不上传，不表示加密。共享同一个浏览器配置、同源网页脚本或能访问设备的人可能读取本机记录。前端只使用 Supabase publishable key；数据库密码、secret/service role key 不得写入仓库。
 
 IndexedDB 不可用、配额满或事务失败时，页面会显示持续错误提示，不会声称已保存，也不会偷偷用短暂内存替代持久存储。当前编辑内容仍可导出 Markdown。浏览器清理、私密模式结束、更换设备或域名可能丢失内容，请定期导出私有 JSON。请求持久存储由浏览器决定，不是备份替代品。
 
-## 怎样发布给其他访客
+## 注册、登录与公开发布
+
+1. 点击顶栏“登录”，使用邮箱和至少 6 位密码注册或登录；若项目要求邮箱确认，先点击确认邮件中的链接。
+2. 登录后在书写台点击“发布到公开云端”。只有当前这一篇经过 `normalizeNote()` 校验的笔记会上传。
+3. 未登录访客仍可阅读静态示例与云端公开目录；未登录不能发布。
+4. 草稿、私有书架、复习卡、留白和图片备份不会自动同步。Supabase 表通过 RLS 限制只有作者能新增、修改或删除自己的公开记录。
+
+Supabase 项目配置位于 `js/config.mjs`，其中只放浏览器可用的 publishable/anon 公钥；SQL 初始化文件位于 `supabase/schema.sql`。GitHub Pages 的站点 URL 和 Supabase Auth 的重定向设置需要保持一致。
+
+## 静态目录发布
 
 1. 打开“备份与发布”→“选择并预览公开目录”。
 2. 默认勾选当前公开文章。明确勾选准备发布的本机书架文章；草稿不能在此被选择。
