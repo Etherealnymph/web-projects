@@ -8,6 +8,7 @@ import { icon, toast, toastOk, toastErr, avatarHtml, emptyState, loadingState, l
 import { esc } from './core/util.js';
 import { parseRoute } from './core/route.js';
 import { getApi, errText } from './data/index.js';
+import { mountUptime } from './core/uptime.js';
 
 let api = null;
 let leaveHooks = [];
@@ -18,6 +19,7 @@ let booted = false;
 let appearanceReady = false;
 let booting = false;
 let shellObserver = null;
+let uptimeCleanup = () => {};
 const pendingReactions = new Set();
 
 // A visit to the login/home page does not download the editor, inbox or admin UI.
@@ -70,6 +72,7 @@ function moduleNavHtml(modules, activeId) {
 
 function renderShell() {
   shellObserver?.disconnect();
+  uptimeCleanup();
   const app = document.getElementById('app');
   const user = state.user;
   const modules = state.modules.filter((m) => m.access.visible);
@@ -100,6 +103,7 @@ function renderShell() {
           <a class="navtab ${segments[0] === 'msg' ? 'is-active' : ''}" href="#/msg" style="display:inline-flex;align-items:center;gap:5px">${esc(t('nav.messages'))}<span class="badge badge--accent hidden" data-badge="nav-msg"></span></a>
         </nav>`}
         <div class="topbar__actions">
+          <a class="icon-btn sister-site-link" href="../silicon-notes/" title="${esc(tl('打开硅间札记', 'Open Silicon Notes'))}" aria-label="${esc(tl('打开硅间札记', 'Open Silicon Notes'))}">硅</a>
           ${bare ? `${themeBtn}${settingsBtn}` : `
           <form class="global-search" role="search" data-role="search-form">
             <label class="sr-only" for="global-search">${esc(t('nav.search'))}</label>
@@ -120,8 +124,11 @@ function renderShell() {
     <footer style="border-top:1px solid var(--line);padding:18px;text-align:center" class="tiny muted">
       ${esc(t('app.footer'))} · v${esc(APP_VERSION)} ·
       <span title="${esc(api?.mode === 'supabase' ? t('app.cloudMode') : t('app.localMode'))}">${api?.mode === 'supabase' ? '☁︎' : '⌂'} ${esc(api?.mode === 'supabase' ? 'PostgreSQL' : t('app.localMode'))}</span>
+      · 已运行 <time data-site-uptime aria-live="off"></time>
+      · <a href="../silicon-notes/">硅间札记 ↗</a>
     </footer>
   `;
+  uptimeCleanup = mountUptime(app);
 
   /* 顶栏交互 */
   app.querySelector('[data-role="skip"]').addEventListener('click', (event) => {

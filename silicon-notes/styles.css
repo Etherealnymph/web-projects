@@ -214,6 +214,19 @@ a:hover {
   white-space: nowrap;
   color: var(--muted);
 }
+.sister-site-link {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--jade);
+  font-family: var(--serif);
+  font-weight: 700;
+  text-decoration: none;
+}
+.sister-site-link:hover { background: var(--jade-pale); text-decoration: none; }
 .workspace {
   display: grid;
   grid-template-columns: 245px minmax(0, 1fr);

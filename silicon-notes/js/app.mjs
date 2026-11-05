@@ -21,6 +21,7 @@ import {
   handoffDigest,
 } from './core.mjs';
 import { openNotebook } from './store.mjs';
+import { mountUptime } from './uptime.mjs';
 
 const $ = (selector) => document.querySelector(selector);
 const state = {
@@ -43,6 +44,7 @@ const state = {
   handoff: null,
   handoffError: '',
 };
+mountUptime(document);
 const DATE = new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
 const date = (value) => DATE.format(new Date(value));
 const evidence = (value) =>
