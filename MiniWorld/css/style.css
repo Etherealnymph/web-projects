@@ -969,3 +969,13 @@ body.underwater #vignette {
   .modal-card { max-height: 92vh; }
   .inv-grid { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* Human-scale construction palette. Controls remain available without pointer lock. */
+.fine-build-controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 9px; }
+.fine-build-controls label { display: flex; align-items: center; gap: 5px; font-size: 9px; color: var(--muted); }
+.fine-build-controls select, .fine-build-controls button { color: #c7e4d1; background: #182d30; border: 1px solid #43605b; border-radius: 4px; padding: 5px 6px; font-size: 10px; }
+.fine-build-controls select { max-width: 175px; }
+.fine-build-controls button { cursor: pointer; }
+.fine-build-controls :focus-visible { outline: 2px solid #f2c782; outline-offset: 2px; }
+.fine-build-status { font-size: 8px; color: #94b5a7; margin-top: 6px; letter-spacing: .2px; }
+@media (max-width: 600px) { .fine-build-controls { gap: 5px; } .fine-build-controls select { max-width: 146px; font-size: 9px; } .fine-build-controls label { font-size: 8px; } }

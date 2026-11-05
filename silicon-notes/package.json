@@ -1,0 +1,13 @@
+{
+  "name": "silicon-notes",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "6.2.4",
+    "katex": "0.19.1"
+  }
+}

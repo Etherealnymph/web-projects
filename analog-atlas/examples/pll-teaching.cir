@@ -1,0 +1,15 @@
+* Analog Atlas - pll - GENERIC TEACHING MODEL
+* No foundry devices. Not TSMC / PDK validation.
+* Analytic and behavioral assumptions are documented in Analog Atlas.
+.options reltol=1e-8 abstol=1e-14 vntol=1e-10
+* Locked-state linear phase model. Voltages ref/y represent phase in rad.
+Vref ref 0 PWL(0 0 5.000000000e-9 1) AC 1
+Bcp 0 control I={1.591549431e-5*(V(ref)-V(y))}
+C1 control 0 3.993305811e-11 IC=0
+Rfilter control c2 6.976769133e+3
+C2 c2 0 3.617541161e-10 IC=0
+Bphase 0 y I={1.256637061e+7*V(control)}
+Cphase y 0 1 IC=0
+.tran 5.000000000e-9 4.000000000e-5 UIC
+.save v(ref) v(y) v(control)
+.end

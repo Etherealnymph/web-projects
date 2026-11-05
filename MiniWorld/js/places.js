@@ -12,6 +12,7 @@
     result.labels.push({ text: name, x, y: y + 7, z, color: 0xc0e5ce, width: 11 });
   }
   function bench(builder, x, z, y, c = 0x9b7754) {
+    if (builder.fineProp?.('bench', x, y, z, c)) return;
     builder.fill(x - 2, y, z, x + 2, y, z, c, { jitter: 0 });
     builder.fill(x - 2, y + 1, z - 1, x + 2, y + 1, z - 1, c, { jitter: 0 });
   }
@@ -20,7 +21,7 @@
     for (let dz = -length + 8; dz <= length - 8; dz += 16)
       for (const side of [-1, 1]) {
         builder.lamp(x + side * 7, z + dz, y, accent, 4);
-        if (dz % 32 === 0) bench(builder, x + side * 13, z + dz, y);
+        if (Math.round((dz + length - 8) / 16) % 2 === 0) bench(builder, x + side * 13, z + dz, y);
       }
   }
   function market(builder, result, kind, x, z, y) {

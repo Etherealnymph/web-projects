@@ -1,0 +1,231 @@
+:root {
+  --blue: #75d6c7;
+  --green: #75d6c7;
+  --muted: #9aaeb7;
+  --line: #2b3c45;
+  --bg: #0b161e;
+}
+.hero h1 {
+  font-size: clamp(32px, 5vw, 54px);
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.hero p {
+  max-width: 740px;
+}
+.eyebrow {
+  letter-spacing: 3px;
+  color: #cea879;
+}
+.shell {
+  max-width: 1280px;
+}
+.card {
+  background: linear-gradient(150deg, #142630dd, #10212cdd);
+  position: relative;
+  content-visibility: auto;
+  contain-intrinsic-size: 240px;
+}
+.card:hover {
+  border-color: #6c9f98;
+}
+.icon {
+  background: #223e41;
+  color: #8ddfcf;
+}
+.tag {
+  background: #213841;
+  color: #a2bfc6;
+}
+.toolbar {
+  background: #0a161df5;
+}
+.pin-button {
+  border: 0;
+  border-radius: 50%;
+  background: #1c353b;
+  color: #9ab5bd;
+  width: 30px;
+  height: 30px;
+  margin-left: auto;
+  cursor: pointer;
+}
+.pin-button[aria-pressed='true'] {
+  color: #f0c483;
+  background: #4a3e2f;
+}
+.favorites-toggle {
+  color: #9bb3be;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.favorites-toggle input {
+  accent-color: #75d6c7;
+}
+#personal-desk {
+  border: 1px solid #2b4149;
+  padding: 24px;
+  border-radius: 18px;
+  margin: 25px 0 24px;
+  background: linear-gradient(110deg, #15302e88, #10233399);
+}
+.desk-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+.desk-heading h2 {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+}
+.desk-heading button {
+  border: 1px solid #3d565b;
+  padding: 7px 12px;
+  background: #183038;
+  color: #c4ddd9;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 6px;
+}
+#learning-paths {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+}
+.learning-path {
+  padding: 17px;
+  border: 1px solid #2a4549;
+  border-radius: 10px;
+  background: #12242c;
+}
+.learning-path h3 {
+  color: #dfc8a9;
+  font-size: 15px;
+  margin: 0 0 6px;
+}
+.learning-path p {
+  color: #9db4bd;
+  font-size: 12px;
+  margin: 0 0 12px;
+}
+.path-step {
+  display: block;
+  padding: 6px 0;
+  border-top: 1px solid #263c43;
+  color: #b7d2d1;
+  text-decoration: none;
+  font-size: 12px;
+}
+.path-step span {
+  float: right;
+  color: #7bb7a5;
+}
+.shelf {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 20px;
+}
+.shelf h3 {
+  font-size: 12px;
+  color: #b49d7b;
+  font-weight: 500;
+  margin: 0 0 10px;
+}
+.shelf a {
+  display: inline-block;
+  font-size: 11px;
+  padding: 5px 9px;
+  margin: 0 5px 6px 0;
+  border: 1px solid #28464b;
+  border-radius: 20px;
+  color: #b1cec9;
+  text-decoration: none;
+}
+.shelf p {
+  color: #819ba8;
+  font-size: 11px;
+}
+.portal-palette {
+  width: min(620px, 92vw);
+  max-height: 80vh;
+  background: #122630;
+  color: #e4f0ee;
+  border: 1px solid #426965;
+  border-radius: 14px;
+  padding: 20px;
+}
+.portal-palette::backdrop {
+  background: #0009;
+  backdrop-filter: blur(4px);
+}
+.portal-palette input {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  background: #0c1c24;
+  border: 1px solid #385354;
+  padding: 12px;
+  border-radius: 7px;
+}
+.palette-results {
+  max-height: 55vh;
+  overflow: auto;
+}
+.palette-results a {
+  display: block;
+  color: #c3dbd7;
+  padding: 12px;
+  text-decoration: none;
+  border-bottom: 1px solid #263f44;
+}
+.palette-results small {
+  display: block;
+  color: #84a3ad;
+  font-size: 11px;
+}
+.palette-close {
+  float: right;
+  margin-bottom: 10px;
+  background: transparent;
+  border: 0;
+  color: #9bb7b9;
+  cursor: pointer;
+}
+.footer {
+  color: #91acb5;
+}
+@media (max-width: 800px) {
+  #learning-paths {
+    grid-template-columns: 1fr;
+  }
+  .desk-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .shelf {
+    grid-template-columns: 1fr;
+  }
+  .desk-heading button {
+    margin-left: 0;
+    margin-right: 5px;
+  }
+  #personal-desk {
+    padding: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+  .card:hover {
+    transform: none;
+  }
+}
+
+.card { min-width: 0; overflow-wrap: anywhere; }
+.card-top .tag { max-width: calc(100% - 88px); overflow: hidden; text-overflow: ellipsis; }
+.pin-button, .card-top .icon { flex-shrink: 0; }

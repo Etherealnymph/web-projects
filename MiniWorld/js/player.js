@@ -404,7 +404,10 @@
         const next = this.pos[axis] + this.vel[axis] * dt;
         const clear = rise => !solid(axis === 'x' ? next : this.pos.x, this.pos.y + rise, axis === 'z' ? next : this.pos.z);
         if (clear(0)) { this.pos[axis] = next; return; }
-        if (this.onGround || this.inWater) for (const rise of [.21,.41,.61,.81,stepH]) {
+        const fineRises = w.fine?.stepHeightsAt(axis === 'x' ? next : this.pos.x,
+          axis === 'z' ? next : this.pos.z, this.pos.y, stepH, r) || [];
+        const rises = [...new Set([.21, .41, .61, .81, stepH, ...fineRises])].sort((a, b) => a - b);
+        if (this.onGround || this.inWater) for (const rise of rises) {
           if (clear(rise)) { this.pos[axis] = next; this.pos.y += rise; return; }
         }
         this.vel[axis] = 0;
@@ -427,8 +430,11 @@
         this.pos.y = ny; this.onGround = false;
         if (this.vel.y <= .01 && solid(this.pos.x, this.pos.y - .035, this.pos.z)) {this.onGround = true; this.vel.y = 0;}
       }
-      if (wasGrounded && this.vel.y <= 0 && w.precision) {
-        const support = w.precision.supportAt(this.pos.x, this.pos.z, this.pos.y + .025, r);
+      if (wasGrounded && this.vel.y <= 0 && (w.precision || w.fine)) {
+        const support = Math.max(
+          w.precision?.supportAt(this.pos.x, this.pos.z, this.pos.y + .025, r) ?? -Infinity,
+          w.fine?.supportAt(this.pos.x, this.pos.z, this.pos.y + .025, r) ?? -Infinity
+        );
         if (support > this.pos.y - .26 && support <= this.pos.y + .025 && !solid(this.pos.x, support + .004, this.pos.z)) {
           this.pos.y = support + .004; this.vel.y = 0; this.onGround = true;
         }

@@ -1,0 +1,11 @@
+* Analog Atlas - bandgap - GENERIC TEACHING MODEL
+* No foundry devices. Not TSMC / PDK validation.
+* Analytic and behavioral assumptions are documented in Analog Atlas.
+.options reltol=1e-8 abstol=1e-14 vntol=1e-10
+* Behavioral temperature transfer only, not a transistor reference circuit.
+Vtemp temperature 0 2.700000000e+1
+Breference out 0 V={(6.500000000e-1+-1.800000000e-3*(V(temperature)-2.700000000e+1)+-4.000000000e-7*(V(temperature)-2.700000000e+1)^2)+1.005000000e+1*(1.791924076e-4*(V(temperature)+273.15))}
+Rload out 0 1G
+.dc Vtemp -40 125 1
+.save v(out) v(temperature)
+.end

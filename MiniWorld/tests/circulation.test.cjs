@@ -41,6 +41,7 @@ for (const name of [
   'geography',
   'terrain',
   'circulation',
+  'fine-build',
   'world',
   'places',
   'worldgen',

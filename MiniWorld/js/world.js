@@ -127,6 +127,7 @@
       this.matWater = SHARED.matWater;
       this.terrain = this.meta.terrain && MW.StreamedTerrain ? new MW.StreamedTerrain(this) : null;
       this.renderStats = { triangles: 0, chunks: 0 };
+      this.fine = MW.FineBuild ? new MW.FineBuild(this) : null;
     }
 
     key(x, y, z) { return x + '|' + y + '|' + z; }
@@ -155,7 +156,8 @@
     surfaceAt(x, z) {
       const t = this.topMap.get(Math.floor(x) + ',' + Math.floor(z));
       const ground = this.terrain ? this.terrain.surfaceAt(x, z) : this.fallbackY;
-      return t ? (this.terrain ? Math.max(t.y + 1, ground) : t.y + 1) : ground;
+      const coarse = t ? (this.terrain ? Math.max(t.y + 1, ground) : t.y + 1) : ground;
+      return Math.max(coarse, this.fine?.topAt(x, z) ?? -Infinity);
     }
 
     topBlock(x, z) {
@@ -384,6 +386,7 @@
       this.markAllDirty();
       let guard = 0;
       while (this.dirty.size && guard++ < 5000) this.rebuildDirty(budget || 1000);
+      while (this.fine?.dirty.size) this.fine.rebuildDirty(1000);
     }
 
     /* ---------- 生成期 ---------- */
@@ -507,6 +510,7 @@
 
     update(dt, cameraPos) {
       this.rebuildDirty();
+      this.fine?.rebuildDirty(2);
       if (this.terrain) this.terrain.update(dt, cameraPos);
       if (this.waterPlane) {
         this.waterTime += dt;
@@ -525,6 +529,7 @@
 
     /* ---------- 碰撞 ---------- */
     collidesBox(x, y, z, radius, height, ignoreTerrainFloor) {
+      if (this.fine?.collidesBox(x, y, z, radius, height)) return true;
       if (this.precision?.collidesBox(x, y, z, radius, height)) return true;
       if (this.terrain && this.terrain.collidesBox(x, y, z, radius, height, ignoreTerrainFloor)) return true;
       const x0 = Math.floor(x - radius), x1 = Math.floor(x + radius);
@@ -543,9 +548,32 @@
     /* 从 from 到 to 的体素射线，返回首个实体方块 */
     raycast(origin, dir, maxDist) {
       maxDist = maxDist || 60;
-      const voxelHit = this._raycastVoxels(origin, dir, maxDist);
-      const groundHit = this.terrain ? this.terrain.raycast(origin, dir, voxelHit ? voxelHit.dist : maxDist) : null;
-      return groundHit && (!voxelHit || groundHit.dist < voxelHit.dist) ? groundHit : voxelHit;
+      let nearest = this._raycastVoxels(origin, dir, maxDist);
+      const accept = hit => { if (hit && (!nearest || hit.dist < nearest.dist)) nearest = hit; };
+      if (this.terrain) accept(this.terrain.raycast(origin, dir, nearest ? nearest.dist : maxDist));
+      else if (MW.FineBuild && dir.y < -0.000001 && origin.y >= this.fallbackY) {
+        const dist = (this.fallbackY - origin.y) / dir.y;
+        if (dist <= maxDist) accept({ x: Math.floor(origin.x + dir.x * dist), y: this.fallbackY - 1,
+          z: Math.floor(origin.z + dir.z * dist), nx: 0, ny: 1, nz: 0, dist, terrain: true, ground: true });
+      }
+      if (this.precision && MW.FineBuildTools) {
+        const candidates = new Set(), limit = nearest ? nearest.dist : maxDist;
+        for (let t = 0; t <= limit + 2; t += 2)
+          for (const box of this.precision.nearby(origin.x + dir.x * Math.min(t, limit), origin.z + dir.z * Math.min(t, limit), 2)) candidates.add(box);
+        for (const bounds of candidates) {
+          const cell = { x: bounds.x0, y: bounds.y0, z: bounds.z0,
+            w: bounds.x1 - bounds.x0, h: bounds.y1 - bounds.y0, d: bounds.z1 - bounds.z0 };
+          const hit = MW.FineBuildTools.rayBox(origin, dir, cell, nearest ? nearest.dist : maxDist);
+          if (hit) accept({ ...hit, ...cell, cell, precision: true });
+        }
+      }
+      accept(this.fine?.raycast(origin, dir, nearest ? nearest.dist : maxDist));
+      if (nearest && !nearest.point) nearest.point = {
+        x: origin.x + dir.x * nearest.dist,
+        y: origin.y + dir.y * nearest.dist,
+        z: origin.z + dir.z * nearest.dist
+      };
+      return nearest;
     }
 
     _raycastVoxels(origin, dir, maxDist) {
@@ -617,11 +645,15 @@
         version: 1,
         name: this.meta.name || '未命名世界',
         meta: this.meta,
-        blocks: out
+        blocks: out,
+        ...(this.fine ? { fine: this.fine.serialize() } : {})
       };
     }
 
     loadSerialized(data) {
+      MW.FineBuildTools?.validateWorldData(data);
+      // Reject the complete fine payload before touching legacy blocks or meshes.
+      if (data.fine && MW.FineBuild) MW.FineBuild.validateSnapshot(data.fine, this);
       this.revision++;
       this.rebuildPrecision();
       this.recordEdits = false;
@@ -643,6 +675,7 @@
         this._addToChunk(b[0], b[1], b[2], k);
         this._trackTop(b[0], b[1], b[2], b[3], b[4] || 0);
       }
+      if (this.fine) this.fine.loadSnapshot(data.fine || { version: 1, cells: [], edits: [] });
       this.recordEdits = true;
       this.markAllDirty();
       this.rebuildAllSync(400);
@@ -658,6 +691,7 @@
     get blockCount() { return this.blocks.size; }
 
     dispose() {
+      this.fine?.dispose();
       this.precision?.dispose();
       for (const ch of this.chunks.values()) {
         for (const m of ch.meshes) { this.group.remove(m); m.geometry.dispose(); }

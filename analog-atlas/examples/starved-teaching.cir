@@ -1,0 +1,20 @@
+* Analog Atlas - starved - GENERIC TEACHING MODEL
+* No foundry devices. Not TSMC / PDK validation.
+* Analytic and behavioral assumptions are documented in Analog Atlas.
+.options reltol=1e-8 abstol=1e-14 vntol=1e-10
+.param VDD=1.800000000e+0
+B1 0 n1 I={5.000000000e-5*(tanh((VDD/2-V(n5))*40)-100*(max(V(n1)-VDD,0)+min(V(n1),0)))}
+C1 n1 0 1.000000000e-13 IC=1.000000000e-2
+B2 0 n2 I={5.000000000e-5*(tanh((VDD/2-V(n1))*40)-100*(max(V(n2)-VDD,0)+min(V(n2),0)))}
+C2 n2 0 1.000000000e-13 IC=9.000000000e-1
+B3 0 n3 I={5.000000000e-5*(tanh((VDD/2-V(n2))*40)-100*(max(V(n3)-VDD,0)+min(V(n3),0)))}
+C3 n3 0 1.000000000e-13 IC=9.000000000e-1
+B4 0 n4 I={5.000000000e-5*(tanh((VDD/2-V(n3))*40)-100*(max(V(n4)-VDD,0)+min(V(n4),0)))}
+C4 n4 0 1.000000000e-13 IC=9.000000000e-1
+B5 0 n5 I={5.000000000e-5*(tanh((VDD/2-V(n4))*40)-100*(max(V(n5)-VDD,0)+min(V(n5),0)))}
+C5 n5 0 1.000000000e-13 IC=9.000000000e-1
+* Starved export assumes crossing excursion = 0.5 VDD (UI input: 0.5).
+* Behavioral saturation/clamps cause small departures from ideal timing.
+.tran 1.200000000e-10 4.500000000e-7 UIC
+.save v(n1) v(n2)
+.end

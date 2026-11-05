@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>个人网页项目目录</title>
+  <title>观澜 · 实验与造物</title>
   <style>
     :root{--bg:#09111f;--panel:#111d31;--panel2:#162943;--line:#263b59;--text:#edf4ff;--muted:#91a3bd;--blue:#64b5ff;--green:#47d59a;--purple:#b79cff}
     *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 12% 0,#19375a 0,#09111f 38%),var(--bg);color:var(--text);font:14px/1.6 Inter,"Microsoft YaHei","PingFang SC",sans-serif}
@@ -14,17 +14,24 @@
     .empty{display:none;text-align:center;color:var(--muted);padding:35px}.footer{margin-top:31px;padding-top:17px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:10px}
     @media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:580px){.shell{width:min(100% - 24px,500px);padding-top:25px}.hero{align-items:start;flex-direction:column}.count{align-self:stretch;text-align:left}.count b,.count small{display:inline;margin-right:7px}.grid{grid-template-columns:1fr}.card{min-height:185px}.footer{display:block}.toolbar{padding:10px 0}.tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.search{flex:1 1 100%;max-width:none;margin-left:0}.group{margin-bottom:26px;scroll-margin-top:118px}}
   </style>
+<link rel="stylesheet" href="assets/portal/portal.css">
+<link rel="icon" href="data:,">
 </head>
 <body>
 <main class="shell">
   <header class="hero">
-    <div><div class="eyebrow">PERSONAL WEB PROJECTS / 项目导航</div><h1>我的网页项目目录</h1><p>统一入口，快速访问本地实验、工具、训练项目，以及签到、游戏、书籍、AI、电子设计与模块资料等常用在线站点。每个入口都附有用途说明，方便找到对应内容。</p></div>
+    <div><div class="eyebrow">ETHEREAL / 实验与造物</div><h1>让想法有迹可循。</h1><p>从一条波形、一块逻辑门，到可运行的芯片与开放世界。在实验中观察，在札记中沉淀，再把新的问题带回来。</p></div>
     <div class="count"><b id="visibleCount">0</b><small>个项目入口</small></div>
   </header>
-  <div class="toolbar">
-    <div class="tabs"><button class="filter active" data-filter="all">全部</button><button class="filter" data-filter="checkin">每日签到</button><button class="filter" data-filter="forum">论坛社区</button><button class="filter" data-filter="projects">本地项目</button><button class="filter" data-filter="games">游戏分区</button><button class="filter" data-filter="books">书籍分区</button><button class="filter" data-filter="ai">AI 分区</button><button class="filter" data-filter="eda">电子设计</button><button class="filter" data-filter="modules">模块资料</button></div>
-    <input id="search" class="search" placeholder="搜索入口名称、功能或关键词…">
+  <section id="personal-desk" aria-label="个人工作台">
+  <div class="desk-heading"><h2>今天，从哪里开始</h2><div><button id="portal-random">随意逛逛</button><button id="portal-palette-button">⌘ K 快速前往</button></div></div>
+  <div id="learning-paths"></div><div class="shelf"><div><h3>常用收藏</h3><div id="favorite-shelf"></div></div><div><h3>最近打开</h3><div id="recent-shelf"></div></div></div>
+</section>
+<div class="toolbar">
+    <div class="tabs"><button class="filter active" data-filter="all">全部</button><button class="filter" data-filter="workbench">芯片工作台</button><button class="filter" data-filter="checkin">每日签到</button><button class="filter" data-filter="forum">论坛社区</button><button class="filter" data-filter="projects">本地项目</button><button class="filter" data-filter="games">游戏分区</button><button class="filter" data-filter="books">书籍分区</button><button class="filter" data-filter="ai">AI 分区</button><button class="filter" data-filter="eda">电子设计</button><button class="filter" data-filter="modules">模块资料</button></div>
+    <label class="favorites-toggle"><input id="favorites-only" type="checkbox">只看收藏</label><input aria-label="搜索项目" id="search" class="search" placeholder="搜索入口名称、功能或关键词…">
   </div>
+<section class="group" id="workbench"><h2 class="group-title">从设计到验证 · 芯片工作台</h2><div class="grid"><article class="card" data-type="lab" data-search="观澜电路 SPICE 仿真 电路 symbol asy netlist ngspice"><div class="card-top"><div class="icon">∿</div><span class="tag">交互工作台</span></div><h2>观澜电路</h2><p>用真实 ngspice 运行 30 个案例，导入网表、模型和符号，观察波形与参数变化。</p><a class="entry" href="circuit-lab/"><span>circuit-lab/</span>进入 →</a></article><article class="card" data-type="lab" data-search="硅海图谱 TSMC 180 nm RF PLL oscillator bandgap 拓扑"><div class="card-top"><div class="icon">⌬</div><span class="tag">交互工作台</span></div><h2>硅海图谱</h2><p>浏览 OSC、基准源与 PLL 拓扑，比较设计计算，导出网表并接入自己的工艺配置。</p><a class="entry" href="analog-atlas/"><span>analog-atlas/</span>进入 →</a></article><article class="card" data-type="lab" data-search="硅间札记 笔记 知识 图谱 论文 Markdown 回顾"><div class="card-top"><div class="icon">笺</div><span class="tag">交互工作台</span></div><h2>硅间札记</h2><p>把实验结果、设计失误与论文想法串联起来，用双链、对照和回忆卡积累可复用经验。</p><a class="entry" href="silicon-notes/"><span>silicon-notes/</span>进入 →</a></article><article class="card" data-type="lab" data-search="逻辑织机 数字 芯片 游戏 CPU ALU gates Turing"><div class="card-top"><div class="icon">⊞</div><span class="tag">交互工作台</span></div><h2>逻辑织机</h2><p>从基本门一路搭到 CPU，让自己接出的电路执行程序，把验证过的模块保存复用。</p><a class="entry" href="logic-loom/"><span>logic-loom/</span>进入 →</a></article><article class="card" data-type="lab" data-search="MiniWorld · 远征 mini world 建造 世界 城市 楼梯 电梯"><div class="card-top"><div class="icon">◈</div><span class="tag">交互工作台</span></div><h2>MiniWorld · 远征</h2><p>在连续地形、城市市集和大陆考察站之间探索，用更小的构件搭建自己的细节。</p><a class="entry" href="MiniWorld/"><span>MiniWorld/</span>进入 →</a></article><article class="card" data-type="lab" data-search="场海 · 物理直觉 field drift 物理 直觉 回旋 共振 波动"><div class="card-top"><div class="icon">≈</div><span class="tag">交互工作台</span></div><h2>场海 · 物理直觉</h2><p>九个可调物理实验与三维场空间，把预测变成轨迹、受力和能量曲线。</p><a class="entry" href="field-drift/"><span>field-drift/</span>进入 →</a></article></div></section>
     <section class="group" id="checkin">
       <h2 class="group-title">每日签到</h2>
       <div class="grid">
@@ -138,14 +145,15 @@
       </div>
     </section>
   <div class="empty" id="empty">没有找到匹配的入口，换个关键词或切回「全部」试试。</div>
-  <footer class="footer"><span>本目录仅作为入口导航，外部站点在新标签页打开，不改变原项目文件。</span><span>D:\Project\html</span></footer>
+  <footer class="footer"><span>收藏、最近打开与路线进度保存在当前浏览器。外部站点在新标签页打开。</span><span>观察 · 设计 · 验证 · 记录</span></footer>
 </main>
 <script>
 const sections=[...document.querySelectorAll(".group")],search=document.getElementById("search"),filters=[...document.querySelectorAll(".filter")],count=document.getElementById("visibleCount"),empty=document.getElementById("empty");let active="all";
-const hash=decodeURIComponent(location.hash.slice(1));if(hash&&sections.some(section=>section.id===hash))active=hash;
+let hash="";try{hash=decodeURIComponent(location.hash.slice(1))}catch{};if(hash&&sections.some(section=>section.id===hash))active=hash;
 filters.forEach(button=>button.classList.toggle("active",button.dataset.filter===active));
-function apply(scrollTo){let query=search.value.trim().toLowerCase(),shown=0;sections.forEach(section=>{let inSection=active==="all"||section.id===active,sectionShown=0;section.querySelectorAll(".card").forEach(card=>{let visible=inSection&&(!query||card.dataset.search.toLowerCase().includes(query));card.style.display=visible?"flex":"none";if(visible){shown++;sectionShown++}});section.style.display=sectionShown?"":"none"});count.textContent=shown;empty.style.display=shown?"none":"block";if(scrollTo&&active!=="all"){let target=document.getElementById(active);if(target&&target.getBoundingClientRect().top<88)target.scrollIntoView({behavior:"smooth",block:"start"})}}
+function apply(scrollTo){let query=search.value.trim().toLowerCase(),shown=0;sections.forEach(section=>{let inSection=active==="all"||section.id===active,sectionShown=0;section.querySelectorAll(".card").forEach(card=>{let visible=inSection&&(!query||card.dataset.search.toLowerCase().includes(query))&&(!window.portalFavoritesOnly||card.dataset.pinned==="true");card.style.display=visible?"flex":"none";if(visible){shown++;sectionShown++}});section.style.display=sectionShown?"":"none"});count.textContent=shown;empty.style.display=shown?"none":"block";if(scrollTo&&active!=="all"){let target=document.getElementById(active);if(target&&target.getBoundingClientRect().top<88)target.scrollIntoView({behavior:"smooth",block:"start"})}}
 search.oninput=()=>apply(false);filters.forEach(button=>button.onclick=()=>{filters.forEach(item=>item.classList.remove("active"));button.classList.add("active");active=button.dataset.filter;try{history.replaceState(null,"",active==="all"?location.pathname+location.search:"#"+active)}catch(error){}apply(true)});apply(false);
 </script>
+<script type="module" src="assets/portal/portal.mjs"></script>
 </body>
 </html>

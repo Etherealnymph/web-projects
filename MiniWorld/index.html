@@ -184,7 +184,13 @@
         </span>
       </div>
       <div id="build-colors"></div>
-      <div class="build-hint">左键执行当前操作 · 右键快速拆除 · <b>[</b> <b>]</b> 笔刷 <span id="brush-size">1×1×1</span></div>
+      <div class="fine-build-controls">
+        <label>网格 <select id="build-grid" aria-label="建造网格大小"><option value="0.25">0.25 m · 精细</option><option value="0.5">0.5 m · 半米</option><option value="1">1 m · 整米</option></select></label>
+        <label>构件 <select id="build-prefab" aria-label="微型预制件"><option value="cell">自由方块</option><option value="stairs">五阶楼梯 · 20 cm</option><option value="bench">花园长椅 · 50 cm 座高</option><option value="planter">种植箱</option><option value="lamp">庭院灯 · 2 m</option><option value="pergola">木格花架</option><option value="rail">细扶手</option></select></label>
+        <button id="build-rotate" title="旋转预制件，快捷键 R">旋转 0°</button>
+      </div>
+      <div class="fine-build-status" id="fine-build-status">细部构件 0 / 10000 · R 旋转 · [ ] 笔刷</div>
+      <div class="build-hint">左键执行当前操作 · 右键快速拆除 · <b>[</b> <b>]</b> 笔刷 · Q 选项 · R 旋转 <span id="brush-size">0.25 m</span></div>
     </div>
 
     <div id="combat-keys" class="combat-keys glass hidden">
@@ -638,6 +644,7 @@
 <script src="js/geography.js"></script>
 <script src="js/terrain.js"></script>
 <script src="js/circulation.js"></script>
+<script src="js/fine-build.js"></script>
 <script src="js/world.js"></script>
 <script src="js/places.js"></script>
 <script src="js/worldgen.js"></script>

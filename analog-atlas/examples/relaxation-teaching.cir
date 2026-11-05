@@ -1,0 +1,14 @@
+* Analog Atlas - relaxation - GENERIC TEACHING MODEL
+* No foundry devices. Not TSMC / PDK validation.
+* Analytic and behavioral assumptions are documented in Analog Atlas.
+.options reltol=1e-8 abstol=1e-14 vntol=1e-10
+* Ideal hysteretic switch: zero comparator delay; no modeled IQ.
+Vdd vdd 0 1.800000000e+0
+Rpull vdd out 1k
+Scomp out 0 cap 0 HYST
+.model HYST SW(Ron=0.001 Roff=1e12 Vt=9.000000000e-1 Vh=3.000000000e-1)
+Bcharge 0 cap I={1.000000000e-5*(2*V(out)/1.800000000e+0-1)}
+Ctim cap 0 1.000000000e-11 IC=5.900000000e-1
+.tran 3.000000000e-9 1.440000000e-5 UIC
+.save v(cap) v(out)
+.end

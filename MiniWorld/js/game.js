@@ -57,6 +57,11 @@
       this.buildColorIndex = 0;
       this.buildBrush = 1;
       this.buildAction = 'place';
+      const finePrefs = MW.store.get('fineBuildPrefs', {}) || {};
+      this.buildGrid = [0.25, 0.5, 1].includes(finePrefs.grid) ? finePrefs.grid : 0.25;
+      this.buildPrefab = 'cell';
+      this.buildRotation = 0;
+      this.buildSerial = 0;
       this.interactTarget = null;
       this.victoryShown = false;
       this.shipTotal = 0;
@@ -1207,79 +1212,150 @@
       }
     }
 
+    setBuildGrid(value) {
+      const grid = Number(value);
+      if (![0.25, 0.5, 1].includes(grid)) return;
+      this.buildGrid = grid;
+      MW.store.set('fineBuildPrefs', { grid });
+      this.ui.updateBrush();
+      this.ui.toast(`网格 ${grid} m · 对准表面后左键放置`, 'info');
+    }
+
+    setBuildPrefab(name) {
+      if (!['cell', 'stairs', 'bench', 'planter', 'lamp', 'pergola', 'rail'].includes(name)) return;
+      this.buildPrefab = name;
+      this.ui.updateBrush();
+    }
+
+    rotateBuild() {
+      this.buildRotation = ((this.buildRotation || 0) + 1) % 4;
+      this.ui.updateBrush();
+      MW.SFX.click();
+    }
+
+    buildCells(prefix = 'preview') {
+      if (!this.buildTarget || !MW.FineBuildTools) return [];
+      const target = this.buildTarget, grid = this.buildGrid || 0.25;
+      const selected = this.selectedBuild;
+      if (this.buildPrefab && this.buildPrefab !== 'cell') {
+        return MW.FineBuildTools.prefab(this.buildPrefab, target.x + grid / 2, target.y,
+          target.z + grid / 2, this.buildRotation || 0, selected.c, prefix);
+      }
+      const type = selected.glow ? MW.BLOCK_TYPES.GLOW : selected.water ? MW.BLOCK_TYPES.WATER
+        : selected.name === '玻璃' ? MW.BLOCK_TYPES.GLASS : MW.BLOCK_TYPES.SOLID;
+      const cells = [], count = this.buildBrush || 1, offset = Math.floor((count - 1) / 2);
+      for (let dx = -offset; dx < count - offset; dx++)
+        for (let dy = -offset; dy < count - offset; dy++)
+          for (let dz = -offset; dz < count - offset; dz++) {
+            const x = Number((target.x + dx * grid).toFixed(5));
+            const y = Number((target.y + dy * grid).toFixed(5));
+            const z = Number((target.z + dz * grid).toFixed(5));
+            cells.push({ id: `cell:${x}:${y}:${z}:${grid}`, x, y, z, w: grid, h: grid, d: grid,
+              c: selected.c, t: type, source: 'user:grid:' + grid });
+          }
+      return cells;
+    }
+
     updateBuild() {
-      if (this.mode !== 'build' || !this.player || !this.world) {
+      if (this.mode !== 'build' || !this.player || !this.world || !this.world.fine) {
         if (this.highlight) this.highlight.visible = false;
         if (this.highlightFill) this.highlightFill.visible = false;
         this.buildTarget = null;
         return;
       }
-      const eye = this.player.eyePos;
-      const dir = this.player.forward;
-      const hit = this.world.raycast(eye, dir, 9);
+      const eye = this.player.eyePos, direction = this.player.forward;
+      const hit = this.world.raycast(eye, direction, 9);
+      this.buildHit = hit;
       if (!hit) {
         this.buildTarget = null;
         this.highlight.visible = false;
         this.highlightFill.visible = false;
         return;
       }
-      this.buildHit = hit;
-      const bx = hit.x + hit.nx, by = hit.y + hit.ny, bz = hit.z + hit.nz;
-      this.buildTarget = { x: bx, y: by, z: bz };
-      this.highlight.visible = true;
-      this.highlight.position.set((this.buildAction==='destroy'?hit.x:bx) + 0.5, (this.buildAction==='destroy'?hit.y:by) + 0.5, (this.buildAction==='destroy'?hit.z:bz) + 0.5);
-      this.highlightFill.visible = true;
+      this.buildTarget = MW.FineBuildTools.placement(hit, eye, direction, this.buildGrid || 0.25);
+      let bounds;
+      if (this.buildAction === 'destroy') {
+        bounds = hit.cell || { x: hit.x, y: hit.y, z: hit.z, w: 1, h: 1, d: 1 };
+      } else {
+        const cells = this.buildCells();
+        const x = Math.min(...cells.map(c => c.x)), y = Math.min(...cells.map(c => c.y)), z = Math.min(...cells.map(c => c.z));
+        bounds = { x, y, z, w: Math.max(...cells.map(c => c.x + c.w)) - x,
+          h: Math.max(...cells.map(c => c.y + c.h)) - y, d: Math.max(...cells.map(c => c.z + c.d)) - z };
+      }
+      this.highlight.visible = !(this.buildAction === 'destroy' && (hit.terrain || hit.precision));
+      this.highlightFill.visible = this.highlight.visible;
+      this.highlight.position.set(bounds.x + bounds.w / 2, bounds.y + bounds.h / 2, bounds.z + bounds.d / 2);
+      this.highlight.scale.set(bounds.w, bounds.h, bounds.d);
       this.highlightFill.position.copy(this.highlight.position);
-      const col = this.selectedBuild.c;
-      this.highlightFill.material.color.setHex(col);
+      this.highlightFill.scale.copy(this.highlight.scale);
+      this.highlightFill.material.color.setHex(this.buildAction === 'destroy' ? 0xd98570 : this.selectedBuild.c);
+      const status = this.$('fine-build-status');
+      if (status) {
+        const targetName = hit.fine ? '精细构件' : hit.precision ? '既有 20 cm 楼梯（保留）' : hit.terrain ? '连续地表' : '旧 1 m 方块';
+        const text = `细部构件 ${this.world.fine.cells.size} / 10000 · 瞄准：${targetName}`;
+        if (status.textContent !== text) status.textContent = text;
+      }
+    }
+
+    canPlaceFine(cell) {
+      const playerBox = { x: this.player.pos.x - this.player.radius, y: this.player.pos.y,
+        z: this.player.pos.z - this.player.radius, w: this.player.radius * 2,
+        h: this.player.height, d: this.player.radius * 2 };
+      if (MW.FineBuildTools.overlaps(cell, playerBox)) return false;
+      const epsilon = 0.00001;
+      for (let x = Math.floor(cell.x + epsilon); x <= Math.floor(cell.x + cell.w - epsilon); x++)
+        for (let y = Math.floor(cell.y + epsilon); y <= Math.floor(cell.y + cell.h - epsilon); y++)
+          for (let z = Math.floor(cell.z + epsilon); z <= Math.floor(cell.z + cell.d - epsilon); z++)
+            if (this.world.isSolid(x, y, z)) return false;
+      const x = cell.x + cell.w / 2, z = cell.z + cell.d / 2, radius = Math.max(cell.w, cell.d) / 2 - epsilon;
+      if (this.world.precision?.collidesBox(x, cell.y + epsilon, z, radius, cell.h - epsilon * 2)) return false;
+      if (this.world.terrain?.collidesBox(x, cell.y + epsilon, z, radius, cell.h - epsilon * 2, true)) return false;
+      if (this.collidesDoor?.(x, cell.y + epsilon, z, radius, cell.h - epsilon * 2)) return false;
+      return true;
     }
 
     placeBlock() {
-      if (this.mode !== 'build' || !this.buildTarget) return;
-      const sel = this.selectedBuild;
-      const n = this.buildBrush;
-      const off = Math.floor((n - 1) / 2);
-      const p = this.player;
-      let placed = 0;
-      for (let dx = -off; dx < n - off; dx++) {
-        for (let dy = -off; dy < n - off; dy++) {
-          for (let dz = -off; dz < n - off; dz++) {
-            const x = this.buildTarget.x + dx, y = this.buildTarget.y + dy, z = this.buildTarget.z + dz;
-            if (y < 0 && this.world.meta.waterLevel == null) continue;
-            if (Math.abs(x) > (this.world.meta.terrain ? this.travelBounds : this.bounds + 4) || Math.abs(z) > (this.world.meta.terrain ? (this.travelBoundsZ || this.travelBounds) : this.bounds + 4)) continue;
-            // 不要把自己砌进墙里
-            if (x + 1 > p.pos.x - p.radius && x < p.pos.x + p.radius &&
-              z + 1 > p.pos.z - p.radius && z < p.pos.z + p.radius &&
-              y + 1 > p.pos.y && y < p.pos.y + p.height) continue;
-            const type = sel.glow ? MW.BLOCK_TYPES.GLOW : sel.water ? MW.BLOCK_TYPES.WATER : MW.BLOCK_TYPES.SOLID;
-            if (this.world.set(x, y, z, sel.c, type, true)) placed++;
-          }
+      if (this.mode !== 'build' || !this.buildTarget || !this.world.fine) return;
+      if (this.buildPrefab !== 'cell' && this.buildPrefab && this.buildHit?.ny !== 1) {
+        this.ui.toast('微型预制件需要放在向上的水平表面', 'info'); return;
+      }
+      const prefix = 'user-' + Date.now().toString(36) + '-' + (++this.buildSerial);
+      const cells = this.buildCells(prefix);
+      try {
+        if (cells.some(cell => !this.canPlaceFine(cell))) throw Error('放置区域被人物、建筑或电梯占用');
+        const placed = this.world.fine.addBatch(cells, true);
+        if (placed) {
+          MW.SFX.build();
+          this.saveLater();
+          this.ui.updateBrush();
         }
-      }
-      if (placed) {
-        MW.SFX.build();
-        this.combat.spark(new THREE.Vector3(this.buildTarget.x + 0.5, this.buildTarget.y + 0.5, this.buildTarget.z + 0.5), 0xffd27a, 4);
-        this.saveLater();
-      }
+      } catch (error) { this.ui.toast(error.message + '；本次未放置任何构件', 'info'); }
     }
 
     removeBlock() {
-      if (this.mode !== 'build' || !this.buildTarget || !this.buildHit) return;
-      if (this.buildHit.terrain) { this.ui.toast('连续地表上可以建造；拆除工具用于建筑方块', 'info'); return; }
-      const target = this.buildHit;
-      const n = this.buildBrush;
-      const off = Math.floor((n - 1) / 2);
-      let removed = 0;
-      for (let dx = -off; dx < n - off; dx++)
-        for (let dy = -off; dy < n - off; dy++)
-          for (let dz = -off; dz < n - off; dz++) {
-            if (this.world.remove(target.x + dx, target.y + dy, target.z + dz, true)) removed++;
+      if (this.mode !== 'build' || !this.buildHit) return;
+      const hit = this.buildHit;
+      // Fine removal is by ID only. A stale/deleted hit never falls through to
+      // rounding coordinates and removing a legacy one-metre block underneath.
+      if (hit.fine) {
+        try {
+          if (this.world.fine?.remove(hit.fineId, true)) {
+            MW.SFX.build(); this.saveLater(); this.ui.updateBrush();
           }
-      if (removed) {
-        MW.SFX.build();
-        this.combat.spark(new THREE.Vector3(this.buildTarget.x + 0.5, this.buildTarget.y + 0.5, this.buildTarget.z + 0.5), 0x9a958a, 5);
-        this.saveLater();
+        } catch (error) { this.ui.toast(error.message, 'info'); }
+        return;
       }
+      if (hit.terrain || hit.precision) {
+        this.ui.toast(hit.precision ? '既有精密楼梯保留；精细构件可单独拆除' : '连续地表保留；可在表面建造', 'info');
+        return;
+      }
+      const count = this.buildBrush || 1, offset = Math.floor((count - 1) / 2);
+      let removed = 0;
+      for (let dx = -offset; dx < count - offset; dx++)
+        for (let dy = -offset; dy < count - offset; dy++)
+          for (let dz = -offset; dz < count - offset; dz++)
+            if (this.world.remove(hit.x + dx, hit.y + dy, hit.z + dz, true)) removed++;
+      if (removed) { MW.SFX.build(); this.saveLater(); }
     }
 
     /* =======================================================
@@ -1800,6 +1876,8 @@
 
     requestLock() {
       if (!this.canvas || this.state !== 'playing') return;
+      // Return keyboard control to the world after a build-palette selection.
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) document.activeElement.blur();
       const p = this.canvas.requestPointerLock();
       if (p && p.catch) p.catch(() => {});
     }
@@ -1815,7 +1893,7 @@
     isTyping(e) {
       const t = e.target;
       if (!t) return false;
-      if (!(t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return false;
+      if (!(t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return false;
       if (t.offsetParent === null) return false;
       const hiddenPanel = t.closest('.modal.hidden, .drawer.hidden, #start-screen.hidden');
       return !hiddenPanel;
@@ -1851,8 +1929,16 @@
         case 'KeyX': this.setMode('build'); break;
         case 'KeyC': this.setMode('combat'); break;
         case 'KeyR':
+          if (this.mode === 'build') { this.rotateBuild(); break; }
           if (this.player.inWater && !this.inVehicle) this.escapeToShore();
           else if (this.mode === 'combat') this.player.startReload();
+          break;
+        case 'KeyQ':
+          if (this.mode === 'build') {
+            this.keys = {};
+            if (document.pointerLockElement) document.exitPointerLock();
+            this.ui.toast('鼠标已释放：选择网格或预制件，再点击画面继续建造', 'info');
+          }
           break;
         case 'KeyG': this.combat.throwGrenade(); break;
         case 'KeyM': this.combat.placeMine(); break;
@@ -2058,6 +2144,7 @@
           items: Array.from(p.items.entries())
         },
         edits: this.world.exportEdits(),
+        fine: this.world.fine?.serialize(),
         zones: this.zones.map(z => ({ name: z.def.name, progress: z.progress, captured: z.captured })),
         doors: this.doors.map(d => ({ id: d.id, open: d.open })),
         shipsDestroyed: this.shipsDestroyed,
@@ -2066,7 +2153,7 @@
       const ok = MW.store.set('save_' + this.currentWorldDef.id, data);
       if (ok) {
         if (this.currentWorldDef.id !== 'custom') MW.store.set('lastWorld', this.currentWorldDef.id);
-        this.ui.setSaveInfo(`已自动保存 · ${MW.nowStamp()} · ${data.edits.length} 处改动`);
+        this.ui.setSaveInfo(`已自动保存 · ${MW.nowStamp()} · ${data.edits.length} 处整米改动 · ${data.fine?.cells.length || 0} 个精细构件`);
       } else {
         this.ui.setSaveInfo('自动保存失败：浏览器存储空间不足，请导出世界备份');
       }
@@ -2104,6 +2191,10 @@
       this.shipsDestroyed = save.shipsDestroyed || 0;
       if (Array.isArray(save.edits) && save.edits.length) {
         this.world.applyEdits(save.edits);
+      }
+      if (save.fine && this.world.fine) {
+        try { this.world.fine.loadSnapshot(save.fine); }
+        catch (error) { this.ui.toast('精细构件存档未恢复：' + error.message + '；生成的原景观保留', 'info'); }
       }
       if (Array.isArray(sp.position) && sp.position.length===3 && sp.position.every(Number.isFinite)) {
         const [x,y,z]=sp.position;
@@ -2181,6 +2272,7 @@
 
     async importWorldFile(file) {
       if (!file) return;
+      const previousState = this.state;
       try {
         const text = await MW.readFile(file);
         const data = JSON.parse(text);
@@ -2188,9 +2280,11 @@
         await this.startImportedWorld(data, file.name);
       } catch (e) {
         console.error(e);
-        this.state = 'menu';
+        // Validation failures occur before replacing the active world.
+        if (this.state !== 'loading') this.state = previousState;
+        else this.state = this.world && this.player ? 'playing' : 'menu';
         this.ui.hideLoading();
-        this.ui.showMenu();
+        if (this.state === 'menu') this.ui.showMenu();
         this.ui.toast('导入失败：' + e.message, 'bad');
       }
     }
@@ -2213,6 +2307,14 @@
 
     async startImportedWorld(data, filename) {
       if (this.state === 'loading') return;
+      if (MW.FineBuildTools) MW.FineBuildTools.validateWorldData(data);
+      else if (!data || !Array.isArray(data.blocks)) throw Error('世界方块格式无效');
+      if (data.fine && MW.FineBuild) {
+        const meta = data.meta || {};
+        const bounds = Number.isFinite(meta.bounds) && meta.bounds > 0 ? meta.bounds : 80;
+        MW.FineBuild.validateSnapshot(data.fine, { meta, bounds,
+          minY: meta.minY ?? -6, maxY: meta.maxY ?? 96, revision: 0 });
+      }
       this.state = 'loading';
       this.ui.closeAll();
       this.panelOpen = null;

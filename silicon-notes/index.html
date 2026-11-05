@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f3f0e7" />
+    <meta
+      name="description"
+      content="硅间札记：把芯片设计的直觉写成可复查的证据。公开学习笔记、私有实验草稿、论文线索与间隔复习。"
+    />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <title>硅间札记 · SILICON NOTES</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="vendor/katex/katex.min.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+    <header class="masthead">
+      <a class="brand" href="#library" aria-label="硅间札记首页"
+        ><span class="seal">硅</span><span>硅间札记<small>SILICON NOTES</small></span></a
+      >
+      <nav class="main-nav" aria-label="主导航">
+        <a href="#library" data-view="library">札记目录</a><a href="#studio" data-view="studio">书写台</a
+        ><a href="#ideas" data-view="ideas">交叉线索</a
+        ><a href="#review" data-view="review">温故<span id="due-dot" class="nav-dot" hidden></span></a
+        ><a href="#reflections" data-view="reflections">留白</a>
+      </nav>
+      <div class="header-actions">
+        <button id="theme-button" class="icon-button" aria-label="切换深浅主题" title="切换深浅主题">◐</button
+        ><a href="../" class="home-link">工作室 ↗</a>
+      </div>
+    </header>
+    <div class="workspace">
+      <aside class="sidebar" aria-label="书架导航">
+        <div class="sidebar-top">
+          <span class="eyebrow">THE OPEN NOTEBOOK</span
+          ><button id="sidebar-toggle" class="mobile-only text-button" aria-expanded="false">
+            展开目录 ＋
+          </button>
+        </div>
+        <div id="sidebar-content">
+          <label class="search-box"
+            ><span aria-hidden="true">⌕</span
+            ><input id="search" type="search" placeholder="搜索问题、标题或来源" aria-label="搜索笔记" /><kbd
+              >/</kbd
+            ></label
+          >
+          <h2 class="sidebar-heading">案头书架 <span>01—06</span></h2>
+          <div id="course-navigation" class="course-navigation"></div>
+          <div class="sidebar-rule"></div>
+          <h2 class="sidebar-heading">阅读范围</h2>
+          <div class="scope-switch" role="group" aria-label="阅读范围">
+            <button data-scope="all" class="active">全部</button><button data-scope="public">公开</button
+            ><button data-scope="local">本机</button>
+          </div>
+          <h2 class="sidebar-heading spaced">线索标签</h2>
+          <div id="tag-navigation" class="tag-navigation"></div>
+          <a class="side-link" href="#studio">草稿夹 <span id="draft-count">0</span></a>
+          <a class="side-link" href="#data">备份与发布 <span>↗</span></a>
+          <div class="privacy-note">
+            <span class="status-lamp"></span>
+            <div>
+              <strong>本机私有，写作自由</strong>
+              <p>草稿与个人记录只保存在此浏览器。公开书架来自网站随附内容。</p>
+              <span id="storage-status" role="status">正在打开本机书库…</span>
+            </div>
+          </div>
+          <div class="sister-links">
+            <span class="eyebrow">同一张工作台</span><a href="../analog-atlas/">模拟知识图谱 ↗</a
+            ><a href="../circuit-lab/">电路实验室 ↗</a><a href="../logic-loom/">逻辑织机 ↗</a>
+          </div>
+        </div>
+      </aside>
+      <main id="main" tabindex="-1"><div class="loading-note">正在摊开这本札记…</div></main>
+    </div>
+    <footer class="site-footer">
+      <span>硅间札记 <i>·</i> 为好问题留一页纸。</span><a href="#data">本机数据与公开发布说明</a
+      ><span>CRAFT / QUESTION / VERIFY</span>
+    </footer>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    <div id="persistent-error" class="persistent-error" role="alert" hidden></div>
+    <dialog id="modal">
+      <form method="dialog"><button class="modal-close icon-button" aria-label="关闭对话框">×</button></form>
+      <div id="modal-content"></div>
+    </dialog>
+    <input id="import-file" type="file" accept=".json,.md,.markdown,text/markdown,application/json" hidden />
+    <script type="module" src="js/app.mjs"></script>
+  </body>
+</html>

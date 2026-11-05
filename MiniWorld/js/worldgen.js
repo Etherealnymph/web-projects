@@ -157,9 +157,36 @@
       }
     }
 
+    fineProp(name, x, y, z, color, options = {}) {
+      if (!this.w.fine || !['beijing', 'washington', 'tokyo'].includes(this.w.meta.id)) return false;
+      const prefix = `city-${name}-${x}-${y}-${z}`;
+      const parts = MW.FineBuildTools.prefab(name, x, y, z, options.rotation || 0, color, prefix);
+      if (name === 'lamp') {
+        const height = options.height || 3.2;
+        parts[1].h = height - 0.35;
+        parts[2].y = y + height - 0.25;
+        parts[2].c = color || 0xffdc99;
+        parts[3].y = y + height - 0.1;
+      }
+      for (const part of parts) part.source = 'city-street:' + name;
+      const stats = this.w.meta.fineScenery || (this.w.meta.fineScenery = { lamps: 0, benches: 0, skipped: 0 });
+      // Reserve space for the maker garden and future player construction.
+      if (this.w.fine.cells.size + parts.length > 1500) { stats.skipped++; return false; }
+      try {
+        this.w.fine.addBatch(parts, false);
+        if (name === 'lamp') stats.lamps++;
+        if (name === 'bench') stats.benches++;
+        return true;
+      } catch (error) {
+        stats.skipped++;
+        return false;
+      }
+    }
+
     lamp(x, z, y, color, h) {
       const base = y != null ? y : this.surface(x, z);
       h = h || 4;
+      if (this.fineProp('lamp', x, base, z, color || 0xffdc99, { height: Math.max(2.8, Math.min(3.8, h * 0.7)) })) return;
       for (let i = 0; i < h; i++) this.set(x, base + i, z, 0x4a3a2a, 0, 0.08);
       this.set(x, base + h, z, color || 0xffb347, MW.BLOCK_TYPES.GLOW, 0.05);
       this.set(x, base + h - 1, z, 0xffcf8a, MW.BLOCK_TYPES.GLOW, 0.05);
@@ -1329,6 +1356,43 @@
     };
   }
 
+  // A small, human-scale demonstration district; never densify the terrain.
+  function makerGarden(builder, meta, result) {
+    if (!builder.w.fine || !['beijing', 'washington', 'tokyo'].includes(meta.id)) return;
+    builder.fill(24, 2, 106, 52, 2, 134, 0xb9bdab, { jitter: 0.01 });
+    builder.fill(13, 2, 106, 37, 2, 109, 0xc7c8b8, { jitter: 0 });
+    const cells = [];
+    let serial = 0;
+    const addPrefab = (kind, x, z, rotation = 0) => {
+      const parts = MW.FineBuildTools.prefab(kind, x, 3, z, rotation, 0xa98b62,
+        meta.id + '-garden-' + (++serial));
+      for (const part of parts) part.source = 'maker-garden:' + kind;
+      cells.push(...parts);
+    };
+    for (const x of [31, 45]) addPrefab('bench', x, 119, x < 38 ? 1 : 3);
+    for (const x of [29, 47]) for (const z of [113, 129]) addPrefab('planter', x, z);
+    for (const x of [26, 50]) for (const z of [108, 132]) addPrefab('lamp', x, z);
+    addPrefab('pergola', 38, 128);
+    addPrefab('stairs', 38, 115);
+    cells.push({ id: meta.id + '-garden-deck', x: 36, y: 3.85, z: 117, w: 4, h: 0.15, d: 4,
+      c: 0xa98b62, t: 0, source: 'maker-garden:deck' });
+    for (const x of [36, 39.85]) for (const z of [117, 120.85])
+      cells.push({ id: `${meta.id}-garden-post-${x}-${z}`, x, y: 3, z, w: 0.15, h: 0.85, d: 0.15,
+        c: 0x455f60, t: 0, source: 'maker-garden:deck' });
+    for (let row = 0; row < 4; row++) for (let col = 0; col < 6; col++)
+      cells.push({ id: `${meta.id}-garden-quarter-${row}-${col}`, x: 33 + col * 0.25, y: 3,
+        z: 110 + row * 0.25, w: 0.25, h: 0.25, d: 0.25,
+        c: (row + col) % 2 ? 0x718f7b : 0xc8c7af, t: 0, source: 'maker-garden:quarter-sample' });
+    builder.w.fine.addBatch(cells, false);
+    result.makerGarden = { x: 38, y: 3, z: 108, cells: cells.length, version: 1 };
+    result.destinations.push({ name: '匠人花园 · 精细建造', x: 38, z: 108,
+      description: '50 cm 座高长椅、20 cm 台阶与庭院灯；按 X 用 0.25 m 网格继续搭建。' });
+    result.discoveries = result.discoveries || [];
+    result.discoveries.push({ id: meta.id + '-maker-garden', name: '匠人花园', x: 38, y: 3, z: 108, r: 6,
+      text: '尺寸变小，细节开始发生。试试走上五级 20 cm 台阶，再在花园旁搭一件自己的作品。' });
+    result.labels.push({ text: '匠人花园 · 0.25 m 工坊', x: 38, y: 7, z: 128, color: 0xe4d6a8, width: 10 });
+  }
+
   /* A compact editable district anchors a much larger streamed landscape.
      Landmarks are deliberately stylised; no claim of surveyed city geometry. */
   function cityInfrastructure(b, meta) {
@@ -1519,6 +1583,7 @@
       const b = new Builder(world, def.seed || 1234);
       const gen = GENERATORS[def.id] || genForbidden;
       const result = gen(b, meta) || {};
+      makerGarden(b, meta, result);
       Object.assign(meta, result);
       meta.doors = b.doors;
       meta.elevators = b.elevators;

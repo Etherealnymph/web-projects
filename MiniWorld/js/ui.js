@@ -285,6 +285,10 @@
       const bDestroy = this.$('build-action-destroy');
       if (bPlace) bPlace.addEventListener('click', () => this.g.setBuildAction('place'));
       if (bDestroy) bDestroy.addEventListener('click', () => this.g.setBuildAction('destroy'));
+      const grid = this.$('build-grid'), prefab = this.$('build-prefab'), rotate = this.$('build-rotate');
+      if (grid) grid.addEventListener('change', () => this.g.setBuildGrid(grid.value));
+      if (prefab) prefab.addEventListener('change', () => this.g.setBuildPrefab(prefab.value));
+      if (rotate) rotate.addEventListener('click', () => this.g.rotateBuild());
       const cbag = this.$('combat-bag');
       if (cbag) cbag.addEventListener('click', () => this.g.openPanel('inventory'));
     }
@@ -811,7 +815,7 @@
       if (hints && this.g.mode === 'build') {
         hints.textContent = action === 'destroy'
           ? '左键摧毁 · 右键拆除 · F 切换为放置 · [ ] 笔刷 · Z/C 切换模式'
-          : '左键放置 · 右键拆除 · F 切换为摧毁 · 1–0 调色板 · [ ] 笔刷';
+          : '左键放置 · 右键拆除 · Q 释放鼠标选网格 · R 旋转构件 · F 切换工具';
       }
     }
 
@@ -846,7 +850,16 @@
 
     updateBrush() {
       const el = this.$('brush-size');
-      if (el) el.textContent = `${this.g.buildBrush}×${this.g.buildBrush}×${this.g.buildBrush}`;
+      if (el) {
+        const extent = (this.g.buildGrid || 0.25) * this.g.buildBrush;
+        el.textContent = `${this.g.buildBrush}³ 格 · ${extent} m 边长`;
+      }
+      const grid = this.$('build-grid'), prefab = this.$('build-prefab'), rotation = this.$('build-rotate');
+      if (grid) grid.value = String(this.g.buildGrid || 0.25);
+      if (prefab) prefab.value = this.g.buildPrefab || 'cell';
+      if (rotation) rotation.textContent = '旋转 ' + (this.g.buildRotation || 0) * 90 + '°';
+      const status = this.$('fine-build-status');
+      if (status) status.textContent = `细部构件 ${this.g.world?.fine?.cells.size || 0} / 10000 · R 旋转 · [ ] 笔刷`;
       this.updateBuildColors();
     }
 

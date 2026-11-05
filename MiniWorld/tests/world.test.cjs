@@ -14,7 +14,7 @@ const sandbox = { THREE, console, performance, Math, Date, Map, Set, Float32Arra
   document: { createElement: () => ({ getContext: () => context2d }) }, localStorage: { getItem() { return null; } } };
 sandbox.window = sandbox;
 const context = vm.createContext(sandbox);
-for (const file of ['data.js', 'util.js', 'geography.js', 'terrain.js', 'circulation.js', 'world.js', 'places.js', 'worldgen.js'])
+for (const file of ['data.js', 'util.js', 'geography.js', 'terrain.js', 'circulation.js', 'fine-build.js', 'world.js', 'places.js', 'worldgen.js'])
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../js', file), 'utf8'), context, { filename: file });
 const MW = sandbox.MW;
 

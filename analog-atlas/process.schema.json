@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Analog Atlas local process adapter v1",
+  "description": "Metadata and scalar teaching approximations; not a foundry PDK or authorization receipt.",
+  "type": "object",
+  "required": ["schemaVersion", "name", "mode", "provenance", "nominal", "devices", "spice"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "name": {"type": "string", "minLength": 1, "maxLength": 120},
+    "mode": {"enum": ["teaching", "user-supplied"]},
+    "target": {"type": "string"},
+    "provenance": {"type": "string", "minLength": 1},
+    "nominal": {
+      "type": "object",
+      "required": ["vddV", "temperatureC", "muN_uA_V2", "vthN_V", "vthTemp_mV_C", "mobilityExponent", "minLengthUm"],
+      "properties": {
+        "vddV": {"type": "number", "exclusiveMinimum": 0},
+        "temperatureC": {"type": "number", "exclusiveMinimum": -273.15},
+        "muN_uA_V2": {"type": "number", "exclusiveMinimum": 0},
+        "vthN_V": {"type": "number", "minimum": 0},
+        "vthTemp_mV_C": {"type": "number"},
+        "mobilityExponent": {"type": "number", "minimum": 0},
+        "minLengthUm": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "devices": {
+      "type": "object", "required": ["nmos", "pmos"],
+      "properties": {"nmos": {"$ref": "#/$defs/device"}, "pmos": {"$ref": "#/$defs/device"}}
+    },
+    "spice": {
+      "type": "object", "required": ["libraryPath", "section"],
+      "properties": {
+        "libraryPath": {"type": "string", "pattern": "^[^\\r\\n\\u0000\"]*$"},
+        "section": {"type": "string", "pattern": "^[A-Za-z0-9_.-]*$"}
+      }
+    }
+  },
+  "$defs": {
+    "device": {
+      "type": "object", "required": ["model", "kind", "pinOrder"],
+      "properties": {
+        "model": {"type": "string", "pattern": "^[A-Za-z0-9_.-]*$"},
+        "kind": {"enum": ["M", "X"]},
+        "pinOrder": {"type": "array", "minItems": 4, "maxItems": 4, "uniqueItems": true, "items": {"enum": ["D", "G", "S", "B"]}}
+      },
+      "allOf": [{"if": {"properties": {"kind": {"const": "M"}}}, "then": {"properties": {"pinOrder": {"const": ["D", "G", "S", "B"]}}}}]
+    }
+  }
+}

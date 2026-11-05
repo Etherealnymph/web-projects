@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "name": "通用 0.18 µm 教学参数",
+  "mode": "teaching",
+  "target": "tsmc180nmrf · 待授权 PDK",
+  "provenance": "人为设置的教学数值，不是 TSMC 工艺数据。",
+  "nominal": {
+    "vddV": 1.8,
+    "temperatureC": 27,
+    "muN_uA_V2": 100,
+    "vthN_V": 0.45,
+    "vthTemp_mV_C": -1,
+    "mobilityExponent": 1.5,
+    "minLengthUm": 0.18
+  },
+  "devices": {
+    "nmos": {
+      "model": "",
+      "kind": "M",
+      "pinOrder": [
+        "D",
+        "G",
+        "S",
+        "B"
+      ]
+    },
+    "pmos": {
+      "model": "",
+      "kind": "M",
+      "pinOrder": [
+        "D",
+        "G",
+        "S",
+        "B"
+      ]
+    }
+  },
+  "spice": {
+    "libraryPath": "",
+    "section": ""
+  }
+}

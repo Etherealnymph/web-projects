@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f2f5f7"><meta name="description" content="硅海图谱：振荡器、参考源与 PLL 的交互式模拟电路设计空间。透明解析模型，可替换工艺配置。">
+<title>硅海图谱 · Analog Atlas</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<aside class="sidebar">
+<a class="brand" href="./" aria-label="硅海图谱首页"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M3 22c6-24 11 24 17 0S31-2 37 22M3 29c6-24 11 24 17 0S31 5 37 29"/></svg><span>硅海图谱<small>ANALOG ATLAS</small></span></a>
+<div class="side-label">WORKSPACE</div>
+<nav aria-label="主导航">
+<button class="nav active" data-view="explore"><span>◈</span>设计空间<span class="nav-count">09</span></button>
+<button class="nav" data-view="process"><span>▧</span>工艺与模型</button>
+<button class="nav" data-view="guide"><span>☷</span>方法与边界</button>
+</nav>
+<div class="side-label">CIRCUIT FAMILIES</div>
+<nav class="family-nav" aria-label="电路类别">
+<button data-family="all" class="family active"><i class="family-dot all"></i>全部拓扑<span>09</span></button>
+<button data-family="osc" class="family"><i class="family-dot osc"></i>振荡器 <small>OSC</small><span>04</span></button>
+<button data-family="ref" class="family"><i class="family-dot ref"></i>参考源 <small>REF</small><span>04</span></button>
+<button data-family="pll" class="family"><i class="family-dot pll"></i>锁相环 <small>PLL</small><span>01</span></button>
+</nav>
+<div class="sidebar-bottom"><button id="open-saved" class="saved-link">☆ 我的设计快照 <span id="saved-count">0</span></button><div class="process-mini"><i></i><div>透明模型 · 本地计算<small>授权工艺库尚未接入</small></div></div><a href="../" class="back-link">↗ 返回以太工坊</a></div>
+</aside>
+<main>
+<header class="topbar"><div class="crumb">WORKBENCH <span>/</span> <b id="breadcrumb">设计空间</b></div><div class="top-actions"><button id="theme" class="icon-button" aria-label="切换深浅主题" title="切换主题">◐</button><button id="process-shortcut" class="process-badge"><span></span> 教学参数 <b>↗</b></button></div></header>
+<section id="explore-view" class="view">
+<div class="hero"><div><div class="eyebrow"><span></span> FROM TOPOLOGY TO INSIGHT</div><h1>在硅海里，<br>找到你的下一条思路<span>。</span></h1><p>探索振荡器、参考源与锁相环。<br class="mobile-br">从拓扑出发，让每一次参数变化都有据可循。</p><div class="hero-counts"><span><b>09</b> 电路拓扑</span><span><b>03</b> 设计领域</span><span class="live"><i></i> 即时解析计算</span></div></div><div class="hero-graphic" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><svg viewBox="0 0 410 160"><path class="wave-shadow" d="M0 80 C25 80 25 5 50 5 S75 155 100 155 S125 5 150 5 S175 155 200 155 S225 5 250 5 S275 155 300 155 S325 5 350 5 S375 80 410 80"/><path class="wave" d="M0 80 C25 80 25 5 50 5 S75 155 100 155 S125 5 150 5 S175 155 200 155 S225 5 250 5 S275 155 300 155 S325 5 350 5 S375 80 410 80"/></svg><div class="wave-caption">IDEAS IN PHASE<span>φ = 2πft</span></div></div></div>
+<div class="model-notice"><span>i</span><p><b>先理解模型，再连接工艺。</b> 当前数值为教学假设；tsmc180nmrf 仅是后续接入目标，不含代工厂模型或签核结果。</p><button data-view="process">查看配置 →</button></div>
+<div class="explore-toolbar"><div><h2>拓扑浏览器</h2><span id="result-count">9 个可探索模型</span></div><div class="browser-tools"><label class="search-wrap"><span>⌕</span><input id="search" type="search" placeholder="搜索拓扑、用途或英文名称" aria-label="搜索拓扑"></label><button id="compare-open" class="outline-button">⇄ 对比 <span id="compare-count">0</span></button></div></div>
+<nav class="mobile-families" aria-label="筛选电路类别"><button data-family="all" class="active">全部 09</button><button data-family="osc">振荡器 04</button><button data-family="ref">参考源 04</button><button data-family="pll">PLL 01</button></nav>
+<div class="workspace"><section class="library" aria-label="拓扑列表"><div id="cards"></div><div class="library-note">每个模型都有明确公式、<br>输入单位与适用边界。</div></section><section id="detail" class="detail" aria-label="设计工作区"></section></div>
+</section>
+<section id="process-view" class="view" hidden></section>
+<section id="guide-view" class="view" hidden></section>
+<footer>ANALOG ATLAS <span>用可解释的模型，连接直觉与设计。</span><a href="../circuit-lab/">电路实验室 ↗</a></footer>
+</main>
+<dialog id="modal"><div class="modal-header"><h2 id="modal-title"></h2><button id="modal-close" class="icon-button" aria-label="关闭弹窗">×</button></div><div id="modal-body"></div></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="./app.mjs"></script>
+</body></html>

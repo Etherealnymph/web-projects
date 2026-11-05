@@ -1,0 +1,12 @@
+* Analog Atlas - lc - GENERIC TEACHING MODEL
+* No foundry devices. Not TSMC / PDK validation.
+* Analytic and behavioral assumptions are documented in Analog Atlas.
+.options reltol=1e-8 abstol=1e-14 vntol=1e-10
+* Differential equivalent tank; cubic limiting conductance is pedagogical.
+L1 out 0 5.000000000e-9 IC=0
+C1 out 0 1.000000000e-12 IC=0.001
+Rloss out 0 7.071067812e+2
+Bneg out 0 I={-1.500000000e-3*V(out)+6.000000000e-3*V(out)^3}
+.tran 4.442882938e-12 8.885765876e-8 UIC
+.save v(out)
+.end
