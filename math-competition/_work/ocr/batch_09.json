@@ -1,0 +1,129 @@
+{
+  "batch": 9,
+  "date": "2026-09-12",
+  "pages": [
+    {
+      "id": 110,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "18",
+          "statement": "设曲面 $\\Sigma$ 是：$x^2+y^2+z^2=a^2$，$M_0(x_0,y_0,z_0)$ 是空间中任意一点，计算曲面积分 $$\\iint\\limits_{\\Sigma}\\frac{dS}{\\rho},$$ 其中 $$\\rho=\\sqrt{(x-x_0)^2+(y-y_0)^2+(z-z_0)^2}.$$",
+          "answer": "",
+          "note": "投影幕翻拍，解答从本页开始（未算完）。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：(1) 当 $M_0=(0,0,0)$ 时 $\\rho=a$，则 $\\iint_\\Sigma\\frac{dS}{\\rho}=\\frac{1}{a}\\iint_\\Sigma dS=4\\pi a$。(2) 当 $M_0\\neq(0,0,0)$ 时，记 $r_0=\\sqrt{x_0^2+y_0^2+z_0^2}$，$\\varphi$ 为 $OP$ 与 $OM_0$ 的夹角，$P(x,y,z)$ 为球面上一点，由余弦定理 $\\rho=\\sqrt{a^2-2ar_0\\cos\\varphi+r_0^2}$。不妨设 $M_0$ 在 $Oz$ 轴正向，则球面坐标下 $x=a\\sin\\varphi\\cos\\theta,\\ y=a\\sin\\varphi\\sin\\theta,\\ z=a\\cos\\varphi$，且 $dS=a^2\\sin\\varphi\\,d\\varphi\\,d\\theta$，$0\\le\\theta\\le2\\pi$，$0\\le\\varphi\\le\\pi$。",
+      "summary": "第18题：球面上 $dS/\\rho$ 的曲面积分及解答开头",
+      "clarity": "good"
+    },
+    {
+      "id": 111,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "第18题解答续：$$\\iint_\\Sigma\\frac{dS}{\\rho}=\\iint_D\\frac{a^2\\sin\\varphi\\,d\\varphi\\,d\\theta}{\\sqrt{a^2-2ar_0\\cos\\varphi+r_0^2}}=a^2\\int_0^{2\\pi}d\\theta\\int_0^{\\pi}\\frac{\\sin\\varphi\\,d\\varphi}{\\sqrt{a^2-2ar_0\\cos\\varphi+r_0^2}}$$ $$=2\\pi a^2\\int_0^{\\pi}\\frac{\\sin\\varphi\\,d\\varphi}{\\sqrt{a^2-2ar_0\\cos\\varphi+r_0^2}}=\\frac{2\\pi a}{r_0}\\sqrt{a^2-2ar_0\\cos\\varphi+r_0^2}\\Big|_0^{\\pi}$$ $$=\\frac{2\\pi a}{r_0}\\left(a+r_0+|a-r_0|\\right)=\\begin{cases}\\dfrac{4\\pi a^2}{r_0},&r_0\\le a,\\\\[2mm] 4\\pi a,&r_0>a.\\end{cases}$$",
+      "summary": "第18题解答续：化为球面坐标，得分段结果",
+      "clarity": "good"
+    },
+    {
+      "id": 112,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "19",
+          "statement": "设函数 $u(x)$ 在 $[0,1]$ 上连续，且 $$u(x)=1+\\lambda\\int_x^1 u(y)u(y-x)\\,dy,$$ 证明：$\\lambda\\le\\dfrac{1}{2}$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：对所给等式两边在 $[0,1]$ 上积分，得 $\\int_0^1u(x)dx=1+\\lambda\\int_0^1dx\\int_x^1u(y)u(y-x)dy$。交换积分次序并令 $t=y-x$，得 $=1+\\lambda\\int_0^1u(y)\\left(\\int_0^yu(t)dt\\right)dy=1+\\lambda\\int_0^1\\left[\\int_0^yu(t)dt\\right]d\\left[\\int_0^yu(t)dt\\right]=1+\\frac{\\lambda}{2}\\left(\\int_0^1u(t)dt\\right)^2$。设 $\\int_0^1u(x)dx=a$，则 $a=1+\\frac{\\lambda}{2}a^2$，故 $\\lambda\\le\\frac{1}{2}$。",
+      "summary": "第19题：积分方程两边积分，证 $\\lambda\\le1/2$",
+      "clarity": "good"
+    },
+    {
+      "id": 113,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "20",
+          "statement": "设 $f(x)$ 为偶函数，$a>0$，证明：$$\\int_{-a}^{a}dx\\int_{-a}^{a}f(y-x)\\,dy=\\int_0^{2a}f(u)(4a-2u)\\,du.$$",
+          "answer": "",
+          "note": "证明分 (1) 换元法、(2) 令 $u=y-x$ 两种写法，右侧附区域图形。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：(1) 令 $u=y-x,\\ v=y+x$，则 $D$ 变为 $D_1:|u|+|v|\\le2a$，$J=\\frac{\\partial(x,y)}{\\partial(u,v)}=-\\frac{1}{2}$，故 $$\\int_{-a}^{a}dx\\int_{-a}^{a}f(y-x)dy=\\iint_{D_1}f(u)\\frac{1}{2}dudv=\\iint_{D_2}f(u)dudv=\\int_0^{2a}du\\int_{u-2a}^{2a-u}f(u)dv=\\int_0^{2a}f(u)(4a-2u)du.$$ (2) 令 $u=y-x$，则原式 $=\\int_{-a}^{a}dy\\int_{y-a}^{y+a}f(u)du=\\int_{-2a}^{0}du\\int_{-a}^{u+a}f(u)dy+\\int_0^{2a}du\\int_{u-a}^{a}f(u)dy$。",
+      "summary": "第20题：二重积分换元，化成单积分",
+      "clarity": "good"
+    },
+    {
+      "id": 114,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "第20题 (2) 解答续：$=\\int_{-2a}^{0}f(u)(u+2a)du+\\int_0^{2a}f(u)(2a-u)du$，令 $u=-v$ 得 $=\\int_0^{2a}f(-v)(2a-v)dv+\\int_0^{2a}f(u)(2a-u)du$，再由 $f$ 为偶函数得 $=2\\int_0^{2a}f(u)(2a-u)du=\\int_0^{2a}f(u)(4a-2u)du$。",
+      "summary": "第20题解答续：换元后用偶函数性合并",
+      "clarity": "good"
+    },
+    {
+      "id": 115,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "21",
+          "statement": "证明：$$f(x,y)=1+\\int_0^x\\int_0^y f(u,v)\\,du\\,dv$$ 在 $\\begin{cases}0\\le x\\le1,\\\\ 0\\le y\\le1\\end{cases}$ 上至多有一个连续解。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：设存在两个连续解，令 $g$ 为它们的差，则 $g$ 连续且 $g(x,y)=\\int_0^x\\int_0^y g(u,v)dudv$。因 $g$ 在正方形上有界，设 $M$ 是它的一个界，则当 $0\\le x\\le1,\\ 0\\le y\\le1$ 时 $|g(x,y)|\\le\\int_0^x\\int_0^yM\\,dudv=Mxy$。猜想 $|g(x,y)|\\le M\\frac{x^ny^n}{n!\\,n!}$ 对一切 $n$ 成立：$n=k$ 时由归纳 $|g(x,y)|\\le\\int_0^x\\int_0^yM\\frac{u^kv^k}{k!k!}dudv=M\\frac{x^{k+1}y^{k+1}}{(k+1)!(k+1)!}$。对任意固定 $x,y$，$\\lim_{n\\to\\infty}M\\frac{x^ny^n}{n!n!}=0$，故 $|g(x,y)|\\le0$，即 $g(x,y)=0$，所以不可能存在两个不同的连续解。",
+      "summary": "第21题：归纳估计证连续解唯一",
+      "clarity": "good"
+    },
+    {
+      "id": 116,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "22",
+          "statement": "求曲面 $(z+1)^2=(x-z-1)^2+y^2$ 与平面 $z=0$ 及 $z=a$ 围成的立体的体积 $V$，其中 $$a=\\sum_{n=1}^{\\infty}\\frac{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}{(n+1)(n+2)}.$$",
+          "answer": "",
+          "note": "上界平面的字母较模糊，据后文 $a=1$ 及体积积分上限为 $1$ 判断为 $a$；级数上标模糊，判断为 $\\infty$。本页解答未完。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：设 $a_n=1+\\frac{1}{2}+\\cdots+\\frac{1}{n}$，则 $$\\sum_{k=1}^{n}\\frac{a_k}{(k+1)(k+2)}=\\sum_{k=1}^{n}\\left(\\frac{a_k}{k+1}-\\frac{a_k}{k+2}\\right)=\\sum_{k=1}^{n}\\left[\\frac{a_k}{k+1}-\\frac{a_{k+1}}{k+2}+\\frac{1}{(k+1)(k+2)}\\right]$$ $$=\\sum_{k=1}^{n}\\left(\\frac{a_k}{k+1}-\\frac{a_{k+1}}{k+2}\\right)+\\sum_{k=1}^{n}\\frac{1}{(k+1)(k+2)}=\\left(\\frac{1}{2}-\\frac{a_{n+1}}{n+2}\\right)+\\left(\\frac{1}{2}-\\frac{1}{n+2}\\right)=1-\\frac{1}{n+2}-\\frac{a_{n+1}}{n+2}.$$",
+      "summary": "第22题：求旋转曲面体积，先处理级数和",
+      "clarity": "partial"
+    },
+    {
+      "id": 117,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "第22题解答续：由 $0\\le\\dfrac{a_{n+1}}{n+2}=\\dfrac{1}{n+2}\\left(1+\\dfrac{1}{2}+\\cdots+\\dfrac{1}{n+1}\\right)\\le\\dfrac{1}{n+2}+\\dfrac{1}{n+2}\\sum_{k=2}^{n+1}\\dfrac{1}{k}\\le\\dfrac{1}{n+2}+\\dfrac{1}{n+2}\\ln(n+1)$（用到 $0\\le f(x)\\downarrow\\Rightarrow\\sum_{k=2}^{n+1}f(k)\\le\\int_1^{n+1}f(x)dx$），又 $\\lim_{n\\to\\infty}\\left[\\dfrac{1}{n+2}+\\dfrac{1}{n+2}\\ln(n+1)\\right]=0$，故 $\\lim_{n\\to\\infty}\\dfrac{a_{n+1}}{n+2}=0$，从而 $a=\\lim_{n\\to\\infty}\\sum_{k=1}^{n}\\dfrac{1+\\frac{1}{2}+\\cdots+\\frac{1}{k}}{(k+1)(k+2)}=1$。",
+      "summary": "第22题解答续：夹逼得级数和 $a=1$",
+      "clarity": "good"
+    },
+    {
+      "id": 118,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "23",
+          "statement": "设 $\\Omega$ 是由曲面 $z=y^2$，$z=4y^2\\ (y>0)$，平面 $z=x$，$z=2x$ 及 $z=2$ 所围成的区域，计算下列积分：(1) $\\iiint\\limits_{\\Omega}x^2\\,dx\\,dy\\,dz$；(2) $\\iiint\\limits_{\\Omega}\\dfrac{z}{y^3}\\cos\\dfrac{z^2}{y^2}\\,dx\\,dy\\,dz$。",
+          "answer": "(1) $\\dfrac{14}{27}\\sqrt{2}$",
+          "note": "本页开头是第22题的体积收尾；第(2)问被积函数中 $y$ 的幂次字迹较小，暂记为 $y^3$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "第22题收尾：$V=\\iiint_\\Omega dV=\\int_0^1dz\\iint_{D_z}d\\sigma$（先二后一），其中 $D_z=\\{(x,y)\\mid(x-z-1)^2+y^2=(z+1)^2\\}$ 是 $\\Omega$ 在竖坐标为 $z$ 的平面上的截面在 $xOy$ 平面上的投影，故 $V=\\int_0^1\\pi(z+1)^2dz=\\frac{7}{3}\\pi$。第23题解：$\\Omega$ 在 $yOz$ 面上的投影区域为 $D:\\frac{1}{2}\\sqrt{z}\\le y\\le\\sqrt{z},\\ 0\\le z\\le2$；于是 (1) $\\iiint_\\Omega x^2dxdydz=\\iint_D dydz\\int_{z/2}^{z}x^2dx=\\int_0^2dz\\int_{\\sqrt{z}/2}^{\\sqrt{z}}dy\\int_{z/2}^{z}x^2dx=\\frac{14}{27}\\sqrt{2}$。",
+      "summary": "第22题算得 $V=7\\pi/3$；第23题开始，得 (1) 之值",
+      "clarity": "partial"
+    }
+  ]
+}

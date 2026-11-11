@@ -1,0 +1,232 @@
+{
+  "batch": 14,
+  "date": "2026-10-06",
+  "pages": [
+    {
+      "id": 170,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "9",
+          "statement": "设 $\\{a_n,n\\ge 1\\}$ 是正实数列，证明：若级数 $\\sum_{n=1}^{\\infty}\\frac{1}{a_n}$ 收敛，则级数 $\\sum_{n=1}^{\\infty}\\frac{n^2a_n}{(a_1+\\cdots+a_n)^2}$ 收敛。",
+          "answer": "",
+          "note": "题干与证明同屏，画面下缘略被裁切"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：记 $A_n=a_1+a_2+\\cdots+a_n$（$n\\ge1$，$A_0=0$），则 $a_k=A_k-A_{k-1}$。于是 $S_n=\\sum_{k=1}^{n}\\frac{k^2}{A_k^2}(A_k-A_{k-1})\\le\\frac{1}{a_1}+\\sum_{k=2}^{n}\\frac{k^2}{A_kA_{k-1}}(A_k-A_{k-1})$。拆项并合并同类项，得 $S_n=\\frac{5}{a_1}+2\\sum_{k=2}^{n-1}\\frac{k}{A_k}+\\sum_{k=2}^{n-1}\\frac{1}{A_k}-\\frac{n^2}{A_n}$。后续估计见下一页。",
+      "summary": "第9题：以 $A_n$ 拆项估计部分和的上界",
+      "clarity": "good"
+    },
+    {
+      "id": 171,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "承接上页：由柯西不等式 $\\sum_{k=1}^{n}\\frac{k}{A_k}=\\sum_{k=1}^{n}\\frac{k}{A_k}\\cdot\\sqrt{a_k}\\cdot\\frac{1}{\\sqrt{a_k}}\\le\\sqrt{\\sum_{k=1}^{n}\\frac{k^2a_k}{A_k^2}}\\cdot\\sqrt{\\sum_{k=1}^{n}\\frac{1}{a_k}}=\\sqrt{S_n}\\cdot\\sqrt{\\sum_{k=1}^{n}\\frac{1}{a_k}}$。代入得 $S_n\\le\\frac{5}{a_1}+2\\sqrt{S_n}\\sqrt{\\sum_{k=1}^{n}\\frac{1}{a_k}}+\\sum_{k=1}^{n}\\frac{1}{a_k}$。视作 $\\sqrt{S_n}$ 的二次不等式，得 $\\sqrt{S_n}\\le\\sqrt{\\sum_{k=1}^{n}\\frac{1}{a_k}}+\\sqrt{\\frac{5}{a_1}+2\\sum_{k=1}^{n}\\frac{1}{a_k}}$。记 $\\sigma=\\sum_{k=1}^{\\infty}\\frac{1}{a_k}$，则 $\\sqrt{S_n}\\le\\sqrt{\\sigma}+\\sqrt{\\frac{5}{a_1}+2\\sigma}$，$S_n$ 有界，故所证级数收敛。",
+      "summary": "第9题证明续：柯西不等式放缩得 $S_n$ 有界",
+      "clarity": "good"
+    },
+    {
+      "id": 172,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "10",
+          "statement": "设实常数 $\\alpha>1$，证明：级数 $\\sum_{n=1}^{\\infty}\\frac{n}{1^{\\alpha}+2^{\\alpha}+\\cdots+n^{\\alpha}}$ 收敛。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：$\\lim_{n\\to\\infty}\\frac{n}{1^{\\alpha}+2^{\\alpha}+\\cdots+n^{\\alpha}}=\\lim_{n\\to\\infty}\\frac{1}{\\left[\\left(\\frac{1}{n}\\right)^{\\alpha}+\\left(\\frac{2}{n}\\right)^{\\alpha}+\\cdots+\\left(\\frac{n}{n}\\right)^{\\alpha}\\right]\\frac{1}{n}}=\\frac{1}{\\lim_{n\\to\\infty}\\sum_{i=1}^{n}\\left(\\frac{i}{n}\\right)^{\\alpha}\\cdot\\frac{1}{n}}=\\frac{1}{\\int_0^1x^{\\alpha}dx}=\\alpha+1$。因 $\\alpha>1$ 时 $\\sum_{n=1}^{\\infty}\\frac{1}{n^{\\alpha}}$ 收敛，由比较判别法的极限形式知原级数收敛。",
+      "summary": "第10题：通项极限为 $\\alpha+1$，与 $\\sum n^{-\\alpha}$ 比较",
+      "clarity": "good"
+    },
+    {
+      "id": 173,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "11",
+          "statement": "已知函数 $f(x)$ 可导，且 $f(0)=1$，$0<f'(x)<\\frac{1}{2}$，设数列 $\\{x_n\\}$ 满足 $x_{n+1}=f(x_n)$ $(n=1,2,\\cdots)$，证明：(1) 级数 $\\sum_{n=1}^{\\infty}(x_{n+1}-x_n)$ 绝对收敛；(2) $\\lim_{n\\to\\infty}x_n$ 存在，且 $0<\\lim_{n\\to\\infty}x_n<2$。",
+          "answer": "",
+          "note": "(1)、(2) 分列同一行"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证 (1)：$|x_{n+1}-x_n|=|f(x_n)-f(x_{n-1})|=|f'(\\xi)(x_n-x_{n-1})|<\\frac{1}{2}|x_n-x_{n-1}|$。递推得 $|x_{n+1}-x_n|<\\frac{1}{2^{n-1}}|x_2-x_1|$。因 $\\sum_{n=1}^{\\infty}\\frac{1}{2^{n-1}}|x_2-x_1|$ 收敛，故 $\\sum_{n=1}^{\\infty}|x_{n+1}-x_n|$ 收敛，即原级数绝对收敛。",
+      "summary": "第11题：用中值定理与公比 $1/2$ 的几何级数证绝对收敛",
+      "clarity": "good"
+    },
+    {
+      "id": 174,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "11",
+          "statement": "已知函数 $f(x)$ 可导，且 $f(0)=1$，$0<f'(x)<\\frac{1}{2}$，设数列 $\\{x_n\\}$ 满足 $x_{n+1}=f(x_n)$ $(n=1,2,\\cdots)$，证明：(1) 级数 $\\sum_{n=1}^{\\infty}(x_{n+1}-x_n)$ 绝对收敛；(2) $\\lim_{n\\to\\infty}x_n$ 存在，且 $0<\\lim_{n\\to\\infty}x_n<2$。",
+          "answer": "",
+          "note": "同一张幻灯片反复出现，此张显示 (2) 的证明开头"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证 (2)：$s_n=\\sum_{k=1}^{n}(x_{k+1}-x_k)=x_{n+1}-x_1$，由 (1) 知 $\\sum_{n=1}^{\\infty}(x_{n+1}-x_n)$ 收敛，故 $\\lim_{n\\to\\infty}s_n=\\lim_{n\\to\\infty}(x_{n+1}-x_1)$ 存在，即 $\\lim_{n\\to\\infty}x_n$ 存在，设为 $A$。又 $x_{n+1}=f(x_n)=f(0)+f'(\\zeta)x_n<1+\\frac{1}{2}x_n$，由此估计 $A$ 的范围（见下页）。",
+      "summary": "第11题(2)：部分和收敛得 $\\lim x_n$ 存在，并估计上界",
+      "clarity": "good"
+    },
+    {
+      "id": 175,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "续证 (2)：由 $x_{n+1}=f(x_n)=f(0)+f'(\\zeta)x_n<1+\\frac{1}{2}x_n$ 取极限得 $A<1+\\frac{1}{2}A$，故 $A<2$。若 $A=0$，由 $x_{n+1}=1+f'(\\zeta)x_n$ 得 $0=1$，矛盾；若 $A<0$，则 $A=1+Af'(\\zeta)$，即 $[1-f'(\\zeta)]A=1$，显然矛盾。故 $\\lim_{n\\to\\infty}x_n$ 存在，且 $0<\\lim_{n\\to\\infty}x_n<2$。",
+      "summary": "第11题(2)收尾：排除 $A\\le0$，得 $0<A<2$",
+      "clarity": "good"
+    },
+    {
+      "id": 176,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "例12",
+          "statement": "讨论级数 $\\sum_{n=1}^{\\infty}\\frac{1}{n^p}\\left(1-\\frac{x\\ln n}{n}\\right)^n$ 的敛散性与参数 $p,x$ 的关系。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：$n$ 充分大时 $1-\\frac{x\\ln n}{n}>0$，故为正项级数。与 $\\frac{1}{n^{p+x}}$ 比较，比值的极限为 $\\lim_{n\\to\\infty}\\left[n\\left(1-\\frac{x\\ln n}{n}\\right)^{\\frac{n}{x}}\\right]^x=\\lim_{n\\to\\infty}(y_n)^x$。而 $\\ln y_n=\\ln n+\\frac{n}{x}\\ln\\left(1-\\frac{x\\ln n}{n}\\right)$，用 $\\ln(1+t)=t-\\frac{t^2}{2}+o(t^2)$ 展开得 $\\ln y_n=-\\frac{1}{2}\\cdot\\frac{x\\ln^2n}{n}+o\\left(\\frac{x\\ln^2n}{n}\\right)\\to0$，故 $\\lim y_n=1$。于是 $p+x>1$ 时级数收敛，$p+x\\le1$ 时级数发散。",
+      "summary": "例12：与 $\\sum n^{-(p+x)}$ 比较，得 $p+x>1$ 收敛",
+      "clarity": "good"
+    },
+    {
+      "id": 177,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "13",
+          "statement": "设 $\\sum_{n=1}^{\\infty}a_n$ 为正项级数，$a_n$ 单调减少，证明：$\\sum_{n=1}^{\\infty}a_n$ 收敛 $\\Leftrightarrow \\sum_{n=1}^{\\infty}2^na_{2^n}$ 收敛。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：设两级数的部分和分别为 $S_n$ 与 $\\sigma_n$，由 $a_n$ 单调减少且非负，$S_{2^n}<a_1+(a_2+a_3)+\\cdots+(a_{2^n}+\\cdots+a_{2^{n+1}-1})<a_1+2a_2+\\cdots+2^na_{2^n}=\\sigma_n$。另一方面 $S_{2^n}=a_1+a_2+(a_3+a_4)+\\cdots+(a_{2^{n-1}+1}+\\cdots+a_{2^n})>\\frac{1}{2}a_1+a_2+2a_4+\\cdots+2^{n-1}a_{2^n}=\\frac{1}{2}\\sigma_n$。故 $S_n$ 有界 $\\Leftrightarrow\\sigma_n$ 有界，两级数同敛散。",
+      "summary": "第13题：夹在 $\\sigma_n$ 与 $\\sigma_n/2$ 之间，同敛散",
+      "clarity": "good"
+    },
+    {
+      "id": 178,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "14",
+          "statement": "设 $\\{a_n\\}$ 是实数列，它满足不等式 $0\\le a_k\\le 100a_n$，其中 $n\\le k\\le 2n$，$n=1,2,\\cdots$，又级数 $\\sum_{n=0}^{\\infty}a_n$ 收敛，证明 $\\lim_{n\\to\\infty}na_n=0$。",
+          "answer": "",
+          "note": "求和下标原图作 $n=0$，疑为 $n=1$；右侧页边另注 $n\\le 2n\\le 2n$、$n+1\\le 2n\\le 2(n+1)$ 等"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：由 $0\\le a_k\\le100a_n$（$n\\le k\\le2n$）取 $k=2n$，得 $0\\le a_{2n}\\le100a_n,100a_{n+1},\\cdots,100a_{2n-1}$，相加得 $0\\le na_{2n}\\le100(a_n+a_{n+1}+\\cdots+a_{2n-1})$。因 $\\sum a_n$ 收敛，$\\lim_{n\\to\\infty}(S_{2n}-S_n)=\\lim_{n\\to\\infty}(a_n+a_{n+1}+\\cdots+a_{2n-1})=0$，故 $\\lim_{n\\to\\infty}(2n)a_{2n}=0$。又 $0\\le(2n-1)a_{2n-1}\\le2na_{2n-1}\\le200(a_n+a_{n+1}+\\cdots+a_{2n-1})$，故 $\\lim_{n\\to\\infty}(2n-1)a_{2n-1}=0$，从而 $\\lim_{n\\to\\infty}na_n=0$。",
+      "summary": "第14题：分奇偶下标夹逼，归到 $S_{2n}-S_n\\to0$",
+      "clarity": "good"
+    },
+    {
+      "id": 179,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "15",
+          "statement": "设正项级数 $\\sum_{n=1}^{\\infty}a_n$ 收敛，证明：级数 $\\sum_{n=1}^{\\infty}(a_n)^{\\frac{n}{n+1}}$ 收敛。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：令 $T=\\{n\\in N\\mid (a_n)^{\\frac{n}{n+1}}<2a_n\\}$。当 $n\\notin T$ 时 $(a_n)^{\\frac{n}{n+1}}\\ge2a_n$，即 $(a_n)^{\\frac{1}{n+1}}\\le\\frac{1}{2}$，故 $(a_n)^{\\frac{n}{n+1}}\\le\\left(\\frac{1}{2}\\right)^n$。于是 $\\sum_{n=1}^{\\infty}(a_n)^{\\frac{n}{n+1}}=\\sum_{n\\in T}(a_n)^{\\frac{n}{n+1}}+\\sum_{n\\notin T}(a_n)^{\\frac{n}{n+1}}\\le\\sum_{n=1}^{\\infty}2a_n+\\sum_{n=1}^{\\infty}\\frac{1}{2^n}$。右端两个级数均收敛，故原级数收敛。",
+      "summary": "第15题：按集合 $T$ 分两类，分别用 $2a_n$ 与 $2^{-n}$ 控制",
+      "clarity": "good"
+    },
+    {
+      "id": 180,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "16",
+          "statement": "已知某级数的部分和为 $S_n=\\frac{1}{2}+\\frac{1}{2^2}+\\frac{2}{2^3}+\\frac{3}{2^4}+\\frac{5}{2^5}+\\frac{8}{2^6}+\\frac{13}{2^7}+\\cdots+\\frac{a_{n-1}}{2^{n-1}}+\\frac{a_n}{2^n}$，其中 $a_n=a_{n-1}+a_{n-2}$ $(n=3,4,5,\\cdots)$；(1) 证明此级数收敛；(2) 求此级数的和。",
+          "answer": "2",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：$a_n=a_{n-1}+a_{n-2}$ 对应的特征方程为 $r^2-r-1=0$，根为 $r_1=\\frac{1+\\sqrt5}{2}$、$r_2=\\frac{1-\\sqrt5}{2}$，故 $a_n=Ar_1^n+Br_2^n$，由 $a_1=a_2=1$ 得 $A=\\frac{1}{\\sqrt5}$、$B=-\\frac{1}{\\sqrt5}$。于是 $\\sum_{n=1}^{\\infty}\\frac{a_n}{2^n}=A\\sum_{n=1}^{\\infty}\\left(\\frac{r_1}{2}\\right)^n+B\\sum_{n=1}^{\\infty}\\left(\\frac{r_2}{2}\\right)^n$ 是两个公比绝对值小于 1 的等比级数之和，故收敛。其和为 $A\\frac{r_1/2}{1-r_1/2}+B\\frac{r_2/2}{1-r_2/2}=2$。",
+      "summary": "第16题：特征根法求通项，等比级数求和得 2",
+      "clarity": "good"
+    },
+    {
+      "id": 181,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "16",
+          "statement": "已知某级数的部分和为 $S_n=\\frac{1}{2}+\\frac{1}{2^2}+\\frac{2}{2^3}+\\frac{3}{2^4}+\\frac{5}{2^5}+\\frac{8}{2^6}+\\frac{13}{2^7}+\\cdots+\\frac{a_{n-1}}{2^{n-1}}+\\frac{a_n}{2^n}$，其中 $a_n=a_{n-1}+a_{n-2}$ $(n=3,4,5,\\cdots)$；(1) 证明此级数收敛；(2) 求此级数的和。",
+          "answer": "2",
+          "note": "与上一张内容相同，为同一页幻灯片的另一拍摄角度"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：对递推 $a_n=a_{n-1}+a_{n-2}$ 写特征方程 $r^2-r-1=0$，得 $r_1=\\frac{1+\\sqrt5}{2}$、$r_2=\\frac{1-\\sqrt5}{2}$，通项 $a_n=Ar_1^n+Br_2^n$；由 $a_1=a_2=1$ 定出 $A=\\frac{1}{\\sqrt5}$、$B=-\\frac{1}{\\sqrt5}$。从而 $\\sum_{n=1}^{\\infty}\\frac{a_n}{2^n}=A\\sum_{n=1}^{\\infty}\\left(\\frac{r_1}{2}\\right)^n+B\\sum_{n=1}^{\\infty}\\left(\\frac{r_2}{2}\\right)^n$，两个等比级数均收敛（公比 $\\frac{r_1}{2}$、$\\frac{r_2}{2}$ 绝对值小于 1），故级数收敛。再由等比求和得 $\\sum_{n=1}^{\\infty}\\frac{a_n}{2^n}=A\\frac{r_1/2}{1-r_1/2}+B\\frac{r_2/2}{1-r_2/2}=2$。",
+      "summary": "第16题（同页另一角度）：证明收敛并求得和为 2",
+      "clarity": "good"
+    },
+    {
+      "id": 182,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "Ex",
+          "statement": "设 $a_1=a_2=1$，$a_n=a_{n-1}+a_{n-2}$ $(n\\ge3)$，求级数 $\\sum_{n=1}^{\\infty}\\frac{a_n}{2^n}$ 的和。",
+          "answer": "2",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：通项 $a_n=\\frac{1}{\\sqrt5}\\left[\\left(\\frac{1+\\sqrt5}{2}\\right)^{n+1}-\\left(\\frac{1-\\sqrt5}{2}\\right)^{n+1}\\right]$。记 $b_n=\\frac{a_n}{2^n}$，则 $\\lim_{n\\to\\infty}\\frac{b_{n+1}}{b_n}=\\frac{1+\\sqrt5}{4}<1$，故级数收敛。由 $a_n=a_{n-1}+a_{n-2}$ 得 $b_n=\\frac{1}{2}b_{n-1}+\\frac{1}{4}b_{n-2}$，对 $k=3,\\cdots,n$ 相加得 $s_n-\\frac{1}{2}-\\frac{1}{2^2}=\\frac{1}{2}\\left(s_{n-1}-\\frac{1}{2}\\right)+\\frac{1}{4}s_{n-2}$。令 $\\lim_{n\\to\\infty}s_n=s$，两边取极限得 $s=2$，即 $\\sum_{n=1}^{\\infty}\\frac{a_n}{2^n}=2$。",
+      "summary": "Ex：比值判别收敛，部分和递推取极限得和为 2",
+      "clarity": "good"
+    },
+    {
+      "id": 183,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "17",
+          "statement": "设正项级数 $\\sum_{n=1}^{\\infty}a_n$ 收敛，证明：$\\lim_{n\\to\\infty}\\frac{\\sum_{k=1}^{n}ka_k}{n}=0$。",
+          "answer": "",
+          "note": "末行附注：若 $\\lim_{n\\to\\infty}a_n=a$，则 $\\lim_{n\\to\\infty}\\frac{a_1+a_2+\\cdots+a_n}{n}=a$"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：设 $S=\\sum_{n=1}^{\\infty}a_n$，$S_n=\\sum_{k=1}^{n}a_k$，则 $S_n\\to S$（$n\\to\\infty$）。由 $\\sum_{k=1}^{n}ka_k=nS_n-\\sum_{k=1}^{n-1}S_k$，有 $\\lim_{n\\to\\infty}\\frac{\\sum_{k=1}^{n}ka_k}{n}=\\lim_{n\\to\\infty}\\left(S_n-\\frac{1}{n}\\sum_{k=1}^{n-1}S_k\\right)$。把 $\\frac{1}{n}\\sum_{k=1}^{n-1}S_k$ 写成 $\\frac{n-1}{n}\\cdot\\frac{1}{n-1}\\sum_{k=1}^{n-1}S_k$，由 $S_n\\to S$ 知其极限为 $S$，故原极限 $=S-S=0$。",
+      "summary": "第17题：分部求和 $\\sum ka_k=nS_n-\\sum S_k$ 再用柯西命题",
+      "clarity": "good"
+    },
+    {
+      "id": 184,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "18",
+          "statement": "设正项级数 $\\sum_{n=1}^{\\infty}a_n$ 收敛，证明：$\\lim_{n\\to\\infty}\\frac{n^2}{\\frac{1}{a_1}+\\frac{1}{a_2}+\\cdots+\\frac{1}{a_n}}=0$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：由 $0\\le\\frac{n}{\\frac{1}{a_1}+\\cdots+\\frac{1}{a_n}}\\le\\sqrt[n]{a_1a_2\\cdots a_n}\\le\\frac{a_1+a_2+\\cdots+a_n}{n}$ 同乘 $n$，得 $0\\le\\frac{n^2}{\\frac{1}{a_1}+\\cdots+\\frac{1}{a_n}}\\le n\\sqrt[n]{a_1a_2\\cdots a_n}\\le n\\cdot\\frac{a_1+a_2+\\cdots+a_n}{n}$。再用加权均值不等式 $\\sqrt[n]{a_1(2a_2)\\cdots(na_n)}\\le\\frac{a_1+2a_2+\\cdots+na_n}{n}$，得 $\\frac{n^2}{\\frac{1}{a_1}+\\cdots+\\frac{1}{a_n}}\\le\\frac{n}{\\sqrt[n]{n!}}\\cdot\\frac{a_1+2a_2+\\cdots+na_n}{n}$。因 $\\lim_{n\\to\\infty}\\frac{n}{\\sqrt[n]{n!}}=e$，$\\lim_{n\\to\\infty}\\frac{a_1+2a_2+\\cdots+na_n}{n}=0$，故所证极限为 $0$。",
+      "summary": "第18题：调和—几何—算术平均夹逼，右端趋于 0",
+      "clarity": "good"
+    }
+  ]
+}

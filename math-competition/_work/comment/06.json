@@ -1,0 +1,85 @@
+{
+  "chunk": 6,
+  "items": [
+    {
+      "pid": 81,
+      "commentary": "考点：交换积分次序 + 一个与 $y$ 无关的核积分。先对 $x$ 积，令 $\\frac{1+y}{2}-x=\\frac{1-y}{2}\\sin t$ 得 $\\int_y^1\\frac{dx}{\\sqrt{(1-x)(x-y)}}=\\pi$，于是原式 $=\\pi[f(1)-f(0)]=\\pi$。易错：忘了把 $f'(y)$ 当常数提出，或在根式上硬凑。",
+      "solution_clean": "交换次序后先对 $x$ 积：$\\int_y^1\\frac{dx}{\\sqrt{(1-x)(x-y)}}$，配方成 $\\sqrt{(\\frac{1-y}{2})^2-(\\frac{1+y}{2}-x)^2}$，令 $\\frac{1+y}{2}-x=\\frac{1-y}{2}\\sin t$ 化为 $\\int_{-\\pi/2}^{\\pi/2}dt=\\pi$。\n故原式 $=\\pi\\int_0^1f'(y)dy=\\pi[f(1)-f(0)]=\\pi$。"
+    },
+    {
+      "pid": 82,
+      "commentary": "考点：Green 公式 + 积分中值定理 + 令 $R\\to0$ 的局部化。补上直径 $AB$ 得 $\\int_{x_0-R}^{x_0+R}P(x,y_0)dx=\\frac{\\pi R^2}{2}(Q_x-P_y)|_{(\\xi,\\eta)}$，两边除 $2R$ 再令 $R\\to0$ 即得 $P\\equiv0$。第 (2) 问须用上下半圆拼成整圆，得 $\\iint Q_x\\,dA=0$ 后除以面积再取极限；只做 (1) 是最常见的失分。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 83,
+      "commentary": "考点：三重积分的对称性 + 柱坐标/极坐标 + 换序。立方体关于 $x=y$ 对称，化到 $0\\le y\\le x$ 再乘 2；该区域极坐标是 $\\theta\\in[0,\\frac\\pi4]$、$r\\le\\sec\\theta$（写成 $r\\le1$ 就错了）。用 $2r\\,dr=d(1+r^2+z^2)$ 积出内层，余下 $\\int_0^1dz\\int_0^{\\pi/4}\\big(\\frac1{1+z^2}-\\frac1{2+z^2+\\tan^2\\theta}\\big)d\\theta$ 再换序。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 84,
+      "commentary": "考点：对称性 + 极坐标（射线扫正方形，$r\\le\\sec\\theta$）。$I=2\\iint_{D_1}$ 后内层 $\\int_0^{\\sec\\theta}\\frac{2r\\,dr}{(1+r^2)^2}=1-\\frac1{2+\\tan^2\\theta}$ 一步到位。剩下 $\\int_0^{\\pi/4}\\frac{d\\theta}{2+\\tan^2\\theta}$ 令 $u=\\tan\\theta$ 拆成 $\\frac1{1+u^2}-\\frac1{2+u^2}$，它与前面的 $\\frac\\pi4$ 正好抵消，别算漏。",
+      "solution_clean": "$D$ 关于 $x=y$ 对称，取 $D_1:0\\le y\\le x\\le1$，则 $I=2\\iint_{D_1}\\frac{dxdy}{(1+x^2+y^2)^2}$。\n极坐标下 $D_1:0\\le\\theta\\le\\frac\\pi4,\\ 0\\le r\\le\\sec\\theta$，\n$I=2\\int_0^{\\pi/4}\\!d\\theta\\int_0^{\\sec\\theta}\\frac{r\\,dr}{(1+r^2)^2}=\\int_0^{\\pi/4}\\Big(1-\\frac1{2+\\tan^2\\theta}\\Big)d\\theta$。\n令 $u=\\tan\\theta$：$\\int_0^{\\pi/4}\\frac{d\\theta}{2+\\tan^2\\theta}=\\int_0^1\\Big(\\frac1{1+u^2}-\\frac1{2+u^2}\\Big)du=\\frac\\pi4-\\frac1{\\sqrt2}\\arctan\\frac1{\\sqrt2}$。\n故 $I=\\frac\\pi4-\\Big(\\frac\\pi4-\\frac1{\\sqrt2}\\arctan\\frac1{\\sqrt2}\\Big)=\\frac1{\\sqrt2}\\arctan\\frac1{\\sqrt2}$。"
+    },
+    {
+      "pid": 85,
+      "commentary": "考点：分割区域 + 球坐标（球心平移）+ 球缺。把空心体写成一个球 $x^2+y^2+(z-1)^2\\le9$ 减去小球 $x^2+y^2+(z-2)^2\\le4$、再减去 $z<0$ 的球缺，每块各用其球心化球坐标。最易错：$z\\ge0$ 会切掉一块球缺，漏掉它结果必偏大；换球心后 $x^2+y^2=\\rho^2\\sin^2\\varphi$ 里的 $\\varphi$ 是相对新球心的角。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 86,
+      "commentary": "考点：Gauss 公式 + 把 $I$ 看成区域泛函求极小。由 $I=3\\iiint_\\Omega(x^2+2y^2+3z^2-1)dV$ 看出被积式只在椭球 $x^2+2y^2+3z^2\\le1$ 内为负，故 $\\Omega$ 取该椭球时 $I$ 最小。第二步伸缩换元 $u=x,\\ v=\\sqrt2y,\\ w=\\sqrt3z$ 化单位球，$|J|=\\frac1{\\sqrt6}$（别写成 $\\sqrt6$），这是唯一容易算错的地方。",
+      "solution_clean": "$I=\\iiint_\\Omega(3x^2+6y^2+9z^2-3)dV=3\\iiint_\\Omega(x^2+2y^2+3z^2-1)dV$，被积式仅在椭球 $E:x^2+2y^2+3z^2\\le1$ 内为负，故 $\\Omega=E$、$\\Sigma=\\partial E$ 时 $I$ 最小。\n令 $u=x,\\ v=\\sqrt2y,\\ w=\\sqrt3z$，则 $E$ 化为 $u^2+v^2+w^2\\le1$，$|J|=\\frac1{\\sqrt6}$，\n$I=\\frac3{\\sqrt6}\\iiint_{u^2+v^2+w^2\\le1}(u^2+v^2+w^2-1)dudvdw=\\frac{3}{\\sqrt6}\\cdot4\\pi\\int_0^1(r^2-1)r^2dr$，\n$I=\\frac{12\\pi}{\\sqrt6}\\Big(\\frac15-\\frac13\\Big)=-\\frac{8\\pi}{5\\sqrt6}=-\\frac{4\\sqrt6}{15}\\pi$。"
+    },
+    {
+      "pid": 87,
+      "commentary": "考点：对称性 + 球坐标下的变上限积分。$(x^2+y^2+z^2)^2=2xy$ 即 $\\rho^2=2\\sin^2\\varphi\\sin\\theta\\cos\\theta$，故 $\\rho$ 的上限依赖 $\\varphi,\\theta$，不能当常数提出；被积式乘 Jacobian 后 $\\sin^2\\varphi$ 恰好约掉，只剩 $\\rho^3\\sin\\varphi\\cos\\varphi\\sin\\theta\\cos\\theta$。收尾用 Wallis：$\\frac16\\cdot\\frac1{12}=\\frac1{72}$。",
+      "solution_clean": "球坐标下曲面为 $\\rho^2=2\\sin^2\\varphi\\sin\\theta\\cos\\theta$，即 $\\rho\\le\\sqrt2\\sin\\varphi\\sqrt{\\sin\\theta\\cos\\theta}$，$0\\le\\theta,\\varphi\\le\\frac\\pi2$。\n被积式乘 Jacobian：$\\frac{xyz}{x^2+y^2}\\cdot\\rho^2\\sin\\varphi=\\rho^3\\sin\\varphi\\cos\\varphi\\sin\\theta\\cos\\theta$。\n$I=\\int_0^{\\pi/2}\\!\\!\\int_0^{\\pi/2}\\frac{\\rho^4}{4}\\sin\\varphi\\cos\\varphi\\sin\\theta\\cos\\theta\\,d\\varphi d\\theta$，代入 $\\rho^4=4\\sin^4\\varphi\\sin^2\\theta\\cos^2\\theta$，\n$I=\\int_0^{\\pi/2}\\sin^5\\varphi\\cos\\varphi\\,d\\varphi\\cdot\\int_0^{\\pi/2}\\sin^3\\theta\\cos^3\\theta\\,d\\theta=\\frac16\\cdot\\frac1{12}=\\frac1{72}$。"
+    },
+    {
+      "pid": 88,
+      "commentary": "考点：把一元反常积分平方成二重积分再化极坐标。$u^2(x)=\\iint_{s,t\\ge0}e^{-x(s^2+t^2)}dsdt=\\int_0^{\\pi/2}\\!d\\theta\\int_0^\\infty e^{-xr^2}r\\,dr=\\frac{\\pi}{4x}$，开方即得。$e^{-xt^2}$ 没有初等原函数，别指望直接积；顺带记住 $\\int_0^\\infty e^{-xt^2}dt=\\frac{\\sqrt\\pi}{2\\sqrt x}$ 这个常用结论。",
+      "solution_clean": "$u^2(x)=\\iint_{s,t\\ge0}e^{-x(s^2+t^2)}dsdt=\\int_0^{\\pi/2}\\!d\\theta\\int_0^\\infty e^{-xr^2}r\\,dr=\\frac{\\pi}{2}\\cdot\\frac1{2x}=\\frac{\\pi}{4x}$。\n故 $u(x)=\\frac{\\sqrt\\pi}{2\\sqrt x}\\ (x>0)$。"
+    },
+    {
+      "pid": 89,
+      "commentary": "考点：交换积分次序 + 分部积分。把 $f(x)=\\int_x^\\infty e^{-t^2}dt$ 看成内层，$\\int_0^\\infty xf(x)dx=\\iint_{0\\le x\\le t}e^{-t^2}x\\,dxdt=\\frac12\\int_0^\\infty t^2e^{-t^2}dt$。再分部得 $\\frac14\\int_0^\\infty e^{-t^2}dt$。易错：$te^{-t^2}$ 的原函数带 $-\\frac12$，符号与系数 $\\frac12,\\frac14$ 是丢分点。",
+      "solution_clean": "由 Fubini，$\\int_0^\\infty xf(x)dx=\\int_0^\\infty e^{-t^2}\\Big(\\int_0^t x\\,dx\\Big)dt=\\frac12\\int_0^\\infty t^2e^{-t^2}dt$。\n分部：$\\frac12\\int_0^\\infty t\\cdot te^{-t^2}dt=-\\frac14\\int_0^\\infty t\\,d(e^{-t^2})=\\frac14\\int_0^\\infty e^{-t^2}dt$。\n故原式 $=\\frac14\\cdot\\frac{\\sqrt\\pi}{2}=\\frac{\\sqrt\\pi}{8}$。"
+    },
+    {
+      "pid": 90,
+      "commentary": "考点：正交变换化二次型 + 伸缩换元化单位球。先由 $P^TAP=\\Lambda$ 对角化，再令 $u_i=\\sqrt{\\lambda_i}\\,x_i$（$|J|=\\frac1{\\sqrt{\\det A}}$），得 $I=\\frac{4\\pi}{\\sqrt{\\det A}}\\int_0^1\\rho^2e^{\\rho^2}d\\rho$。最后一元积分须分部：$\\int_0^1\\rho^2e^{\\rho^2}d\\rho=\\frac e2-\\frac12\\int_0^1e^{\\rho^2}d\\rho\\approx0.628$，并不等于 $e-2$，务必自己算一遍。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 91,
+      "commentary": "考点：含参重积分求极限 + 洛必达与导数定义的分野。第 (1) 问 $f\\in C^1$ 时先交换次序，$\\frac{dI_t}{dt}$ 里的 $t^3$ 与分母 $t^4$ 的 $t^3$ 约掉，得 $\\frac{\\pi f'(0)}2$。第 (2) 问 $f$ 只在 $0$ 可导，洛必达失效，须换成 $f(u)-f'(0)u=o(u)$ 的一致估计——这正是本题的考点。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 92,
+      "commentary": "考点：第二型曲面积分 + 挖奇点（$\\varepsilon$ 球）后用 Gauss 公式。把 $S$ 与 $\\varepsilon$ 半球面、$xOy$ 平面上的投影面片拼成闭曲面，奇点处只剩 $\\iint_{S_\\varepsilon}=\\pm2\\pi$ 一项。两个坑：补面后内外方向容易反号；另外 $\\operatorname{div}\\frac{\\vec r}{r^4}=-\\frac1{r^4}\\ne0$，若分母确是 $(x^2+y^2+z^2)^2$，体积分不能直接丢掉，先核对题面。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 93,
+      "commentary": "考点：与前半页同型的 Green 公式 + 中值定理局部化。半圆域上 $\\int_{x_0-R}^{x_0+R}P(x,y_0)dx=\\frac{\\pi R^2}{2}(Q_x-P_y)|_{(\\xi,\\eta)}$，除 $2R$ 令 $R\\to0$ 得 $P\\equiv0$。第 (2) 问须换成上下半圆拼整圆：$P=0$ 后 $\\oint Qdy=0$ 给出 $\\iint Q_x dA=0$，再除面积取极限；把 (1) 重复一遍是拿不到结论的。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 94,
+      "commentary": "考点：曲线积分估值 $|\\oint Pdx+Qdy|\\le\\oint\\sqrt{P^2+Q^2}\\,ds\\le Ml$ + 放缩。关键不等式 $x^2+xy+y^2\\ge\\frac12(x^2+y^2)$ 把分母压到 $\\frac{r^4}{4}$，配合 $\\sqrt{P^2+Q^2}=\\frac{r}{(x^2+xy+y^2)^2}\\le\\frac4{r^3}$，乘弧长 $2\\pi r$ 得 $\\le\\frac{8\\pi}{r^2}\\to0$。别漏弧长因子，也别把 $P^2+Q^2$ 误写成 $x^2+y^2$。",
+      "solution_clean": "记 $P=\\frac{y}{(x^2+xy+y^2)^2},\\ Q=\\frac{-x}{(x^2+xy+y^2)^2}$，则 $\\sqrt{P^2+Q^2}=\\frac{r}{(x^2+xy+y^2)^2}$，其中 $r=\\sqrt{x^2+y^2}$。\n由 $x^2+xy+y^2\\ge\\frac12(x^2+y^2)=\\frac{r^2}{2}$ 得 $(x^2+xy+y^2)^2\\ge\\frac{r^4}{4}$，故 $\\sqrt{P^2+Q^2}\\le\\frac4{r^3}$。\n于是 $\\Big|\\oint_{C_r}Pdx+Qdy\\Big|\\le\\oint_{C_r}\\sqrt{P^2+Q^2}\\,ds\\le\\frac4{r^3}\\cdot2\\pi r=\\frac{8\\pi}{r^2}\\to0\\ (r\\to+\\infty)$。"
+    },
+    {
+      "pid": 95,
+      "commentary": "考点：线性变换把二次曲线拉成椭圆 + 只看 $r$ 的幂次。令 $u=\\frac{x+y}2,v=\\frac{x-y}2$ 得 $x^2+y^2+xy=3u^2+v^2$，再令 $u=\\frac r{\\sqrt3}\\cos\\theta,v=r\\sin\\theta$，则 $y\\,dx-x\\,dy=\\frac{2r^2}{\\sqrt3}d\\theta$，被积函数分母为 $(\\frac{2r^2}3)^t(\\cos^2\\theta+3\\sin^2\\theta)^t$，$f$ 只剩 $r^{2-2t}$ 与一个常数积分之积。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 96,
+      "commentary": "考点：Green 第一公式（分部积分）+ 能量法证常数。$\\oint_{\\partial D}u\\frac{\\partial u}{\\partial n}ds=\\iint_D(u\\Delta u+|\\nabla u|^2)dA$，代入 $\\Delta u=0$ 只剩 $\\iint_D|\\nabla u|^2\\ge0$。第 (1) 问由 $u|_{\\partial D}=A$ 直接得 $A\\oint\\frac{\\partial u}{\\partial n}ds=A\\iint_D\\Delta u=0$；第 (2) 问由该积分为 $0$ 推出 $\\nabla u\\equiv0$。只用最大值原理只能得弱极值，不够。",
+      "solution_clean": "(1) $u\\big|_{\\partial D}=A$，故 $\\oint_{\\partial D}u\\frac{\\partial u}{\\partial n}ds=A\\oint_{\\partial D}\\frac{\\partial u}{\\partial n}ds=A\\iint_D\\Delta u\\,dA=0$。\n(2) 取 $P=-u\\frac{\\partial u}{\\partial y},\\ Q=u\\frac{\\partial u}{\\partial x}$，由 Green 公式\n$\\oint_{\\partial D}u\\frac{\\partial u}{\\partial n}ds=\\iint_D\\Big[u\\Big(\\frac{\\partial^2u}{\\partial x^2}+\\frac{\\partial^2u}{\\partial y^2}\\Big)+\\Big(\\frac{\\partial u}{\\partial x}\\Big)^2+\\Big(\\frac{\\partial u}{\\partial y}\\Big)^2\\Big]dA=\\iint_D\\Big[\\Big(\\frac{\\partial u}{\\partial x}\\Big)^2+\\Big(\\frac{\\partial u}{\\partial y}\\Big)^2\\Big]dA$。\n由 (1) 此积分为 $0$，而被积函数非负连续，故 $\\frac{\\partial u}{\\partial x}=\\frac{\\partial u}{\\partial y}=0$，$u\\equiv C$；\n又 $u\\big|_{\\partial D}=A$，所以 $u(x,y)=A,\\ (x,y)\\in D$。"
+    }
+  ]
+}

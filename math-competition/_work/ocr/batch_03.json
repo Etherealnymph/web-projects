@@ -1,0 +1,210 @@
+{
+  "batch": 3,
+  "date": "2026-05-31",
+  "pages": [
+    {
+      "id": 21,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "12",
+          "statement": "设函数 $f(x)$ 在 $[0,1]$ 上连续，且满足 $\\forall x\\in[0,1]$，$\\int_{x^2}^{x} f(t)dt \\ge \\frac{x^2-x^4}{2}$，证明：$\\int_0^1 f^2(x)dx \\ge \\frac{1}{10}$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：先交换积分次序得 $\\int_0^1 dx\\int_{x^2}^{x}f(t)dt=\\int_0^1 dt\\int_t^{\\sqrt t}f(t)dx=\\int_0^1(\\sqrt t-t)f(t)dt$，于是 $\\int_0^1(\\sqrt t-t)f(t)dt\\ge\\int_0^1\\frac{x^2-x^4}{2}dx=\\frac{1}{15}$；再由 $\\int_0^1[f(t)-(\\sqrt t-t)]^2dt\\ge0$ 展开得 $\\int_0^1 f^2(t)dt\\ge2\\int_0^1(\\sqrt t-t)f(t)dt-\\int_0^1(\\sqrt t-t)^2dt=\\frac{2}{15}-\\frac{1}{30}=\\frac{1}{10}$。",
+      "summary": "第12题：交换积分次序并用平方非负证积分不等式",
+      "clarity": "good"
+    },
+    {
+      "id": 22,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "12'",
+          "statement": "设函数 $f(x)$ 在 $[0,1]$ 上连续，且满足 $\\forall x\\in[0,1]$，$\\int_{x^2}^{x} f(t)dt \\ge \\frac{x^2-x^4}{2}$，证明：$\\int_0^1 f^2(x)dx \\ge \\frac{1}{3}$，且等号成立当且仅当 $f(x)=x$。",
+          "answer": "",
+          "note": "本页证明只写到 $\\int_0^1 xf(x)dx$，后续见下一页。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：对 $\\forall x\\in[0,1]$，由 $\\int_{x^2}^{x}f(t)dt=\\int_{x^2}^{1}f(t)dt-\\int_x^1 f(t)dt$，令 $F(x)=\\int_x^1 f(t)dt+\\frac{1}{2}x^2$，则 $F(x)$ 在 $[0,1]$ 上连续，且 $F(x^2)\\ge F(x)$，故对 $x\\in(0,1]$ 有 $F(x)\\ge F(\\sqrt x)\\ge\\cdots\\ge F(x^{2^n})$；又 $\\lim_{n\\to\\infty}F(x^{2^n})=F(1)=\\frac{1}{2}$，故 $F(x)\\ge\\frac{1}{2}$，即 $\\int_x^1 f(t)dt\\ge\\frac{1-x^2}{2}$。于是 $\\frac{1}{3}=\\int_0^1\\frac{1-x^2}{2}dx\\le\\int_0^1 dx\\int_x^1 f(t)dt=\\int_0^1 dt\\int_0^t f(t)dx=\\int_0^1 tf(t)dt=\\int_0^1 xf(x)dx$。",
+      "summary": "第12′题：迭代 $F(x)$ 得 $\\int_x^1 f\\ge\\frac{1-x^2}{2}$ 并转为积分估计",
+      "clarity": "good"
+    },
+    {
+      "id": 23,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "接上页：由 $\\int_0^1[f(x)-x]^2dx=\\int_0^1 f^2(x)dx-2\\int_0^1 xf(x)dx+\\int_0^1 x^2dx\\ge0$，得 $\\int_0^1 f^2(x)dx=\\int_0^1[f(x)-x]^2dx+2\\int_0^1 xf(x)dx-\\int_0^1 x^2dx\\ge\\frac{1}{3}$。若 $\\int_0^1 f^2(x)dx=\\frac{1}{3}$，则 $\\int_0^1[f(x)-x]^2dx=0$，故 $f(x)=x$；反之若 $f(x)=x$，则 $\\int_0^1 f^2(x)dx=\\frac{1}{3}$。",
+      "summary": "第12′题解答续：平方展开得下界并证等号条件",
+      "clarity": "good"
+    },
+    {
+      "id": 24,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "13",
+          "statement": "设函数 $f(x),g(x)$ 是 $[0,1]\\to[0,1]$ 上的连续函数，且 $f(x)$ 单调增加，证明 $\\int_0^1 f(g(x))dx-\\int_0^1 g(x)dx\\le\\int_0^1 f(x)dx$。",
+          "answer": "",
+          "note": "原文把最大值记作 $F_{\\max}(x)$；解答在下一页继续。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证明：令 $F(x)=f(x)-x$，则问题转化为证 $\\int_0^1[F(g(x))-F(x)]dx\\le\\int_0^1 xdx=\\frac{1}{2}$；只需证 $F_{\\max}(x)-\\int_0^1 F(x)dx\\le\\int_0^1 xdx=\\frac{1}{2}$，即 $\\int_0^1 F(x)dx\\ge F_{\\max}(x)-\\frac{1}{2}$。记 $F_{\\max}(x)=F(x_0)=a$，由 $0\\le f(x)\\le1$ 得 $-x\\le F(x)\\le1-x$，故 $a\\le1-x_0$。",
+      "summary": "第13题：作 $F=f-x$ 把不等式化为积分估计",
+      "clarity": "good"
+    },
+    {
+      "id": 25,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "接上页：∵ $0\\le f(x)\\le1$，∴ $-x\\le F(x)\\le1-x$，$a\\le1-x_0$；∵ $f(x)$ 单调增加，∴ 当 $x\\in[x_0,1]$ 时 $f(x)\\ge f(x_0)$，即 $F(x)+x\\ge F(x_0)+x_0=a+x_0$。∴ $\\int_0^1 F(x)dx=\\int_0^{x_0}F(x)dx+\\int_{x_0}^1 F(x)dx\\ge\\int_0^{x_0}(-x)dx+\\int_{x_0}^1(a+x_0-x)dx=a-\\frac{1}{2}-ax_0+x_0(1-x_0)=a-\\frac{1}{2}+x_0[(1-x_0)-a]\\ge a-\\frac{1}{2}=F(x_0)-\\frac{1}{2}$，∴ 原结论成立。",
+      "summary": "第13题解答续：分段估计积分并推出原不等式",
+      "clarity": "good"
+    },
+    {
+      "id": 26,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "14",
+          "statement": "设函数 $f(x)$ 的导数 $f'(x)$ 在 $[0,1]$ 上连续，$f(0)=f(1)=0$，且满足 $\\int_0^1[f'(x)]^2dx-8\\int_0^1 f(x)dx+\\frac{4}{3}=0$，计算 $f(x)$。",
+          "answer": "$f(x)=2x-2x^2$。",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：由 $\\int_0^1 f(x)dx=-\\int_0^1 xf'(x)dx$、$\\int_0^1 f'(x)dx=0$、$\\int_0^1(4x^2-4x+1)dx=\\frac{1}{3}$，把原式化为 $\\int_0^1[f'(x)+4x-2]^2dx=0$，故 $f'(x)=2-4x$，即 $f(x)=2x-2x^2+C$；由 $f(0)=0$ 得 $C=0$，故 $f(x)=2x-2x^2$。",
+      "summary": "第14题：配方成完全平方，求得 $f(x)=2x-2x^2$",
+      "clarity": "good"
+    },
+    {
+      "id": 27,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "1",
+          "statement": "求 $\\lim_{n\\to\\infty}\\left(\\frac{1}{a}+\\frac{2}{a^2}+\\cdots+\\frac{n}{a^n}\\right)$，$(a>1)$。",
+          "answer": "",
+          "note": "本页属「八、用级数的敛散性计算」；页末方法小结：1) 作初等运算将部分和化简（有限项）求极限；2) 对部分和做估计，用夹逼定理求极限；3) 化为定积分计算；4) 利用幂级数的和函数计算。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：∵ $S(x)=\\sum_{n=1}^{\\infty}nx^n=x\\left(\\sum_{n=1}^{\\infty}x^n\\right)'=x\\left(\\frac{x}{1-x}\\right)'=\\frac{x}{(1-x)^2}$，$|x|<1$，∴ 原极限 $=S\\left(\\frac{1}{a}\\right)=\\frac{a}{(1-a)^2}$。",
+      "summary": "第1题：用幂级数的和函数求级数极限",
+      "clarity": "good"
+    },
+    {
+      "id": 28,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "已知 $x_0=1$，$x_1=\\frac{1}{x_0^3+4}$，$\\cdots$，$x_{n+1}=\\frac{1}{x_n^3+4}$，$\\cdots$，求证：(1) 数列 $\\{x_n\\}$ 收敛；(2) $\\{x_n\\}$ 的极限值 $a$ 是方程 $x^4+4x-1=0$ 的唯一正根。",
+          "answer": "",
+          "note": "本页只证到 (1)，(2) 见下一页。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证 (1)：易知 $0<x_n<1$，且 $|x_{n+1}-x_n|=\\left|\\frac{1}{x_n^3+4}-\\frac{1}{x_{n-1}^3+4}\\right|=\\frac{|x_n^3-x_{n-1}^3|}{(x_n^3+4)(x_{n-1}^3+4)}\\le\\frac{|x_n-x_{n-1}||x_n^2+x_nx_{n-1}+x_{n-1}^2|}{4^2}<\\frac{3|x_n-x_{n-1}|}{16}<\\left(\\frac{3}{16}\\right)^2|x_{n-1}-x_{n-2}|<\\cdots<\\left(\\frac{3}{16}\\right)^n|x_1-x_0|=\\frac{4}{5}\\left(\\frac{3}{16}\\right)^n$。∴ $\\sum_{n=0}^{\\infty}\\left(\\frac{3}{16}\\right)^n$ 收敛，∴ $\\sum_{n=0}^{\\infty}(x_{n+1}-x_n)$ 收敛（绝对收敛），其部分和 $S_n=x_{n+1}-x_0$，∴ $\\{x_n\\}$ 收敛。",
+      "summary": "第2题(1)：用压缩型差估计证数列收敛",
+      "clarity": "good"
+    },
+    {
+      "id": 29,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "已知 $x_0=1$，$x_1=\\frac{1}{x_0^3+4}$，$\\cdots$，$x_{n+1}=\\frac{1}{x_n^3+4}$，$\\cdots$，求证：(1) 数列 $\\{x_n\\}$ 收敛；(2) $\\{x_n\\}$ 的极限值 $a$ 是方程 $x^4+4x-1=0$ 的唯一正根。",
+          "answer": "",
+          "note": "幻灯片有重影叠字（同一段文字叠写两遍），按可辨内容转写。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证 (2)：令 $\\lim_{n\\to\\infty}x_n=a$，∵ $0<x_n<1$，∴ $0\\le a\\le1$；由 $x_{n+1}=\\frac{1}{x_n^3+4}$ 取极限得 $a=\\frac{1}{a^3+4}\\ne0$，∴ $a$ 是方程 $x^4+4x-1=0$ 的正根。又∵ $(x^4+4x-1)'=4x^3+4>0$，$x\\in[0,1]$，知 $f(x)=x^4+4x-1$ 在 $[0,1]$ 上严格单调增加，故根唯一。",
+      "summary": "第2题(2)：取极限得方程并证正根唯一",
+      "clarity": "partial"
+    },
+    {
+      "id": 30,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "3",
+          "statement": "设 $x_n=\\frac{1}{2\\ln2}+\\frac{1}{3\\ln3}+\\cdots+\\frac{1}{n\\ln n}-\\ln\\ln n$，$(n=1,2,\\cdots)$，证明 $\\{x_n\\}$ 收敛。",
+          "answer": "",
+          "note": ""
+        },
+        {
+          "label": "4",
+          "statement": "证明数列 $x_n=\\frac{5^n\\cdot n!}{(2n)^n}$（$n=1,2,\\cdots$）有极限，并求此极限。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "第3题证：∵ $|x_{n+1}-x_n|=\\left|\\frac{1}{(n+1)\\ln(n+1)}-\\frac{1}{\\xi_n\\ln\\xi_n}\\right|\\le\\frac{1}{n\\ln n}-\\frac{1}{(n+1)\\ln(n+1)}$，∴ $S_n=\\sum_{k=2}^{n}|x_{k+1}-x_k|\\le\\frac{1}{2\\ln2}$，∴ $\\sum_{k=2}^{\\infty}|x_{k+1}-x_k|$ 收敛，∴ $\\sum_{k=2}^{\\infty}(x_{n+1}-x_n)$ 收敛，∴ $\\{x_n\\}$ 收敛。第4题证：∵ $\\lim_{n\\to\\infty}\\frac{x_{n+1}}{x_n}=\\lim_{n\\to\\infty}\\frac{5}{2}\\cdot\\frac{1}{\\left(1+\\frac{1}{n}\\right)^n}=\\frac{5}{2e}$，∴ 正项级数 $\\sum_{n=1}^{\\infty}x_n$ 收敛，∴ $\\lim_{n\\to\\infty}x_n=0$。",
+      "summary": "第3题证收敛；第4题用比值判别法求极限为0",
+      "clarity": "good"
+    },
+    {
+      "id": 31,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "5",
+          "statement": "求极限：$\\lim_{n\\to\\infty}\\int_0^{\\frac{\\pi}{2}}\\frac{\\sin 2nx}{\\sin x}dx$。",
+          "answer": "",
+          "note": "本页最后一行未写出最终数值，下一页给出 $\\pi/2$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：∵ $\\frac{\\sin2nx}{\\sin x}=2[\\cos x+\\cos3x+\\cdots+\\cos(2n-1)x]$，∴ $\\int_0^{\\frac{\\pi}{2}}\\frac{\\sin2nx}{\\sin x}dx=2\\int_0^{\\frac{\\pi}{2}}[\\cos x+\\cos3x+\\cdots+\\cos(2n-1)x]dx=2\\left[\\sin x+\\frac{\\sin3x}{3}+\\cdots+\\frac{\\sin(2n-1)x}{2n-1}\\right]_0^{\\frac{\\pi}{2}}=2\\left[1-\\frac{1}{3}+\\frac{1}{5}-\\cdots+(-1)^{n-1}\\frac{1}{2n-1}\\right]$，故原极限 $=2\\lim_{n\\to\\infty}\\left[1-\\frac{1}{3}+\\frac{1}{5}-\\cdots+(-1)^{n-1}\\frac{1}{2n-1}\\right]$。",
+      "summary": "第5题：积化和差化为余弦和逐项积分",
+      "clarity": "good"
+    },
+    {
+      "id": 32,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "接上页：考虑级数 $\\sum_{n=1}^{\\infty}(-1)^{n-1}\\frac{x^{2n-1}}{2n-1}$ 的和，其收敛区域为 $[-1,1]$。∵ $S'(x)=\\left(\\sum_{n=1}^{\\infty}(-1)^{n-1}\\frac{x^{2n-1}}{2n-1}\\right)'=\\sum_{n=1}^{\\infty}(-1)^{n-1}x^{2n-2}=\\frac{1}{1+x^2}$，$S(0)=0$，∴ $S(x)=\\int_0^x S'(x)dx=\\int_0^x\\frac{1}{1+x^2}dx=\\arctan x$。∴ $S(1)=\\sum_{n=1}^{\\infty}(-1)^{n-1}\\frac{1}{2n-1}=\\frac{\\pi}{4}$，∴ $\\lim_{n\\to\\infty}\\int_0^{\\frac{\\pi}{2}}\\frac{\\sin2nx}{\\sin x}dx=2\\cdot\\frac{\\pi}{4}=\\frac{\\pi}{2}$。",
+      "summary": "第5题解答续：用幂级数和函数求得极限为 $\\pi/2$",
+      "clarity": "good"
+    },
+    {
+      "id": 33,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "接上页：考虑级数 $\\sum_{n=1}^{\\infty}(-1)^{n-1}\\frac{x^{2n-1}}{2n-1}$ 的和，其收敛区域为 $[-1,1]$。∵ $S'(x)=\\left(\\sum_{n=1}^{\\infty}(-1)^{n-1}\\frac{x^{2n-1}}{2n-1}\\right)'=\\sum_{n=1}^{\\infty}(-1)^{n-1}x^{2n-2}=\\frac{1}{1+x^2}$，$S(0)=0$，∴ $S(x)=\\int_0^x S'(x)dx=\\int_0^x\\frac{1}{1+x^2}dx=\\arctan x$。∴ $S(1)=\\sum_{n=1}^{\\infty}(-1)^{n-1}\\frac{1}{2n-1}=\\frac{\\pi}{4}$，∴ $\\lim_{n\\to\\infty}\\int_0^{\\frac{\\pi}{2}}\\frac{\\sin2nx}{\\sin x}dx=2\\cdot\\frac{\\pi}{4}=\\frac{\\pi}{2}$。",
+      "summary": "与上一页同内容的第5题解答（重拍）",
+      "clarity": "good"
+    },
+    {
+      "id": 34,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "板书：反常积分敛散性的判断方法。(1) 柯西准则：$\\int_a^{+\\infty}f(x)dx$ 收敛 $\\Leftrightarrow\\forall\\varepsilon>0$，$\\exists X>a$，当 $x_1,x_2>X$ 时，$\\left|\\int_{x_1}^{x_2}f(x)dx\\right|<\\varepsilon$。(2) 绝对收敛与收敛的关系：若 $\\int_a^{+\\infty}|f(x)|dx$ 收敛 $\\Rightarrow\\int_a^{+\\infty}f(x)dx$ 收敛。(3) 比较判别法：若 $0\\le f(x)\\le g(x)$，$a\\le x\\le+\\infty$，(1) 当 $\\int_a^{+\\infty}g(x)dx$ 收敛时，$\\int_a^{+\\infty}f(x)dx$ 收敛；(2) 当 $\\int_a^{+\\infty}f(x)dx$ 发散时，$\\int_a^{+\\infty}g(x)dx$ 发散。(4) 比较判别法的极限形式：若 $0\\le f(x)\\le g(x)$，$a\\le x\\le+\\infty$，$\\lim_{x\\to+\\infty}\\frac{f(x)}{g(x)}=l$，则 a) $0<l<+\\infty$ 时，$\\int_a^{+\\infty}g(x)dx$ 收敛 $\\Leftrightarrow\\int_a^{+\\infty}f(x)dx$ 收敛；b) $l=0$ 时，$\\int_a^{+\\infty}g(x)dx$ 收敛 $\\Rightarrow\\int_a^{+\\infty}f(x)dx$ 收敛；c) $l=+\\infty$ 时，$\\int_a^{+\\infty}g(x)dx$ 发散 $\\Rightarrow\\int_a^{+\\infty}f(x)dx$ 发散。",
+      "summary": "反常积分敛散性判断方法：柯西准则与比较判别法",
+      "clarity": "good"
+    },
+    {
+      "id": 35,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "板书（续）：当 $p>1$ 时，$\\int_1^{+\\infty}\\frac{dx}{x^p}$ 收敛；当 $p\\le1$ 时，$\\int_1^{+\\infty}\\frac{dx}{x^p}$ 发散。对于积分 $\\int_1^{+\\infty}\\frac{dx}{x^p}$：当 $p>1$ 时，且 $0\\le f(x)\\le\\frac{1}{x^p}$ 时，$\\Rightarrow\\int_1^{+\\infty}f(x)dx$ 收敛；当 $p\\le1$ 时，且 $f(x)\\ge\\frac{1}{x^p}$ 时，$\\Rightarrow\\int_1^{+\\infty}f(x)dx$ 发散。若 $\\lim_{x\\to+\\infty}x^pf(x)=l$：当 $p>1$ 时，且 $0\\le l<+\\infty$ 时，$\\Rightarrow\\int_1^{+\\infty}f(x)dx$ 收敛；当 $p\\le1$ 时，且 $0<l\\le+\\infty$ 时，$\\Rightarrow\\int_1^{+\\infty}f(x)dx$ 发散。对于积分 $\\int_0^1\\frac{dx}{x^p}$：当 $0<p<1$ 时，且 $f(x)\\le\\frac{1}{x^p}$ 时，$\\Rightarrow\\int_0^1 f(x)dx$ 收敛；当 $p\\ge1$ 时，且 $f(x)\\ge\\frac{1}{x^p}$ 时，$\\Rightarrow\\int_0^1 f(x)dx$ 发散。若 $\\lim_{x\\to0^+}x^pf(x)=l$：当 $0<p<1$ 时，且 $0\\le l<+\\infty$ 时，$\\Rightarrow\\int_0^1 f(x)dx$ 收敛；当 $p\\ge1$ 时，且 $0<l\\le+\\infty$ 时，$\\Rightarrow\\int_0^1 f(x)dx$ 发散。",
+      "summary": "$p$ 积分敛散性与比较判别法极限形式的应用",
+      "clarity": "good"
+    }
+  ]
+}

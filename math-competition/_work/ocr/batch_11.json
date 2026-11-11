@@ -1,0 +1,101 @@
+{
+  "batch": 11,
+  "date": "2026-09-19",
+  "pages": [
+    {
+      "id": 134,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "第(3)小题解答过程。区域 $V_1:\\begin{cases}x=r\\cos\\theta\\\\y=r\\sin\\theta\\\\z=z\\end{cases}$，其中 $0\\le\\theta\\le2\\pi$，$0\\le r\\le2\\sqrt2$，$1-\\sqrt{9-r^2}\\le z\\le0$（下限处负号反光不清，疑为 $1-\\sqrt{9-r^2}$），用柱坐标得 $\\iiint_{V_1}(x^2+y^2)dxdydz=\\iint_{r\\le2\\sqrt2}r^3drd\\theta\\int_{1-\\sqrt{9-r^2}}^{0}dz=\\int_0^{2\\pi}d\\theta\\int_0^{2\\sqrt2}r^3(\\sqrt{9-r^2}-1)dr=(124-\\frac{2\\cdot3^5}{5}+\\frac{2}{5})\\pi$。再由 $\\iiint_V(x^2+y^2)dxdydz=\\iiint_{V_1}-\\iiint_{V_2}-\\iiint_{V_3}=\\frac{8\\cdot3^5}{15}\\pi-\\frac{8\\cdot2^5}{15}\\pi-(124-\\frac{2\\cdot3^5}{5}+\\frac{2}{5})\\pi=\\frac{256}{3}\\pi$。法二（先二后一）：$V:\\begin{cases}0\\le z\\le4\\\\0\\le\\theta\\le2\\pi\\\\\\sqrt{4z-z^2}\\le r\\le\\sqrt{8+2z-z^2}\\end{cases}$，其中 $x^2+y^2+(z-2)^2\\ge4\\Leftrightarrow r\\ge\\sqrt{4z-z^2}$，$x^2+y^2+(z-1)^2\\le9\\Leftrightarrow r\\le\\sqrt{8+2z-z^2}$，故 $\\iiint_V(x^2+y^2)dxdydz=\\int_0^4dz\\iint_D(x^2+y^2)dxdy=\\int_0^4dz\\int_0^{2\\pi}d\\theta\\int_{\\sqrt{4z-z^2}}^{\\sqrt{8+2z-z^2}}r^3dr=\\frac{256}{3}\\pi$。",
+      "summary": "第(3)题解答续：柱坐标与先二后一法算得 256π/3",
+      "clarity": "partial"
+    },
+    {
+      "id": 135,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "30",
+          "statement": "设 $\\Sigma$ 是一个光滑封闭曲面，方向朝外。\\n$$I=\\iint_\\Sigma (x^3-x)dydz+(2y^3-y)dzdx+(3z^3-z)dxdy.$$\\n试确定曲面 $\\Sigma$，使得积分 $I$ 的值最小并求该值。",
+          "answer": "$-\\frac{4\\sqrt6}{15}\\pi$",
+          "note": "右上角标注「Gauss公式」；解答中作正交变换时 $u,v,w$ 的系数被反光遮挡，$|J|=\\frac{1}{\\sqrt6}$ 清晰。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "记 $\\Sigma$ 围成的区域为 $\\Omega$，由 Gauss 公式得 $I=\\iiint_\\Omega(3x^2+6y^2+9z^2-3)dV=3\\iiint_\\Omega(x^2+2y^2+3z^2-1)dxdydz$。故 $I$ 达到最小 $\\Leftrightarrow \\Omega:x^2+2y^2+3z^2-1\\le0$，即 $\\Omega$ 是一椭球、$\\Sigma$ 是 $\\Omega$ 的表面时积分最小。再令 $u=x[?],\\ v=y[?],\\ w=z[?]$（伸缩换元，系数被反光遮挡，$|J|=\\frac{1}{\\sqrt6}$）把椭球化为单位球，用球坐标得 $I=3\\iiint_\\Omega(u^2+v^2+w^2-1)\\frac{1}{\\sqrt6}dudvdw=\\frac{3}{\\sqrt6}\\int_0^{2\\pi}d\\theta\\int_0^{\\pi}d\\varphi\\int_0^1(r^2-1)r^2\\sin\\varphi dr=-\\frac{4\\sqrt6}{15}\\pi$。",
+      "summary": "第30题：用Gauss公式把曲面积分化为三重积分并求最小值",
+      "clarity": "good"
+    },
+    {
+      "id": 136,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "31",
+          "statement": "计算三重积分 $I=\\iiint_\\Omega\\frac{xyz}{x^2+y^2}dxdydz$，其中 $\\Omega$ 是由曲面 $(x^2+y^2+z^2)^2=2xy$ 围成的区域在第一卦限的部分。",
+          "answer": "$\\frac{1}{72}$",
+          "note": "解答中标注「球坐标」「Wallis公式」；先用对称性把积分化为在 $\\Omega'$ 上的 2 倍。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "被积函数满足 $f(x,y,z)=\\frac{xyz}{x^2+y^2}=f(y,x,z)$，关于 $y\\to x$ 对称，$I=2\\iiint_{\\Omega'}\\frac{xyz}{x^2+y^2}dxdydz$，$\\Omega':(x^2+y^2+z^2)^2=2xy\\ (x>y)$。令 $x=\\rho\\sin\\varphi\\cos\\theta,\\ y=\\rho\\sin\\varphi\\sin\\theta,\\ z=\\rho\\cos\\varphi$，则 $\\Omega':0\\le\\theta\\le\\frac{\\pi}{4},0\\le\\varphi\\le\\frac{\\pi}{2},0\\le\\rho\\le\\sqrt{2\\sin\\varphi\\sqrt{\\sin\\theta\\cos\\theta}}$。代入并分离变量：$I=2\\int_0^{\\pi/4}\\cos\\theta\\sin\\theta d\\theta\\int_0^{\\pi/2}\\cos\\varphi\\sin\\varphi d\\varphi\\int_0^{\\sqrt{2\\sin\\varphi\\sqrt{\\sin\\theta\\cos\\theta}}}\\rho^3d\\rho$，用 Wallis 公式化为 $=2\\int_0^{\\pi/4}\\cos^3\\theta\\sin^3\\theta d\\theta\\int_0^{\\pi/2}\\cos\\varphi\\sin^5\\varphi d\\varphi=\\frac{1}{4}\\int_0^{\\pi/2}\\sin^22\\theta d\\theta\\int_0^{\\pi/2}\\sin^5\\varphi\\,d(\\sin\\varphi)=\\frac{1}{72}$。",
+      "summary": "第31题：球坐标加对称性算三重积分得 1/72",
+      "clarity": "good"
+    },
+    {
+      "id": 137,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "32",
+          "statement": "设区间 $(0,+\\infty)$ 上的函数 $u(x)$ 定义为 $u(x)=\\int_0^{+\\infty}e^{-xt^2}dt$，写出 $u(x)$ 的初等函数表达式。",
+          "answer": "$u(x)=\\frac{\\sqrt{\\pi}}{2\\sqrt{x}}$",
+          "note": "本页两题都编为 32，题号疑有误；解答框内标注「广义积分化为二重积分，极坐标」$t=r\\cos\\theta>0,\\ s=r\\sin\\theta>0$。"
+        },
+        {
+          "label": "32",
+          "statement": "设 $f(x)=\\int_x^{+\\infty}e^{-t^2}dt$，计算 $\\int_0^{+\\infty}xf(x)dx$ 的值。",
+          "answer": "$\\frac{\\sqrt{\\pi}}{8}$",
+          "note": "标注「交换积分次序」「分部积分公式」。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "第一题：$u^2(x)=\\int_0^{+\\infty}e^{-xt^2}dt\\int_0^{+\\infty}e^{-xs^2}ds=\\iint_{s,t\\ge0}e^{-x(t^2+s^2)}dsdt=\\int_0^{\\pi/2}d\\theta\\int_0^{+\\infty}e^{-xr^2}rdr=\\frac{\\pi}{4x}\\int_0^{+\\infty}e^{-xr^2}d(xr^2)=\\frac{\\pi}{4x}$，故 $u(x)=\\frac{\\sqrt\\pi}{2\\sqrt x}$。第二题：交换积分次序得 $\\int_0^{+\\infty}xf(x)dx=\\int_0^{+\\infty}e^{-t^2}dt\\int_0^t xdx=\\frac{1}{2}\\int_0^{+\\infty}e^{-t^2}t^2dt=-\\frac{1}{4}\\int_0^{+\\infty}t\\,d(e^{-t^2})=\\frac{1}{4}\\int_0^{+\\infty}e^{-t^2}dt=\\frac{1}{4}u(1)=\\frac{1}{4}\\cdot\\frac{\\sqrt\\pi}{2}=\\frac{\\sqrt\\pi}{8}$。",
+      "summary": "第32题两问：用二重积分与交换次序算概率型积分",
+      "clarity": "good"
+    },
+    {
+      "id": 138,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "33",
+          "statement": "设 $H(x)=\\sum_{i,j=1}^{3}a_{ij}x_ix_j$，$A=(a_{ij})$ 是 3 阶对称正定阵，求 $I=\\iiint_{H(x)\\le1}e^{H(x)}dx_1dx_2dx_3$。",
+          "answer": "$\\frac{4\\pi}{\\sqrt{\\det A}}(e-2)$",
+          "note": "解答中用正交变换把 $A$ 对角化为特征值 $\\lambda_1,\\lambda_2,\\lambda_3>0$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "存在三阶正交矩阵 $P$ 使 $P^TAP=\\mathrm{diag}(\\lambda_1,\\lambda_2,\\lambda_3)$，$\\lambda_i>0$。作正交变换 $x=Py$，则 $H(x)=\\lambda_1y_1^2+\\lambda_2y_2^2+\\lambda_3y_3^2$，且 $|\\det P|=1$ 给出 $\\left|\\frac{\\partial(x_1,x_2,x_3)}{\\partial(y_1,y_2,y_3)}\\right|=1$，故 $I=\\iiint_{\\lambda_1y_1^2+\\lambda_2y_2^2+\\lambda_3y_3^2\\le1}e^{\\lambda_1y_1^2+\\lambda_2y_2^2+\\lambda_3y_3^2}dy_1dy_2dy_3$。再令 $y_1=\\frac{1}{\\sqrt{\\lambda_1}}\\rho\\sin\\varphi\\cos\\theta,\\ y_2=\\frac{1}{\\sqrt{\\lambda_2}}\\rho\\sin\\varphi\\sin\\theta,\\ y_3=\\frac{1}{\\sqrt{\\lambda_3}}\\rho\\cos\\varphi$，得 $I=\\frac{1}{\\sqrt{\\lambda_1\\lambda_2\\lambda_3}}\\int_0^{2\\pi}d\\theta\\int_0^{\\pi}d\\varphi\\int_0^1\\rho^2e^{\\rho^2}\\sin\\varphi d\\rho=\\frac{4\\pi}{\\sqrt{\\lambda_1\\lambda_2\\lambda_3}}\\int_0^1\\rho^2e^{\\rho^2}d\\rho=\\frac{4\\pi}{\\sqrt{\\lambda_1\\lambda_2\\lambda_3}}(e-2)=\\frac{4\\pi}{\\sqrt{\\det A}}(e-2)$。",
+      "summary": "第33题：正交变换化椭球，球坐标算得 4π(e-2)/√detA",
+      "clarity": "good"
+    },
+    {
+      "id": 139,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "33",
+          "statement": "设 $H(x)=\\sum_{i,j=1}^{3}a_{ij}x_ix_j$，$A=(a_{ij})$ 是 3 阶对称正定阵，求 $I=\\iiint_{H(x)\\le1}e^{H(x)}dx_1dx_2dx_3$。",
+          "answer": "$\\frac{4\\pi}{\\sqrt{\\det A}}(e-2)$",
+          "note": "与上一张同为第33题，本张取景略宽，内容相同。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "用正交矩阵 $P$ 把 $A$ 对角化：$P^TAP=\\mathrm{diag}(\\lambda_1,\\lambda_2,\\lambda_3)$，$\\lambda_i>0$；作正交变换 $x=Py$ 后 $H(Py)=\\lambda_1y_1^2+\\lambda_2y_2^2+\\lambda_3y_3^2$，Jacobian 为 1。再作伸缩代换 $y_i=\\frac{1}{\\sqrt{\\lambda_i}}\\times(\\rho\\sin\\varphi\\cos\\theta,\\rho\\sin\\varphi\\sin\\theta,\\rho\\cos\\varphi)$，区域变单位球。于是 $I=\\frac{4\\pi}{\\sqrt{\\lambda_1\\lambda_2\\lambda_3}}\\int_0^1\\rho^2e^{\\rho^2}d\\rho=\\frac{4\\pi}{\\sqrt{\\lambda_1\\lambda_2\\lambda_3}}(e-2)=\\frac{4\\pi}{\\sqrt{\\det A}}(e-2)$。",
+      "summary": "第33题重复：正交变换+球坐标得 4π(e-2)/√detA",
+      "clarity": "good"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "chunk": 13,
+  "items": [
+    {
+      "pid": 193,
+      "commentary": "考点是把 Riemann 和拆成主项加误差项：先由定积分定义定出 $A=\\int_0^1\\arctan x\\,dx$，再对误差用拉格朗日中值定理。误差写成 $n\\sum_{k=1}^{n}\\int_{\\frac{k-1}{n}}^{\\frac{k}{n}}\\left[f\\left(\\frac{k}{n}\\right)-f(x)\\right]dx$，用 $f\\left(\\frac{k}{n}\\right)-f(x)=f'(\\xi_x)\\left(\\frac{k}{n}-x\\right)$ 每段积出 $\\frac{1}{2n}f'(\\xi_k)$，得 $B=\\frac{1}{2}\\int_0^1f'=\\frac{f(1)-f(0)}{2}=\\frac{\\pi}{8}$。易错：只求 $A$ 就收笔，或把 $f'(\\xi)$ 直接换成 $f'\\left(\\frac{k}{n}\\right)$ 丢了精度。",
+      "solution_clean": "$A=\\lim_{n\\to\\infty}\\frac{1}{n}\\sum_{k=1}^{n}\\arctan\\frac{k}{n}=\\int_0^1\\arctan x\\,dx=\\frac{\\pi}{4}-\\frac{\\ln 2}{2}$（$B$ 存在迫使 $A$ 取此值）\n记 $S_n=\\sum_{k=1}^{n}f\\left(\\frac{k}{n}\\right)$，则 $S_n-An=n\\sum_{k=1}^{n}\\int_{\\frac{k-1}{n}}^{\\frac{k}{n}}\\left[f\\left(\\frac{k}{n}\\right)-f(x)\\right]dx$\n由 $f\\left(\\frac{k}{n}\\right)-f(x)=f'(\\xi_x)\\left(\\frac{k}{n}-x\\right)$ 得 $B=\\lim_{n\\to\\infty}\\frac{1}{2n}\\sum_{k=1}^{n}f'(\\xi_k)$\n故 $B=\\frac{1}{2}\\int_0^1\\frac{dx}{1+x^2}=\\frac{\\pi}{8}$，即 $A=\\frac{\\pi}{4}-\\frac{\\ln 2}{2},\\ B=\\frac{\\pi}{8}$。"
+    },
+    {
+      "pid": 194,
+      "commentary": "考点是带 Lagrange 余项的 Taylor 公式叠加积分第一中值定理，右端的形状恰是 $\\left[xf(x)\\right]''=2f'(x)+xf''(x)$ 的一半。把 $xf(x)$ 在 $0$ 处展开（$(xf)'|_0=f(0)$，二阶导即上式）得 $xf(x)=f(0)x+\\frac{x^2}{2}\\left[2f'(\\xi_x)+\\xi_xf''(\\xi_x)\\right]$，而 $\\int_{-1}^1f(0)x\\,dx=0$，权 $x^2\\ge0$ 且连续，中值定理把 $\\xi_x$ 统一成一个 $\\xi$。易错：直接对 $f$ 展开只会凑出 $f''(\\xi)$，凑不出 $2f'+xf''$ 的组合。",
+      "solution_clean": "$[xf(x)]'=f(x)+xf'(x),\\ [xf(x)]''=2f'(x)+xf''(x)$\n在 $0$ 处 Taylor 展开：$xf(x)=f(0)x+\\frac{x^2}{2}\\left[2f'(\\xi_x)+\\xi_xf''(\\xi_x)\\right]$，$\\xi_x$ 介于 $0,x$ 之间\n又 $\\int_{-1}^{1}f(0)x\\,dx=0$，$2f'(x)+xf''(x)$ 连续、权 $x^2\\ge0$，积分第一中值定理给出 $\\xi\\in[-1,1]$：\n$\\int_{-1}^{1}xf(x)dx=\\frac{1}{2}\\left[2f'(\\xi)+\\xi f''(\\xi)\\right]\\int_{-1}^{1}x^2dx=\\frac{2}{3}f'(\\xi)+\\frac{1}{3}\\xi f''(\\xi)$。"
+    },
+    {
+      "pid": 195,
+      "commentary": "考点是单调有界准则：对 $n+1$ 项用 AM–GM，$k+1=\\frac{k}{n}+\\cdots+\\frac{k}{n}+1>(n+1)\\left(\\frac{k}{n}\\right)^{\\frac{n}{n+1}}$，即得 $\\left(\\frac{k}{n}\\right)^n<\\left(\\frac{k+1}{n+1}\\right)^{n+1}$，于是 $S_{n+1}>S_n$。上界用少一项的右端点 Riemann 和：$\\frac{S_n}{n}<\\int_0^1x^ndx=\\frac{1}{n+1}$，得 $S_n<\\frac{n}{n+1}<1$。易错：极限值不能只写“存在”，要写成 $S_n=\\sum_{j=0}^{n-2}\\left(1-\\frac{j}{n}\\right)^n$ 才看得出极限是 $\\frac{e}{e-1}$。",
+      "solution_clean": "由 AM–GM：$k+1=\\frac{k}{n}+\\cdots+\\frac{k}{n}+1>(n+1)\\left(\\frac{k}{n}\\right)^{\\frac{n}{n+1}}$，即 $\\left(\\frac{k}{n}\\right)^n<\\left(\\frac{k+1}{n+1}\\right)^{n+1}$\n故 $S_{n+1}>\\left(\\frac{1}{n+1}\\right)^{n+1}+S_n>S_n$，$\\{S_n\\}$ 单调增加\n又 $\\frac{S_n}{n}=\\sum_{k=1}^{n-1}\\left(\\frac{k}{n}\\right)^n\\cdot\\frac{1}{n}<\\int_0^1x^ndx=\\frac{1}{n+1}$，故 $S_n<\\frac{n}{n+1}<1$，有界\n极限：$S_n=\\sum_{j=0}^{n-2}\\left(1-\\frac{j}{n}\\right)^n\\to\\sum_{j=0}^{\\infty}e^{-j}=\\frac{e}{e-1}$。"
+    },
+    {
+      "pid": 196,
+      "commentary": "考点是三重积分换元：$u=\\frac{x^2+y^2}{z},\\ v=xy,\\ w=\\frac{y}{x}$ 把三族曲面拉成坐标面，区域直接变成长方体，$m\\le u\\le n$、$a^2\\le v\\le b^2$、$\\alpha\\le w\\le\\beta$。破题时先由 $u,v,w$ 反解 $x,y,z$，再倒算 $|J|=\\left|\\frac{\\partial(u,v,w)}{\\partial(x,y,z)}\\right|^{-1}=\\frac{v}{2u^2w}\\left(w+\\frac{1}{w}\\right)$，被积式化为 $\\frac{v^3}{2u^3}\\left(w+\\frac{2}{w}+\\frac{1}{w^3}\\right)$ 后三次积分完全分离。易错：雅可比忘取倒数或漏绝对值；上限下限必须由 $m,n,a,b,\\alpha,\\beta$ 直接读出。",
+      "solution_clean": "令 $u=\\frac{x^2+y^2}{z},\\ v=xy,\\ w=\\frac{y}{x}$，则 $x=\\sqrt{\\frac{v}{w}},\\ y=\\sqrt{vw},\\ z=\\frac{v}{u}\\left(w+\\frac{1}{w}\\right)$，$m\\le u\\le n,\\ a^2\\le v\\le b^2,\\ \\alpha\\le w\\le\\beta$\n$|J|=\\left|\\frac{\\partial(u,v,w)}{\\partial(x,y,z)}\\right|^{-1}=\\frac{z^2}{x^2+y^2}\\cdot\\frac{x}{2y}=\\frac{v}{2u^2w}\\left(w+\\frac{1}{w}\\right)$，故 $xyz\\,|J|=\\frac{v^3}{2u^3}\\left(w+\\frac{2}{w}+\\frac{1}{w^3}\\right)$\n$I=\\frac{1}{2}\\left[\\int_m^n\\frac{du}{u^3}\\right]\\left[\\int_{a^2}^{b^2}v^3dv\\right]\\left[\\int_\\alpha^\\beta\\left(w+\\frac{2}{w}+\\frac{1}{w^3}\\right)dw\\right]$\n$=\\frac{1}{32}\\left(\\frac{1}{m^2}-\\frac{1}{n^2}\\right)(b^8-a^8)\\left[(\\beta^2-\\alpha^2)\\left(1+\\frac{1}{\\alpha^2\\beta^2}\\right)+4\\ln\\frac{\\beta}{\\alpha}\\right]$。"
+    },
+    {
+      "pid": 197,
+      "commentary": "考点是正项级数收敛的精细刻画与反例构造：(1) 取只在 $n=k^2$ 处冒尖的 $a_n$，那里 $na_n=1$，说明 $\\sum a_n$ 收敛推不出 $na_n\\to0$。(2) 破题靠“尾部任意小”加 Cauchy–Schwarz：取 $N$ 使 $\\sum_{k>N}a_k<\\varepsilon$，则 $(n-N)^2\\le\\left(\\sum_{k>N}a_k\\right)\\left(\\sum_{k>N}\\frac{1}{a_k}\\right)<\\varepsilon\\sum_{k\\le n}\\frac{1}{a_k}$，故 $n^2/\\sum_{k\\le n}\\frac{1}{a_k}\\lesssim\\varepsilon$。易错：只用 $\\left(\\sum a_k\\right)\\left(\\sum\\frac{1}{a_k}\\right)\\ge n^2$ 只能得到有界，出不来极限为 $0$。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 198,
+      "commentary": "考点是幂指函数一律写成 $e^{v\\ln u}$ 后比较指数差：令 $t=\\frac{1}{x}$，两项化为 $e^{(1+t)\\ln\\frac{1+at}{t}}$ 与 $e^{-\\left(1+\\frac{t}{1+at}\\right)\\ln t}$。提出公因子后指数差 $\\Delta=(1+t)\\ln(1+at)-\\frac{at^2}{1+at}\\ln t=at+o(t)$，故 $I=\\lim\\frac{\\Delta}{t}=a$。易错：底数与指数不能分别做等价替换，指数里的 $\\frac{1}{x}$ 与常数 $a$ 必须整体比较；$\\lim_{t\\to0}t\\ln t=0$ 这一步别漏。",
+      "solution_clean": "令 $t=\\frac{1}{x}\\to0^+$，$I=\\lim_{t\\to0^+}\\left[\\left(\\frac{1+at}{t}\\right)^{1+t}-\\left(\\frac{1}{t}\\right)^{1+\\frac{t}{1+at}}\\right]$\n提公因子 $B=\\left(\\frac{1}{t}\\right)^{1+\\frac{t}{1+at}}$，则 $I=\\lim_{t\\to0^+}B\\left(e^{\\Delta}-1\\right)$，其中 $\\Delta=(1+t)\\ln(1+at)-\\frac{at^2}{1+at}\\ln t$\n由 $e^{\\Delta}-1\\sim\\Delta$ 且 $B\\sim\\frac{1}{t}$：$I=\\lim_{t\\to0^+}\\frac{\\Delta}{t}=\\lim_{t\\to0^+}\\left[(1+t)\\frac{at}{t}-\\frac{a}{1+at}\\,t\\ln t\\right]=a$。"
+    },
+    {
+      "pid": 199,
+      "commentary": "考点是把 $\\frac{\\arctan x}{x}$ 写成含参积分 $\\int_0^1\\frac{dy}{1+x^2y^2}$ 后交换次序，属于“积分号下积分”的标准套路。内层令 $x=\\sin t$、再令 $u=\\tan t$，得 $\\int_0^{\\frac{\\pi}{2}}\\frac{dt}{1+y^2\\sin^2t}=\\frac{\\pi}{2\\sqrt{1+y^2}}$，外层只剩 $\\frac{\\pi}{2}\\int_0^1\\frac{dy}{\\sqrt{1+y^2}}$。易错：$\\int_0^1\\frac{dy}{\\sqrt{1+y^2}}=\\ln(1+\\sqrt{2})$ 要背；端点 $x=0$ 是可去奇点、$x=1$ 只是 $\\frac{1}{\\sqrt{1-x}}$ 型奇性，不必拆区间。",
+      "solution_clean": "$\\frac{\\arctan x}{x}=\\int_0^1\\frac{dy}{1+x^2y^2}$，故原式 $=\\int_0^1dy\\int_0^1\\frac{dx}{(1+x^2y^2)\\sqrt{1-x^2}}$\n令 $x=\\sin t$，再令 $u=\\tan t$：$\\int_0^{\\frac{\\pi}{2}}\\frac{dt}{1+y^2\\sin^2t}=\\int_0^{+\\infty}\\frac{du}{1+(1+y^2)u^2}=\\frac{\\pi}{2\\sqrt{1+y^2}}$\n$I=\\frac{\\pi}{2}\\int_0^1\\frac{dy}{\\sqrt{1+y^2}}=\\frac{\\pi}{2}\\ln\\left(y+\\sqrt{1+y^2}\\right)\\Big|_0^1=\\frac{\\pi}{2}\\ln(1+\\sqrt{2})$。"
+    },
+    {
+      "pid": 200,
+      "commentary": "考点是“分部积分降阶”处理振荡积分：令 $u=e^t$ 得 $f(x)=\\int_{e^x}^{e^{x+1}}\\frac{\\sin u}{u}du$，一次分部把振荡转到 $\\frac{\\cos u}{u}$，余项放大成 $\\int_{e^x}^{e^{x+1}}\\frac{du}{u^2}$，三项恰好合成 $\\frac{2}{e^x}$。易错：只写 $|\\sin u|\\le1$ 得 $|f|\\le1$，乘 $e^x$ 仍无界，必须利用振荡；边界项 $\\frac{1}{e^x}+\\frac{1}{e^{x+1}}$ 与 $\\int_{e^x}^{e^{x+1}}\\frac{du}{u^2}=\\frac{1}{e^x}-\\frac{1}{e^{x+1}}$ 的符号别写反。",
+      "solution_clean": "令 $u=e^t$：$f(x)=\\int_{e^x}^{e^{x+1}}\\frac{\\sin u}{u}du=-\\frac{\\cos u}{u}\\Big|_{e^x}^{e^{x+1}}-\\int_{e^x}^{e^{x+1}}\\frac{\\cos u}{u^2}du$\n取绝对值：$|f(x)|\\le\\frac{1}{e^{x+1}}+\\frac{1}{e^x}+\\int_{e^x}^{e^{x+1}}\\frac{du}{u^2}=\\frac{1}{e^{x+1}}+\\frac{1}{e^x}+\\left(\\frac{1}{e^x}-\\frac{1}{e^{x+1}}\\right)=\\frac{2}{e^x}$\n故 $e^x|f(x)|\\le2$。"
+    },
+    {
+      "pid": 201,
+      "commentary": "考点是多项式的对数求导：$f=\\prod_{i=1}^{n}(x-x_i)$ 给出 $\\frac{f'(x)}{f(x)}=\\sum_{i=1}^{n}\\frac{1}{x-x_i}$，这是无重根时的部分分式恒等式。把 $x=y_j$（$f'$ 的根）代入，因 $f(y_j)\\ne0$，立即得 $\\sum_{i=1}^{n}\\frac{1}{y_j-x_i}=0$，对 $j$ 求和即为所求，答案是 $0$。易错：没有“无重根”就排除不了 $y_j=x_i$，分式会爆；其实每个 $y_j$ 单独已贡献 $0$，所以结果与 $n$、根的分布都无关。",
+      "solution_clean": "$f(x)=\\prod_{i=1}^{n}(x-x_i)$，$f'(x)=n\\prod_{j=1}^{n-1}(x-y_j)$，且 $\\frac{f'(x)}{f(x)}=\\sum_{i=1}^{n}\\frac{1}{x-x_i}$\n在 $x=y_j$ 处 $f'(y_j)=0$，又 $f(y_j)\\ne0$（无重根），故 $\\sum_{i=1}^{n}\\frac{1}{y_j-x_i}=0,\\ j=1,\\cdots,n-1$\n对 $j$ 求和：$\\sum_{j=1}^{n-1}\\sum_{i=1}^{n}\\frac{1}{y_j-x_i}=0$，即所求差的倒数之和为 $0$。"
+    },
+    {
+      "pid": 202,
+      "commentary": "考点是二阶偏微分方程化为“混合偏导为零”再解一阶线性 ODE。破题只需把方程看成 $\\frac{\\partial}{\\partial y}\\left(z_x-\\frac{z}{2x}\\right)=0$，于是 $z_x-\\frac{z}{2x}=g(x)$，乘以积分因子 $x^{-\\frac{1}{2}}$ 得 $z=\\sqrt{x}\\int\\frac{g(x)}{\\sqrt{x}}dx+\\sqrt{x}\\,\\varphi(y)$。易错：$\\frac{1}{2x}$ 的符号要小心，积分因子是 $x^{-\\frac{1}{2}}$ 而非 $x^{\\frac{1}{2}}$；对 $x$ 积分会带出只含 $x$ 的任意函数 $\\psi(x)$，它不能并进 $\\varphi(y)$。",
+      "solution_clean": "$\\frac{\\partial}{\\partial y}\\left(z_x-\\frac{z}{2x}\\right)=0\\Rightarrow z_x-\\frac{z}{2x}=g(x)$\n乘积分因子 $x^{-\\frac{1}{2}}$：$\\left(x^{-\\frac{1}{2}}z\\right)_x=x^{-\\frac{1}{2}}g(x)$\n$z=\\sqrt{x}\\int\\frac{g(x)}{\\sqrt{x}}dx+\\sqrt{x}\\,\\varphi(y)$，记 $\\psi(x)=\\sqrt{x}\\int\\frac{g(x)}{\\sqrt{x}}dx$\n得通解 $z=\\psi(x)+\\sqrt{x}\\,\\varphi(y)$。"
+    },
+    {
+      "pid": 203,
+      "commentary": "考点就是 Taylor 公式的积分余项，本质是一次分部积分：把 $\\int_a^x(x-t)f''(t)dt$ 中的 $(x-t)$ 当作求导得 $-1$ 的因子，$f''$ 降为 $f'$ 后再积一次。得 $\\int_a^x(x-t)f''(t)dt=(x-t)f'(t)\\Big|_a^x+\\int_a^xf'(t)dt=f(x)-f(a)-f'(a)(x-a)$，代回右端正好回到 $f(x)$。易错：$(x-t)f'(t)\\Big|_a^x$ 在 $t=x$ 处为 $0$，只剩 $-(x-a)f'(a)$，符号弄反最常见；这是恒等变形，不必引入中值点。",
+      "solution_clean": "$\\int_a^x(x-t)f''(t)dt=(x-t)f'(t)\\Big|_a^x+\\int_a^xf'(t)dt$，其中 $(x-t)f'(t)\\Big|_a^x=-(x-a)f'(a)$\n$=f(x)-f(a)-f'(a)(x-a)$\n代回右端：$f(a)+f'(a)(x-a)+\\left[f(x)-f(a)-f'(a)(x-a)\\right]=f(x)$，命题得证。"
+    },
+    {
+      "pid": 204,
+      "commentary": "考点是第二型曲面积分：每个分量拆成 $\\frac{x}{x-x_0}=1+\\frac{x_0}{x-x_0}$，而 $\\iint_Sdxdy=\\iiint_\\Omega\\frac{\\partial 1}{\\partial z}dV=0$，只剩 $\\iint_S\\frac{dxdy}{z-z_0}$。投到 $xy$ 面时上下两叶的 $z-z_0$ 与 $dxdy$ 同时变号，故同号相加得 $\\frac{2}{c}\\iint_D\\frac{dA}{\\sqrt{1-r^2}}$，广义极坐标后 $\\int_0^1\\frac{r\\,dr}{\\sqrt{1-r^2}}=1$。易错：漏掉上下两叶的因子 $2$；三个分量对称，别只算 $z$ 项就交卷。",
+      "solution_clean": "$z$ 项：$\\iint_S\\frac{z\\,dxdy}{z-z_0}=\\iint_Sdxdy+z_0\\iint_S\\frac{dxdy}{z-z_0}=z_0\\iint_S\\frac{dxdy}{z-z_0}$（因 $\\iint_Sdxdy=0$）\n投到 $D:\\frac{(x-x_0)^2}{a^2}+\\frac{(y-y_0)^2}{b^2}\\le1$，上下两叶同号相加：$=\\frac{2z_0}{c}\\iint_D\\frac{dA}{\\sqrt{1-\\frac{(x-x_0)^2}{a^2}-\\frac{(y-y_0)^2}{b^2}}}$\n令 $x-x_0=ar\\cos\\theta,\\ y-y_0=br\\sin\\theta$：$=\\frac{2abz_0}{c}\\cdot2\\pi\\int_0^1\\frac{r\\,dr}{\\sqrt{1-r^2}}=\\frac{4\\pi abz_0}{c}$\n同理另两项，得 $I=4\\pi\\left(\\frac{bcx_0}{a}+\\frac{cay_0}{b}+\\frac{abz_0}{c}\\right)$。"
+    },
+    {
+      "pid": 205,
+      "commentary": "考点是分段放缩把 $a_n$ 卡成 $O(n)$，再走比较判别法。以 $t=\\frac{\\pi}{n}$ 分界：小段用 $|\\sin nt|\\le n\\sin t$，得 $n^3\\int_0^{\\frac{\\pi}{n}}t\\,dt=O(n)$；大段用 $|\\sin nt|\\le1$ 与 $\\sin t\\ge\\frac{2t}{\\pi}$，得 $\\int_{\\frac{\\pi}{n}}^{\\frac{\\pi}{2}}t\\left(\\frac{\\pi}{2t}\\right)^3dt=O(n)$。于是 $a_n<Cn$，$\\frac{1}{a_n}>\\frac{1}{Cn}$ 而调和级数发散。易错：不分段则分子与分母的估计互相打架；$\\sin t\\ge\\frac{2t}{\\pi}$ 的方向不能写反。",
+      "solution_clean": "拆成 $\\int_0^{\\frac{\\pi}{n}}+\\int_{\\frac{\\pi}{n}}^{\\frac{\\pi}{2}}$。小段用 $|\\sin nt|\\le n\\sin t$：$\\int_0^{\\frac{\\pi}{n}}t\\left|\\frac{\\sin nt}{\\sin t}\\right|^3dt\\le n^3\\int_0^{\\frac{\\pi}{n}}t\\,dt=\\frac{\\pi^2}{2}n$\n大段用 $|\\sin nt|\\le1$、$\\sin t\\ge\\frac{2t}{\\pi}$：$\\int_{\\frac{\\pi}{n}}^{\\frac{\\pi}{2}}t\\left|\\frac{\\sin nt}{\\sin t}\\right|^3dt\\le\\frac{\\pi^3}{8}\\int_{\\frac{\\pi}{n}}^{\\frac{\\pi}{2}}\\frac{dt}{t^2}<\\frac{\\pi^2}{8}n$\n故 $a_n<\\pi^2n$，$\\frac{1}{a_n}>\\frac{1}{\\pi^2n}$，而 $\\sum\\frac{1}{n}$ 发散，故 $\\sum\\frac{1}{a_n}$ 发散。"
+    },
+    {
+      "pid": 206,
+      "commentary": "考点是按 $a=\\int_0^{+\\infty}f$ 这个分点拆积分再放缩：$\\int_a^{+\\infty}xf(x)dx>a\\int_a^{+\\infty}f=a\\left[a-\\int_0^af\\right]=\\int_0^aa[1-f(x)]dx$。与 $\\int_0^axf$ 相加后用 $x\\le a$ 把 $a(1-f)$ 换成 $x(1-f)$，两项恰好合成 $\\int_0^ax\\,dx=\\frac{a^2}{2}$。易错：条件 $0<f<1$ 正是保证 $1-f>0$；分点必须取 $\\int_0^{+\\infty}f$ 本身，取 $1$ 或其他数就接不上 $\\int_a^{+\\infty}f=a-\\int_0^af$。",
+      "solution_clean": "设 $a=\\int_0^{+\\infty}f(x)dx\\in(0,+\\infty)$，则 $\\int_0^{+\\infty}xf=\\int_0^axf+\\int_a^{+\\infty}xf$\n后半：$\\int_a^{+\\infty}xf>a\\int_a^{+\\infty}f=a\\left[a-\\int_0^af\\right]=\\int_0^aa[1-f(x)]dx$\n故 $\\int_0^{+\\infty}xf>\\int_0^axf+\\int_0^aa(1-f)>\\int_0^axf+\\int_0^ax[1-f(x)]dx=\\int_0^ax\\,dx=\\frac{a^2}{2}$。"
+    },
+    {
+      "pid": 207,
+      "commentary": "考点是取对数后用 Jensen：待证式等价于 $\\sum g(x_i)\\le ng(\\bar x)$，故只需 $g(x)=\\ln\\frac{\\ln x}{x}$ 在 $(1,e)$ 上凹。算 $g''(x)=\\frac{(\\ln x)^2-\\ln x-1}{(x\\ln x)^2}$，$x<e$ 时 $\\ln x<1$ 使分子 $\\le-1<0$，凹性成立。易错：凹凸方向写反结论就反；题设 $x_i<e$ 正是保证分子为负，越过 $e$ 结论就不成立。",
+      "solution_clean": "令 $g(x)=\\ln\\frac{\\ln x}{x}=\\ln\\ln x-\\ln x$，则 $g'(x)=\\frac{1}{x\\ln x}-\\frac{1}{x}$，$g''(x)=\\frac{(\\ln x)^2-\\ln x-1}{(x\\ln x)^2}$\n$1<x<e$ 时 $0<\\ln x<1$，分子 $\\le-1<0$，故 $g''<0$，$g$ 在 $[1,e]$ 上凹\n由 Jensen 不等式：$\\sum_{i=1}^{n}g(x_i)\\le ng\\left(\\frac{1}{n}\\sum_{i=1}^{n}x_i\\right)=ng(\\bar x)$\n即 $\\prod_{i=1}^{n}\\frac{\\ln x_i}{x_i}\\le\\left(\\frac{\\ln\\bar x}{\\bar x}\\right)^n$。"
+    },
+    {
+      "pid": 208,
+      "commentary": "考点是把 $\\int_0^1xf\\,dx$ 分部积分成 $\\int_0^1h(x)f'(x)dx$ 再用 Cauchy–Schwarz，关键是权函数选得使 $\\int h^2$ 最小：由 $f(0)=f(1)=0$ 有 $\\int hf'=[hf]_0^1-\\int h'f=-\\int h'f$，故只要 $h'=-x$，即 $h=C-\\frac{x^2}{2}$ 都成立。取 $C=\\int_0^1\\frac{x^2}{2}dx=\\frac{1}{6}$ 得 $h=\\frac{1-3x^2}{6}$，$\\int_0^1h^2=\\frac{1}{45}$，正是 (2) 的最佳常数（(1) 取 $h=-\\frac{x^2}{2}$ 只得 $\\frac{1}{20}$）。易错：看不出 $C$ 可任意取，就凑不出 $\\frac{1}{45}$。",
+      "solution_clean": "由 $f(0)=f(1)=0$：$\\int_0^1xf(x)dx=\\frac{x^2}{2}f(x)\\Big|_0^1-\\frac{1}{2}\\int_0^1x^2f'(x)dx=-\\frac{1}{2}\\int_0^1x^2f'(x)dx$\n(1) Cauchy–Schwarz：$\\left[\\int_0^1xf\\right]^2\\le\\frac{1}{4}\\int_0^1x^4dx\\int_0^1f'^2=\\frac{1}{20}\\int_0^1f'^2\\le\\int_0^1f'^2$\n(2) 对任意常数 $C$ 有 $\\int_0^1xf=-\\int_0^1\\left(C-\\frac{x^2}{2}\\right)f'$，取 $C=\\frac{1}{6}$ 得 $6\\int_0^1xf=\\int_0^1(1-3x^2)f'$\n$36\\left[\\int_0^1xf\\right]^2\\le\\int_0^1(1-3x^2)^2dx\\int_0^1f'^2=\\frac{4}{5}\\int_0^1f'^2$，即 $\\left[\\int_0^1xf\\right]^2\\le\\frac{1}{45}\\int_0^1f'^2$。"
+    }
+  ]
+}

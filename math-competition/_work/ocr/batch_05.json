@@ -1,0 +1,181 @@
+{
+  "batch": 5,
+  "date": "2026-05-31",
+  "pages": [
+    {
+      "id": 51,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "6",
+          "statement": "找出所有可微函数 $f:(0,+\\infty)\\to(0,+\\infty)$，对于这样一个函数，存在 $a>0$，使得对于 $\\forall x>0$，有 $f'\\left(\\frac{a}{x}\\right)=\\frac{x}{f(x)}$。",
+          "answer": "$f(x)=\\sqrt{b}\\left(\\frac{x}{\\sqrt{a}}\\right)^{\\frac{a}{b}}$，$b>0$",
+          "note": "幻灯片版式，先给「分析」再给「解」"
+        }
+      ],
+      "has_solution": true,
+      "solution": "分析：由 $f'\\left(\\frac{a}{x}\\right)=\\frac{x}{f(x)}$ 得 $f'\\left(\\frac{a}{x}\\right)f(x)=x$，换元得 $f'(x)f\\left(\\frac{a}{x}\\right)=\\frac{a}{x}$。于是构造 $g(x)=f\\left(\\frac{a}{x}\\right)f(x)$，则 $g'(x)=f'(x)f\\left(\\frac{a}{x}\\right)+f'\\left(\\frac{a}{x}\\right)f(x)\\left(-\\frac{a}{x^2}\\right)=\\frac{a}{x}+x\\left(-\\frac{a}{x^2}\\right)=0$，故 $g(x)=b$（$b$ 为常数）。即 $f(x)\\left[\\frac{1}{x}\\cdot\\frac{a}{f'(x)}\\right]=b$，得 $\\frac{f'(x)}{f(x)}=\\frac{a}{bx}$，积分得 $\\ln f(x)=\\frac{a}{b}\\ln x+\\ln c$，即 $f(x)=cx^{\\frac{a}{b}}\\ (c>0)$。再令 $x=a$ 代入 $c^2a^{\\frac{a}{b}}=b$，得 $f(x)=\\sqrt{b}\\left(\\frac{x}{\\sqrt{a}}\\right)^{\\frac{a}{b}}$，$b>0$。",
+      "summary": "第6题：函数方程，构造 $f(a/x)f(x)$ 为常数求解",
+      "clarity": "good"
+    },
+    {
+      "id": 52,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "7",
+          "statement": "求方程 $y''+4y'+5y=8\\cos x$ 在 $(-\\infty,0)$ 内有界的特解。",
+          "answer": "$y^{*}=\\cos x+\\sin x$",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "此方程属 $f(x)=e^{\\lambda x}\\left[P_l(x)\\cos\\omega x+P_n(x)\\sin\\omega x\\right]$ 型，其中 $\\lambda=0,\\ \\omega=1,\\ P_l(x)=8,\\ P_n(x)=0$。特征方程 $r^2+4r+5=0$，得 $r_{1,2}=-2\\pm i$，对应齐次方程通解为 $Y=e^{-2x}(C_1\\cos x+C_2\\sin x)$。由于 $\\lambda+i\\omega=i$ 不是特征根，故 $k=0$，设 $y^{*}=A\\cos x+B\\sin x$，代入原方程比较系数即得其特解 $y^{*}=\\cos x+\\sin x$。",
+      "summary": "第7题：待定系数法求 $8\\cos x$ 型非齐次方程特解",
+      "clarity": "good"
+    },
+    {
+      "id": 53,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "承上页，方程的通解为 $y=e^{-2x}(C_1\\cos x+C_2\\sin x)+\\cos x+\\sin x$。要使 $y(x)$ 在 $(-\\infty,0)$ 内有界，必须 $C_1=C_2=0$（否则 $e^{-2x}\\to+\\infty$ 当 $x\\to-\\infty$），故所求有界特解为 $y=\\cos x+\\sin x$。",
+      "summary": "第7题续：由有界性定 $C_1=C_2=0$，得解",
+      "clarity": "good"
+    },
+    {
+      "id": 54,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "8",
+          "statement": "设 $f(x)$ 在 $[0,+\\infty)$ 上是有界连续函数，证明：方程 $y''+14y'+13y=f(x)$ 的每一个解在 $[0,+\\infty)$ 上都是有界函数。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "对应齐次方程 $y''+14y'+13y=0$ 的通解为 $y=C_1e^{-x}+C_2e^{-13x}$。又 $y''+14y'+13y=y''+y'+13(y'+y)=f(x)$，令 $y_1=y'+y$，则 $y_1'+13y_1=f(x)$，解得 $y_1=e^{-13x}\\left[\\int_0^x f(t)e^{13t}dt+C_3\\right]$。同理 $y''+14y'+13y=y''+13y'+(y'+13y)=f(x)$，令 $y_2=y'+13y$，则 $y_2'+y_2=f(x)$，解得 $y_2=e^{-x}\\left[\\int_0^x f(t)e^t dt+C_4\\right]$。",
+      "summary": "第8题：用两个一阶方程求非齐次方程特解",
+      "clarity": "good"
+    },
+    {
+      "id": 55,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "取 $C_3=C_4=0$，得 $y'+y=e^{-13x}\\int_0^x f(t)e^{13t}dt$，$y'+13y=e^{-x}\\int_0^x f(t)e^t dt$，故原方程的一个特解为 $y^{*}=\\frac{1}{12}e^{-x}\\int_0^x f(t)e^t dt-\\frac{1}{12}e^{-13x}\\int_0^x f(t)e^{13t}dt$，通解为 $y=C_1e^{-x}+C_2e^{-13x}+y^{*}$。又 $f(x)$ 在 $[0,+\\infty)$ 上有界，故 $\\exists M>0$ 使得 $|f(x)|\\le M$；且 $0<e^{-x}<1$，$0<e^{-13x}<1$。",
+      "summary": "第8题续：求出特解与通解，给出 $M$ 界",
+      "clarity": "good"
+    },
+    {
+      "id": 56,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "由 $|f(x)|\\le M$ 估计 $|y|\\le|C_1|+|C_2|+\\frac{M}{12}e^{-x}\\int_0^x e^t dt+\\frac{M}{12}e^{-13x}\\int_0^x e^{13t}dt\\le|C_1|+|C_2|+\\frac{M}{12}(1-e^{-x})+\\frac{M}{12\\times13}(1-e^{-13x})\\le|C_1|+|C_2|+\\frac{M}{12}+\\frac{M}{12\\times13}=|C_1|+|C_2|+\\frac{7M}{78}$。对于方程的每一个确定的解，$C_1,C_2$ 是固定的，所以原方程的每一个解都有界。",
+      "summary": "第8题续：估计 $|y|$ 有上界，结论得证",
+      "clarity": "good"
+    },
+    {
+      "id": 57,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "承上页（讨论 $y'+y=f(x)$，$f$ 以 $T$ 为周期的周期解唯一性）：$y(x+T)=e^{-(x+T)}\\left[\\int_0^{x+T}e^tf(t)dt+C\\right]$，令 $t=u+T$ 得 $=e^{-(x+T)}\\left[\\int_{-T}^{x}e^{u+T}f(u+T)du+C\\right]=e^{-x}\\int_{-T}^{x}e^uf(u)du+Ce^{-(x+T)}$。由 $y(x+T)=y(x)$ 得 $e^{-x}\\int_{-T}^{x}e^uf(u)du+Ce^{-(x+T)}=e^{-x}\\int_0^x e^tf(t)dt+Ce^{-x}$，即 $y(x+T)-y(x)=e^{-x}\\int_{-T}^{0}e^tf(t)dt+Ce^{-(x+T)}-Ce^{-x}=0$，故 $C=\\frac{1}{1-e^{-T}}\\int_{-T}^{0}f(u)e^u du$ 为确定的常数，所以符合条件的周期解 $y(x)$ 唯一。",
+      "summary": "续解：定出常数 $C$，证明周期解唯一",
+      "clarity": "good"
+    },
+    {
+      "id": 58,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "11",
+          "statement": "设方程 $(2x+1)y''+(4x-2)y'-8y=0$ 有多项式型的特解和形如 $y=e^{mx}$（$m$ 为常数）之特解，求方程的通解。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "设 $y_1=e^{mx}$，代入原方程得 $(2m^2+4m)x+(m^2-2m-8)=0$，令 $\\begin{cases}2m^2+4m=0,\\\\ m^2-2m-8=0,\\end{cases}$ 解得 $m=-2$，故 $y_1=e^{-2x}$。再设 $y_2=a_nx^n+a_{n-1}x^{n-1}+\\cdots+a_1x+a_0$，代入原方程得 $(4n-8)a_nx^n+\\cdots=0$，从而 $(4n-8)a_n=0$。",
+      "summary": "第11题：由 $e^{mx}$ 型特解定 $m=-2$，设多项式解",
+      "clarity": "good"
+    },
+    {
+      "id": 59,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "由 $(4n-8)a_n=0$ 得 $n=2$，即 $y_2=a_2x^2+a_1x+a_0$，代入原方程得 $-4a_1x+(2a_2-2a_1-8a_0)=0$，故 $a_1=0,\\ a_2=4a_0$。令 $a_0=1$，则 $a_2=4$，$y_2=4x^2+1$。因 $\\frac{y_1}{y_2}=\\frac{e^{-2x}}{4x^2+1}\\neq$ 常数，故所求通解为 $y=C_1e^{-2x}+C_2(4x^2+1)$。",
+      "summary": "第11题续：求得 $y_2=4x^2+1$ 与通解",
+      "clarity": "good"
+    },
+    {
+      "id": 60,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "12",
+          "statement": "设方程 $y''-\\frac{1}{x}y'+q(x)y=0$ 有两个特解 $y_1(x)$ 和 $y_2(x)$，且 $y_1\\cdot y_2=1$，求 $q(x)$，并求方程的通解。",
+          "answer": "$q(x)=0$，$y=C_1a+C_2x^2$",
+          "note": "图中「解」先讨论 (1) 特例 $y_1=a$"
+        }
+      ],
+      "has_solution": true,
+      "solution": "(1) 取 $y_1=a$，由 $y_1\\cdot y_2=1$ 知 $a\\neq0$，且 $y_1(x)=a$ 是所给微分方程 $y''-\\frac{1}{x}y'+q(x)y=0$ 的特解，故 $aq(x)=0$，由此推得 $q(x)=0$。于是方程化为 $y''-\\frac{1}{x}y'=0$，得特解 $x^2$，它与 $y_1(x)=a$ 无关，故通解为 $y=C_1a+C_2x^2$。",
+      "summary": "第12题(1)：特例 $y_1=a$ 定出 $q(x)=0$",
+      "clarity": "good"
+    },
+    {
+      "id": 61,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "(2) 一般情形：由 $y_2=\\frac{1}{y_1}$ 得 $y_2'=-\\frac{y_1'}{y_1^2}$，$y_2''=-\\frac{y_1y_1''-2y_1'^2}{y_1^3}$。又 $q(x)=-\\frac{y_1''-\\frac{1}{x}y_1'}{y_1}$，$q(x)=-\\frac{y_2''-\\frac{1}{x}y_2'}{y_2}$，两式相等并代入 $y_2$ 的导数，得 $\\frac{y_1''-\\frac{1}{x}y_1'}{y_1}=y_1\\left(-\\frac{y_1y_1''-2y_1'^2}{y_1^3}+\\frac{1}{x}\\cdot\\frac{y_1'}{y_1^2}\\right)$。",
+      "summary": "第12题(2)：代入 $y_2=1/y_1$ 建立 $y_1$ 的方程",
+      "clarity": "good"
+    },
+    {
+      "id": 62,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "化简上述等式得 $y_1''-\\frac{1}{x}y_1'-\\frac{1}{y_1}y_1'^2=0$，即 $y_1''-\\frac{1}{y_1}y_1'^2=\\frac{1}{x}y_1'$，于是 $\\frac{y_1y_1''-y_1'^2}{y_1^2}=\\frac{1}{x}\\cdot\\frac{y_1'}{y_1}$，即 $\\left(\\frac{y_1'}{y_1}\\right)'=\\frac{1}{x}\\cdot\\frac{y_1'}{y_1}$。令 $z=\\frac{y_1'}{y_1}$，得 $\\frac{dz}{dx}=\\frac{1}{x}z$，故 $z=2x$，从而 $y_1(x)=e^{x^2}$，$y_2(x)=e^{-x^2}$，$q(x)=-4x^2$；故原方程通解为 $y=C_1e^{x^2}+C_2e^{-x^2}$。",
+      "summary": "第12题续：令 $z=y_1'/y_1$ 得 $q(x)=-4x^2$ 与通解",
+      "clarity": "good"
+    },
+    {
+      "id": 63,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "13",
+          "statement": "解方程 $(x^2+y^2+3)\\frac{dy}{dx}=2x\\left(2y-\\frac{x^2}{y}\\right)$。",
+          "answer": "",
+          "note": "图中该题推导以「证」字开头，疑为「解」"
+        }
+      ],
+      "has_solution": true,
+      "solution": "原方程变形为 $\\frac{y\\,dy}{x\\,dx}=\\frac{4y^2-2x^2}{x^2+y^2+3}$。令 $U=x^2,\\ V=y^2$，则方程化为 $\\frac{dV}{dU}=\\frac{4V-2U}{U+V+3}$。再令 $U=u+h,\\ V=v+k$，则 $\\frac{dV}{dU}=\\frac{4(v+k)-2(u+h)}{u+v+k+h+3}$，取 $4k-2h=0,\\ k+h=-3$，解得 $k=-1,\\ h=-2$，方程化为齐次方程 $\\frac{dv}{du}=\\frac{4v-2u}{u+v}=\\frac{4\\frac{v}{u}-2}{1+\\frac{v}{u}}$，令 $z=\\frac{v}{u}$。",
+      "summary": "第13题：两次换元化齐次方程",
+      "clarity": "good"
+    },
+    {
+      "id": 64,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "13",
+          "statement": "解方程 $(x^2+y^2+3)\\frac{dy}{dx}=2x\\left(2y-\\frac{x^2}{y}\\right)$。",
+          "answer": "$C(y^2-x^2-1)^2=(y^2-2x^2-3)^3$",
+          "note": "与上一页同题的续页，题面重出；图中推导以「证」字开头，疑为「解」"
+        }
+      ],
+      "has_solution": true,
+      "solution": "由 $z=\\frac{v}{u}$ 得 $\\frac{dv}{du}=z+u\\frac{dz}{du}=\\frac{4z-2}{1+z}$，故 $u\\frac{dz}{du}=-\\frac{z^2-3z+2}{z+1}$，即 $\\frac{z+1}{(z-1)(z-2)}dz=-\\frac{du}{u}$。积分得 $3\\ln|z-2|-2\\ln|z-1|=-\\ln|e^{C_1}u|$，回代整理得 $C(y^2-x^2-1)^2=(y^2-2x^2-3)^3$。",
+      "summary": "第13题续：分离变量积分并回代得隐式解",
+      "clarity": "good"
+    }
+  ]
+}

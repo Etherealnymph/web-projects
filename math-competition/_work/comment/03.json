@@ -1,0 +1,85 @@
+{
+"chunk": 3,
+"items": [
+{
+"pid": 33,
+"commentary": "考点：常系数非齐次线性方程，先把 $\\sin^2x$ 降幂再用待定系数法。破题：$\\sin^2x=\\frac12-\\frac12\\cos2x$，常数项取 $y^*=-\\frac12$；$\\pm2i$ 不是特征根，设 $y^*=A\\cos2x+B\\sin2x$，代入得 $A=\\frac1{10},B=0$。易错：对 $\\sin^2x$ 直接设 $A\\cos^2x$ 型特解，或漏掉常数项那部分（$0$ 也不是特征根）。",
+"solution_clean": ""
+},
+{
+"pid": 34,
+"commentary": "考点：凑全微分 + 换元化可分离。破题：两边乘 $x$ 立刻看出 $(xy)'=\\frac{1}{\\sin^2(xy)}$，令 $u=xy$ 得 $\\sin^2u\\,du=dx$。易错：不乘 $x$ 而硬分离会卡住；积分要用 $\\int\\sin^2u\\,du=\\frac u2-\\frac{\\sin2u}{4}$，最后的隐式解 $2xy-\\sin2xy=4x+C$ 不必强行解出 $y$。",
+"solution_clean": ""
+},
+{
+"pid": 35,
+"commentary": "考点：右端出现 $\\sin2y$、$\\cos^2y$ 时，除以 $\\cos^2y$ 并令 $u=\\tan y$ 化为一阶线性。破题：得 $u'+2xu=xe^{-x^2}$，积分因子 $e^{x^2}$ 使左端成为 $(ue^{x^2})'=x$，故 $\\tan y=e^{-x^2}\\left(\\frac{x^2}{2}+C\\right)$。易错：$\\cos y=0$（$y=\\frac\\pi2+k\\pi$）也是解但通解含不进去，要单独交代；别把积分因子误取成 $e^{-x^2}$。",
+"solution_clean": ""
+},
+{
+"pid": 36,
+"commentary": "考点：右端为 $\\frac{e^x}{1+e^x}$ 的常系数方程，它不是 $e^{\\lambda x}P_n(x)$ 型，待定系数法失效，只能降阶或常数变易。破题：注意 $(y'+2y)'-(y'+2y)=y''+y'-2y$，令 $u=y'+2y$ 得 $u'-u=\\frac{e^x}{1+e^x}$。易错：解出 $u=e^x\\left(C_1+\\ln(1+e^x)\\right)$ 只是做了一半，还要再解一次一阶线性才得到 $y$。",
+"solution_clean": ""
+},
+{
+"pid": 37,
+"commentary": "考点：缺 $y$ 项的二阶方程，用 $u=y-xy'$ 降阶。破题：关键恒等式 $u'=-xy''$，于是 $x^3y''=-x^2u'$，方程化为 $u'=-\\frac{u^2}{x^2}$；由 $y(1)=0,y'(1)=3$ 得 $u(1)=-3$，从而 $y'=\\frac yx-\\frac{3}{2x-3}$。易错：$u(1)$ 的符号别弄反；积分 $\\int\\frac{3}{x(2x-3)}dx$ 要用 $|2x-3|$，最终 $y=x\\ln\\frac{x}{3-2x}$。",
+"solution_clean": ""
+},
+{
+"pid": 38,
+"commentary": "考点：右端分段的一阶线性方程，两段分别解、再用解的连续性定常数。破题：公式给 $y=2+C_1e^{-x}$，由 $y(0)=0$ 定 $C_1=-2$；$x>1$ 时 $y=C_2e^{-x}$，在 $x=1$ 用 $\\lim_{x\\to1^-}y=\\lim_{x\\to1^+}y$ 得 $C_2=2(e-1)$。易错：拼接点取 $x=1$ 而不是 $x=0$；题目只要求 $y$ 连续，不必强求 $y'$ 在 $x=1$ 连续。",
+"solution_clean": "当 $0\\le x\\le1$：$y=e^{-x}\\left(\\int2e^{x}dx+C_1\\right)=2+C_1e^{-x}$，由 $y(0)=0$ 得 $C_1=-2$，即 $y=2-2e^{-x}$。\n当 $x>1$：$y'+y=0$，得 $y=C_2e^{-x}$。\n由 $y$ 在 $x=1$ 连续：$2-2e^{-1}=C_2e^{-1}$，得 $C_2=2(e-1)$。\n故 $y=\\begin{cases}2(1-e^{-x}),&0\\le x\\le1,\\\\2(e-1)e^{-x},&x>1.\\end{cases}$"
+},
+{
+"pid": 39,
+"commentary": "考点：函数方程，用换元加构造不变量把两个未知的导数消掉。破题：把 $x$ 换成 $\\frac ax$ 得 $f'(x)f\\left(\\frac ax\\right)=\\frac ax$，与 $f'\\left(\\frac ax\\right)f(x)=x$ 联立，令 $g(x)=f(x)f\\left(\\frac ax\\right)$，则 $g'\\equiv0$，故 $f(x)f\\left(\\frac ax\\right)=b$。易错：相除得 $\\frac{f'}{f}=\\frac{a}{bx}$ 后必须代回原方程定出 $c^2a^{a/b}=b$，否则参数关系不全；取对数要用到题设 $f>0$。",
+"solution_clean": "由 $f'\\left(\\frac ax\\right)f(x)=x$，将 $x$ 换为 $\\frac ax$ 得 $f'(x)f\\left(\\frac ax\\right)=\\frac ax$。\n令 $g(x)=f(x)f\\left(\\frac ax\\right)$，则 $g'(x)=f'(x)f\\left(\\frac ax\\right)-\\frac{a}{x^2}f(x)f'\\left(\\frac ax\\right)=\\frac ax-\\frac{a}{x^2}\\cdot x=0$，故 $f(x)f\\left(\\frac ax\\right)=b>0$。\n两式相除得 $\\frac{f'(x)}{f(x)}=\\frac{a}{bx}$，积分得 $\\ln f(x)=\\frac ab\\ln x+\\ln c$，即 $f(x)=cx^{a/b}$。\n代回原方程：$c^2a^{a/b}=b$，故 $c=\\sqrt b\\,a^{-\\frac{a}{2b}}$。\n所以 $f(x)=\\sqrt b\\left(\\frac{x}{\\sqrt a}\\right)^{a/b}$，$b>0$。"
+},
+{
+"pid": 40,
+"commentary": "考点：常系数非齐次方程，并按有界性挑选特解。破题：特征根 $-2\\pm i$，$\\lambda+i\\omega=i$ 不是特征根，设 $y^*=A\\cos x+B\\sin x$，代入比较系数得 $A=B=1$。易错：题目要 $(-\\infty,0)$ 内有界的解，齐次部分 $e^{-2x}(C_1\\cos x+C_2\\sin x)$ 当 $x\\to-\\infty$ 时发散，故只能 $C_1=C_2=0$，不能把通解当答案。",
+"solution_clean": "特征方程 $r^2+4r+5=0$，$r_{1,2}=-2\\pm i$，齐次通解为 $e^{-2x}(C_1\\cos x+C_2\\sin x)$。\n右端 $f(x)=8\\cos x$ 对应 $\\lambda+i\\omega=i$，它不是特征根，故取 $k=0$，设 $y^*=A\\cos x+B\\sin x$。\n代入原方程比较系数：$(4A+4B)\\cos x+(4B-4A)\\sin x=8\\cos x$，得 $A=B=1$。\n$x\\to-\\infty$ 时 $e^{-2x}(C_1\\cos x+C_2\\sin x)$ 无界，故有界的解只能是 $C_1=C_2=0$，即 $y^*=\\cos x+\\sin x$。"
+},
+{
+"pid": 41,
+"commentary": "考点：特征根实部全负时「有界输入给出有界输出」，证明靠算子分解。破题：$y''+14y'+13y=(y'+y)'+13(y'+y)=(y'+13y)'+(y'+13y)$，令 $y_1=y'+y,\\ y_2=y'+13y$，各解一个一阶线性方程。易错：直接写常数变易的通解再去估积分很难，应估 $\\left|e^{-13x}\\int_0^xf e^{13t}dt\\right|\\le\\frac{M}{13}$ 这类式子；别忘 $y=\\frac{y_2-y_1}{12}$。",
+"solution_clean": "特征根 $-1,-13$。作分解：$y''+14y'+13y=(y'+y)'+13(y'+y)=(y'+13y)'+(y'+13y)$。\n令 $y_1=y'+y$，则 $y_1'+13y_1=f$，得 $y_1=e^{-13x}\\left[\\int_0^xf(t)e^{13t}dt+C_1\\right]$。\n令 $y_2=y'+13y$，则 $y_2'+y_2=f$，得 $y_2=e^{-x}\\left[\\int_0^xf(t)e^{t}dt+C_2\\right]$。\n设 $|f|\\le M$，则 $|y_1|\\le|C_1|+\\frac{M}{13}$，$|y_2|\\le|C_2|+M$。\n由 $y_2-y_1=12y$ 得 $|y|\\le\\frac1{12}\\left(|C_1|+|C_2|+M+\\frac M{13}\\right)$，故每个解在 $[0,+\\infty)$ 上有界。"
+},
+{
+"pid": 42,
+"commentary": "考点：二阶变系数方程靠「猜解」——指数解加多项式解，再拼通解。破题：$y=e^{mx}$ 代回须对一切 $x$ 成立，得 $2m^2+4m=0$ 与 $m^2-2m-8=0$，取公共根 $m=-2$；多项式解由最高次项 $(4n-8)a_n=0$ 定出 $n=2$，解得 $y=4x^2+1$。易错：只用其中一个方程取 $m=0$ 或 $4$ 都会失败；两个特解还要说明线性无关，通解才是 $y=C_1e^{-2x}+C_2(4x^2+1)$。",
+"solution_clean": ""
+},
+{
+"pid": 43,
+"commentary": "考点：只含 $x^2,y^2$ 的方程，作 $U=x^2,V=y^2$ 降阶为齐次方程。破题：乘 $y$ 后由 $\\frac{y\\,dy}{x\\,dx}=\\frac{dV}{dU}$ 得 $\\frac{dV}{dU}=\\frac{4V-2U}{U+V+3}$，再平移 $U=u-2,\\ V=v-1$ 消去常数项，化为 $\\frac{dv}{du}=\\frac{4v-2u}{u+v}$。易错：平移量由 $4k-2h=0,\\ h+k=-3$ 定；最后 $z=v/u$ 分离时要算 $\\frac{1+z}{(z-1)(z-2)}=-\\frac{2}{z-1}+\\frac{3}{z-2}$，答案会是隐式式 $C(y^2-x^2-1)^2=(y^2-2x^2-3)^3$。",
+"solution_clean": ""
+},
+{
+"pid": 44,
+"commentary": "考点：把一维分部积分恒等式 $\\int_0^1\\varphi\\,dx=-\\frac12\\int_0^1(x-x^2)\\varphi''dx$ 搬到二重积分上。破题：$f$ 在边界为 $0$，对 $x$、对 $y$ 各分部两次，把四阶偏导转到权函数 $x(1-x)y(1-y)$ 上，才能用 $\\left|\\frac{\\partial^4f}{\\partial x^2\\partial y^2}\\right|\\le1$ 估值。易错：$\\iint_D(x-x^2)f_{xx}\\,dxdy$ 中的 $(x-x^2)$ 不能提出去写成两个一元积分之积，这一步不成立，必须继续对 $y$ 分部。",
+"solution_clean": ""
+},
+{
+"pid": 45,
+"commentary": "考点：分部积分把四阶偏导从 $f$ 转移到非负权函数 $g=x(1-x)y(1-y)$ 上。破题：$g_{xxyy}=4$，故 $4\\iint_Df\\,dxdy=\\iint_Dg\\,f_{xxyy}\\,dxdy$，再由 $|f_{xxyy}|\\le1$ 与 $\\iint_Dg=\\frac1{36}$ 得 $\\frac1{144}$。易错：四次分部积分的边界项全靠 $f$ 在四条边上为 $0$ 逐项消掉，漏一项结论就废。",
+"solution_clean": ""
+},
+{
+"pid": 46,
+"commentary": "考点：只在一侧为零的边界条件，对应权函数 $(1-x)(1-y)$，与上题的 $x(1-x)y(1-y)$ 完全不同。破题：用 $\\int_0^1\\varphi\\,dx=\\int_0^1(1-x)\\varphi'\\,dx$（只需 $\\varphi(0)=0$）对 $x$、$y$ 各用一次，得 $\\iint_Df\\,dxdy=\\iint_D(1-x)(1-y)f_{xy}\\,dxdy$。易错：条件只给 $f(0,y)=f(x,0)=0$，若仍用 $x(1-x)$ 会多出 $x=1,y=1$ 上的边界项；严格说只能证 $|I|\\le\\frac14$。",
+"solution_clean": ""
+},
+{
+"pid": 47,
+"commentary": "考点：把累次积分认成球面上的第一型曲面积分，再用球带面积公式。破题：$I=\\iint_\\Sigma e^{x-y}dS$（$\\Sigma:x^2+y^2+z^2=1$），令 $\\frac{x-y}{\\sqrt2}=t$，平面截球所得球带面积与 $t$ 无关，为 $2\\pi\\,dt$，于是 $I=2\\pi\\int_{-1}^1e^{\\sqrt2t}dt$。易错：$dS=\\sin\\theta\\,d\\theta\\,d\\varphi$ 里的 $\\sin\\theta$ 不能漏；球带面积 $=2\\pi\\times$厚度（Archimedes），用它可免去硬算 $\\theta$ 积分。",
+"solution_clean": "设 $\\Sigma:x^2+y^2+z^2=1$，由 $x=\\sin\\theta\\cos\\varphi,\\ y=\\sin\\theta\\sin\\varphi,\\ z=\\cos\\theta$ 得 $dS=\\sin\\theta\\,d\\theta\\,d\\varphi$，故 $I=\\iint_\\Sigma e^{x-y}\\,dS$。\n令 $t=\\frac{x-y}{\\sqrt2}\\in[-1,1]$，即用平行平面族去截 $\\Sigma$；厚度为 $dt$ 的球带面积 $dS(t)=2\\pi\\,dt$，与 $t$ 无关。\n于是 $I=2\\pi\\int_{-1}^{1}e^{\\sqrt2t}dt=\\frac{2\\pi}{\\sqrt2}\\left(e^{\\sqrt2}-e^{-\\sqrt2}\\right)$。\n即 $I=\\sqrt2\\pi\\left(e^{\\sqrt2}-e^{-\\sqrt2}\\right)$。"
+},
+{
+"pid": 48,
+"commentary": "考点：把二重和式凑成二重积分和，被积函数是取整函数。破题：$\\Delta x=\\frac2n,\\Delta y=\\frac1n$，节点取 $\\left(\\frac{2i}{n},\\frac jn\\right)$，和式即为 $[x+y]$ 在 $[0,2]^2$ 上的积分和，故极限 $=\\iint_D[x+y]dxdy=\\sum_{k=1}^{3}\\sigma\\{x+y\\ge k\\}$。易错：$k\\le2$ 时 $\\{x+y\\ge k\\}$ 要减去角上的三角形，$k>2$ 时才是三角形，面积算错就得不到 $6$；间断线是零面积集，节点落在上面也不影响。",
+"solution_clean": "取 $\\Delta x=\\frac2n,\\ \\Delta y=\\frac1n$，节点 $\\left(\\frac{2i}{n},\\frac jn\\right)$，$\\Delta\\sigma=\\frac{2}{n^2}$，和式是 $f=[x+y]$ 在 $D=[0,2]^2$ 上的积分和。\n$[x+y]$ 在 $D$ 上分片连续（间断线为零面积集），故极限 $=\\iint_D[x+y]\\,dxdy$。\n按 $[x+y]\\ge k$ 分层求面积：$\\sigma\\{x+y\\ge1\\}=4-\\frac12=\\frac72$，$\\sigma\\{x+y\\ge2\\}=4-2=2$，$\\sigma\\{x+y\\ge3\\}=\\frac12$。\n故极限 $=\\frac72+2+\\frac12=6$。"
+}
+]
+}

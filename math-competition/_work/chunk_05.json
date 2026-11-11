@@ -1,0 +1,117 @@
+{
+"chunk": 5,
+"items": [
+{
+"pid": 65,
+"label": "15",
+"statement": "15.证明:一个薄的均匀的球壳对一个在球外的单位质点产生的引力,相当于这个球壳的质量全部集中于它的中心时所产生的引力.",
+"answer": "",
+"notebook_candidate": "第14题收尾:代入 $\\mathrm{d}S$ 后 $I=\\iint_{D_{xy}}\\frac{(x+\\sqrt{3})|y-2z|}{\\sqrt{4+y^2+z^2-4yz}}\\cdot\\frac{\\sqrt{4+y^2+z^2-4yz}}{|y-2z|}\\mathrm{d}x\\mathrm{d}y=\\iint_{D_{xy}}(x+\\sqrt{3})\\mathrm{d}x\\mathrm{d}y$,$D_{xy}$ 关于 $x,y$ 轴对称使 $x$ 项积分为零,故 $I=\\sqrt{3}\\iint_{D_{xy}}\\mathrm{d}x\\mathrm{d}y=\\sqrt{3}\\cdot\\pi\\cdot1\\cdot\\frac{2}{\\sqrt{3}}=2\\pi$. 第15题:以球心为原点、质点在 $z$ 轴上建系,设 $\\Sigma:x^2+y^2+z^2=R^2$,单位质点坐标 $(0,0,a)$, $a>R$;设引力 $\\vec{F}=(F_x,F_y,F_z)$,由对称性 $F_x=F_y=0$,球壳密度 $\\rho$,则 $F_z=\\iint_{\\Sigma}\\frac{G\\rho(z-a)}{[x^2+y^2+(z-a)^2]^{3/2}}\\mathrm{d}S$."
+},
+{
+"pid": 66,
+"label": "未编号",
+"statement": "设 $S$ 为以原点为中心、$a\\ (a>0)$ 为半径的上半球面,$I=\\iint_{S}\\frac{\\mathrm{d}S}{\\sqrt{x^2+y^2+(z+a)^2}}$,则 $I=(\\quad)$.",
+"answer": "$2\\pi(2-\\sqrt{2})$",
+"notebook_candidate": "第15题:$F_z=\\iint_{\\Sigma}\\frac{G\\rho(z-a)}{[x^2+y^2+(z-a)^2]^{3/2}}\\mathrm{d}S=\\iint_{D}\\frac{G\\rho(R\\cos\\varphi-a)}{[R^2+a^2-2aR\\cos\\varphi]^{3/2}}R^2\\sin\\varphi\\,\\mathrm{d}\\varphi\\mathrm{d}\\theta$(球面坐标 $x=R\\sin\\varphi\\cos\\theta,y=R\\sin\\varphi\\sin\\theta,z=R\\cos\\varphi$),化为 $-G\\rho R^2\\int_0^{2\\pi}\\mathrm{d}\\theta\\int_0^{\\pi}\\frac{R\\cos\\varphi-a}{[R^2+a^2-2aR\\cos\\varphi]^{3/2}}\\mathrm{d}\\cos\\varphi=-G\\frac{4\\pi R^2\\rho}{a^2}$. 校赛题:上半球面参数方程 $x=a\\sin\\varphi\\cos\\theta,\\ y=a\\sin\\varphi\\sin\\theta,\\ z=a\\cos\\varphi$,$\\varphi\\in(0,\\frac{\\pi}{2}),\\ \\theta\\in(0,2\\pi)$,故 $I=\\iint\\frac{a^2\\sin\\varphi}{\\sqrt{2a^2+2a^2\\cos\\varphi}}\\mathrm{d}\\varphi\\mathrm{d}\\theta=2\\pi\\int_0^{\\pi/2}\\frac{\\sin\\varphi\\,\\mathrm{d}\\varphi}{\\sqrt{2+2\\cos\\varphi}}=2\\pi(2-\\sqrt{2})$."
+},
+{
+"pid": 67,
+"label": "16",
+"statement": "16.设 $f(x),g(x)$ 均为 $[a,b]$ 上的连续增函数 $(a,b>0)$,证明: $$\\int_a^b f(x)\\,\\mathrm{d}x\\int_a^b g(x)\\,\\mathrm{d}x\\le(b-a)\\int_a^b f(x)g(x)\\,\\mathrm{d}x.$$",
+"answer": "",
+"notebook_candidate": "因 $f,g$ 均为 $[a,b]$ 上的连续增函数,故 $\\forall x,y\\in[a,b]$ 有 $(f(x)-f(y))(g(x)-g(y))\\ge0$,从而 $I=\\iint_{D}(f(x)-f(y))(g(x)-g(y))\\mathrm{d}x\\mathrm{d}y\\ge0$(其中 $D=[a,b]\\times[a,b]$). 展开得 $I=\\iint_D f(x)g(x)\\mathrm{d}x\\mathrm{d}y-\\iint_D f(x)g(y)\\mathrm{d}x\\mathrm{d}y-\\iint_D g(x)f(y)\\mathrm{d}x\\mathrm{d}y+\\iint_D f(y)g(y)\\mathrm{d}x\\mathrm{d}y\\ge0$;利用 $D$ 关于 $y=x$ 对称,得 $\\iint_D f(x)g(x)=\\iint_D f(y)g(y)$、$\\iint_D f(x)g(y)=\\iint_D g(x)f(y)$,于是 $I=2\\iint_D f(x)g(x)\\mathrm{d}x\\mathrm{d}y-2\\iint_D f(x)g(y)\\mathrm{d}x\\mathrm{d}y\\ge0$,即 $\\iint_D f(x)g(y)\\mathrm{d}x\\mathrm{d}y\\le\\iint_D f(x)g(x)\\mathrm{d}x\\mathrm{d}y$."
+},
+{
+"pid": 68,
+"label": "练习",
+"statement": "练习:设 $f(x)$ 在 $[0,1]$ 上连续且单调增加,证明: $$\\frac{1}{2}\\int_0^1 f(x)\\,\\mathrm{d}x\\le\\int_0^1 xf(x)\\,\\mathrm{d}x.$$",
+"answer": "",
+"notebook_candidate": "承接第16题:由 $\\iint_D f(x)g(y)\\mathrm{d}x\\mathrm{d}y\\le\\iint_D f(x)g(x)\\mathrm{d}x\\mathrm{d}y$ 得 $\\int_a^b f(x)\\mathrm{d}x\\int_a^b g(y)\\mathrm{d}y\\le\\int_a^b\\mathrm{d}y\\int_a^b f(x)g(x)\\mathrm{d}x\\le(b-a)\\int_a^b f(x)g(x)\\mathrm{d}x$. 练习的等价形式:$\\int_0^1 f(x)\\mathrm{d}x\\le2\\int_0^1 xf(x)\\mathrm{d}x\\Leftrightarrow\\frac{1}{2}\\int_0^1 f(x)\\mathrm{d}x\\le\\int_0^1 xf(x)\\mathrm{d}x\\Leftrightarrow\\int_0^1 x\\mathrm{d}x\\int_0^1 f(x)\\mathrm{d}x\\le\\int_0^1 xf(x)\\mathrm{d}x$."
+},
+{
+"pid": 69,
+"label": "练习",
+"statement": "练习:设 $f(x)$ 在 $[0,1]$ 上连续且单调增加,证明: $$\\int_0^1 f(x)\\,\\mathrm{d}x\\le2\\int_0^1 xf(x)\\,\\mathrm{d}x.$$",
+"answer": "",
+"notebook_candidate": "因 $f$ 在 $[0,1]$ 上连续且单调增加,故 $(x-y)(f(x)-f(y))\\ge0$,从而 $\\iint_D(x-y)(f(x)-f(y))\\mathrm{d}x\\mathrm{d}y\\ge0$,其中 $D=\\{(x,y)\\mid 0\\le x\\le1,0\\le y\\le1\\}$. 展开得 $\\iint_D[xf(x)+yf(y)-xf(y)-yf(x)]\\mathrm{d}x\\mathrm{d}y=2\\iint_D xf(x)\\mathrm{d}x\\mathrm{d}y-2\\iint_D xf(y)\\mathrm{d}x\\mathrm{d}y=2\\int_0^1 xf(x)\\mathrm{d}x-\\int_0^1 f(y)\\mathrm{d}y=2\\int_0^1 xf(x)\\mathrm{d}x-\\int_0^1 f(x)\\mathrm{d}x\\ge0$,即得所证不等式."
+},
+{
+"pid": 70,
+"label": "18",
+"statement": "设曲面 $\\Sigma$ 是：$x^2+y^2+z^2=a^2$，$M_0(x_0,y_0,z_0)$ 是空间中任意一点，计算曲面积分 $$\\iint\\limits_{\\Sigma}\\frac{dS}{\\rho},$$ 其中 $$\\rho=\\sqrt{(x-x_0)^2+(y-y_0)^2+(z-z_0)^2}.$$",
+"answer": "",
+"notebook_candidate": "解：(1) 当 $M_0=(0,0,0)$ 时 $\\rho=a$，则 $\\iint_\\Sigma\\frac{dS}{\\rho}=\\frac{1}{a}\\iint_\\Sigma dS=4\\pi a$。(2) 当 $M_0\\neq(0,0,0)$ 时，记 $r_0=\\sqrt{x_0^2+y_0^2+z_0^2}$，$\\varphi$ 为 $OP$ 与 $OM_0$ 的夹角，$P(x,y,z)$ 为球面上一点，由余弦定理 $\\rho=\\sqrt{a^2-2ar_0\\cos\\varphi+r_0^2}$。不妨设 $M_0$ 在 $Oz$ 轴正向，则球面坐标下 $x=a\\sin\\varphi\\cos\\theta,\\ y=a\\sin\\varphi\\sin\\theta,\\ z=a\\cos\\varphi$，且 $dS=a^2\\sin\\varphi\\,d\\varphi\\,d\\theta$，$0\\le\\theta\\le2\\pi$，$0\\le\\varphi\\le\\pi$。"
+},
+{
+"pid": 71,
+"label": "19",
+"statement": "设函数 $u(x)$ 在 $[0,1]$ 上连续，且 $$u(x)=1+\\lambda\\int_x^1 u(y)u(y-x)\\,dy,$$ 证明：$\\lambda\\le\\dfrac{1}{2}$。",
+"answer": "",
+"notebook_candidate": "解：对所给等式两边在 $[0,1]$ 上积分，得 $\\int_0^1u(x)dx=1+\\lambda\\int_0^1dx\\int_x^1u(y)u(y-x)dy$。交换积分次序并令 $t=y-x$，得 $=1+\\lambda\\int_0^1u(y)\\left(\\int_0^yu(t)dt\\right)dy=1+\\lambda\\int_0^1\\left[\\int_0^yu(t)dt\\right]d\\left[\\int_0^yu(t)dt\\right]=1+\\frac{\\lambda}{2}\\left(\\int_0^1u(t)dt\\right)^2$。设 $\\int_0^1u(x)dx=a$，则 $a=1+\\frac{\\lambda}{2}a^2$，故 $\\lambda\\le\\frac{1}{2}$。"
+},
+{
+"pid": 72,
+"label": "20",
+"statement": "设 $f(x)$ 为偶函数，$a>0$，证明：$$\\int_{-a}^{a}dx\\int_{-a}^{a}f(y-x)\\,dy=\\int_0^{2a}f(u)(4a-2u)\\,du.$$",
+"answer": "",
+"notebook_candidate": "证：(1) 令 $u=y-x,\\ v=y+x$，则 $D$ 变为 $D_1:|u|+|v|\\le2a$，$J=\\frac{\\partial(x,y)}{\\partial(u,v)}=-\\frac{1}{2}$，故 $$\\int_{-a}^{a}dx\\int_{-a}^{a}f(y-x)dy=\\iint_{D_1}f(u)\\frac{1}{2}dudv=\\iint_{D_2}f(u)dudv=\\int_0^{2a}du\\int_{u-2a}^{2a-u}f(u)dv=\\int_0^{2a}f(u)(4a-2u)du.$$ (2) 令 $u=y-x$，则原式 $=\\int_{-a}^{a}dy\\int_{y-a}^{y+a}f(u)du=\\int_{-2a}^{0}du\\int_{-a}^{u+a}f(u)dy+\\int_0^{2a}du\\int_{u-a}^{a}f(u)dy$。"
+},
+{
+"pid": 73,
+"label": "21",
+"statement": "证明：$$f(x,y)=1+\\int_0^x\\int_0^y f(u,v)\\,du\\,dv$$ 在 $\\begin{cases}0\\le x\\le1,\\\\ 0\\le y\\le1\\end{cases}$ 上至多有一个连续解。",
+"answer": "",
+"notebook_candidate": "解：设存在两个连续解，令 $g$ 为它们的差，则 $g$ 连续且 $g(x,y)=\\int_0^x\\int_0^y g(u,v)dudv$。因 $g$ 在正方形上有界，设 $M$ 是它的一个界，则当 $0\\le x\\le1,\\ 0\\le y\\le1$ 时 $|g(x,y)|\\le\\int_0^x\\int_0^yM\\,dudv=Mxy$。猜想 $|g(x,y)|\\le M\\frac{x^ny^n}{n!\\,n!}$ 对一切 $n$ 成立：$n=k$ 时由归纳 $|g(x,y)|\\le\\int_0^x\\int_0^yM\\frac{u^kv^k}{k!k!}dudv=M\\frac{x^{k+1}y^{k+1}}{(k+1)!(k+1)!}$。对任意固定 $x,y$，$\\lim_{n\\to\\infty}M\\frac{x^ny^n}{n!n!}=0$，故 $|g(x,y)|\\le0$，即 $g(x,y)=0$，所以不可能存在两个不同的连续解。"
+},
+{
+"pid": 74,
+"label": "22",
+"statement": "求曲面 $(z+1)^2=(x-z-1)^2+y^2$ 与平面 $z=0$ 及 $z=a$ 围成的立体的体积 $V$，其中 $$a=\\sum_{n=1}^{\\infty}\\frac{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}{(n+1)(n+2)}.$$",
+"answer": "",
+"notebook_candidate": "解：设 $a_n=1+\\frac{1}{2}+\\cdots+\\frac{1}{n}$，则 $$\\sum_{k=1}^{n}\\frac{a_k}{(k+1)(k+2)}=\\sum_{k=1}^{n}\\left(\\frac{a_k}{k+1}-\\frac{a_k}{k+2}\\right)=\\sum_{k=1}^{n}\\left[\\frac{a_k}{k+1}-\\frac{a_{k+1}}{k+2}+\\frac{1}{(k+1)(k+2)}\\right]$$ $$=\\sum_{k=1}^{n}\\left(\\frac{a_k}{k+1}-\\frac{a_{k+1}}{k+2}\\right)+\\sum_{k=1}^{n}\\frac{1}{(k+1)(k+2)}=\\left(\\frac{1}{2}-\\frac{a_{n+1}}{n+2}\\right)+\\left(\\frac{1}{2}-\\frac{1}{n+2}\\right)=1-\\frac{1}{n+2}-\\frac{a_{n+1}}{n+2}.$$"
+},
+{
+"pid": 75,
+"label": "23",
+"statement": "设 $\\Omega$ 是由曲面 $z=y^2$，$z=4y^2\\ (y>0)$，平面 $z=x$，$z=2x$ 及 $z=2$ 所围成的区域，计算下列积分：(1) $\\iiint\\limits_{\\Omega}x^2\\,dx\\,dy\\,dz$；(2) $\\iiint\\limits_{\\Omega}\\dfrac{z}{y^3}\\cos\\dfrac{z^2}{y^2}\\,dx\\,dy\\,dz$。",
+"answer": "(1) $\\dfrac{14}{27}\\sqrt{2}$",
+"notebook_candidate": "第22题收尾：$V=\\iiint_\\Omega dV=\\int_0^1dz\\iint_{D_z}d\\sigma$（先二后一），其中 $D_z=\\{(x,y)\\mid(x-z-1)^2+y^2=(z+1)^2\\}$ 是 $\\Omega$ 在竖坐标为 $z$ 的平面上的截面在 $xOy$ 平面上的投影，故 $V=\\int_0^1\\pi(z+1)^2dz=\\frac{7}{3}\\pi$。第23题解：$\\Omega$ 在 $yOz$ 面上的投影区域为 $D:\\frac{1}{2}\\sqrt{z}\\le y\\le\\sqrt{z},\\ 0\\le z\\le2$；于是 (1) $\\iiint_\\Omega x^2dxdydz=\\iint_D dydz\\int_{z/2}^{z}x^2dx=\\int_0^2dz\\int_{\\sqrt{z}/2}^{\\sqrt{z}}dy\\int_{z/2}^{z}x^2dx=\\frac{14}{27}\\sqrt{2}$。"
+},
+{
+"pid": 76,
+"label": "27",
+"statement": "设 $P(x,y,z)$，$R(x,y,z)$ 在空间中具有连续偏导数，记上半球面 $S$：$z=z_0+\\sqrt{R^2-(x-x_0)^2-(y-y_0)^2}$，方向向上。若对任意的点 $(x_0,y_0,z_0)$ 和 $r>0$，为任意实数，第二类曲面积分 $$\\iint_S P\\,dydz+R\\,dxdy=0$$，证明：$\\dfrac{\\partial P}{\\partial x}\\equiv 0$。",
+"answer": "",
+"notebook_candidate": "证：记上半球面 $S$ 的底平面为 $D$，$z=z_0$ 方向向下，$S$ 和 $D$ 围成的区域为 $\\Omega$。由 Gauss 公式 $$\\left(\\iint_S+\\iint_D\\right)P\\,dydz+R\\,dxdy=\\iiint_\\Omega\\left(\\frac{\\partial P}{\\partial x}+\\frac{\\partial R}{\\partial z}\\right)dV.$$ $\\because\\iint_D P\\,dydz+R\\,dxdy=-\\iint_D R\\,dxdy$（框注 $D: z=z_0\\Rightarrow dz=0$），由题设 $\\iint_S P\\,dydz+R\\,dxdy=0$，故 $-\\iint_D R\\,dxdy=\\iiint_\\Omega\\left(\\frac{\\partial P}{\\partial x}+\\frac{\\partial R}{\\partial z}\\right)dV$。最后一行写：对 $\\forall r>0$ 及任意点 $(x_0,y_0,z_0)$，$R(x_0,y_0,z_0)=0$。"
+},
+{
+"pid": 77,
+"label": "例4",
+"statement": "证明(Lagrange恒等式)：对任意向量 $a,b,c,d$，有 $$(a\\times b)\\cdot(c\\times d)=\\begin{vmatrix}a\\cdot c & a\\cdot d\\\\ b\\cdot c & b\\cdot d\\end{vmatrix}$$",
+"answer": "",
+"notebook_candidate": "证明：$(a\\times b)\\cdot(c\\times d)=(a,b,c\\times d)=(c\\times d,a,b)=[(c\\times d)\\times a]\\cdot b$（后续式子被裁切，无法辨认）。"
+},
+{
+"pid": 78,
+"label": "例1",
+"statement": "1.向量的基本运算。例1. 设单位向量 $\\overrightarrow{OA}$ 和 $\\overrightarrow{OB}$ 的夹角为 $\\theta\\ (0<\\theta<\\frac{\\pi}{2})$，$\\lambda$ 为正常数，求 $\\lim_{n\\to\\infty}\\frac{1}{n}\\left(\\lambda\\overrightarrow{OA}+[?]\\right)$",
+"answer": "",
+"notebook_candidate": "屏上「解：」后可见 $\\because|\\overrightarrow{OA}+\\overrightarrow{OB}|^2=a^2+b^2-2ab\\cos(\\pi-\\theta)=a^2+b^2+2ab\\cos\\theta$，其后各式（含 $\\lim$ 与 $\\frac{1-\\cos\\theta[?]}{[?]}$）过小，无法辨认。"
+},
+{
+"pid": 79,
+"label": "25",
+"statement": "设 $\\Omega:\\ x^2+y^2+z^2\\le 1$，证明：$$\\frac{4\\sqrt{2}}{3}\\pi\\le \\iiint_\\Omega\\sqrt[3]{x+2y-2z+5}\\,dV\\le \\frac{8\\pi}{3}$$",
+"answer": "",
+"notebook_candidate": "证：设 $f(x,y,z)=x+2y-2z+5$。(1) $f_x=1\\ne 0\\Rightarrow f(x,y,z)$ 在 $\\Omega$ 内部无驻点，必在边界上取得最值；(2) 令 $L(x,y,z,\\lambda)=x+2y-2z+5+\\lambda(x^2+y^2+z^2-1)$。"
+},
+{
+"pid": 80,
+"label": "25",
+"statement": "证明：$$\\lim_{n\\to\\infty}\\frac{1}{n^4}\\iiint_{V_n}[r]\\,dxdydz=\\pi$$ 其中 $V_n=\\{(x,y,z)\\mid x^2+y^2+z^2\\le n^2\\}$，$r=\\sqrt{x^2+y^2+z^2}$，$[r]$ 表示 $r$ 的整数部分。",
+"answer": "答案为 $\\pi$（即所证等式）。",
+"notebook_candidate": "解：$\\iiint_{V_n} r\\,dxdydz=\\int_0^{2\\pi}d\\theta\\int_0^{\\pi}\\sin\\varphi\\,d\\varphi\\int_0^{n}r^3dr=\\pi n^4$。由 $r-1\\le[r]\\le r$ 及 $V_n$ 的体积为 $\\frac{4}{3}\\pi n^3$，故积分满足 $\\pi n^4-\\frac{4}{3}\\pi n^3<\\iiint_{V_n}[r]\\,dxdydz\\le\\iiint_{V_n} r\\,dxdydz=\\pi n^4$，再用夹逼准则得 $\\lim_{n\\to\\infty}\\frac{1}{n^4}\\iiint_{V_n}[r]\\,dxdydz=\\pi$。"
+}
+]
+}

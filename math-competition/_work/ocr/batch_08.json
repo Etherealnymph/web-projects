@@ -1,0 +1,238 @@
+{
+  "batch": 8,
+  "date": "2026-09-12",
+  "pages": [
+    {
+      "id": 95,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "14",
+          "statement": "14.设 $P$ 是椭球面 $S:x^2+y^2+z^2-yz=1$ 上的动点,若 $S$ 在点 $P$ 处的切平面与 $xoy$ 面垂直,求 $P$ 的轨迹 $C$,并计算 $$I=\\iint_{\\Sigma}\\frac{(x+\\sqrt{3})|y-2z|}{\\sqrt{4+y^2+z^2-4yz}}\\,\\mathrm{d}S$$ 其中 $\\Sigma$ 是椭球面 $S$ 位于曲线 $C$ 上方的部分.",
+          "answer": "",
+          "note": "页面左下仅有\"解\"字,尚未展开;投影屏幕拍摄,文字略倾斜"
+        }
+      ],
+      "has_solution": false,
+      "solution": "",
+      "summary": "第14题:切平面垂直xoy面求轨迹C并算曲面积分",
+      "clarity": "good"
+    },
+    {
+      "id": 96,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "17",
+          "statement": "17.设 $f(x),g(x)$ 连续,$g(x)$ 以 $1$ 为周期. 证明: $$\\lim_{n\\to\\infty}\\int_0^1 f(x)g(nx)\\,\\mathrm{d}x=\\int_0^1 f(x)\\,\\mathrm{d}x\\int_0^1 g(x)\\,\\mathrm{d}x.$$",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": false,
+      "solution": "",
+      "summary": "第17题:证周期函数g(nx)的积分极限可分离",
+      "clarity": "good"
+    },
+    {
+      "id": 97,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "19",
+          "statement": "19.设函数 $u(x)$ 在 $[0,1]$ 上连续,且 $$u(x)=1+\\lambda\\int_x^1 u(y)u(y-x)\\,\\mathrm{d}y$$ 证明: $\\lambda\\le\\frac{1}{2}$.",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": false,
+      "solution": "",
+      "summary": "第19题:由积分方程证明参数λ不超过1/2",
+      "clarity": "good"
+    },
+    {
+      "id": 98,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "例12",
+          "statement": "例12.计算积分 $$I=\\int_0^{2\\pi}\\mathrm{d}\\varphi\\int_0^{\\pi}e^{\\sin\\theta(\\cos\\varphi-\\sin\\varphi)}\\sin\\theta\\,\\mathrm{d}\\theta.$$",
+          "answer": "$\\sqrt{2}\\pi\\left(e^{\\sqrt{2}}-e^{-\\sqrt{2}}\\right)$",
+          "note": "板书右上角标注\"球面坐标\""
+        }
+      ],
+      "has_solution": true,
+      "solution": "取球面 $\\Sigma:x^2+y^2+z^2=1$ 的参数方程 $x=\\sin\\theta\\cos\\varphi,\\ y=\\sin\\theta\\sin\\varphi,\\ z=\\cos\\theta$,$\\mathrm{d}S=\\sin\\theta\\,\\mathrm{d}\\theta\\mathrm{d}\\varphi$,故 $I=\\iint_{\\Sigma}e^{x-y}\\,\\mathrm{d}S$. 设平面 $P_t:\\frac{x-y}{\\sqrt{2}}=t,\\ -1\\le t\\le 1$,原点到 $P_t$ 的距离 $d=|t|$,其截球面所得球带面积 $\\mathrm{d}S(t)=2\\pi\\sqrt{1-t^2}\\cdot\\frac{1}{\\sqrt{1-t^2}}\\mathrm{d}t=2\\pi\\,\\mathrm{d}t$. 于是 $I=\\int_{-1}^{1}e^{\\sqrt{2}t}2\\pi\\,\\mathrm{d}t=\\sqrt{2}\\pi(e^{\\sqrt{2}}-e^{-\\sqrt{2}})$.",
+      "summary": "例12:用球带面积法算出含e的球面积分为√2π(e^√2-e^-√2)",
+      "clarity": "good"
+    },
+    {
+      "id": 99,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "例12",
+          "statement": "例12.计算积分 $$I=\\int_0^{2\\pi}\\mathrm{d}\\varphi\\int_0^{\\pi}e^{\\sin\\theta(\\cos\\varphi-\\sin\\varphi)}\\sin\\theta\\,\\mathrm{d}\\theta.$$",
+          "answer": "$\\sqrt{2}\\pi\\left(e^{\\sqrt{2}}-e^{-\\sqrt{2}}\\right)$",
+          "note": "本页为例12的另一种解法(幂级数法)"
+        }
+      ],
+      "has_solution": true,
+      "solution": "把 $e^{\\sin\\theta(\\cos\\varphi-\\sin\\varphi)}$ 展成幂级数并逐项积分;$n$ 为奇数时 $\\int_0^{2\\pi}(\\cos\\varphi-\\sin\\varphi)^n\\mathrm{d}\\varphi=0$,又 $\\cos\\varphi-\\sin\\varphi=\\sqrt{2}\\cos(\\varphi+\\frac{\\pi}{4})$,得 $I=\\sum_{n=0}^{\\infty}\\frac{2^{n+\\frac{3}{2}}}{(2n)!}\\cdot\\frac{(2n-1)!!}{(2n)!!}\\pi\\cdot\\frac{(2n)!!}{2(2n+1)!!}=2\\sqrt{2}\\pi\\sum_{n=0}^{\\infty}\\frac{(\\sqrt{2})^{2n+1}}{(2n+1)!}$. 令 $f(x)=\\sum_{n=0}^{\\infty}\\frac{x^{2n+1}}{(2n+1)!}$,则 $f'(x)+f(x)=e^x$、$f(0)=0$,得 $f(x)=\\frac{1}{2}(e^x-e^{-x})$. 故 $I=2\\sqrt{2}\\pi f(\\sqrt{2})=\\sqrt{2}\\pi(e^{\\sqrt{2}}-e^{-\\sqrt{2}})$.",
+      "summary": "例12另解:幂级数逐项积分并用f'+f=e^x求和",
+      "clarity": "good"
+    },
+    {
+      "id": 100,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "13",
+          "statement": "13.设 $\\Sigma$ 是曲面 $z=\\frac{1}{2}(x^2+y^2)$ 在椭球面 $x^2+y^2+4z^2=2$ 内的部分,证明: $$\\frac{2\\pi\\left(2-\\frac{\\sqrt{2}}{2}\\right)}{3}\\le\\iint_{\\Sigma}\\sqrt{x+y+2z+1}\\,\\mathrm{d}S\\le\\frac{3\\pi}{2}.$$",
+          "answer": "",
+          "note": "下界在图中以分数线形式书写,即 $\\frac{2\\pi(2-\\frac{\\sqrt2}{2})}{3}$"
+        }
+      ],
+      "has_solution": true,
+      "solution": "设 $f(x,y,z)=\\sqrt{x+y+2z+1}$,用估值定理 $m\\le f\\le M\\Rightarrow m\\iint_{\\Sigma}\\mathrm{d}S\\le\\iint_{\\Sigma}f\\,\\mathrm{d}S\\le M\\iint_{\\Sigma}\\mathrm{d}S$. 在 $\\Sigma$ 上 $x+y+2z+1=x+y+x^2+y^2+1=(x+\\frac{1}{2})^2+(y+\\frac{1}{2})^2+\\frac{1}{2}$,故 $f(-\\frac{1}{2},-\\frac{1}{2},\\frac{1}{4})=\\frac{\\sqrt{2}}{2}$ 是 $f$ 的最小值,得 $\\iint_{\\Sigma}\\sqrt{x+y+2z+1}\\,\\mathrm{d}S\\ge\\frac{\\sqrt{2}}{2}\\iint_{\\Sigma}\\mathrm{d}S$. 再由 $\\{z=\\frac{1}{2}(x^2+y^2),\\ x^2+y^2+4z^2=2\\}$ 消去 $z$,得 $\\Sigma$ 在 $xoy$ 平面的投影区域 $D_{xy}:x^2+y^2\\le 1$.",
+      "summary": "第13题:用被积函数最值估计曲面积分下界",
+      "clarity": "good"
+    },
+    {
+      "id": 101,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "承接第13题:$\\iint_{\\Sigma}\\mathrm{d}S=\\iint_{D_{xy}}\\sqrt{1+z_x^2+z_y^2}\\,\\mathrm{d}x\\mathrm{d}y=\\iint_{D_{xy}}\\sqrt{1+x^2+y^2}\\,\\mathrm{d}x\\mathrm{d}y=\\int_0^{2\\pi}\\mathrm{d}\\theta\\int_0^1 r\\sqrt{1+r^2}\\,\\mathrm{d}r=\\frac{2}{3}(2\\sqrt{2}-1)\\pi$. 又 $\\left(\\iint_{\\Sigma}\\sqrt{x+y+2z+1}\\,\\mathrm{d}S\\right)^2=\\left(\\iint_{D_{xy}}\\sqrt{x+y+x^2+y^2+1}\\sqrt{1+x^2+y^2}\\,\\mathrm{d}x\\mathrm{d}y\\right)^2$,由 $(\\alpha,\\beta)^2\\le(\\alpha,\\alpha)(\\beta,\\beta)$ 得 $\\le\\iint_{D_{xy}}(x+y+x^2+y^2+1)\\mathrm{d}x\\mathrm{d}y\\cdot\\iint_{D_{xy}}(1+x^2+y^2)\\mathrm{d}x\\mathrm{d}y$. 因 $D_{xy}$ 关于 $x,y$ 轴对称,$x+y$ 项积分为零,故上式 $=\\left[\\iint_{D_{xy}}(1+x^2+y^2)\\mathrm{d}x\\mathrm{d}y\\right]^2=\\left[\\int_0^{2\\pi}\\mathrm{d}\\theta\\int_0^1 r(1+r^2)\\mathrm{d}r\\right]^2=\\left(\\frac{3\\pi}{2}\\right)^2$,从而 $\\frac{2\\pi}{3}(2-\\frac{\\sqrt{2}}{2})\\le\\iint_{\\Sigma}\\sqrt{x+y+2z+1}\\,\\mathrm{d}S\\le\\frac{3\\pi}{2}$.",
+      "summary": "第13题续:Cauchy不等式估计并整理得上下界",
+      "clarity": "good"
+    },
+    {
+      "id": 102,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "14",
+          "statement": "14.设 $P$ 是椭球面 $S:x^2+y^2+z^2-yz=1$ 上的动点,若 $S$ 在点 $P$ 处的切平面与 $xoy$ 面垂直,求 $P$ 的轨迹 $C$,并计算 $$I=\\iint_{\\Sigma}\\frac{(x+\\sqrt{3})|y-2z|}{\\sqrt{4+y^2+z^2-4yz}}\\,\\mathrm{d}S$$ 其中 $\\Sigma$ 是椭球面 $S$ 位于曲线 $C$ 上方的部分.",
+          "answer": "",
+          "note": "投影区域原文写作 $x^2+\\frac{y^2}{4/3}\\le1$,疑为 $x^2+\\frac{3y^2}{4}\\le1$"
+        }
+      ],
+      "has_solution": true,
+      "solution": "令 $P$ 的坐标为 $(x,y,z)$,则 $S$ 在点 $P$ 处切平面的法向量 $\\vec{n}=(2x,2y-z,2z-y)$;因切平面与 $xoy$ 面垂直,即 $\\vec{n}\\perp(0,0,1)$,故 $y=2z$. 所以 $P$ 的轨迹 $C:\\{y=2z,\\ x^2+y^2+z^2-yz=1\\}$. 将 $\\Sigma$ 向 $xoy$ 面投影得 $x^2+\\frac{y^2}{4/3}\\le 1$;又 $\\frac{\\partial z}{\\partial x}=\\frac{2x}{y-2z},\\ \\frac{\\partial z}{\\partial y}=\\frac{2y-z}{y-2z}$,故 $\\mathrm{d}S=\\sqrt{1+\\left(\\frac{\\partial z}{\\partial x}\\right)^2+\\left(\\frac{\\partial z}{\\partial y}\\right)^2}\\mathrm{d}x\\mathrm{d}y=\\frac{\\sqrt{4+y^2+z^2-4yz}}{|y-2z|}\\mathrm{d}x\\mathrm{d}y$.",
+      "summary": "第14题解:法向量垂直z轴得y=2z并写出dS",
+      "clarity": "good"
+    },
+    {
+      "id": 103,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "15",
+          "statement": "15.证明:一个薄的均匀的球壳对一个在球外的单位质点产生的引力,相当于这个球壳的质量全部集中于它的中心时所产生的引力.",
+          "answer": "",
+          "note": "本页上方为第14题的收尾(算得 $I=2\\pi$)"
+        }
+      ],
+      "has_solution": true,
+      "solution": "第14题收尾:代入 $\\mathrm{d}S$ 后 $I=\\iint_{D_{xy}}\\frac{(x+\\sqrt{3})|y-2z|}{\\sqrt{4+y^2+z^2-4yz}}\\cdot\\frac{\\sqrt{4+y^2+z^2-4yz}}{|y-2z|}\\mathrm{d}x\\mathrm{d}y=\\iint_{D_{xy}}(x+\\sqrt{3})\\mathrm{d}x\\mathrm{d}y$,$D_{xy}$ 关于 $x,y$ 轴对称使 $x$ 项积分为零,故 $I=\\sqrt{3}\\iint_{D_{xy}}\\mathrm{d}x\\mathrm{d}y=\\sqrt{3}\\cdot\\pi\\cdot1\\cdot\\frac{2}{\\sqrt{3}}=2\\pi$. 第15题:以球心为原点、质点在 $z$ 轴上建系,设 $\\Sigma:x^2+y^2+z^2=R^2$,单位质点坐标 $(0,0,a)$, $a>R$;设引力 $\\vec{F}=(F_x,F_y,F_z)$,由对称性 $F_x=F_y=0$,球壳密度 $\\rho$,则 $F_z=\\iint_{\\Sigma}\\frac{G\\rho(z-a)}{[x^2+y^2+(z-a)^2]^{3/2}}\\mathrm{d}S$.",
+      "summary": "第14题收尾得2π;第15题球壳引力建系与Fz表达式",
+      "clarity": "good"
+    },
+    {
+      "id": 104,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "未编号",
+          "statement": "设 $S$ 为以原点为中心、$a\\ (a>0)$ 为半径的上半球面,$I=\\iint_{S}\\frac{\\mathrm{d}S}{\\sqrt{x^2+y^2+(z+a)^2}}$,则 $I=(\\quad)$.",
+          "answer": "$2\\pi(2-\\sqrt{2})$",
+          "note": "【30届校赛题】填空题;本页上部为第15题(球壳引力)解答的收尾"
+        }
+      ],
+      "has_solution": true,
+      "solution": "第15题:$F_z=\\iint_{\\Sigma}\\frac{G\\rho(z-a)}{[x^2+y^2+(z-a)^2]^{3/2}}\\mathrm{d}S=\\iint_{D}\\frac{G\\rho(R\\cos\\varphi-a)}{[R^2+a^2-2aR\\cos\\varphi]^{3/2}}R^2\\sin\\varphi\\,\\mathrm{d}\\varphi\\mathrm{d}\\theta$(球面坐标 $x=R\\sin\\varphi\\cos\\theta,y=R\\sin\\varphi\\sin\\theta,z=R\\cos\\varphi$),化为 $-G\\rho R^2\\int_0^{2\\pi}\\mathrm{d}\\theta\\int_0^{\\pi}\\frac{R\\cos\\varphi-a}{[R^2+a^2-2aR\\cos\\varphi]^{3/2}}\\mathrm{d}\\cos\\varphi=-G\\frac{4\\pi R^2\\rho}{a^2}$. 校赛题:上半球面参数方程 $x=a\\sin\\varphi\\cos\\theta,\\ y=a\\sin\\varphi\\sin\\theta,\\ z=a\\cos\\varphi$,$\\varphi\\in(0,\\frac{\\pi}{2}),\\ \\theta\\in(0,2\\pi)$,故 $I=\\iint\\frac{a^2\\sin\\varphi}{\\sqrt{2a^2+2a^2\\cos\\varphi}}\\mathrm{d}\\varphi\\mathrm{d}\\theta=2\\pi\\int_0^{\\pi/2}\\frac{\\sin\\varphi\\,\\mathrm{d}\\varphi}{\\sqrt{2+2\\cos\\varphi}}=2\\pi(2-\\sqrt{2})$.",
+      "summary": "第15题球壳引力算完;校赛填空:上半球面积分得2π(2-√2)",
+      "clarity": "good"
+    },
+    {
+      "id": 105,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "16",
+          "statement": "16.设 $f(x),g(x)$ 均为 $[a,b]$ 上的连续增函数 $(a,b>0)$,证明: $$\\int_a^b f(x)\\,\\mathrm{d}x\\int_a^b g(x)\\,\\mathrm{d}x\\le(b-a)\\int_a^b f(x)g(x)\\,\\mathrm{d}x.$$",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "因 $f,g$ 均为 $[a,b]$ 上的连续增函数,故 $\\forall x,y\\in[a,b]$ 有 $(f(x)-f(y))(g(x)-g(y))\\ge0$,从而 $I=\\iint_{D}(f(x)-f(y))(g(x)-g(y))\\mathrm{d}x\\mathrm{d}y\\ge0$(其中 $D=[a,b]\\times[a,b]$). 展开得 $I=\\iint_D f(x)g(x)\\mathrm{d}x\\mathrm{d}y-\\iint_D f(x)g(y)\\mathrm{d}x\\mathrm{d}y-\\iint_D g(x)f(y)\\mathrm{d}x\\mathrm{d}y+\\iint_D f(y)g(y)\\mathrm{d}x\\mathrm{d}y\\ge0$;利用 $D$ 关于 $y=x$ 对称,得 $\\iint_D f(x)g(x)=\\iint_D f(y)g(y)$、$\\iint_D f(x)g(y)=\\iint_D g(x)f(y)$,于是 $I=2\\iint_D f(x)g(x)\\mathrm{d}x\\mathrm{d}y-2\\iint_D f(x)g(y)\\mathrm{d}x\\mathrm{d}y\\ge0$,即 $\\iint_D f(x)g(y)\\mathrm{d}x\\mathrm{d}y\\le\\iint_D f(x)g(x)\\mathrm{d}x\\mathrm{d}y$.",
+      "summary": "第16题:构造二重积分差并用对称性证积分不等式",
+      "clarity": "good"
+    },
+    {
+      "id": 106,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "16",
+          "statement": "16.设 $f(x),g(x)$ 均为 $[a,b]$ 上的连续增函数 $(a,b>0)$,证明: $$\\int_a^b f(x)\\,\\mathrm{d}x\\int_a^b g(x)\\,\\mathrm{d}x\\le(b-a)\\int_a^b f(x)g(x)\\,\\mathrm{d}x.$$",
+          "answer": "",
+          "note": ""
+        },
+        {
+          "label": "练习",
+          "statement": "练习:设 $f(x)$ 在 $[0,1]$ 上连续且单调增加,证明: $$\\frac{1}{2}\\int_0^1 f(x)\\,\\mathrm{d}x\\le\\int_0^1 xf(x)\\,\\mathrm{d}x.$$",
+          "answer": "",
+          "note": "该练习的证明在下一张图"
+        }
+      ],
+      "has_solution": true,
+      "solution": "承接第16题:由 $\\iint_D f(x)g(y)\\mathrm{d}x\\mathrm{d}y\\le\\iint_D f(x)g(x)\\mathrm{d}x\\mathrm{d}y$ 得 $\\int_a^b f(x)\\mathrm{d}x\\int_a^b g(y)\\mathrm{d}y\\le\\int_a^b\\mathrm{d}y\\int_a^b f(x)g(x)\\mathrm{d}x\\le(b-a)\\int_a^b f(x)g(x)\\mathrm{d}x$. 练习的等价形式:$\\int_0^1 f(x)\\mathrm{d}x\\le2\\int_0^1 xf(x)\\mathrm{d}x\\Leftrightarrow\\frac{1}{2}\\int_0^1 f(x)\\mathrm{d}x\\le\\int_0^1 xf(x)\\mathrm{d}x\\Leftrightarrow\\int_0^1 x\\mathrm{d}x\\int_0^1 f(x)\\mathrm{d}x\\le\\int_0^1 xf(x)\\mathrm{d}x$.",
+      "summary": "第16题证完;另给出练习的等价变形",
+      "clarity": "good"
+    },
+    {
+      "id": 107,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "练习",
+          "statement": "练习:设 $f(x)$ 在 $[0,1]$ 上连续且单调增加,证明: $$\\int_0^1 f(x)\\,\\mathrm{d}x\\le2\\int_0^1 xf(x)\\,\\mathrm{d}x.$$",
+          "answer": "",
+          "note": "与上一张图中的练习为同一题,此处给出证明"
+        }
+      ],
+      "has_solution": true,
+      "solution": "因 $f$ 在 $[0,1]$ 上连续且单调增加,故 $(x-y)(f(x)-f(y))\\ge0$,从而 $\\iint_D(x-y)(f(x)-f(y))\\mathrm{d}x\\mathrm{d}y\\ge0$,其中 $D=\\{(x,y)\\mid 0\\le x\\le1,0\\le y\\le1\\}$. 展开得 $\\iint_D[xf(x)+yf(y)-xf(y)-yf(x)]\\mathrm{d}x\\mathrm{d}y=2\\iint_D xf(x)\\mathrm{d}x\\mathrm{d}y-2\\iint_D xf(y)\\mathrm{d}x\\mathrm{d}y=2\\int_0^1 xf(x)\\mathrm{d}x-\\int_0^1 f(y)\\mathrm{d}y=2\\int_0^1 xf(x)\\mathrm{d}x-\\int_0^1 f(x)\\mathrm{d}x\\ge0$,即得所证不等式.",
+      "summary": "练习证法:构造(x-y)(f(x)-f(y))的二重积分",
+      "clarity": "good"
+    },
+    {
+      "id": 108,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "17",
+          "statement": "17.设 $f(x),g(x)$ 连续,$g(x)$ 以 $1$ 为周期. 证明: $$\\lim_{n\\to\\infty}\\int_0^1 f(x)g(nx)\\,\\mathrm{d}x=\\int_0^1 f(x)\\,\\mathrm{d}x\\int_0^1 g(x)\\,\\mathrm{d}x.$$",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "(1)先设 $g(x)\\ge0$,将 $[0,1]$ 等分为 $n$ 份,由积分中值定理存在 $\\xi_k\\in[\\frac{k}{n},\\frac{k+1}{n}]$$(k=0,1,\\dots,n-1)$,使 $I_n=\\int_0^1 f(x)g(nx)\\mathrm{d}x=\\sum_{k=0}^{n-1}\\int_{k/n}^{(k+1)/n}f(x)g(nx)\\mathrm{d}x=\\sum_{k=0}^{n-1}f(\\xi_k)\\int_{k/n}^{(k+1)/n}g(nx)\\mathrm{d}x$(用 $f,g\\in C[a,b]$ 且 $g\\ge0$ 时的积分中值公式). 令 $nx=u$,得 $I_n=\\frac{1}{n}\\sum_{k=0}^{n-1}f(\\xi_k)\\int_k^{k+1}g(u)\\mathrm{d}u=\\frac{1}{n}\\int_0^1 g(u)\\mathrm{d}u\\sum_{k=0}^{n-1}f(\\xi_k)$,故 $\\lim_{n\\to\\infty}I_n=\\int_0^1 g(x)\\mathrm{d}x\\int_0^1 f(x)\\mathrm{d}x$. (2)对一般 $g(x)$,设 $m$ 是 $[0,1]$ 上的最小值,令 $\\tilde g(x)=g(x)-m\\ge0$,它在 $[0,1]$ 上连续且以 $1$ 为周期.",
+      "summary": "第17题:等分区间用积分中值定理(先设g≥0)证极限式",
+      "clarity": "good"
+    },
+    {
+      "id": 109,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "承接第17题(2):对 $\\tilde g(x)=g(x)-m\\ge0$ 用已证情形,得 $\\lim_{n\\to\\infty}\\int_0^1 f(x)\\tilde g(nx)\\mathrm{d}x=\\int_0^1 f(x)\\mathrm{d}x\\int_0^1\\tilde g(x)\\mathrm{d}x$,即 $\\lim_{n\\to\\infty}\\left[\\int_0^1 f(x)g(nx)\\mathrm{d}x-m\\int_0^1 f(x)\\mathrm{d}x\\right]=\\int_0^1 f(x)\\mathrm{d}x\\left[\\int_0^1 g(x)\\mathrm{d}x-m\\right]$,从而 $\\lim_{n\\to\\infty}\\int_0^1 f(x)g(nx)\\mathrm{d}x=\\int_0^1 f(x)\\mathrm{d}x\\int_0^1 g(x)\\mathrm{d}x$. (3)若 $g(x)$ 是周期为 $T$ 的连续函数,则 $\\lim_{n\\to\\infty}\\int_0^T f(x)g(nx)\\mathrm{d}x=\\frac{1}{T}\\int_0^T f(x)\\mathrm{d}x\\int_0^T g(x)\\mathrm{d}x$. 注:令 $F(x)=f(Tx),h(x)=g(Tx)$,则 $\\lim_{n\\to\\infty}\\int_0^1 F(x)h(nx)\\mathrm{d}x=\\int_0^1 F(x)\\mathrm{d}x\\int_0^1 h(x)\\mathrm{d}x$.",
+      "summary": "第17题续:平移g去掉最小值,并推广到周期T情形",
+      "clarity": "good"
+    }
+  ]
+}

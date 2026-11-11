@@ -1,0 +1,85 @@
+{
+  "chunk": 12,
+  "items": [
+    {
+      "pid": 177,
+      "commentary": "考点：把递推改写成差分 $a_n=b_n(b_{n+1}-b_n)$，用比较判别法作双向估计。破题：由 $b_1=1,\\ a_n>0$ 得 $b_n\\ge1$，于是 $b_{n+1}-b_n=\\frac{a_n}{b_n}\\le a_n$，级数收敛推出数列收敛；反过来用 $a_n<(b_{n+1}-b_n)(b_{n+1}+b_n)=b_{n+1}^2-b_n^2$ 造出可求和的望远镜级数。易错：$b_n$ 未必有上界，只能靠单调递增加有界判收敛，别把 $b_n\\ge1$ 当成上界直接用。",
+      "solution_clean": "由 $b_{n+1}=b_n+\\frac{a_n}{b_n}$、$a_n>0$、$b_1=1$ 得 $b_n\\ge1$ 且 $\\{b_n\\}$ 严格递增，且\n$a_n=b_n(b_{n+1}-b_n)$，$\\ b_{n+1}-b_n=\\frac{a_n}{b_n}\\le a_n$，$\\ a_n=b_n(b_{n+1}-b_n)<(b_{n+1}+b_n)(b_{n+1}-b_n)=b_{n+1}^2-b_n^2$.\n若 $\\sum a_n$ 收敛：由 $0<b_{n+1}-b_n\\le a_n$ 得 $\\sum(b_{n+1}-b_n)$ 收敛，故 $b_n\\to1+\\sum_{k\\ge1}(b_{k+1}-b_k)$，$\\{b_n\\}$ 收敛。\n若 $b_n\\to b$：则 $\\sum(b_{n+1}^2-b_n^2)$ 收敛（部分和 $\\to b^2-1$），由 $a_n<b_{n+1}^2-b_n^2$ 及比较判别法得 $\\sum a_n$ 收敛。"
+    },
+    {
+      "pid": 178,
+      "commentary": "考点：$L^n$ 范数（幂平均）与最大值的联系。破题：设 $M=\\max f$，由 $M^n\\le\\int_a^b f^n\\le M^n(b-a)$ 开 $n$ 次方得 $M\\le\\big(\\int_a^b f^n\\big)^{1/n}\\le M(b-a)^{1/n}$，两边夹即可。易错：$M$ 必须取到，靠的是 $f$ 在闭区间上连续；$f\\ge0$ 才能保证 $f^n$ 单调，去掉非负条件结论应换成 $\\max|f|$。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 179,
+      "commentary": "考点：积分中值定理 + 黎曼和（定积分定义）。破题：把 $[0,\\pi]$ 等分，每段上 $\\int|\\sin nx|dx=\\frac1n\\int_0^\\pi|\\sin t|dt=\\frac2n$ 是常数，把 $x^{2024}$ 取中值点后凑成 $\\frac2\\pi\\sum\\xi_k^{2024}\\cdot\\frac{\\pi}{n}\\to\\frac2\\pi\\int_0^\\pi x^{2024}dx$。易错：中值点 $\\xi_k$ 依赖 $n$，要显式写成黎曼和再取极限；答案是 $\\frac{2\\pi^{2024}}{2025}$，别漏因子 $\\pi$。",
+      "solution_clean": "把 $[0,\\pi]$ 分成 $n$ 段，取中值点 $\\xi_k\\in(\\frac{(k-1)\\pi}{n},\\frac{k\\pi}{n})$，且 $\\int_{\\frac{(k-1)\\pi}{n}}^{\\frac{k\\pi}{n}}|\\sin nx|dx=\\frac1n\\int_0^\\pi|\\sin t|dt=\\frac2n$.\n$\\int_0^\\pi x^{2024}|\\sin nx|dx=\\sum_{k=1}^n\\xi_k^{2024}\\cdot\\frac2n=\\frac2\\pi\\sum_{k=1}^n\\xi_k^{2024}\\cdot\\frac{\\pi}{n}$.\n$\\to\\frac2\\pi\\int_0^\\pi x^{2024}dx=\\frac2\\pi\\cdot\\frac{\\pi^{2025}}{2025}=\\frac{2\\pi^{2024}}{2025}$."
+    },
+    {
+      "pid": 180,
+      "commentary": "考点：含参积分求导 + 幂平均极限，本质是 $\\exp$ 的几何平均。破题：设 $F(t)=\\frac1A\\iint_S f^t\\,dS$，则 $F(0)=1$，原极限 $=\\lim_{t\\to0}F(t)^{1/t}=e^{F'(0)}$，而 $F'(0)=\\frac1A\\iint_S\\ln f\\,dS$。易错：必须把离散的 $1/n$ 换成连续参数 $t\\to0$ 才能用洛必达或导数定义；$f>0$ 才保证 $f^t$ 与 $\\ln f$ 有定义，别漏这个条件。",
+      "solution_clean": "令 $F(t)=\\frac1A\\iint_S f^t(x,y,z)\\,dS$，则 $F(0)=1$，原极限 $=\\lim_{t\\to0}\\big[F(t)\\big]^{1/t}=\\exp\\big(\\lim_{t\\to0}\\frac{\\ln F(t)-\\ln F(0)}{t}\\big)=\\exp F'(0)$.\n$F'(0)=\\frac1A\\iint_S f^t\\ln f\\,dS\\Big|_{t=0}=\\frac1A\\iint_S\\ln f(x,y,z)\\,dS$.\n故原极限 $=\\exp\\Big(\\frac1A\\iint_S\\ln f\\,dS\\Big)$，即 $f$ 在 $S$ 上的几何平均。"
+    },
+    {
+      "pid": 181,
+      "commentary": "考点：方向导数与梯度、等值面的切平面。破题：把 $f$ 限制在 $\\Gamma$ 上得 $u(t)=f(x(t),y(t),z(t))$，它在 $t_0$ 取极值故 $\\frac{du}{dt}=|\\mathbf r'(t_0)|\\frac{\\partial f}{\\partial\\tau}=0$；再由 $\\mathrm{grad}f(P_0)\\perp\\tau$ 且 $\\mathrm{grad}f$ 是等值面法向量，得切线落在切平面内。易错：$|\\mathbf r'(t_0)|\\neq0$（光滑曲线）才可约去，$\\tau$ 是单位切向量。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 182,
+      "commentary": "考点：函数方程求导，归结为守恒量（$f^2+g^2$ 为常数）。破题：两式对 $y$ 求导后令 $y=0$，得 $f'(x)=-g(x)g'(0)$、$g'(x)=f(x)g'(0)$，于是 $(f^2+g^2)'=0$；再用 $x=y=0$ 定 $f(0)=1,g(0)=0$（$f$ 非常数排除 $f\\equiv0$ 那支）。易错：$f'(0)=0$ 是守恒的关键，否则 $f^2+g^2$ 会指数增长；“非常数”条件不能不用。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 183,
+      "commentary": "考点：幂级数展开后逐项积分，配 $\\int_0^1x^m\\ln^n x\\,dx$ 的递推。破题：$x^{-x}=e^{-x\\ln x}=\\sum\\frac{(-x\\ln x)^n}{n!}$，由 $I(m,n)=-\\frac{n}{m+1}I(m,n-1)$ 得 $I(m,n)=\\frac{(-1)^nn!}{(m+1)^{n+1}}$，再取 $m=n$ 让 $(-1)^n$ 与 $\\frac{(-1)^n}{n!}$ 相消。易错：$m$ 与展开下标 $n$ 是两个符号，取 $m=n$ 这一步写糊了最易算错；$n=0$ 项正好给出 $\\sum_{n\\ge1}n^{-n}$ 的首项 1。",
+      "solution_clean": "$x^{-x}=e^{-x\\ln x}=\\sum_{n\\ge0}\\frac{(-x\\ln x)^n}{n!}$，逐项积分得 $\\int_0^1x^{-x}dx=\\sum_{n\\ge0}\\frac{(-1)^n}{n!}I(n,n)$。\n记 $I(m,n)=\\int_0^1x^m\\ln^n x\\,dx$，分部积分 $I(m,n)=-\\frac{n}{m+1}I(m,n-1)$，$I(m,0)=\\frac1{m+1}$，故 $I(m,n)=\\frac{(-1)^nn!}{(m+1)^{n+1}}$。\n取 $m=n$ 得 $I(n,n)=\\frac{(-1)^nn!}{(n+1)^{n+1}}$，代回：$\\int_0^1x^{-x}dx=\\sum_{n\\ge0}\\frac1{(n+1)^{n+1}}=\\sum_{n\\ge1}\\frac1{n^n}$。"
+    },
+    {
+      "pid": 184,
+      "commentary": "考点：三重积分化累次 + 变上限积分作换元。破题：令 $F(u)=\\int_0^uf$，则 $F(0)=0,F(1)=2$，内层 $\\int_x^y f=F(y)-F(x)$ 恰是 $\\int dF$ 型，最后化成 $\\int_0^{F(1)}(2-2F+\\frac12F^2)dF$。易错：积分区域是 $0\\le x\\le y\\le z\\le1$，上下限别写反；结果只依赖 $F(1)=2$，与 $f$ 的具体形状无关，不必去找 $f$。",
+      "solution_clean": "令 $F(u)=\\int_0^uf(t)dt$，则 $F(0)=0$，$F(1)=2$，$\\int_x^yf(z)dz=F(y)-F(x)$.\n原式 $=\\int_0^1f(x)\\,dx\\int_x^1[F(y)-F(x)]\\,dF(y)$，内层 $=\\Big[\\frac{F^2(y)}2-F(x)F(y)\\Big]_x^1=2-2F(x)+\\frac{F^2(x)}2$.\n故原式 $=\\int_0^{F(1)}\\Big(2-2F+\\frac{F^2}2\\Big)dF=\\Big[2F-F^2+\\frac{F^3}6\\Big]_0^2=4-4+\\frac43=\\frac43$."
+    },
+    {
+      "pid": 185,
+      "commentary": "考点：矩条件 + 构造特定多项式做最佳逼近式放缩。破题：把 $(x-\\frac12)^n$ 展开，除首项 $x^n$ 外全被 $\\int x^kf=0$ 消掉，于是 $1=\\int_0^1(x-\\frac12)^nf$，再用 $\\int_0^1|x-\\frac12|^n=\\frac1{2^n(n+1)}$ 放缩。易错：忘了先展开并用全部 $n$ 个矩条件；等号取不到（$f$ 连续），只能证 $\\ge$，写“最大值 $=$”就错了。",
+      "solution_clean": "设 $M=\\max_{[0,1]}|f|=|f(\\xi)|$。由 $(x-\\frac12)^n=\\sum_{k=0}^nc_kx^k$（$c_n=1$）及 $\\int_0^1x^kf=0\\ (k<n)$、$\\int_0^1x^nf=1$ 得\n$1=\\int_0^1(x-\\tfrac12)^nf(x)\\,dx$。\n又 $\\int_0^1|x-\\frac12|^n dx=2\\int_0^{1/2}(\\frac12-x)^n dx=\\frac1{2^n(n+1)}$。\n于是 $1\\le\\int_0^1|x-\\frac12|^n|f(x)|dx\\le M\\cdot\\frac1{2^n(n+1)}$，故 $M\\ge2^n(n+1)$。"
+    },
+    {
+      "pid": 186,
+      "commentary": "考点：比较判别法 + 望远镜（Abel 型）求和。破题：三段乘积 $\\sim\\frac1{4n^3}$ 定收敛；求和的关键恒等式是 $a_{2n}+a_{2n+1}=a_n$，它给出 $b_n-b_{n+1}=3a_na_{2n}a_{2n+1}$，于是和 $=\\frac13b_1$。易错：要补证 $b_n\\to0$（用 $0<b_n\\le na_n^3\\to0$）才能把 $\\sum(b_n-b_{n+1})$ 写成 $b_1$；漏掉系数 $\\frac13$ 是常见错误。",
+      "solution_clean": "1) $a_n\\sim\\frac1n$，故 $a_na_{2n}a_{2n+1}\\sim\\frac1{n\\cdot2n\\cdot(2n+1)}\\sim\\frac1{4n^3}$，与 $\\sum n^{-3}$ 同敛，原级数收敛。\n2) 由 $a_{2n}+a_{2n+1}=\\ln\\frac{2n+1}{2n}+\\ln\\frac{2n+2}{2n+1}=\\ln\\frac{2n+2}{2n}=a_n$ 得 $a_n^3-a_{2n}^3-a_{2n+1}^3=3a_{2n}a_{2n+1}(a_{2n}+a_{2n+1})=3a_na_{2n}a_{2n+1}$.\n又 $b_n-b_{n+1}=a_n^3-a_{2n}^3-a_{2n+1}^3$，且 $0<b_n\\le n a_n^3\\to0$。\n故 $\\sum_{n\\ge1}a_na_{2n}a_{2n+1}=\\frac13\\sum(b_n-b_{n+1})=\\frac13b_1=\\frac13a_1^3=\\frac{(\\ln2)^3}{3}$."
+    },
+    {
+      "pid": 187,
+      "commentary": "考点：傅里叶余弦级数的和函数在连续点的取值。破题：不必求 $a_n$ 通项，先算 $a_0=\\frac2\\pi\\int_0^\\pi f=-\\frac{\\pi^2}3$，再由 $f(0)=\\frac{a_0}2+\\sum_{n\\ge1}a_n$ 直接得 $\\frac{\\pi^2}6$。易错：$f$ 在 $[0,\\pi]$ 连续且延拓后偶对称，$x=0$ 处级数收敛到 $f(0)$；若取 $x=\\pi$ 会得到另一个（含 $(-1)^n$ 的）和式。",
+      "solution_clean": "$a_0=\\frac2\\pi\\int_0^\\pi\\Big(\\frac{x^2}4-\\frac{\\pi x}2\\Big)dx=\\frac2\\pi\\Big(\\frac{\\pi^3}{12}-\\frac{\\pi^3}{4}\\Big)=-\\frac{\\pi^2}{3}$.\n$f$ 在 $[0,\\pi]$ 上连续，余弦级数在 $x=0$ 收敛于 $f(0)=0$：$0=\\frac{a_0}2+\\sum_{n\\ge1}a_n$.\n故 $\\sum_{n\\ge1}a_n=-\\frac{a_0}2=\\frac{\\pi^2}{6}$."
+    },
+    {
+      "pid": 188,
+      "commentary": "考点：Cauchy（泊松）核积分的对称性与换元。破题：$\\xi-x$ 的偶性把积分折成 $2\\int_0^\\infty$，再令 $t=u^2$ 化为 $\\int_0^\\infty\\frac{u^2}{u^4+y^2}du=\\frac{\\pi}{2\\sqrt{2y}}$，最终 $f=\\sqrt{2y}$。易错：题面以 $f(y)$ 定义而以 $f(x)$ 提问，只是把自变量记作 $x$；奇偶性忘记乘 2 倍是最常见丢分点。",
+      "solution_clean": "$f(y)=\\frac1\\pi\\int_{-\\infty}^{+\\infty}|\\xi-x|^{1/2}\\frac{y}{(\\xi-x)^2+y^2}d\\xi=\\frac{2y}{\\pi}\\int_0^{+\\infty}\\frac{\\sqrt t}{t^2+y^2}dt$.\n令 $t=u^2$：$f(y)=\\frac{4y}{\\pi}\\int_0^{+\\infty}\\frac{u^2}{u^4+y^2}du$，而 $\\int_0^{+\\infty}\\frac{u^2}{u^4+y^2}du=\\frac{\\pi}{2\\sqrt{2y}}$.\n故 $f(y)=\\frac{4y}{\\pi}\\cdot\\frac{\\pi}{2\\sqrt{2y}}=\\sqrt{2y}$，自变量记作 $x$ 即 $f(x)=\\sqrt{2x}$。"
+    },
+    {
+      "pid": 189,
+      "commentary": "考点：含参积分求导（Feynman 技巧）。破题：先把 $\\tan x$ 换成 $t$，令 $I(a)=\\int_0^\\infty\\frac{\\arctan(at)}{t(1+t^2)}dt$，则 $I'(a)=\\frac\\pi{2(a+1)}$，由 $I(0)=0$ 积分得 $I(a)=\\frac\\pi2\\ln(a+1)$。易错：求导后分解 $\\frac1{(1+t^2)(1+a^2t^2)}$ 时分母出现 $a^2-1$，$a=1$ 要另行讨论或取极限；别忘了 $I(0)=0$ 定常数。",
+      "solution_clean": "令 $t=\\tan x$：$I(a)=\\int_0^{+\\infty}\\frac{\\arctan(at)}{t(1+t^2)}dt$，$I(0)=0$.\n$I'(a)=\\int_0^{+\\infty}\\frac{dt}{(1+t^2)(1+a^2t^2)}=\\frac{a}{a^2-1}\\int_0^{+\\infty}\\Big(\\frac1{1+u^2}-\\frac1{a^2+u^2}\\Big)du=\\frac{\\pi}{2(a+1)}$.\n$I(a)=\\int_0^a\\frac{\\pi}{2(s+1)}ds=\\frac\\pi2\\ln(a+1)$，故 $I(2)=\\frac\\pi2\\ln3$."
+    },
+    {
+      "pid": 190,
+      "commentary": "考点：质心公式 + 点到直线距离的转动惯量 $I_L=\\iint_Dd^2\\,d\\sigma$。破题：由 $x$ 的对称性 $\\bar x=0$，算出 $\\bar y=\\frac35$；直线过 $(0,\\frac35)$ 与 $(1,1)$ 即 $2x-5y+3=0$，$I_L=\\frac1{29}\\iint(2x-5y+3)^2$。易错：展开后要用 $x,xy$ 的奇对称把交叉项消掉，只留 $\\iint x^2,\\iint y^2,\\iint y$ 与面积，硬算三重展开极易出错。",
+      "solution_clean": "面积 $S=\\int_{-1}^1(1-x^2)dx=\\frac43$，$\\iint_Dy\\,d\\sigma=\\int_{-1}^1\\frac{1-x^4}2dx=\\frac45$，$\\iint_Dx\\,d\\sigma=0$，故质心 $(0,\\frac35)$。\n直线过 $(0,\\frac35),(1,1)$：$2x-5y+3=0$，$d=\\frac{|2x-5y+3|}{\\sqrt{29}}$。\n$I_L=\\frac1{29}\\iint_D(2x-5y+3)^2d\\sigma$，展开后 $x$、$xy$ 项积分为 $0$，$\\iint x^2=\\frac4{15}$，$\\iint y^2=\\frac47$：\n$I_L=\\frac1{29}\\Big(4\\cdot\\frac4{15}+25\\cdot\\frac47+9\\cdot\\frac43-30\\cdot\\frac45\\Big)=\\frac1{29}\\cdot\\frac{352}{105}=\\frac{352}{3045}$."
+    },
+    {
+      "pid": 191,
+      "commentary": "考点：分部积分造出 Dirichlet 积分。破题：把 $\\frac{dx}{x^2}$ 看成 $d(-\\frac1x)$，分部后边界项 $\\frac{\\sin^2x}{x}$ 两端为 0，剩下 $\\int_0^\\infty\\frac{\\sin2x}{x}dx=\\int_0^\\infty\\frac{\\sin t}{t}dt=\\frac\\pi2$。易错：$x\\to0^+$ 时 $\\frac{\\sin^2x}{x}\\to0$ 要交代；第二个积分换元 $t=ax$ 后多出因子 $a$，结果是 $\\frac{a\\pi}2$ 而非 $\\frac\\pi2$。",
+      "solution_clean": "$\\int_0^{+\\infty}\\Big(\\frac{\\sin x}{x}\\Big)^2dx=\\int_0^{+\\infty}\\sin^2x\\,d\\Big(-\\frac1x\\Big)=-\\frac{\\sin^2x}{x}\\Big|_0^{+\\infty}+\\int_0^{+\\infty}\\frac{2\\sin x\\cos x}{x}dx$.\n边界项为 $0$（$x\\to0$ 时 $\\frac{\\sin^2x}{x}\\to0$），故原式 $=\\int_0^{+\\infty}\\frac{\\sin2x}{x}dx=\\int_0^{+\\infty}\\frac{\\sin t}{t}dt=\\frac\\pi2$.\n令 $t=ax$：$\\int_0^{+\\infty}\\Big(\\frac{\\sin ax}{x}\\Big)^2dx=a\\int_0^{+\\infty}\\Big(\\frac{\\sin t}{t}\\Big)^2dt=\\frac{a\\pi}2\\ (a>0)$."
+    },
+    {
+      "pid": 192,
+      "commentary": "考点：$f''<0$ 推出的导数单调性 + 单调有界数列 + 极限传递。破题：$f'$ 严格递减，最大值点 $x_0$ 处 $f'(x_0)=0$，$f'$ 在 $x_0$ 两侧异号，故每个 $\\frac Mn$ 对应唯一 $x_n$；$\\frac Mn$ 递减使 $\\{x_n\\}$ 单调增，$f'(\\lim x_n)=0$ 只能指向 $x_0$。易错：$x_n$ 的存在性靠 $f'$ 两侧异号，别只讲唯一性；最后要用 $f$ 连续把 $x_n\\to x_0$ 转成 $f(x_n)\\to M$。",
+      "solution_clean": "$f''<0\\Rightarrow f'$ 在 $(0,1)$ 上严格递减；设 $f$ 在 $x_0\\in(0,1)$ 取最大值 $M$，则 $f'(x_0)=0$，且 $x<x_0$ 时 $f'>0$，$x>x_0$ 时 $f'<0$.\n故对每个 $n$，$\\frac Mn>0$ 在 $(0,x_0)$ 内有唯一解 $x_n$：$f'(x_n)=\\frac Mn$，(1) 得证。\n由 $f'(x_n)=\\frac Mn>\\frac M{n+1}=f'(x_{n+1})$ 及 $f'$ 严格递减得 $x_n<x_{n+1}<1$，故 $a=\\lim_{n\\to\\infty}x_n$ 存在。\n$f'$ 单调故连续，$f'(a)=\\lim f'(x_n)=\\lim\\frac Mn=0$；$f'$ 严格递减说明 $f'=0$ 的点唯一，故 $a=x_0$。\n由 $f$ 连续得 $f\\big(\\lim_{n\\to\\infty}x_n\\big)=f(x_0)=M$，(2) 得证。"
+    }
+  ]
+}

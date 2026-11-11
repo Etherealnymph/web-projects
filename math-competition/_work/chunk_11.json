@@ -1,0 +1,117 @@
+{
+"chunk": 11,
+"items": [
+{
+"pid": 161,
+"label": "12",
+"statement": "12.计算幂级数 $\\sum_{n=1}^{\\infty}\\frac{2+(-1)^n\\sin n}{n}x^n$ 的收敛半径和收敛域。",
+"answer": "收敛半径 $R=1$，收敛域 $[-1,1)$。",
+"notebook_candidate": "解：$\\because \\frac{1}{n}|x|^n\\le\\left|\\frac{2+(-1)^n\\sin n}{n}x^n\\right|\\le\\frac{3}{n}|x|^n$，当 $|x|<1$ 时 $\\sum\\frac{3}{n}|x|^n$ 收敛，故原级数绝对收敛；当 $|x|>1$ 时 $\\sum\\frac{1}{n}|x|^n$ 发散，故原级数发散。由阿贝尔定理知 $R=1$，收敛区间 $(-1,1)$。$x=1$ 时 $\\frac{2+(-1)^n\\sin n}{n}>\\frac{1}{n}$，故 $\\sum$ 发散；$x=-1$ 时 $\\sum\\frac{2(-1)^n}{n}$ 收敛，而 $\\sum\\frac{\\sin n}{n}$ 由狄利克雷判别法收敛，故收敛域为 $[-1,1)$。"
+},
+{
+"pid": 162,
+"label": "13",
+"statement": "13.设 $f(x)$ 是仅有正实根的多项式函数，满足 $\\frac{f'(x)}{f(x)}=-\\sum_{n=0}^{\\infty}c_nx^n$，试证 $c_n>0\\ (n\\ge 0)$，极限 $\\lim_{n\\to\\infty}\\frac{1}{\\sqrt[n]{c_n}}$ 存在，且等于 $f(x)$ 的最小根。",
+"answer": "",
+"notebook_candidate": "证：$\\because f(x)$ 是仅有正实根的多项式，不妨设其全部根为 $0<a_1<a_2<\\cdots<a_k$，$\\therefore f(x)=A(x-a_1)^{r_1}(x-a_2)^{r_2}\\cdots(x-a_k)^{r_k}$，$r_i$ 为根 $a_i$ 的重数 $(i=1,2,\\cdots,k,\\ r_i\\ge1)$。逐项求导并相加得 $f'(x)=f(x)\\left(\\frac{r_1}{x-a_1}+\\cdots+\\frac{r_k}{x-a_k}\\right)$，即 $\\frac{f'(x)}{f(x)}=\\frac{r_1}{x-a_1}+\\cdots+\\frac{r_k}{x-a_k}$。再由 $\\frac{1}{x-a_i}=-\\frac{1}{a_i}\\cdot\\frac{1}{1-x/a_i}=-\\frac{1}{a_i}\\sum_{n=0}^{\\infty}\\left(\\frac{x}{a_i}\\right)^n$（$|x|<a_1$）展开为幂级数。"
+},
+{
+"pid": 163,
+"label": "14",
+"statement": "14.设球面为 $\\Sigma:(x-1)^2+(y+1)^2+(z-2)^2=9$，曲面 $S$ 是以 $A(5,-3,-2)$ 为顶点且与球面 $\\Sigma$ 相切的圆锥面，$\\Omega$ 是由球面与锥面 $S$ 所围成的空间区域。1) 求空间区域 $\\Omega$ 的体积；2) 在空间区域 $\\Omega$ 内与球面 $\\Sigma$ 和锥面 $S$ 都相切的球面记为 $S_1,\\cdots$，与球面 $S_{n-1}$ 和锥面 $S$ 相切的球面记为 $S_n$，设球面 $S_n$ 的半径为 $r_n$，求级数 $\\sum_{n=1}^{\\infty}r_n\\left(1+\\frac{1}{2}+\\cdots+\\frac{1}{n}\\right)$ 的和。",
+"answer": "1) $V=\\frac{9}{2}\\pi$",
+"notebook_candidate": "解：由题意知，球心 $(1,-1,2)$ 与锥面顶点 $A$ 之间的距离为 $d=6$，故问题转化为球面 $\\Sigma:x^2+y^2+z^2=9$ 与锥面 $S:(z-6)^2=x^2+y^2$ 相切，二者围成的空间区域仍记为 $\\Omega$。1) 在 $yOz$ 平面上，过点 $(0,6)$ 与圆 $z=\\sqrt{9-y^2}$ 相切的直线与该圆围成的平面图形绕 $z$ 轴旋转而成的旋转体即 $\\Omega$，故 $V=\\frac{\\pi}{3}\\left(\\frac{3\\sqrt3}{2}\\right)^2\\cdot\\frac{9}{2}-\\pi\\int_{3/2}^{3}(9-z^2)dz=\\frac{9}{2}\\pi$。"
+},
+{
+"pid": 164,
+"label": "例1",
+"statement": "例 1设函数 $f(x)=\\sin^2x\\sin 2x$，讨论 $f(x)$ 在区间 $(0,\\pi)$ 上的单调性及 $f(x)$ 最大值；",
+"answer": "$\\max_{x\\in(0,\\pi)}|f(x)|=\\frac{3\\sqrt3}{8}$",
+"notebook_candidate": "解：1) $\\because f(x)=\\sin^2x\\sin2x$ 是周期为 $\\pi$ 的函数，$f'(x)=2\\sin^2x(3-4\\sin^2x)=-8\\sin^2x\\left(\\sin x-\\frac{\\sqrt3}{2}\\right)\\left(\\sin x+\\frac{\\sqrt3}{2}\\right)$，令 $f'(x)=0$ 可得 $x_1=\\frac{\\pi}{3},\\ x_2=\\frac{2\\pi}{3}$。由 (1) 知 $f(x)=\\sin^2x\\sin2x\\le\\frac{3\\sqrt3}{8}$：当 $x\\in(0,\\frac{\\pi}{3})$ 时 $f'(x)>0$ 单调递增；当 $x\\in(\\frac{\\pi}{3},\\frac{2\\pi}{3})$ 时 $f'(x)<0$ 单调递减；当 $x\\in(\\frac{2\\pi}{3},\\pi)$ 时 $f'(x)>0$ 单调递增，故 $\\max_{x\\in(0,\\pi)}|f(x)|=|f(x_1)|=\\frac{3\\sqrt3}{8}$。2) 由 (1) 知 $|f(x)|=|\\sin^2x\\sin2x|\\le\\frac{3\\sqrt3}{8}$，依次得 $|\\sin^22x\\sin2^2x|\\le\\frac{3\\sqrt3}{8}$，$|\\sin^22^2x\\sin2^3x|\\le\\frac{3\\sqrt3}{8}$，$\\cdots$，$|\\sin^22^{n-1}x\\sin2^nx|\\le\\frac{3\\sqrt3}{8}$。"
+},
+{
+"pid": 165,
+"label": "2",
+"statement": "2. 判断级数 $\\sum_{n=1}^{\\infty}a_n$ 的敛散性，其中 $a_n=\\sin^2x\\sin^2 2x\\cdots\\sin^2 2^nx,\\ x\\in R$。",
+"answer": "",
+"notebook_candidate": "解：1) $\\because f(x)=\\sin^2x\\sin2x$ 是周期为 $\\pi$ 的函数，$f'(x)=2\\sin^2x(3-4\\sin^2x)=-8\\sin^2x\\left(\\sin x-\\frac{\\sqrt3}{2}\\right)\\left(\\sin x+\\frac{\\sqrt3}{2}\\right)$，令 $f'(x)=0$ 可得 $x_1=\\frac{\\pi}{3},\\ x_2=\\frac{2\\pi}{3}$。由 (1) 知 $f(x)=\\sin^2x\\sin2x\\le\\frac{3\\sqrt3}{8}$：当 $x\\in(0,\\frac{\\pi}{3})$ 时 $f'(x)>0$ 单调递增；当 $x\\in(\\frac{\\pi}{3},\\frac{2\\pi}{3})$ 时 $f'(x)<0$ 单调递减；当 $x\\in(\\frac{2\\pi}{3},\\pi)$ 时 $f'(x)>0$ 单调递增，故 $\\max_{x\\in(0,\\pi)}|f(x)|=|f(x_1)|=\\frac{3\\sqrt3}{8}$。2) 由 (1) 知 $|f(x)|=|\\sin^2x\\sin2x|\\le\\frac{3\\sqrt3}{8}$，依次得 $|\\sin^22x\\sin2^2x|\\le\\frac{3\\sqrt3}{8}$，$|\\sin^22^2x\\sin2^3x|\\le\\frac{3\\sqrt3}{8}$，$\\cdots$，$|\\sin^22^{n-1}x\\sin2^nx|\\le\\frac{3\\sqrt3}{8}$。"
+},
+{
+"pid": 166,
+"label": "1",
+"statement": "1.求曲面 $z=xy,\\ x+y+z=1,\\ x=0,\\ y=0,\\ z=0$ 所围区域的体积。",
+"answer": "$V=\\frac{17}{12}-2\\ln2$",
+"notebook_candidate": "解：立体 $\\Omega=\\{(x,y,z)\\mid(x,y)\\in D,\\ 0\\le z\\le\\min\\{xy,1-x-y\\}\\}$，其中 $D=\\{(x,y)\\mid x\\ge0,\\ y\\ge0,\\ x+y\\le1\\}$。则按 $z$ 先积并分块：$V=\\int_0^1dy\\int_0^{\\frac{1-y}{1+y}}xy\\,dx+\\int_0^1dy\\int_{\\frac{1-y}{1+y}}^{1-y}(1-x-y)dx=\\left(4\\ln2-\\frac{11}{4}\\right)+\\left(\\frac{25}{6}-6\\ln2\\right)=\\frac{17}{12}-2\\ln2$。"
+},
+{
+"pid": 167,
+"label": "1",
+"statement": "求曲面 $z=xy$，$x+y+z=1$，$x=0$，$y=0$，$z=0$ 所围区域的体积。",
+"answer": "$V=\\frac{17}{12}-2\\ln 2$",
+"notebook_candidate": "第1题取 $\\Omega=\\{(x,y,z)\\mid (x,y)\\in D,\\ 0\\le z\\le\\min\\{xy,1-x-y\\}\\}$，$D=\\{(x,y)\\mid x\\ge0,y\\ge0,x+y\\le1\\}$，分两段累次积分得 $V=(4\\ln2-\\frac{11}{4})+(\\frac{25}{6}-6\\ln2)=\\frac{17}{12}-2\\ln2$。第2题用偏导数定义 $f_x(1,1)=\\lim_{\\Delta x\\to0}\\frac{f(1+\\Delta x,1)-f(1,1)}{\\Delta x}$，并由可微得连续、$f(1,1)=1$，令 $y=0$ 得 $f(\\cos x,1)=1+x^{2}+o(x^{2})$。"
+},
+{
+"pid": 168,
+"label": "2",
+"statement": "当 $(x,y)\\to(0,0)$ 时，$f(\\pi\\sqrt[3]{xy}+\\cos x,\\,e^{xy}+\\cos y)=1+x^{2}+y^{2}+o(x^{2}+y^{2})$，$f(x,y)$ 在 $(1,1)$ 处可微，计算 $f_x(1,1)$，$f_y(1,1)$ 的值。",
+"answer": "",
+"notebook_candidate": "第1题取 $\\Omega=\\{(x,y,z)\\mid (x,y)\\in D,\\ 0\\le z\\le\\min\\{xy,1-x-y\\}\\}$，$D=\\{(x,y)\\mid x\\ge0,y\\ge0,x+y\\le1\\}$，分两段累次积分得 $V=(4\\ln2-\\frac{11}{4})+(\\frac{25}{6}-6\\ln2)=\\frac{17}{12}-2\\ln2$。第2题用偏导数定义 $f_x(1,1)=\\lim_{\\Delta x\\to0}\\frac{f(1+\\Delta x,1)-f(1,1)}{\\Delta x}$，并由可微得连续、$f(1,1)=1$，令 $y=0$ 得 $f(\\cos x,1)=1+x^{2}+o(x^{2})$。"
+},
+{
+"pid": 169,
+"label": "3",
+"statement": "计算广义积分 $\\displaystyle\\int_0^{+\\infty}\\frac{1}{\\sqrt{t}}e^{-\\left(t+\\frac{1}{t}\\right)}dt$。",
+"answer": "$e^{-2}\\sqrt{\\pi}$",
+"notebook_candidate": "第3题令 $\\sqrt{t}=x$，原式 $=2\\int_0^{+\\infty}e^{-(x^{2}+\\frac{1}{x^{2}})}dx=2e^{2}\\int_0^{+\\infty}e^{-(x+\\frac{1}{x})^{2}}dx$。再令 $u=x+\\frac{1}{x}$，$u\\ge2$，反解得 $x=\\frac{u\\pm\\sqrt{u^{2}-4}}{2}$，并分 $x\\in(0,1]$ 取 $\\frac{u-\\sqrt{u^{2}-4}}{2}$、$x\\in[1,+\\infty)$ 取 $\\frac{u+\\sqrt{u^{2}-4}}{2}$ 讨论。"
+},
+{
+"pid": 170,
+"label": "4",
+"statement": "设 $f$ 在 $[0,1]$ 上有二阶导数，并且 $f(0)=f'(0)=0$，求证：$\\exists\\xi\\in(0,1)$，$f''(\\xi)=\\frac{2f(\\xi)}{(1-\\xi)^{2}}$。",
+"answer": "",
+"notebook_candidate": "证：构造辅助函数 $g(x)=(x-1)^{2}f'(x)-2f(x)(x-1)$，则 $g(0)=g(1)=0$，满足罗尔定理，故 $\\exists\\xi\\in(0,1)$，使得 $f''(\\xi)=\\frac{2f(\\xi)}{(1-\\xi)^{2}}$。"
+},
+{
+"pid": 171,
+"label": "5",
+"statement": "求 $\\iint_{\\Sigma}(ax^{2}+by^{2}+cz^{2})dS$，其中 $\\Sigma:\\ x^{2}+y^{2}+z^{2}=2z$。",
+"answer": "$\\frac{4}{3}\\pi(a+b+c)+4\\pi c$",
+"notebook_candidate": "令 $F=x^{2}+y^{2}+z^{2}-2z=0$，则 $\\Sigma$ 外侧法向量 $\\mathbf{n}=(2x,2y,2z-2)$，方向余弦 $\\mathbf{n}^{0}=(x,y,z-1)$。用 $cz^{2}=cz(z-1)+c(z-1)+c$ 拆项后化为第二型曲面积分：$\\iint_{\\Sigma}ax\\,dydz+by\\,dzdx+cz\\,dxdy+\\iint_{\\Sigma}c\\,dxdy+4\\pi c$，再用高斯公式得 $\\iiint_V(a+b+c)dV+\\iiint_V0\\,dV+4\\pi c=\\frac{4}{3}\\pi(a+b+c)+4\\pi c$。"
+},
+{
+"pid": 172,
+"label": "二",
+"statement": "证明：当 $x\\ge0$，$y\\ge0$ 时，$1+x+y+xy\\le(x+1)\\ln(x+1)+e^{y}$。",
+"answer": "",
+"notebook_candidate": "证：对于固定的 $y$，考虑函数 $f(x)=(x+1)\\ln(x+1)-xy-x$，$f'(x)=\\ln(x+1)-y$，知 $f(x)$ 在 $[0,e^{y}-1]$ 中递减、在 $[e^{y}-1,+\\infty)$ 上递增，因而 $f(x)\\ge f(e^{y}-1)=1+y-e^{y}$，即 $(x+1)\\ln(x+1)-xy-x\\ge1+y-e^{y}$，移项即 $1+x+y+xy\\le(x+1)\\ln(x+1)+e^{y}$。"
+},
+{
+"pid": 173,
+"label": "三",
+"statement": "计算 $\\oint_{\\Gamma}|\\sqrt{3}y-x|dx-5z\\,dz$，曲线 $\\Gamma:\\begin{cases}x^{2}+y^{2}+z^{2}=8\\\\ x^{2}+y^{2}=2z\\end{cases}$ 从 $z$ 轴正向往坐标原点看去取逆时针方向。",
+"answer": "$0$",
+"notebook_candidate": "曲线 $\\Gamma$ 可表示为 $\\begin{cases}z=2\\\\ x^{2}+y^{2}=4\\end{cases}$，参数方程为 $x=2\\cos\\theta$，$y=2\\sin\\theta$，$z=2$，$0\\le\\theta\\le2\\pi$。因 $z$ 为常数，$dz=0$，原式 $=\\oint_{\\Gamma}|\\sqrt{3}y-x|dx=-\\int_0^{2\\pi}|2\\sqrt{3}\\sin\\theta-2\\cos\\theta|2\\sin\\theta\\,d\\theta=-8\\int_0^{2\\pi}|\\frac{\\sqrt{3}}{2}\\sin\\theta-\\frac{1}{2}\\cos\\theta|\\sin\\theta\\,d\\theta=-8\\int_0^{2\\pi}|\\cos(\\theta+\\frac{\\pi}{3})|\\sin\\theta\\,d\\theta=-8\\int_0^{2\\pi}|\\cos\\theta|\\sin\\theta\\,d\\theta=-8\\int_{-\\pi}^{\\pi}|\\cos\\theta|\\sin\\theta\\,d\\theta=0$。"
+},
+{
+"pid": 174,
+"label": "四",
+"statement": "设函数 $f(x)$ 有连续导数，且存在常数 $a_1,a_2,b_1,b_2$ 使得 $\\lim_{x\\to-\\infty}[f(x)-(a_1x+b_1)]=0$，$\\lim_{x\\to+\\infty}[f(x)-(a_2x+b_2)]=0$，其中 $a_1<a_2$，证明：对 $\\forall c\\in(a_1,a_2)$，$\\exists\\xi$，使得 $f'(\\xi)=c$。",
+"answer": "",
+"notebook_candidate": "证：由题意知 $\\lim_{x\\to-\\infty}\\frac{f(x)-f(0)}{x}=a_1<c$，$\\lim_{x\\to+\\infty}\\frac{f(x)-f(0)}{x}=a_2>c$，于是 $\\exists x_1<0,x_2>0$ 使 $\\frac{f(x_1)-f(0)}{x_1}<c$，$\\frac{f(x_2)-f(0)}{x_2}>c$。$f(x)$ 在 $[x_1,0]$、$[0,x_2]$ 上分别满足拉氏定理，得 $\\xi_1\\in(x_1,0)$、$\\xi_2\\in(0,x_2)$ 使 $f'(\\xi_1)<c<f'(\\xi_2)$；又 $f'(x)\\in C[x_1,x_2]$，由连续函数的介值定理得 $\\exists\\xi\\in(x_1,x_2)$，$f'(\\xi)=c$。"
+},
+{
+"pid": 175,
+"label": "五",
+"statement": "设函数 $f(x)$ 在 $[0,1]$ 上单调递减，证明：对 $\\forall\\alpha\\in(0,1)$，$\\int_0^{\\alpha}f(x)dx\\ge\\alpha\\int_0^{1}f(x)dx$。",
+"answer": "",
+"notebook_candidate": "证：对 $\\forall\\alpha\\in(0,1)$，$\\int_0^{\\alpha}f(x)dx\\ge\\int_0^{\\alpha}f(\\alpha)dx=\\alpha f(\\alpha)$，即 $\\frac{\\int_0^{\\alpha}f(x)dx}{\\alpha}\\ge f(\\alpha)$；又 $\\int_{\\alpha}^{1}f(x)dx\\le\\int_{\\alpha}^{1}f(\\alpha)dx=(1-\\alpha)f(\\alpha)$，即 $\\frac{\\int_{\\alpha}^{1}f(x)dx}{1-\\alpha}\\le f(\\alpha)$。两式比较得 $\\frac{\\int_{\\alpha}^{1}f}{1-\\alpha}\\le\\frac{\\int_0^{\\alpha}f}{\\alpha}$，即 $\\alpha\\int_{\\alpha}^{1}f(x)dx\\le(1-\\alpha)\\int_0^{\\alpha}f(x)dx$，整理得 $\\int_0^{\\alpha}f(x)dx\\ge\\alpha\\int_0^{1}f(x)dx$。"
+},
+{
+"pid": 176,
+"label": "六",
+"statement": "设曲面 $\\Sigma$ 是由一段空间曲线 $C:\\ x=t,\\ y=2t,\\ z=t^{2}\\ (0\\le t\\le1)$ 绕 $z$ 轴旋转一周所成，其法向量指向与 $z$ 轴正向成钝角。已知连续函数 $f(x,y,z)$ 满足 $f(x,y,z)=(x+y+z)^{2}+\\iint_{\\Sigma}f(x,y,z)dydz+x^{2}dxdy$，求 $f(1,1,1)$ 的值。",
+"answer": "",
+"notebook_candidate": "解：曲面 $\\Sigma$ 的方程为 $x^{2}+y^{2}=5z$，$0\\le z\\le1$。令 $a=\\iint_{\\Sigma}f(x,y,z)dydz+x^{2}dxdy$，则 $f(x,y,z)=(x+y+z)^{2}+a$；添加平面 $\\Sigma_1:\\ z=1$ 上侧，与 $\\Sigma$ 构成封闭曲面的外侧。于是 $a=I_1-I_2$，其中 $I_1=\\iint_{\\Sigma+\\Sigma_1}[(x+y+z)^{2}+a]dydz+x^{2}dxdy=\\iiint_{\\Omega}2(x+y+z)dV=\\iiint_{\\Omega}2z\\,dV=2\\int_0^{1}z\\,dz\\iint_{D_z}d\\sigma=\\frac{10\\pi}{3}$。"
+}
+]
+}

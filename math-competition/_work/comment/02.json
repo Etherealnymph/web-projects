@@ -1,0 +1,85 @@
+{
+"chunk": 2,
+"items": [
+{
+"pid": 17,
+"commentary": "把 $f(x)-x$ 记为 $F$，待证式等价于 $\\int_0^1F(g(x))dx\\le\\int_0^1F(x)dx+\\frac12$。左边不超过 $F$ 的最大值 $a=F(x_0)$，而 $0\\le f\\le1$ 给出 $a\\le1-x_0$，再用 $F(x)\\ge-x$（$x\\le x_0$）与 $F(x)\\ge a+x_0-x$（$x\\ge x_0$）估出 $\\int_0^1F\\ge a-\\frac12$，夹一下即得证。易错：误以为 $f$ 单调增加能推出 $f(x)-x$ 单调——它一般并不单调，只能走「最大值 + 端点约束」这条路。",
+"solution_clean": "令 $F(x)=f(x)-x$，由 $\\int_0^1F=\\int_0^1f-\\frac12$，待证式化为 $\\int_0^1F(g(x))dx\\le\\int_0^1F(x)dx+\\frac12$。\n设 $F$ 在 $x_0$ 取最大值 $a=f(x_0)-x_0$，由 $0\\le f\\le1$ 得 $a\\le1-x_0$。\n因 $g$ 取值于 $[0,1]$，有 $\\int_0^1F(g(x))dx\\le a$。\n又 $F(x)\\ge-x$，且 $x\\ge x_0$ 时 $F(x)\\ge f(x_0)-x=a+x_0-x$，故 $\\int_0^1F\\ge-\\frac{x_0^2}{2}+\\int_{x_0}^1(a+x_0-x)dx=a(1-x_0)+x_0-x_0^2-\\frac12$。\n由 $a\\le1-x_0$ 得 $x_0(1-x_0-a)\\ge0$，即 $\\int_0^1F\\ge a-\\frac12$。\n于是 $\\int_0^1F(g)\\le a\\le\\int_0^1F+\\frac12$，即 $\\int_0^1f(g(x))dx-\\int_0^1g(x)dx\\le\\int_0^1f(x)dx$。"
+},
+{
+"pid": 18,
+"commentary": "考「配成完全平方 + 分部积分」：由 $f(0)=f(1)=0$ 得 $\\int_0^1f\\,dx=-\\int_0^1xf'\\,dx$，从而 $\\int_0^1(4x-2)f'\\,dx=-4\\int_0^1f\\,dx$，等式就凑成 $\\int_0^1(f'+4x-2)^2dx=0$，非负连续函数积分为零只能恒为零。坑是只看 $\\int(f')^2\\ge0$ 就收工：交叉项 $-8\\int f$ 必须靠边界条件才消得掉，$\\int_0^1(4x-2)^2dx=\\frac43$ 也别忘了。",
+"solution_clean": "由 $f(0)=f(1)=0$ 分部积分：$\\int_0^1f\\,dx=-\\int_0^1xf'\\,dx$，$\\int_0^1(4x-2)f'\\,dx=-4\\int_0^1f\\,dx$。\n又 $\\int_0^1(4x-2)^2dx=\\frac43$，故原式左端 $=\\int_0^1(f')^2dx-8\\int_0^1f\\,dx+\\frac43=\\int_0^1(f'+4x-2)^2dx=0$。\n被积函数连续非负，故 $f'+4x-2\\equiv0$，即 $f'=2-4x$。\n积分得 $f(x)=2x-2x^2+C$，由 $f(0)=0$ 得 $C=0$，故 $f(x)=2x-2x^2$。"
+},
+{
+"pid": 19,
+"commentary": "幂级数逐项求导的标准操作：$\\sum nx^n=x\\left(\\sum x^n\\right)'=\\frac{x}{(1-x)^2}$（$|x|<1$），取 $x=\\frac1a$ 即可；$a>1$ 保证 $\\frac1a\\in(0,1)$、级数绝对收敛，代入才合法。也可用 $S-\\frac1aS$ 错位相减。易错：化简时把 $(1-\\frac1a)^2=\\frac{(a-1)^2}{a^2}$ 写反，或不管收敛范围就硬代 $x=\\frac1a$。",
+"solution_clean": "设 $S(x)=\\sum_{n=1}^{\\infty}nx^n$，$|x|<1$ 时逐项求导得\n$S(x)=x\\left(\\sum_{n=1}^{\\infty}x^n\\right)'=x\\left(\\frac{x}{1-x}\\right)'=\\frac{x}{(1-x)^2}$。\n$a>1$ 时 $\\frac1a\\in(0,1)$，级数绝对收敛，代入合法。\n故原极限 $=S\\left(\\frac1a\\right)=\\frac{1/a}{(1-1/a)^2}=\\frac{a}{(a-1)^2}$。"
+},
+{
+"pid": 20,
+"commentary": "典型「差分可和 ⇒ 收敛」：先归纳出 $0<x_n\\le1$，再用 $|x_{n+1}-x_n|\\le\\frac{3}{16}|x_n-x_{n-1}|$ 得几何衰减，$\\sum(x_{n+1}-x_n)$ 绝对收敛故极限存在（压缩映射原理也可一句话解决）。第二步在递推式两边取极限得 $a^4+4a-1=0$，唯一性靠 $x^4+4x-1$ 在 $(0,+\\infty)$ 严格增。坑：把 $x_n^2+x_nx_{n-1}+x_{n-1}^2\\le3$ 和分母 $\\ge16$ 的估计漏写，压缩比 $\\frac{3}{16}$ 就被当成 1，论证整体失效。",
+"solution_clean": "由 $x_0=1$ 归纳得 $0<x_n\\le1$（$x_1=\\frac15$）。\n$|x_{n+1}-x_n|=\\frac{|x_n^3-x_{n-1}^3|}{(x_n^3+4)(x_{n-1}^3+4)}\\le\\frac{3|x_n-x_{n-1}|}{16}$，故 $|x_{n+1}-x_n|\\le\\left(\\frac{3}{16}\\right)^n|x_1-x_0|=\\frac45\\left(\\frac{3}{16}\\right)^n$。\n于是 $\\sum_{n=0}^{\\infty}|x_{n+1}-x_n|$ 收敛，而 $x_n=x_0+\\sum_{k=0}^{n-1}(x_{k+1}-x_k)$，故 $\\{x_n\\}$ 收敛。\n设极限为 $a\\in(0,1]$，在 $x_{n+1}=\\frac{1}{x_n^3+4}$ 两边取极限得 $a=\\frac{1}{a^3+4}$，即 $a^4+4a-1=0$。\n$h(x)=x^4+4x-1$ 在 $(0,+\\infty)$ 严格增（$h'=4x^3+4>0$），$h(0)=-1<0<h(1)=4$，故 $a$ 是唯一正根。"
+},
+{
+"pid": 21,
+"commentary": "核心是「$\\sum|x_{n+1}-x_n|$ 收敛 ⇒ 数列收敛」，把 $x_n$ 看成差分的部分和。关键一刀是用拉格朗日中值定理把 $\\ln\\ln(n+1)-\\ln\\ln n$ 写成 $\\frac{1}{\\xi\\ln\\xi}$（$\\xi\\in(n,n+1)$），再由 $\\frac{1}{t\\ln t}$ 递减得到可求和的界 $\\frac{1}{n\\ln n}-\\frac{1}{(n+1)\\ln(n+1)}$。别指望写出极限的显式值；也注意 $\\ln\\ln1$ 无定义，差分应自 $n\\ge2$ 讨论。",
+"solution_clean": "记 $b_n=\\frac{1}{n\\ln n}$，$n\\ge2$ 时递减。由中值定理 $\\ln\\ln(n+1)-\\ln\\ln n=\\frac{1}{\\xi_n\\ln\\xi_n}$，$\\xi_n\\in(n,n+1)$，且 $b_{n+1}<\\frac{1}{\\xi_n\\ln\\xi_n}$。\n故 $x_{n+1}-x_n=b_{n+1}-\\frac{1}{\\xi_n\\ln\\xi_n}<0$，且 $|x_{n+1}-x_n|=\\frac{1}{\\xi_n\\ln\\xi_n}-b_{n+1}\\le b_n-b_{n+1}$。\n求和得 $\\sum_{k=2}^{n}|x_{k+1}-x_k|\\le b_2-b_{n+1}<\\frac{1}{2\\ln2}$，级数绝对收敛。\n又 $x_n=x_2+\\sum_{k=2}^{n-1}(x_{k+1}-x_k)$，故 $\\{x_n\\}$ 收敛。"
+},
+{
+"pid": 22,
+"commentary": "「比值判别法反用」：先有 $x_n>0$，算出 $\\frac{x_{n+1}}{x_n}=\\frac52\\left(1+\\frac1n\\right)^{-n}\\to\\frac{5}{2e}<1$，于是 $\\sum x_n$ 收敛，故 $x_n\\to0$，存在性与极限值一箭双雕。要害就是 $\\frac{5}{2e}\\approx0.92$ 与 1 的比较；另外 $x_n$ 本身不单调，别硬套「单调有界」。记住 $\\left(1+\\frac1n\\right)^n\\to e$ 常与比值法配套出现。",
+"solution_clean": "$x_n>0$，且 $\\frac{x_{n+1}}{x_n}=\\frac{5^{n+1}(n+1)!}{(2n+2)^{n+1}}\\cdot\\frac{(2n)^n}{5^n\\,n!}=\\frac52\\left(1+\\frac1n\\right)^{-n}$。\n由 $\\left(1+\\frac1n\\right)^n\\to e$ 得 $\\frac{x_{n+1}}{x_n}\\to\\frac{5}{2e}<1$。\n故正项级数 $\\sum_{n=1}^{\\infty}x_n$ 收敛（比值判别法）。\n级数收敛则其通项趋于零，即 $\\lim_{n\\to\\infty}x_n=0$，数列极限存在且为 0。"
+},
+{
+"pid": 23,
+"commentary": "三角和差化积 + 莱布尼茨级数：由 $\\frac{\\sin2nx}{\\sin x}=2\\sum_{k=1}^{n}\\cos(2k-1)x$ 把积分变成有限和，$\\int_0^{\\frac\\pi2}\\cos(2k-1)x\\,dx=\\frac{(-1)^{k-1}}{2k-1}$，最后归结为 $\\sum_{k\\ge1}\\frac{(-1)^{k-1}}{2k-1}=\\frac\\pi4$。易错：上限写成 $\\pi$ 会使级数变样；另外必须逐项积完有限和再令 $n\\to\\infty$，不能先对 $n$ 取极限。",
+"solution_clean": "$x\\ne0$ 时 $\\frac{\\sin2nx}{\\sin x}=2\\sum_{k=1}^{n}\\cos(2k-1)x$。\n又 $\\int_0^{\\frac\\pi2}\\cos(2k-1)x\\,dx=\\frac{\\sin\\frac{(2k-1)\\pi}{2}}{2k-1}=\\frac{(-1)^{k-1}}{2k-1}$，故原积分 $=2\\sum_{k=1}^{n}\\frac{(-1)^{k-1}}{2k-1}$。\n由 $\\arctan1=\\sum_{k=1}^{\\infty}\\frac{(-1)^{k-1}}{2k-1}=\\frac\\pi4$（莱布尼茨级数）。\n故原极限 $=2\\cdot\\frac\\pi4=\\frac\\pi2$。"
+},
+{
+"pid": 24,
+"commentary": "无界函数反常积分：两个奇点 $x=0$ 与 $x=\\frac\\pi2$，拆成 $\\int_0^{\\pi/4}+\\int_{\\pi/4}^{\\pi/2}$ 分别比阶。$x\\to0^+$ 时被积函数与 $x^{-p}$ 同阶，$x\\to\\frac\\pi2$ 时与 $\\left(\\frac\\pi2-x\\right)^{-q}$ 同阶，故收敛的充要条件是 $p<1$ 且 $q<1$。易错：只盯 $x=0$ 一端；另外用 $\\sin x\\sim x$、$\\cos x\\sim\\frac\\pi2-x$ 比较时指数必须严格小于 1，取等号即为对数发散。",
+"solution_clean": "$x=0$、$x=\\frac\\pi2$ 是奇点，$I=\\int_0^{\\pi/4}+\\int_{\\pi/4}^{\\pi/2}$。\n当 $x\\to0^+$：$x^p\\cdot\\frac{1}{\\sin^px\\cos^qx}\\to1$，故 $\\int_0^{\\pi/4}$ 在 $0<p<1$ 时收敛、$p\\ge1$ 时发散。\n当 $x\\to\\frac\\pi2$：$\\left(\\frac\\pi2-x\\right)^q\\cdot\\frac{1}{\\sin^px\\cos^qx}\\to1$，故 $\\int_{\\pi/4}^{\\pi/2}$ 在 $0<q<1$ 时收敛、$q\\ge1$ 时发散。\n结论：$0<p<1$ 且 $0<q<1$ 时积分收敛，其余情形发散。"
+},
+{
+"pid": 25,
+"commentary": "把 $t=\\frac{y}{x+y}$ 直接当换元（等值线族 $y=\\frac{t}{1-t}x$ 都过原点），$t\\in[0,1]$，等值线在三角形内截出的面积 $\\sigma(t)=\\frac t2$，于是 $d\\sigma=\\frac12dt$，$I=\\int_0^1e^t\\cdot\\frac12dt$——这就是二重积分换元「按等值线累加」的几何实质。也可令 $u=x+y,v=y$ 硬算雅可比，但容易把 $e^{v/u}$ 的积分次序与上下限弄错。",
+"solution_clean": "令 $t=\\frac{y}{x+y}\\in[0,1]$，等值线 $y=\\frac{t}{1-t}x$ 与 $x+y=1$ 交于 $(1-t,t)$。\n区域 $\\{\\frac{y}{x+y}\\le t\\}\\cap D$ 是以 $(0,0),(1-t,t),(1,0)$ 为顶点的三角形。\n其面积 $\\sigma(t)=\\frac t2$，故 $d\\sigma(t)=\\frac12dt$。\n于是 $I=\\int_0^1e^t\\,d\\sigma(t)=\\frac12\\int_0^1e^t\\,dt=\\frac12(e-1)$。"
+},
+{
+"pid": 26,
+"commentary": "正交变换化标准形：$A=\\begin{pmatrix}17&15&0\\\\15&17&0\\\\0&0&8\\end{pmatrix}$，特征值 $32,2,8$，沿 $\\frac{x\\pm y}{\\sqrt2}$ 与 $z$ 轴化简后再配方平移，把椭球与抛物面分别写成 $\\alpha u'^2+\\beta v'^2+\\gamma(z-z_0)^2=1$ 和 $z=ku'^2+lv'^2+c$。破题点是两曲面同轴，$z$ 为常数截出的都是相似椭圆，体积比可压成一个关于 $z$ 的一维积分比。易错：特征向量必须单位正交，平移中心的常数算错就前功尽弃。",
+"solution_clean": ""
+},
+{
+"pid": 27,
+"commentary": "把 $f'\\!\\left(\\frac ax\\right)=\\frac{x}{f(x)}$ 中的 $x$ 换成 $\\frac ax$，得 $f'(x)f\\!\\left(\\frac ax\\right)=\\frac ax$，两式相乘后求导发现 $f(x)f\\!\\left(\\frac ax\\right)$ 是常数 $b$，回代即得 $\\frac{f'}{f}=\\frac{a}{bx}$，积分就是 $f=cx^{a/b}$。这种「对称代换 + 造不变量」是函数方程的通法。易错：忘了 $c$ 与 $b$ 并不独立（代回需 $c^2a^{a/b}=b$），也没验证 $f$ 在 $(0,+\\infty)$ 上的正值条件。",
+"solution_clean": "由条件 $f'\\!\\left(\\frac ax\\right)f(x)=x$，将 $x$ 换成 $\\frac ax$ 得 $f'(x)f\\!\\left(\\frac ax\\right)=\\frac ax$。\n令 $g(x)=f\\!\\left(\\frac ax\\right)f(x)$，则 $g'(x)=f'(x)f\\!\\left(\\frac ax\\right)-\\frac{a}{x^2}f'\\!\\left(\\frac ax\\right)f(x)=\\frac ax-\\frac{a}{x^2}\\cdot x=0$，故 $g\\equiv b\\ne0$，即 $f\\!\\left(\\frac ax\\right)=\\frac{b}{f(x)}$。\n代入 $f'(x)=\\frac{a}{x}\\cdot\\frac{1}{f(a/x)}$ 得 $\\frac{f'(x)}{f(x)}=\\frac{a}{bx}$。\n积分得 $\\ln f=\\frac{a}{b}\\ln x+\\ln c$，故 $f(x)=cx^{\\frac ab}$（$c>0$），且需满足 $c^2a^{a/b}=b$。"
+},
+{
+"pid": 28,
+"commentary": "把 $y_1y_2=1$ 读成 $y_2=y_1^{-1}$，用刘维尔公式：$W=y_1y_2'-y_1'y_2$ 满足 $W'=\\frac1xW$，而 $y_2=y_1^{-1}$ 给出 $W=-\\frac{2y_1'}{y_1}$，两者合起来定出 $y_1=e^{-Cx^2/4}$，再回代得 $q(x)=-\\frac{C^2x^2}{4}$。所以书上答案 $q=0$ 只是 $C=0$ 的退化情形（此时 $1$ 与 $x^2$ 相乘不等于 1）；若坚持 $y_1,y_2$ 线性无关，$q$ 就必为 $-c^2x^2$。",
+"solution_clean": ""
+},
+{
+"pid": 29,
+"commentary": "最基础的直接积分型，右端只是 $x$ 的函数：$y=e^x-2\\ln|x|+C$，没有初值条件，只能给通解。两个易错点：$\\frac1x$ 的原函数要带绝对值、$x=0$ 处方程不定义，故通解只在 $x>0$ 或 $x<0$ 的单个区间上成立；写成 $\\ln x$ 而无 $C$ 的通解区间说明，是标准扣分点。",
+"solution_clean": ""
+},
+{
+"pid": 30,
+"commentary": "Riccati 方程：先猜形如 $\\frac kx$ 的特解，代入得 $k^2+4k+4=0$，即 $k=-2$（重根），再令 $y=-\\frac2x+\\frac1u$，方程化为一阶线性 $u'=\\frac ux-\\frac14$，解得 $u=x\\left(C-\\frac{\\ln|x|}{4}\\right)$。猜特解是这类题的突破口，猜不到可试 $y=\\alpha+\\frac{\\beta}{x}$。注意 $x=0$ 是奇点，解只在单侧区间有效，且 $y=-\\frac2x$ 本身是丢掉的奇解。",
+"solution_clean": ""
+},
+{
+"pid": 31,
+"commentary": "看到 $\\cos y\\,y'$ 就该换元 $u=\\sin y$：方程变成 $u'=u+u^2\\cos x$，是以 $u$ 为未知量的伯努利方程；再令 $v=\\frac1u$ 得线性方程 $v'+v=-\\cos x$，积分因子 $e^x$。这条「$\\sin y$ → 伯努利 → 线性」的链条是含三角函数非线性的标准套路。易错：换元后别漏掉 $u=0$（即 $y=k\\pi$）这个被除掉的解，它通常正是奇解。",
+"solution_clean": ""
+},
+{
+"pid": 32,
+"commentary": "根号里是 $x^2+y$，令 $u=\\sqrt{x^2+y}$（即 $y=u^2-x^2$）代入得 $2uu'=u+x$，这是齐次方程，再令 $u=vx$ 化为可分离变量，得 $\\int\\frac{2v}{1+v-2v^2}dv=\\ln|x|+C$。这类「根号内平方项 + 一次项」的题，选对 $u$ 就是全部；也可用 $y'=p$ 的参数法。易错：平方换元后要回代检验，并注意定义域 $x^2+y\\ge0$ 与可能产生的增根。",
+"solution_clean": ""
+}
+]
+}

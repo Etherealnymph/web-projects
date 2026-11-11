@@ -1,0 +1,85 @@
+{
+  "chunk": 1,
+  "items": [
+    {
+      "pid": 1,
+      "commentary": "考点：离散 $L^n$ 范数型的夹逼。破题：上界把所有项换成 $M$ 即可；下界只需在最大值点附近留一项 $f(i_0/n)>M-\\varepsilon$，得 $x_n\\ge(M-\\varepsilon)\\sqrt[n]{1/n}$。易错：不要试图把所有项都放大到 $M-\\varepsilon$（做不到）；$\\sqrt[n]{n}\\to1$ 这个因子要留到先取 $n\\to\\infty$、再令 $\\varepsilon\\to0$。",
+      "solution_clean": "记 $M=\\max_{[0,1]}f$，由 $f(i/n)\\le M$ 得 $x_n\\le\\sqrt[n]{M^n\\cdot\\frac1n}=M$。\n取 $x_0$ 使 $f(x_0)=M$，则 $\\forall\\varepsilon>0\\ \\exists\\delta>0$，当 $|x-x_0|<\\delta$ 时 $f(x)>M-\\varepsilon$。\n$n$ 充分大时存在 $i_0$ 使 $|i_0/n-x_0|<\\delta$，于是 $x_n\\ge\\sqrt[n]{(M-\\varepsilon)^n\\cdot\\frac1n}=(M-\\varepsilon)\\,n^{-1/n}$。\n令 $n\\to\\infty$（$n^{-1/n}\\to1$）得 $\\liminf x_n\\ge M-\\varepsilon$，再令 $\\varepsilon\\to0$，夹逼得极限为 $M$。"
+    },
+    {
+      "pid": 2,
+      "commentary": "考点：构造辅助函数用中值定理。破题：把结论改写成 $f'(x)-2x[f(x)-f(0)]=0$，它恰是 $F(x)=e^{-x^2}[f(x)-f(0)]$ 的导数因子，$F(0)=0$，而条件 $f'(-\\frac12)=0$ 只在原点左侧给信息。易错：只对 $f$ 用拉格朗日会丢掉权因子 $2x$，$f(0)$ 这个常数也要一并塞进 $F$；区间与 $-\\frac12$ 分居原点两侧时先核对题面（取 $f=(x+\\frac12)^2$ 可验右半区间不成立）。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 3,
+      "commentary": "考点：用导数定义判定可导性。破题：把差商拆成 $\\frac{f(a+h)-f(a)}{h}g(a+h)+\\frac{g(a+h)-g(a)}{h}f(a)$，第二项的“坏”只有乘上 $\\frac1{f(a)}$ 才暴露，故 $f(a)=0$ 时只剩第一项、极限为 $f'(a)g(a)$。易错：只证充分性就收笔；必要性要把 $g$ 的差商用 $F$、$f$ 的差商表出，再用“可导函数四则运算仍可导”导出矛盾。",
+      "solution_clean": "由定义拆项：$\\frac{F(a+h)-F(a)}{h}=\\frac{f(a+h)-f(a)}{h}g(a+h)+\\frac{g(a+h)-g(a)}{h}f(a)$。\n若 $f(a)=0$，则 $F'(a)=\\lim_{h\\to0}\\frac{f(a+h)-f(a)}{h}g(a+h)=f'(a)g(a)$，故 $F$ 在 $a$ 可导。\n若 $f(a)\\ne0$ 且 $F$ 在 $a$ 可导，则由上式解出\n$\\frac{g(a+h)-g(a)}{h}=\\frac1{f(a)}\\left[\\frac{F(a+h)-F(a)}{h}-\\frac{f(a+h)-f(a)}{h}g(a+h)\\right]$，右端极限存在，故 $g'(a)$ 存在，矛盾。\n所以 $F$ 在 $a$ 可导的充要条件是 $f(a)=0$。"
+    },
+    {
+      "pid": 4,
+      "commentary": "考点：$h(x)|g(x)|$ 型函数的不可导点。破题：$|x^3-x|=|x||x-1||x+1|$，零点 $0,\\pm1$ 只是候选；在 $x=-1$ 处另一因式 $x^2-4x-5=(x-5)(x+1)$ 也含 $(x+1)$，局部是 $(x+1)|x+1|$，可导且导数为 $0$，故该点其实可导。易错：判据是 $g(a)=0$ 且 $g'(a)\\ne0$ 且 $h(a)\\ne0$；答案只有 $x=0$ 与 $x=1$。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 5,
+      "commentary": "考点：三角恒等式加对数求导。破题：由 $\\sin x=2^n\\sin\\frac{x}{2^n}\\prod_{k=1}^{n}\\cos\\frac{x}{2^k}$ 取对数再对 $x$ 求导，一次就把所有项同时得到。易错：$\\ln\\sin\\frac{x}{2^n}$、$\\ln\\cos\\frac{x}{2^k}$ 求导都要带链式因子 $\\frac1{2^k}$；也可记裂项式 $\\frac1{2^k}\\tan\\frac{x}{2^k}=\\frac1{2^k}\\cot\\frac{x}{2^k}-\\frac1{2^{k-1}}\\cot\\frac{x}{2^{k-1}}$，相加即相消。",
+      "solution_clean": "由 $\\sin x=2^n\\sin\\frac{x}{2^n}\\prod_{k=1}^{n}\\cos\\frac{x}{2^k}$ 取对数：\n$\\ln\\sin x=n\\ln2+\\ln\\sin\\frac{x}{2^n}+\\sum_{k=1}^{n}\\ln\\cos\\frac{x}{2^k}$。\n两边对 $x$ 求导：$\\cot x=\\frac1{2^n}\\cot\\frac{x}{2^n}-\\sum_{k=1}^{n}\\frac1{2^k}\\tan\\frac{x}{2^k}$。\n移项即得 $\\frac12\\tan\\frac x2+\\cdots+\\frac1{2^n}\\tan\\frac{x}{2^n}=\\frac1{2^n}\\cot\\frac{x}{2^n}-\\cot x$。"
+    },
+    {
+      "pid": 6,
+      "commentary": "考点：由函数方程反推高阶导数存在。破题：$\\beta\\ne0$ 时把方程解成 $f''=\\frac1\\beta f-\\frac\\alpha\\beta f'$，右端可导即左端可导，于是 $f'''$ 存在且由同一式子表出，按此归纳。易错：$\\beta=0$ 必须单列（此时 $f'=\\frac1\\alpha f$，或 $f\\equiv0$）；归纳时要写清“右端出现的导数都已证出”，不能默认。",
+      "solution_clean": "若 $\\beta=0$：由 $f=\\alpha f'$，当 $\\alpha\\ne0$ 时 $f'=\\frac1\\alpha f$，逐次求导得 $f^{(n)}=\\frac{f}{\\alpha^n}$；当 $\\alpha=0$ 时 $f\\equiv0$，结论成立。\n若 $\\beta\\ne0$：$f''=\\frac1\\beta f-\\frac\\alpha\\beta f'$，右端可导故 $f'''$ 存在，且 $f'''=\\frac1\\beta f'-\\frac\\alpha\\beta f''$。\n设 $f^{(n)}=\\frac1\\beta f^{(n-2)}-\\frac\\alpha\\beta f^{(n-1)}$，右端各项可导，故\n$f^{(n+1)}=\\frac1\\beta f^{(n-1)}-\\frac\\alpha\\beta f^{(n)}$ 存在。\n由归纳法 $f$ 在 $[a,b]$ 内无穷次可导。"
+    },
+    {
+      "pid": 7,
+      "commentary": "考点：拉格朗日定理证凸性不等式（弦在曲线上方）。破题：对 $[a,x]$、$[x,b]$ 各用一次拉格朗日，两式相加会多出 $[f'(\\xi)-f'(\\xi_2)](x-a)(b-x)$，只要 $f'$ 严格增，交叉项就为负。易错：结论实质只用到 $f''>0$；若题面写成“正的三阶导数”，注意 $f'''>0$ 推不出凸性（$f=x^3$ 在 $(-1,1)$ 上即反例），动笔前先核实条件。",
+      "solution_clean": "设 $a<x<b$，对 $[a,x]$、$[x,b]$ 分别用拉格朗日定理：$f(x)=f(a)+f'(\\xi)(x-a)$，$f(x)=f(b)-f'(\\xi_2)(b-x)$，其中 $a<\\xi<x<\\xi_2<b$。\n第一式乘 $(b-x)$、第二式乘 $(x-a)$ 后相加：\n$f(x)(b-a)=f(a)(b-x)+f(b)(x-a)+[f'(\\xi)-f'(\\xi_2)](x-a)(b-x)$。\n由 $f''>0$ 知 $f'$ 严格增，故 $f'(\\xi)<f'(\\xi_2)$，交叉项为负。\n于是 $f(x)(b-a)<f(a)(b-x)+f(b)(x-a)$，两边除以 $b-a$ 即得所证。"
+    },
+    {
+      "pid": 8,
+      "commentary": "考点：压缩映射型递推加不动点求极限。破题：由 $|f'(\\xi)|=\\frac1{2\\sqrt{3+\\xi}}\\le\\frac1{2\\sqrt3}=\\alpha<1$ 得 $|x_{n+1}-x_n|\\le\\alpha^n|x_1-x_0|$，再补 Cauchy 估计；极限满足 $L=\\sqrt{3+L}$。易错：“相邻两项之差趋于 $0$”本身不保证收敛，必须给 Cauchy 或单调有界；先确认 $x_n\\in[0,3]$ 才能用这个 $\\alpha$。",
+      "solution_clean": "令 $f(x)=\\sqrt{3+x}$，$x_{n+1}=f(x_n)$，归纳得 $x_n\\in[0,3]$。\n由中值定理 $|x_{n+1}-x_n|=|f'(\\xi)||x_n-x_{n-1}|$，而 $|f'(\\xi)|=\\frac1{2\\sqrt{3+\\xi}}\\le\\frac1{2\\sqrt3}=\\alpha<1$。\n故 $|x_{n+1}-x_n|\\le\\alpha^n|x_1-x_0|$，从而当 $m>n$ 时 $|x_m-x_n|\\le\\frac{\\alpha^n}{1-\\alpha}|x_1-x_0|\\to0$，$\\{x_n\\}$ 收敛。\n设极限为 $L$，由 $L=\\sqrt{3+L}$ 得 $L^2-L-3=0$，取正根 $L=\\frac{1+\\sqrt{13}}{2}$。"
+    },
+    {
+      "pid": 9,
+      "commentary": "考点：Gronwall 型微分不等式。破题：设 $g=f^2$，用 $|f'|\\le A|f|$ 得 $|g'|\\le2Ag$，再让 $e^{-2Ax}g(x)$ 单调递减，由 $g(0)=0$ 得 $g\\equiv0$。易错：这一步要的是 $|f'|\\le A|f(x)|$；若条件真是 $A\\sqrt x$，取 $f=\\frac{2A}{3}x^{3/2}$ 就满足条件而不恒为零，抄题审题时先看清被控的是 $f$ 还是 $\\sqrt x$。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 10,
+      "commentary": "考点：“唯一性”型微分不等式。破题：条件右端被 $|g(x)|$ 控制，应在 $g\\ne0$ 处除以 $|g|$ 凑出 $|g'|\\le k|g|$，再用 $g^2e^{-2kx}$ 单调、配合 $g(a)=0$ 推出 $g\\equiv0$。易错：$f$ 只连续、可正可负，取界要用 $M=\\max|f|$ 而不是 $f$；若条件里根本不含 $g'$，结论并不成立（$f\\equiv0,g\\equiv\\frac12$ 即反例），先查是否漏抄 $|g'(x)|$。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 11,
+      "commentary": "考点：泰勒展开加最大值论证（“局部为零”型唯一性）。破题：由 $f(0)=f'(0)=0$ 得 $f(x)=\\frac12f''(\\xi_1)x^2$、$f'(x)=f''(\\eta)x$，取 $M=\\max_{|x|\\le1/4}(|f|+|f'|)$，代入 $|f''|\\le|f|+|f'|$ 得 $M\\le\\frac12M$。易错：区间要小到 $\\frac12x_0^2+|x_0|\\le\\frac12$ 才有收缩因子；余项中的 $\\xi_1,\\eta$ 必须仍落在该区间内，否则界失效。",
+      "solution_clean": "由 $f(0)=f'(0)=0$ 作泰勒展开：$f(x)=\\frac12f''(\\xi_1)x^2$，$f'(x)=f''(\\eta)x$，$\\xi_1,\\eta$ 在 $0$ 与 $x$ 之间。\n取 $I=[-\\frac14,\\frac14]$，$M=\\max_I(|f|+|f'|)=|f(x_0)|+|f'(x_0)|$（$x_0\\in I$）。\n则 $M\\le\\frac12|f''(\\xi_1)|x_0^2+|f''(\\eta)||x_0|\\le\\frac12\\cdot\\frac1{16}M+\\frac14M<\\frac12M$。\n故 $M=0$，即 $f=f'\\equiv0$ 于 $I$，取 $\\delta=\\frac14$ 即得。"
+    },
+    {
+      "pid": 12,
+      "commentary": "考点：拉格朗日定理加辅助函数 $\\varphi=f^2+f'^2$ 的极值。破题：由 $|f|\\le1$ 得 $|f'(\\xi_i)|\\le1$，故 $\\varphi(\\xi_1),\\varphi(\\xi_2)\\le2$ 而 $\\varphi(0)=4$，最大值必在内点 $\\xi$ 取到，$\\varphi'=2f'(f+f'')=0$。易错：不能用 $|f'|\\le1$ 去说明 $f'\\ne0$，正确路径是由 $\\varphi(\\xi)\\ge4$ 与 $|f(\\xi)|\\le1$ 得 $|f'(\\xi)|\\ge\\sqrt3$。",
+      "solution_clean": "由拉格朗日定理，$f'(\\xi_1)=\\frac{f(0)-f(-2)}2$，$f'(\\xi_2)=\\frac{f(2)-f(0)}2$，$\\xi_1\\in(-2,0)$，$\\xi_2\\in(0,2)$；由 $|f|\\le1$ 得 $|f'(\\xi_i)|\\le1$。\n令 $\\varphi(x)=f^2(x)+[f'(x)]^2$，则 $\\varphi(\\xi_1)\\le2$，$\\varphi(\\xi_2)\\le2$，而 $\\varphi(0)=4$。\n故 $\\varphi$ 在 $(\\xi_1,\\xi_2)$ 的内点 $\\xi$ 取到最大值，$\\varphi'(\\xi)=2f'(\\xi)[f(\\xi)+f''(\\xi)]=0$。\n又 $\\varphi(\\xi)\\ge4$、$|f(\\xi)|\\le1$，故 $|f'(\\xi)|\\ge\\sqrt3\\ne0$，从而 $f(\\xi)+f''(\\xi)=0$。"
+    },
+    {
+      "pid": 13,
+      "commentary": "考点：中值定理给单调性加单调有界原理。破题：先证 $\\varphi(1)x<\\varphi(x)<\\varphi'(0)x$，再由 $x_{n+1}<\\varphi'(0)x_n\\le x_n$ 得单调减、由 $x_{n+1}>\\varphi(1)x_n\\ge0$ 得有下界；极限 $a$ 存在后代回 $a=\\varphi(a)$，与 $\\varphi(a)<\\varphi'(0)a\\le a$ 矛盾。易错：只说“单调有界”不验极限方程；$\\varphi(1)\\ge0$ 保证下界、$\\varphi'(0)\\le1$ 保证真下降，缺一不可。",
+      "solution_clean": "(1) 令 $F(x)=\\varphi(x)-\\varphi(1)x$，$F(0)=F(1)=0$，由罗尔定理有 $\\varphi'(\\eta)=\\varphi(1)$，$\\eta\\in(0,1)$。\n由 $\\varphi'$ 严格减知 $F'>0$ 于 $(0,\\eta)$、$F'<0$ 于 $(\\eta,1)$，故 $F(x)>0$，即 $\\varphi(1)x<\\varphi(x)$。\n又 $[\\varphi'(0)x-\\varphi(x)]'=\\varphi'(0)-\\varphi'(x)>0$ 且 $x=0$ 处该式为 $0$，故 $\\varphi(x)<\\varphi'(0)x$。\n(2) $x_{n+1}=\\varphi(x_n)<\\varphi'(0)x_n\\le x_n$，故 $\\{x_n\\}$ 单调减；又 $x_{n+1}>\\varphi(1)x_n\\ge0$，有下界。\n设 $x_n\\to a\\ge0$；若 $a>0$，由递推得 $a=\\varphi(a)$，而 (1) 给出 $\\varphi(a)<\\varphi'(0)a\\le a$，矛盾，故 $\\lim_{n\\to\\infty}x_n=0$。"
+    },
+    {
+      "pid": 14,
+      "commentary": "考点：罗尔定理在无穷区间上的用法。破题：由 $f(a)=\\lim_{x\\to+\\infty}f(x)=A$，若 $f\\not\\equiv A$ 就取 $f(x_0)>\\mu>A$，在 $(a,x_0)$ 与 $(x_0,+\\infty)$ 上各用介值定理造出 $f(x_1)=f(x_2)=\\mu$，再对 $[x_1,x_2]$ 用罗尔。易错：不能直接对 $[a,+\\infty)$ 用罗尔；“恒等于 $A$”与“不恒等”两种情形要分开写。",
+      "solution_clean": "设 $A=f(a)=\\lim_{x\\to+\\infty}f(x)$。若 $f\\equiv A$，则 $f'\\equiv0$，任取 $\\xi$ 即可。\n若存在 $x_0$ 使 $f(x_0)>A$（$f(x_0)<A$ 同理），取 $\\mu$ 满足 $f(x_0)>\\mu>A$。\n由介值定理，存在 $x_1\\in(a,x_0)$、$x_2\\in(x_0,+\\infty)$ 使 $f(x_1)=f(x_2)=\\mu$。\n$f$ 在 $[x_1,x_2]$ 上连续、在 $(x_1,x_2)$ 内可导，由罗尔定理，$\\exists\\xi\\in(x_1,x_2)\\subset(a,+\\infty)$ 使 $f'(\\xi)=0$。"
+    },
+    {
+      "pid": 15,
+      "commentary": "考点：变限积分条件转为交换积分次序，再用配方法。破题：条件对 $x$ 积分后交换次序得 $\\int_0^1(\\sqrt t-t)f(t)dt\\ge\\frac1{15}$，再用 $\\int_0^1[f-(\\sqrt t-t)]^2\\ge0$ 展开，把 $\\int f^2$ 用一次项与常数项夹出。易错：区域 $\\{(x,t):x^2\\le t\\le x\\}$ 投影到 $t$ 轴是 $t\\in[0,1]$、$x\\in[t,\\sqrt t]$；常数项 $\\int_0^1(\\sqrt t-t)^2dt=\\frac1{30}$ 别算错。",
+      "solution_clean": "对条件式在 $[0,1]$ 上积分并交换次序：$\\int_0^1dx\\int_{x^2}^{x}f(t)dt=\\int_0^1(\\sqrt t-t)f(t)dt\\ge\\int_0^1\\frac{x^2-x^4}2dx=\\frac1{15}$。\n又 $0\\le\\int_0^1[f(t)-(\\sqrt t-t)]^2dt=\\int_0^1f^2-2\\int_0^1(\\sqrt t-t)f+\\int_0^1(\\sqrt t-t)^2$。\n其中 $\\int_0^1(\\sqrt t-t)^2dt=\\frac12-\\frac45+\\frac13=\\frac1{30}$。\n故 $\\int_0^1f^2(x)dx\\ge\\frac2{15}-\\frac1{30}=\\frac1{10}$。"
+    },
+    {
+      "pid": 16,
+      "commentary": "考点：变限积分加沿 $x\\to x^2$ 的迭代，最后用 Cauchy 不等式。破题：把条件写成 $F(x^2)\\ge F(x)$（$F(x)=\\int_x^1f+\\frac{x^2}2$），迭代到 $F(1)=\\frac12$ 得 $\\int_x^1f\\ge\\frac{1-x^2}2$，再对 $x$ 积分得 $\\int_0^1xf\\ge\\frac13$，最后由 $(\\int_0^1xf)^2\\le\\frac13\\int_0^1f^2$ 收口。易错：停在 $\\int xf\\ge\\frac13$ 不算完；等号条件要求 $f$ 与 $x$ 成比例，代回得 $f=x$。",
+      "solution_clean": "令 $F(x)=\\int_x^1f(t)dt+\\frac{x^2}2$，条件即 $F(x^2)-F(x)=\\int_{x^2}^{x}f+\\frac{x^4-x^2}2\\ge0$，即 $F(x^2)\\ge F(x)$。\n迭代得 $F(x)\\ge F(\\sqrt x)\\ge\\cdots\\ge F(x^{2^{-n}})\\to F(1)=\\frac12$，故 $\\int_x^1f\\ge\\frac{1-x^2}2$。\n积分得 $\\int_0^1xf(x)dx=\\int_0^1dx\\int_x^1f(t)dt\\ge\\int_0^1\\frac{1-x^2}2dx=\\frac13$。\n由 Cauchy 不等式 $(\\int_0^1xf)^2\\le\\int_0^1x^2dx\\cdot\\int_0^1f^2=\\frac13\\int_0^1f^2$，故 $\\int_0^1f^2\\ge\\frac13$。\n等号成立需 $f=cx$，代入条件得 $c=1$，即 $f(x)=x$。"
+    }
+  ]
+}

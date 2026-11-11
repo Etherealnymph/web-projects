@@ -1,0 +1,279 @@
+{
+  "batch": 2,
+  "date": "2026-04-12",
+  "pages": [
+    {
+      "id": 3,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "课下作业",
+          "statement": "设 $f(x)$ 在 $(-\\infty,+\\infty)$ 内有一阶连续的导数，且 $f'\\left(-\\frac{1}{2}\\right)=0$。证明：存在 $\\xi\\in\\left(0,\\frac{1}{2}\\right)$ 使得 $f'(\\xi)=2\\xi[f(\\xi)-f(0)]$。",
+          "answer": "",
+          "note": "虚线框内的“课下作业”题；照片为投影屏横拍，文字旋转 90°"
+        }
+      ],
+      "has_solution": true,
+      "solution": "承接上一页的证明：由 $F'(x)>0$ 与 $F'(c)=e^{\\frac{c-b}{a}}\\left[f'(c)-\\frac{f(c)-f(a)}{b-a}\\right]=-\\frac{1}{b-a}e^{\\frac{c-b}{a}}[f(c)-f(a)]=-\\frac{1}{b-a}F(c)<0$ 引出矛盾；又 $F'(x)\\in C[a,c]$，由零点定理 $\\exists\\xi\\in(a,c)\\subset(a,b)$ 使 $F'(\\xi)=0$，即 $f'(\\xi)=\\frac{f(\\xi)-f(a)}{b-a}$。注：要证 $\\exists\\xi\\in(a,b)$ 使 $f'(\\xi)=0$，常用以下两种方法：(1) 对 $f'(x)$ 使用介值定理；(2) 对 $f(x)$ 使用罗尔定理。",
+      "summary": "框内一道课下作业题，上方为介值定理与罗尔定理证法总结",
+      "clarity": "partial"
+    },
+    {
+      "id": 4,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "由 $f(x_0+\\alpha_n)=f(x_0)+f'(x_0)\\alpha_n+o(\\alpha_n)$ 型展开得 $\\frac{f(x_0+\\alpha_n)-f(x_0-\\beta_n)}{\\alpha_n+\\beta_n}=f'(x_0)+\\frac{o(\\alpha_n)-o(\\beta_n)}{\\alpha_n+\\beta_n}$；又 $\\left|\\frac{o(\\alpha_n)-o(\\beta_n)}{\\alpha_n+\\beta_n}\\right|\\le\\left|\\frac{o(\\alpha_n)}{\\alpha_n+\\beta_n}\\right|+\\left|\\frac{o(\\beta_n)}{\\alpha_n+\\beta_n}\\right|\\le\\frac{|o(\\alpha_n)|}{\\alpha_n}+\\frac{|o(\\beta_n)|}{\\beta_n}\\to0\\ (n\\to\\infty)$，故 $\\lim_{n\\to\\infty}\\frac{f(x_0+\\alpha_n)-f(x_0-\\beta_n)}{\\alpha_n+\\beta_n}=f'(x_0)$。",
+      "summary": "用高阶无穷小估计与夹逼法证明差商极限等于导数",
+      "clarity": "partial"
+    },
+    {
+      "id": 5,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "6 (1)",
+          "statement": "已知 $f(x)$ 在 $x=a$ 处可导，$g(x)$ 在 $x=a$ 处连续但不可导，设 $F(x)=f(x)g(x)$，求证 $F(x)$ 在 $x=a$ 处可导的充分必要条件为 $f(a)=0$。",
+          "answer": "",
+          "note": "本页同时出现第 6 题的 (1)(2) 两个小问"
+        },
+        {
+          "label": "6 (2)",
+          "statement": "设 $R(x)=(x^{2}-4x-5)|x^{3}-x|$，求出 $R(x)$ 的全部不可导点。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "从导数定义出发：$\\frac{F(a+h)-F(a)}{h}=\\frac{f(a+h)-f(a)}{h}g(a+h)+\\frac{g(a+h)-g(a)}{h}f(a)$。必要性：设 $F$ 在 $x=a$ 可导，若 $f(a)\\ne0$，则 $\\frac{g(a+h)-g(a)}{h}=\\frac{1}{f(a)}\\left[\\frac{F(a+h)-F(a)}{h}-\\frac{f(a+h)-f(a)}{h}g(a+h)\\right]$，将推出 $g$ 在 $x=a$ 可导，与题设矛盾，故 $f(a)=0$。",
+      "summary": "第 6 题两小问及可导性必要条件的证明开头",
+      "clarity": "partial"
+    },
+    {
+      "id": 6,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "续上页的必要性证明：$\\frac{g(a+h)-g(a)}{h}=\\frac{1}{f(a)}\\left[\\frac{F(a+h)-F(a)}{h}-\\frac{f(a+h)-f(a)}{h}g(a+h)\\right]$；由于 $g(x)$ 在 $x=a$ 连续、$f(x)$ 在 $x=a$ 可导，两边同时取极限得 $\\lim_{h\\to0}\\frac{g(a+h)-g(a)}{h}=\\frac{1}{f(a)}[F'(a)-f'(a)g(a)]$，即 $g(x)$ 在 $x=a$ 处可导，矛盾，故 $f(a)=0$。",
+      "summary": "第 6(1) 题必要性证明的续写",
+      "clarity": "partial"
+    },
+    {
+      "id": 7,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "充分性：设 $f(a)=0$，则 $F'(a)=\\lim_{h\\to0}\\frac{F(a+h)-F(a)}{h}=\\lim_{h\\to0}\\left[\\frac{f(a+h)-f(a)}{h}g(a+h)+\\frac{g(a+h)-g(a)}{h}f(a)\\right]=\\lim_{h\\to0}\\frac{f(a+h)-f(a)}{h}g(a+h)=f'(a)g(a)$，故 $F(x)$ 在 $x=a$ 处可导。本页文字指出：主要考察了导数定义、导数四则运算法则与极限四则运算法则的综合使用。",
+      "summary": "第 6(1) 题充分性部分的证明与方法小结",
+      "clarity": "partial"
+    },
+    {
+      "id": 8,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "证明：$\\frac{1}{2}\\tan\\frac{x}{2}+\\frac{1}{4}\\tan\\frac{x}{4}+\\cdots+\\frac{1}{2^{n}}\\tan\\frac{x}{2^{n}}=\\frac{1}{2^{n}}\\cot\\frac{x}{2^{n}}-\\cot x$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "由 $2^{n}\\sin\\frac{x}{2^{n}}\\cos\\frac{x}{2^{n}}\\cos\\frac{x}{2^{n-1}}\\cdots\\cos\\frac{x}{2}=\\sin x$，两边取对数得 $\\ln2^{n}+\\ln\\cos\\frac{x}{2^{n}}+\\ln\\cos\\frac{x}{2^{n-1}}+\\cdots+\\ln\\cos\\frac{x}{2}=\\ln\\sin x-\\ln\\sin\\frac{x}{2^{n}}$；再两边对 $x$ 求导，整理即得 $-\\left(\\frac{1}{2}\\tan\\frac{x}{2}+\\frac{1}{4}\\tan\\frac{x}{4}+\\cdots+\\frac{1}{2^{n}}\\tan\\frac{x}{2^{n}}\\right)=\\cot x-\\frac{1}{2^{n}}\\cot\\frac{x}{2^{n}}$。",
+      "summary": "正切级数求和恒等式的证明（取对数后求导）",
+      "clarity": "partial"
+    },
+    {
+      "id": 9,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "3",
+          "statement": "设 $f(x)$ 在 $[a,b]$ 内 $n$ 次可导，且存在常数 $\\alpha,\\beta$ 使得对于 $\\forall x\\in(a,b)$，$f(x)=\\alpha f'(x)+\\beta f''(x)$，则 $f(x)$ 在 $[a,b]$ 内无穷次可导。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "分两种情形。(1) $\\beta=0$ 时 $f'(x)=\\alpha f(x)$，于是 $f''(x)=\\alpha f'(x)=\\alpha^{2}f(x)$，$f'''(x)=\\alpha^{3}f(x)$，$\\cdots$，$f^{(n)}(x)=\\alpha^{n}f(x)$，故无穷次可导。(2) $\\beta\\ne0$ 时 $f''(x)=\\frac{1}{\\beta}f(x)-\\frac{\\alpha}{\\beta}f'(x)$，右端可导故左端可导，即 $f'''(x)=\\frac{1}{\\beta}f'(x)-\\frac{\\alpha}{\\beta}f''(x)$；若 $f^{(n)}(x)=\\frac{1}{\\beta}f^{(n-2)}(x)-\\frac{\\alpha}{\\beta}f^{(n-1)}(x)$，则 $f^{(n+1)}(x)=\\frac{1}{\\beta}f^{(n-1)}(x)-\\frac{\\alpha}{\\beta}f^{(n)}(x)$，依此归纳即得结论。",
+      "summary": "由二阶导数递推关系归纳证明函数无穷次可导",
+      "clarity": "partial"
+    },
+    {
+      "id": 10,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "1",
+          "statement": "设 $f(x)$ 在 $(-\\infty,+\\infty)$ 内有正的三阶导数，$A(a,f(a))$ 与 $B(b,f(b))$ 是曲线 $y=f(x)$ 上任取两点，证明：$\\forall x\\in(a,b)$，有 $f(x)<\\frac{b-x}{b-a}f(a)+\\frac{x-a}{b-a}f(b)$。",
+          "answer": "",
+          "note": "页眉为“三、微分中值定理”；右上角另有小字“$f''(x)>0$，函数下凸性是不是更简单?”"
+        }
+      ],
+      "has_solution": true,
+      "solution": "由拉格朗日定理，$f(x)=f(a)+f'(\\xi)(x-a)$，$a<\\xi<x$，故 $f(x)(b-x)=f(a)(b-x)+f'(\\xi)(x-a)(b-x)$；同理 $f(x)=f(b)-f'(\\xi_{2})(b-x)$，$x<\\xi_{2}<b$，故 $f(x)(x-a)=f(b)(x-a)-f'(\\xi_{2})(x-a)(b-x)$。两式相加得 $f(x)(b-a)=f(a)(b-x)+f(b)(x-a)+[f'(\\xi)-f'(\\xi_{2})](x-a)(b-x)$，由 $f''>0$ 知 $f'(\\xi)<f'(\\xi_{2})$，故 $f(x)(b-a)<f(a)(b-x)+f(b)(x-a)$，即所证不等式。",
+      "summary": "用两次拉格朗日中值定理证明弦线在曲线之上",
+      "clarity": "good"
+    },
+    {
+      "id": 11,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "4",
+          "statement": "证明：数列 $\\sqrt{3},\\ \\sqrt{3+\\sqrt{3}},\\ \\sqrt{3+\\sqrt{3+\\sqrt{3}}},\\cdots$ 收敛，并计算其极限值。",
+          "answer": "",
+          "note": "题面末尾还给出一般项（多层根号嵌套）的写法，根号层数辨认不清"
+        }
+      ],
+      "has_solution": true,
+      "solution": "令 $x_{0}=\\sqrt{3}$，$x_{n+1}=\\sqrt{3+x_{n}}\\ (n\\ge0)$，考察 $f(x)=\\sqrt{3+x}$，则 $x_{n+1}=f(x_{n})$。由微分中值定理 $|f(x_{n})-f(x_{n-1})|=|f'(\\xi)||x_{n}-x_{n-1}|$，当 $0\\le x\\le3$ 时 $|f'(\\xi)|=\\frac{1}{2\\sqrt{3+\\xi}}\\le\\frac{1}{2\\sqrt{3}}=\\alpha<1$，故 $|x_{n+1}-x_{n}|\\le\\alpha|x_{n}-x_{n-1}|$，从而 $|x_{n+1}-x_{n}|\\le\\alpha^{n}|x_{1}-x_{0}|\\to0$，数列为压缩型，故收敛。",
+      "summary": "用压缩映射（中值定理估计）证明嵌套根号数列收敛",
+      "clarity": "partial"
+    },
+    {
+      "id": 12,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "5",
+          "statement": "设函数 $f(x)\\in D[0,+\\infty)$，$f(0)=0$，且常数 $A>0$ 使得 $|f'(x)|\\le A\\sqrt{x}$ 在 $[0,+\\infty)$ 上成立。证明：在 $[0,+\\infty)$ 上，$f(x)=0$。",
+          "answer": "",
+          "note": "题后标注“（1 届预赛题，3 题）”，届数辨不清，记为 [?] 届；条件中 $A\\sqrt{x}$ 与 $A|x|$ 亦难分辨"
+        }
+      ],
+      "has_solution": true,
+      "solution": "设 $M=\\max_{x\\in\\left[0,\\frac{1}{2A}\\right]}|f(x)|=|f(x_{0})|$，用拉格朗日中值定理与条件 $|f'(x)|\\le A\\sqrt{x}$ 得 $M=|f(0)+f'(\\xi)x_{0}|\\le\\frac{1}{2}M$，故 $M=0$，即 $f$ 在 $\\left[0,\\frac{1}{2A}\\right]$ 上为 0；再设 $f$ 在 $\\left[0,\\frac{i}{2A}\\right]$ 上为 0，对区间 $\\left[\\frac{i}{2A},\\frac{i+1}{2A}\\right]$ 用同样的最大值估计得 $M'=0$，于是 $\\forall x\\in[0,+\\infty)$，$f(x)=0$。",
+      "summary": "用区间最大值估计逐步推出函数在整条半轴上恒为零",
+      "clarity": "partial"
+    },
+    {
+      "id": 13,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "5",
+          "statement": "设函数 $f(x)\\in D[0,+\\infty)$，$f(0)=0$，且常数 $A>0$ 使得 $|f'(x)|\\le A\\sqrt{x}$ 在 $[0,+\\infty)$ 上成立。证明：在 $[0,+\\infty)$ 上，$f(x)=0$。",
+          "answer": "",
+          "note": "与前一页同一题（第 5 题）的又一种证法；题后标注“（1 届预赛题，3 题）”，届数辨不清"
+        }
+      ],
+      "has_solution": true,
+      "solution": "设 $g(x)=f^{2}(x)$，$x\\in[0,+\\infty)$，则 $g'(x)=2f(x)f'(x)$，由条件得 $|g'(x)|\\le2A|g(x)|$，即 $-2Ag(x)\\le g'(x)\\le2Ag(x)$。由 $g'(x)\\le2Ag(x)$ 得 $\\left(e^{-2Ax}g(x)\\right)'\\le0$，故 $e^{-2Ax}g(x)$ 单调递减，于是当 $x\\ge0$ 时 $g(x)\\le g(0)=0$；又 $g(x)\\ge0$，故 $g(x)=f^{2}(x)=0$，即 $\\forall x\\in[0,+\\infty)$，$f(x)=0$。末尾另附提示：$f(x)=f(x_{0})+f'(\\xi)(x-x_{0})=f'(\\xi)(x-x_{0})$。",
+      "summary": "令 $g=f^{2}$ 用微分不等式与单调性证明函数恒为零",
+      "clarity": "partial"
+    },
+    {
+      "id": 14,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "6",
+          "statement": "设函数 $f(x),g(x)\\in C[a,b]$，$g(x)\\in D(a,b)$，$g(a)=0$，若存在实数 $\\lambda>0$，使得 $\\forall x\\in(a,b)$ 时，$|g(x)|f(x)+\\lambda g^{2}(x)\\le|g(x)|$，试证：在 $[a,b]$ 上，$g(x)=0$。",
+          "answer": "",
+          "note": "条件 $g(a)=0$ 的下标较小，也可能为 $g(0)=0$"
+        }
+      ],
+      "has_solution": true,
+      "solution": "由条件得 $\\lambda\\left|g^{2}(x)-g(x)f(x)\\right|\\le f(x)g(x)+\\lambda g^{2}(x)\\le|g(x)|$，从而 $|g'(x)|\\le\\frac{1}{|\\lambda|}\\left(f(x)+1\\right)|g(x)|$。因 $f(x)\\in C[a,b]$，$\\exists M>0$ 使 $|f(x)|\\le M$，故当 $x\\in(a,b)$ 时 $|g'(x)|\\le\\frac{M+1}{|\\lambda|}|g(x)|$，由第 5 题结论知在 $[a,b]$ 上 $|g(x)|=0$。注：证明 $f(x)\\equiv0$ 一类问题称为“唯一性问题”，中值定理在其中的论证中具有很重要的作用。",
+      "summary": "第 6 题：借第 5 题结论证明 $g\\equiv0$，并附唯一性问题注记",
+      "clarity": "partial"
+    },
+    {
+      "id": 15,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "7",
+          "statement": "设函数 $f(x)$ 在 $(-1,1)$ 内有二阶导数，且 $f(0)=f'(0)=0$，$|f''(x)|\\le|f(x)|+|f'(x)|$，试证：$\\exists\\delta>0$，使得在 $(-\\delta,\\delta)$ 内 $f(x)=0$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "将 $f(x)$、$f'(x)$ 在 $x=0$ 处泰勒展开：$f(x)=\\frac{1}{2}f''(\\xi_{1})x^{2}$，$f'(x)=f''(\\eta)x$，$\\xi_{1},\\eta$ 在 0 与 $x$ 之间。限制 $x\\in\\left[-\\frac{1}{4},\\frac{1}{4}\\right]$，取 $x_{0}$ 使 $M=|f(x_{0})|+|f'(x_{0})|=\\max_{|x|\\le\\frac{1}{4}}(|f(x)|+|f'(x)|)$，则 $M\\le\\frac{1}{2}|f''(\\xi_{1})|x_{0}^{2}+|f''(\\eta)||x_{0}|\\le\\frac{1}{4}(|f(\\xi_{1})|+|f'(\\xi_{1})|)+\\frac{1}{4}(|f(\\eta)|+|f'(\\eta)|)\\le\\frac{1}{2}M$，故 $0\\le M\\le\\frac{1}{2}M$，$M=0$，即在 $\\left[-\\frac{1}{4},\\frac{1}{4}\\right]$ 上 $f(x)=0$。",
+      "summary": "第 7 题：泰勒展开加最大值估计证明局部恒为零",
+      "clarity": "good"
+    },
+    {
+      "id": 16,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "课下作业",
+          "statement": "设 $f(x)$ 在 $(-\\infty,+\\infty)$ 内有一阶连续的导数，且 $f'\\left(-\\frac{1}{2}\\right)=0$。证明：存在 $\\xi\\in\\left(0,\\frac{1}{2}\\right)$ 使得 $f'(\\xi)=2\\xi[f(\\xi)-f(0)]$。",
+          "answer": "",
+          "note": "与 id=3 是同一张幻灯片的重拍；虚线框内为“课下作业”题"
+        }
+      ],
+      "has_solution": true,
+      "solution": "承接上一题的证明：由 $F'(x)>0$ 与 $F'(c)=e^{\\frac{c-b}{a}}\\left[f'(c)-\\frac{f(c)-f(a)}{b-a}\\right]=-\\frac{1}{b-a}e^{\\frac{c-b}{a}}[f(c)-f(a)]=-\\frac{1}{b-a}F(c)<0$ 引出矛盾；又 $F'(x)\\in C[a,c]$，由零点定理 $\\exists\\xi\\in(a,c)\\subset(a,b)$ 使 $F'(\\xi)=0$，即 $f'(\\xi)=\\frac{f(\\xi)-f(a)}{b-a}$。注：证 $\\exists\\xi\\in(a,b)$ 使 $f'(\\xi)=0$ 常用：(1) 对 $f'(x)$ 用介值定理；(2) 对 $f(x)$ 用罗尔定理。",
+      "summary": "与 id=3 同一页的重拍：课下作业题与定理证法小结",
+      "clarity": "partial"
+    },
+    {
+      "id": 17,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "课下作业",
+          "statement": "设 $f(x)$ 在 $(-\\infty,+\\infty)$ 内有一阶连续的导数，且 $f'\\left(-\\frac{1}{2}\\right)=0$。证明：存在 $\\xi\\in\\left(0,\\frac{1}{2}\\right)$ 使得 $f'(\\xi)=2\\xi[f(\\xi)-f(0)]$。",
+          "answer": "",
+          "note": "与 id=3、id=16 为同一张幻灯片的重拍；虚线框内为“课下作业”题"
+        }
+      ],
+      "has_solution": true,
+      "solution": "承接上一题的证明：由 $F'(x)>0$ 与 $F'(c)=e^{\\frac{c-b}{a}}\\left[f'(c)-\\frac{f(c)-f(a)}{b-a}\\right]=-\\frac{1}{b-a}e^{\\frac{c-b}{a}}[f(c)-f(a)]=-\\frac{1}{b-a}F(c)<0$ 引出矛盾；又 $F'(x)\\in C[a,c]$，由零点定理 $\\exists\\xi\\in(a,c)\\subset(a,b)$ 使 $F'(\\xi)=0$，即 $f'(\\xi)=\\frac{f(\\xi)-f(a)}{b-a}$。注：证 $\\exists\\xi\\in(a,b)$ 使 $f'(\\xi)=0$ 常用：(1) 对 $f'(x)$ 用介值定理；(2) 对 $f(x)$ 用罗尔定理。",
+      "summary": "同一页幻灯片的第三次重拍：课下作业题与证法小结",
+      "clarity": "partial"
+    },
+    {
+      "id": 18,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "9",
+          "statement": "设 $f(x)$ 在 $[-2,2]$ 上二阶可导，且 $|f(x)|\\le1$，又 $f^{2}(0)+[f'(0)]^{2}=4$。证明：存在 $\\xi\\in(-2,2)$，使得 $f(\\xi)+f''(\\xi)=0$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "由拉格朗日定理 $f(0)-f(-2)=2f'(\\xi_{1})$，$\\xi_{1}\\in(-2,0)$；$f(2)-f(0)=2f'(\\xi_{2})$，$\\xi_{2}\\in(0,2)$。由 $|f(x)|\\le1$ 得 $|f'(\\xi_{1})|=\\frac{|f(0)-f(-2)|}{2}\\le1$，$|f'(\\xi_{2})|\\le1$。令 $\\varphi(x)=f^{2}(x)+[f'(x)]^{2}$，则 $\\varphi(\\xi_{1})\\le2$，$\\varphi(\\xi_{2})\\le2$，而 $\\varphi(0)=4$，故 $\\varphi$ 在 $(\\xi_{1},\\xi_{2})$ 内取得最大值，设内部极值点为 $\\xi$，则 $\\varphi'(\\xi)=2f(\\xi)f'(\\xi)+2f'(\\xi)f''(\\xi)=0$；又 $|f'(\\xi)|\\le1$ 故 $f'(\\xi)\\ne0$，得 $f(\\xi)+f''(\\xi)=0$。",
+      "summary": "第 9 题：构造 $f^{2}+f'^{2}$ 在内部取最大值导出结论",
+      "clarity": "good"
+    },
+    {
+      "id": 19,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "10",
+          "statement": "设函数 $\\varphi(x)$ 可导，且满足 $\\varphi(0)=0$，又设 $\\varphi'(x)$ 严格单调减少，证明：(1) $\\forall x\\in(0,1)$，有 $\\varphi(1)x<\\varphi(x)<\\varphi'(0)x$；(2) 若 $\\varphi(1)\\ge0$，$\\varphi'(0)\\le1$，$\\forall x_{0}\\in(0,1)$，令 $x_{n}=\\varphi(x_{n-1})\\ (n=1,2,\\cdots)$，证明 $\\lim_{n\\to\\infty}x_{n}$ 存在，并求该极限。",
+          "answer": "",
+          "note": "第 (2) 问中初始项下标记为 $x_{0}$，字迹较小"
+        }
+      ],
+      "has_solution": true,
+      "solution": "(2) 由 $x_{n+1}=\\varphi(x_{n})<\\varphi'(0)x_{n}\\le x_{n}$ 知 $\\{x_{n}\\}$ 单调减少；又 $x_{n+1}=\\varphi(x_{n})>\\varphi(1)x_{n}>\\cdots>\\varphi^{n+1}(1)x_{0}\\ge0$，故有下界，$\\lim_{n\\to\\infty}x_{n}=a$ 存在且 $a\\ge0$。若 $a>0$（显然 $a<x_{0}<1$），由递推式得 $a=\\varphi(a)$，$a\\in(0,1)$，而由 (1) 有 $\\varphi(a)<\\varphi'(0)a\\le a$，矛盾，故 $\\lim_{n\\to\\infty}x_{n}=0$。",
+      "summary": "第 10 题：证明迭代数列单调有界并求出极限为 0",
+      "clarity": "good"
+    },
+    {
+      "id": 20,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "11",
+          "statement": "设函数 $f(x)$ 在 $[a,+\\infty)$ 上连续，$(a,+\\infty)$ 上可导，且 $f(a)=\\lim_{x\\to+\\infty}f(x)$，证明：$\\exists\\xi\\in(a,+\\infty)$ 使得 $f'(\\xi)=0$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "设 $f(a)=\\lim_{x\\to+\\infty}f(x)=A$（$A$ 为有限数）。(1) 若 $f(x)=A$，则 $f'(x)=0$，命题得证。(2) 若 $f(x)\\ne A$，则 $\\exists x_{0}\\in(a,+\\infty)$ 使 $f(x_{0})>A$（或 $<A$）；因 $f$ 在 $(a,+\\infty)$ 连续且两端极限为 $A$，对任意取定的 $\\mu$（$f(x_{0})>\\mu>A$）有 $x_{1}\\in(a,x_{0})$、$x_{2}\\in(x_{0},+\\infty)$ 使 $f(x_{1})=f(x_{2})=\\mu$，由罗尔定理 $\\exists\\xi\\in(x_{1},x_{2})\\subset(a,+\\infty)$ 使 $f'(\\xi)=0$。",
+      "summary": "第 11 题：由罗尔定理证明半轴上有驻点",
+      "clarity": "good"
+    }
+  ]
+}

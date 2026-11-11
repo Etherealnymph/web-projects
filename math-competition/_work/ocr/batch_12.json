@@ -1,0 +1,225 @@
+{
+  "batch": 12,
+  "date": "2026-10-06",
+  "pages": [
+    {
+      "id": 140,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "未编号",
+          "statement": "(1) 若函数 $f(x)$ 连续可导（一阶导函数连续），求 $\\lim_{t\\to 0^+}\\frac{I_t}{t^4}$；(2) 若 $f(x)$ 仅在 $x=0$ 可导，在其余点连续，求 (1) 中的极限。",
+          "answer": "$\\frac{\\pi f'(0)}{2}$",
+          "note": "投影幻灯片（第14张）；$I_t$ 的定义在前一页，本页未给出；本题未见题号。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "先交换积分次序得 $I_t=2\\pi\\int_0^1\\int_0^t f'(r^2z)r^3\\,\\mathrm{d}r\\,\\mathrm{d}z$；对 $t$ 求导并用洛必达法则，$\\lim_{t\\to 0^+}\\frac{I_t}{t^4}=\\lim_{t\\to 0^+}\\frac{2\\pi\\int_0^1\\int_0^t f'(r^2z)r^3\\mathrm{d}r\\mathrm{d}z}{t^4}=\\lim_{t\\to 0^+}\\frac{2\\pi\\int_0^1 f'(t^2z)t^3\\mathrm{d}z}{4t^3}$；约去 $t^3$ 后得 $=\\lim_{t\\to 0^+}\\frac{\\pi\\int_0^1 f'(t^2z)\\mathrm{d}z}{2}=\\frac{\\pi f'(0)}{2}$。",
+      "summary": "第(1)(2)问：求 $I_t/t^4$ 的极限，答 $\\frac{\\pi f'(0)}{2}$",
+      "clarity": "good"
+    },
+    {
+      "id": 141,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "承接上页第(2)问：把 $\\Sigma_t$ 分为下底面、上底面和侧面，分别记为 $\\Sigma_t'$、$\\Sigma_t''$、$\\Sigma_t'''$。因 $\\Sigma_t'$、$\\Sigma_t''$ 在 $yoz$ 面上的投影面积为 $0$，故 $\\iint_{\\Sigma_t'}P\\,\\mathrm{d}y\\mathrm{d}z=\\iint_{\\Sigma_t''}P\\,\\mathrm{d}y\\mathrm{d}z=0$；又 $P$ 是 $x$ 的偶函数，$\\Sigma_t'$ 关于 $yoz$ 平面对称，所以 $\\iint_{\\Sigma_t'}P\\,\\mathrm{d}y\\mathrm{d}z=0$，同理 $\\iint_{\\Sigma_t'}Q\\,\\mathrm{d}z\\mathrm{d}x=0$。由 $\\iint_{\\Sigma_t'}R\\,\\mathrm{d}x\\mathrm{d}y=0$ 得 $I_t=\\left(\\iint_{\\Sigma_t'}+\\iint_{\\Sigma_t''}\\right)f(x^2+y^2)z\\,\\mathrm{d}x\\mathrm{d}y=-\\iint_{D_{xy}}f(0)\\,\\mathrm{d}x\\mathrm{d}y+\\iint_{D_{xy}}f(x^2+y^2)\\,\\mathrm{d}x\\mathrm{d}y=-\\pi f(0)t^2+2\\pi\\int_0^t f(r^2)r\\,\\mathrm{d}r$。于是 $\\lim_{t\\to 0^+}\\frac{I_t}{t^4}=\\lim_{t\\to 0^+}\\frac{-2\\pi f(0)t+2\\pi f(t^2)t}{4t^3}=\\frac{\\pi}{2}\\lim_{t\\to 0^+}\\frac{f(t^2)-f(0)}{t^2}=\\frac{\\pi}{2}f'(0)$。",
+      "summary": "第(2)问解答：分片讨论 $\\Sigma_t$，得极限 $\\frac{\\pi}{2}f'(0)$",
+      "clarity": "good"
+    },
+    {
+      "id": 142,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "11",
+          "statement": "计算 $I=\\mathop{\\iint}\\limits_{S}\\frac{x\\,\\mathrm{d}y\\mathrm{d}z+y\\,\\mathrm{d}z\\mathrm{d}x+z\\,\\mathrm{d}x\\mathrm{d}y}{(x^2+y^2+z^2)^2}$，其中 $S$ 是 $\\frac{z}{7}=\\frac{(x-2)^2}{25}+\\frac{(y-1)^2}{16}$，$z\\ge 0$。",
+          "answer": "$2\\pi$",
+          "note": "投影幻灯片（第16张）；$z$ 上的指数/上标看不清，疑为 $\\frac{z^2}{7}$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "取 $\\varepsilon$ 为充分小的正数，作上半球面 $x^2+y^2+z^2=\\varepsilon^2\\ (z\\ge0)$，将其下侧记为 $S_\\varepsilon^l$；把 $S$ 在 $xoy$ 平面上的投影区域去掉 $\\{(x,y)\\mid x^2+y^2\\le\\varepsilon^2\\}$（其上侧记为 $S_\\varepsilon^u$）后剩下的部分记为 $S_3$，令 $S_1=S_\\varepsilon^l+S_3$。于是 $I=\\left(\\iint_{S+S_1}-\\iint_{S_\\varepsilon^l}-\\iint_{S_3}\\right)=\\iiint_\\Omega\\left(\\frac{\\partial P}{\\partial x}+\\frac{\\partial Q}{\\partial y}+\\frac{\\partial R}{\\partial z}\\right)\\mathrm{d}V-\\iint_{S_\\varepsilon^l}-\\iint_{S_3}=-\\iint_{S_\\varepsilon^l}-\\iint_{S_3}$。又 $\\iint_{S_\\varepsilon^l}=\\frac{1}{\\varepsilon^3}\\iint_{S_\\varepsilon^l}x\\,\\mathrm{d}y\\mathrm{d}z+y\\,\\mathrm{d}z\\mathrm{d}x+z\\,\\mathrm{d}x\\mathrm{d}y=\\frac{1}{\\varepsilon^3}\\left(\\iint_{S_\\varepsilon^l+S_\\varepsilon^u}x\\,\\mathrm{d}y\\mathrm{d}z+y\\,\\mathrm{d}z\\mathrm{d}x+z\\,\\mathrm{d}x\\mathrm{d}y-\\iint_{S_\\varepsilon^u}x\\,\\mathrm{d}y\\mathrm{d}z+y\\,\\mathrm{d}z\\mathrm{d}x+z\\,\\mathrm{d}x\\mathrm{d}y\\right)$。",
+      "summary": "第11题：补面用高斯公式算第二型曲面积分",
+      "clarity": "good"
+    },
+    {
+      "id": 143,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "12",
+          "statement": "设函数 $P(x,y),Q(x,y)$ 具有一阶连续偏导数，且对任意实数 $x_0,y_0$ 和任意正实数 $R$ 均有 $\\oint_L P(x,y)\\,\\mathrm{d}x+Q(x,y)\\,\\mathrm{d}y=0$，其中 $L$ 是半圆 $y=y_0+\\sqrt{R^2-(x-x_0)^2}$，证明 $P(x,y)=0$，$\\frac{\\partial Q(x,y)}{\\partial x}=0$。",
+          "answer": "",
+          "note": "本页上半部分为第11题解答的结尾（$\\iint_{S_\\varepsilon^l}=\\frac{1}{\\varepsilon^3}\\left(-3\\iiint_{\\Omega_\\varepsilon}\\mathrm{d}V-0\\right)=-\\frac{3}{\\varepsilon^3}\\cdot\\frac{2}{3}\\pi\\varepsilon^3=-2\\pi$，又 $\\iint_{S_3}=0$，故 $I=0-(-2\\pi)-0=2\\pi$）；右侧有半圆示意图。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "承接上页第11题：$\\iint_{S_\\varepsilon^l}=\\frac{1}{\\varepsilon^3}\\left(\\iint_{S_\\varepsilon^l+S_\\varepsilon^u}-\\iint_{S_\\varepsilon^u}\\right)=\\frac{1}{\\varepsilon^3}\\left(-3\\iiint_{\\Omega_\\varepsilon}\\mathrm{d}V-0\\right)=-\\frac{3}{\\varepsilon^3}\\cdot\\frac{2}{3}\\pi\\varepsilon^3=-2\\pi$；又 $\\iint_{S_3}=0$，故 $I=0-(-2\\pi)-0=2\\pi$。",
+      "summary": "第11题解答收尾（得 $2\\pi$）与第12题题干",
+      "clarity": "good"
+    },
+    {
+      "id": 144,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "13",
+          "statement": "证明：$\\lim_{r\\to+\\infty}\\oint_{C_r}\\frac{y\\,\\mathrm{d}x-x\\,\\mathrm{d}y}{(x^2+xy+y^2)^2}=0$，其中 $C_r$ 是圆周 $x^2+y^2=r^2$，方向为逆时针方向。",
+          "answer": "",
+          "note": "投影幻灯片（第18张）。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "用积分估计：$\\left|\\oint_{C_r}P\\,\\mathrm{d}x+Q\\,\\mathrm{d}y\\right|=\\left|\\oint_{C_r}(P\\cos\\alpha+Q\\sin\\alpha)\\,\\mathrm{d}s\\right|\\le\\oint_{C_r}\\sqrt{P^2+Q^2}\\,\\mathrm{d}s\\le Ml$，其中 $l=2\\pi r$ 是弧长、$M=\\max_{(x,y)\\in C_r}\\sqrt{P^2+Q^2}$。由 $x^2+xy+y^2\\ge\\frac12(x^2+y^2)$ 得 $\\sqrt{P^2+Q^2}\\le\\left[\\frac{8}{(x^2+y^2)^2}\\right]^{1/2}$，故 $M\\le\\frac{2\\sqrt2}{r^2}$。于是 $\\left|\\oint_{C_r}P\\,\\mathrm{d}x+Q\\,\\mathrm{d}y\\right|\\le 2\\pi r\\cdot\\frac{2\\sqrt2}{r^2}=\\frac{4\\pi\\sqrt2}{r}\\to0\\ (r\\to+\\infty)$。",
+      "summary": "第13题：用积分估值证明大圆周上积分趋于0",
+      "clarity": "good"
+    },
+    {
+      "id": 145,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "14",
+          "statement": "设 $f(r,t)=\\oint_{C_r}\\frac{y\\,\\mathrm{d}x-x\\,\\mathrm{d}y}{(x^2+y^2)^t}$，其中 $C_r$ 为：$x^2+y^2+xy=r^2$ 的正方向，求 $\\lim_{r\\to\\infty}f(r,t)$。",
+          "answer": "$\\lim_{r\\to+\\infty}f(r,t)=\\begin{cases}-\\infty, & t<1\\\\ -2\\pi, & t=1\\\\ 0, & t>1\\end{cases}$",
+          "note": "投影幻灯片（第19张）。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "作变换 $x=u+v,\\ y=u-v$ 得 $x^2+y^2+xy=3u^2+v^2$；再令 $u=\\frac{r}{\\sqrt3}\\cos\\theta,\\ v=r\\sin\\theta$，则 $x=\\frac{r}{\\sqrt3}(\\cos\\theta+\\sqrt3\\sin\\theta)$，$y=\\frac{r}{\\sqrt3}(\\cos\\theta-\\sqrt3\\sin\\theta)$。代入得 $f(r,t)=\\oint_{C_r}\\frac{y\\mathrm{d}x-x\\mathrm{d}y}{(x^2+y^2)^t}=-\\int_0^{2\\pi}\\frac{\\frac{\\sqrt3}{3}2r^2}{\\left(\\frac{2r^2}{3}\\right)^t(\\cos^2\\theta+3\\sin^2\\theta)^t}\\,\\mathrm{d}\\theta$。",
+      "summary": "第14题：作变量替换把曲线积分化为定积分",
+      "clarity": "good"
+    },
+    {
+      "id": 146,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "化简得 $f(r,t)=-\\sqrt3\\left(\\frac{2r^2}{3}\\right)^{1-t}\\int_0^{2\\pi}\\frac{\\mathrm{d}\\theta}{(\\cos^2\\theta+3\\sin^2\\theta)^t}$，故 $t<1$ 时 $\\lim_{r\\to+\\infty}f(r,t)=-\\infty$，$t>1$ 时 $\\lim_{r\\to+\\infty}f(r,t)=0$。$t=1$ 时由 $\\frac{\\partial Q}{\\partial x}=\\frac{\\partial P}{\\partial y}$ 取充分小的 $C_a:x^2+y^2=a^2$，得 $\\oint_{C_r}=\\oint_{C_a}\\frac{y\\mathrm{d}x-x\\mathrm{d}y}{(x^2+y^2)^1}=\\frac{1}{a^2}\\oint_{C_a}y\\mathrm{d}x-x\\mathrm{d}y=\\frac{1}{a^2}\\iint_D(-2)\\mathrm{d}x\\mathrm{d}y=-2\\pi$。综上 $\\lim_{r\\to+\\infty}f(r,t)=\\begin{cases}-\\infty, & t<1\\\\ -2\\pi, & t=1\\\\ 0, & t>1\\end{cases}$。",
+      "summary": "第14题解答：按 $t$ 与1的大小分类求极限",
+      "clarity": "good"
+    },
+    {
+      "id": 147,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "15",
+          "statement": "设函数在有界闭区域上有二阶连续偏导数，且满足 $\\frac{\\partial^2u}{\\partial x^2}+\\frac{\\partial^2u}{\\partial y^2}=0,\\ (x,y)\\in D$。记 $D$ 的正向边界曲线为 $\\partial D$，$\\partial D$ 的外法线向量为 $\\vec n$。当 $(x,y)\\in\\partial D$ 时，$u(x,y)=A$。(1) 求曲线积分 $\\oint_{\\partial D}u\\frac{\\partial u}{\\partial n}\\,\\mathrm{d}s$ 的值；(2) 证明：$u(x,y)=A,\\ (x,y)\\in D$。",
+          "answer": "",
+          "note": "投影幻灯片（第20张）。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "(1) 令 $\\vec n=(\\cos\\alpha,\\cos\\beta)=(\\cos\\alpha,\\sin\\alpha)$，则 $\\frac{\\partial u}{\\partial n}=\\frac{\\partial u}{\\partial x}\\cos\\alpha+\\frac{\\partial u}{\\partial y}\\sin\\alpha$，$\\partial D$ 的单位切向量 $\\tau=(-\\sin\\alpha,\\cos\\alpha)$，$\\tau\\cdot\\mathrm{d}s=(-\\sin\\alpha,\\cos\\alpha)\\cdot\\mathrm{d}s=(\\mathrm{d}x,\\mathrm{d}y)$，即 $\\sin\\alpha\\,\\mathrm{d}s=-\\mathrm{d}x$、$\\cos\\alpha\\,\\mathrm{d}s=\\mathrm{d}y$。于是 $\\oint_{\\partial D}u\\frac{\\partial u}{\\partial n}\\mathrm{d}s=A\\oint_{\\partial D}\\left(\\frac{\\partial u}{\\partial x}\\cos\\alpha+\\frac{\\partial u}{\\partial y}\\sin\\alpha\\right)\\mathrm{d}s=A\\oint_{\\partial D}\\frac{\\partial u}{\\partial x}\\mathrm{d}y-\\frac{\\partial u}{\\partial y}\\mathrm{d}x=A\\iint_D\\left(\\frac{\\partial^2u}{\\partial x^2}+\\frac{\\partial^2u}{\\partial y^2}\\right)\\mathrm{d}x\\mathrm{d}y=0$。",
+      "summary": "第15题：用格林公式求边界积分，值为0",
+      "clarity": "good"
+    },
+    {
+      "id": 148,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "15",
+          "statement": "设函数在有界闭区域上有二阶连续偏导数，且满足 $\\frac{\\partial^2u}{\\partial x^2}+\\frac{\\partial^2u}{\\partial y^2}=0,\\ (x,y)\\in D$。记 $D$ 的正向边界曲线为 $\\partial D$，$\\partial D$ 的外法线向量为 $\\vec n$。当 $(x,y)\\in\\partial D$ 时，$u(x,y)=A$。(1) 求曲线积分 $\\oint_{\\partial D}u\\frac{\\partial u}{\\partial n}\\,\\mathrm{d}s$ 的值；(2) 证明：$u(x,y)=A,\\ (x,y)\\in D$。",
+          "answer": "",
+          "note": "同一张幻灯片（第21张）的放大版，最上一行被裁切。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "(2) $\\oint_{\\partial D}u\\frac{\\partial u}{\\partial n}\\mathrm{d}s=\\int_{\\partial D}u\\left(\\frac{\\partial u}{\\partial x}\\cos\\alpha+\\frac{\\partial u}{\\partial y}\\cos\\beta\\right)\\mathrm{d}s=\\int_{\\partial D}u\\frac{\\partial u}{\\partial x}\\mathrm{d}y-u\\frac{\\partial u}{\\partial y}\\mathrm{d}x=\\iint_D\\left[u\\left(\\frac{\\partial^2u}{\\partial x^2}+\\frac{\\partial^2u}{\\partial y^2}\\right)+\\left(\\frac{\\partial u}{\\partial x}\\right)^2+\\left(\\frac{\\partial u}{\\partial y}\\right)^2\\right]\\mathrm{d}x\\mathrm{d}y=\\iint_D\\left[\\left(\\frac{\\partial u}{\\partial x}\\right)^2+\\left(\\frac{\\partial u}{\\partial y}\\right)^2\\right]\\mathrm{d}x\\mathrm{d}y$。因该积分为 $0$ 且被积函数非负，得 $\\left(\\frac{\\partial u}{\\partial x}\\right)^2+\\left(\\frac{\\partial u}{\\partial y}\\right)^2=0$，即 $\\frac{\\partial u}{\\partial x}=\\frac{\\partial u}{\\partial y}=0$，故 $u(x,y)=$ 常数；又 $(x,y)\\in\\partial D$ 时 $u(x,y)=A$，所以 $u(x,y)=A,\\ (x,y)\\in D$。",
+      "summary": "第15题(2)：格林公式化二重积分证明 $u$ 为常数",
+      "clarity": "good"
+    },
+    {
+      "id": 149,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "15",
+          "statement": "设函数在有界闭区域上有二阶连续偏导数，且满足 $\\frac{\\partial^2u}{\\partial x^2}+\\frac{\\partial^2u}{\\partial y^2}=0,\\ (x,y)\\in D$。记 $D$ 的正向边界曲线为 $\\partial D$，$\\partial D$ 的外法线向量为 $\\vec n$。当 $(x,y)\\in\\partial D$ 时，$u(x,y)=A$。(1) 求曲线积分 $\\oint_{\\partial D}u\\frac{\\partial u}{\\partial n}\\,\\mathrm{d}s$ 的值；(2) 证明：$u(x,y)=A,\\ (x,y)\\in D$。",
+          "answer": "",
+          "note": "投影幻灯片（第22张），与上一页为同一张。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "(2) $\\oint_{\\partial D}u\\frac{\\partial u}{\\partial n}\\mathrm{d}s=\\int_{\\partial D}u\\left(\\frac{\\partial u}{\\partial x}\\cos\\alpha+\\frac{\\partial u}{\\partial y}\\cos\\beta\\right)\\mathrm{d}s=\\int_{\\partial D}u\\frac{\\partial u}{\\partial x}\\mathrm{d}y-u\\frac{\\partial u}{\\partial y}\\mathrm{d}x=\\iint_D\\left[u\\left(\\frac{\\partial^2u}{\\partial x^2}+\\frac{\\partial^2u}{\\partial y^2}\\right)+\\left(\\frac{\\partial u}{\\partial x}\\right)^2+\\left(\\frac{\\partial u}{\\partial y}\\right)^2\\right]\\mathrm{d}x\\mathrm{d}y=\\iint_D\\left[\\left(\\frac{\\partial u}{\\partial x}\\right)^2+\\left(\\frac{\\partial u}{\\partial y}\\right)^2\\right]\\mathrm{d}x\\mathrm{d}y$。由积分 $=0$ 与 $\\left(\\frac{\\partial u}{\\partial x}\\right)^2+\\left(\\frac{\\partial u}{\\partial y}\\right)^2\\ge0$ 得 $\\frac{\\partial u}{\\partial x}=\\frac{\\partial u}{\\partial y}=0$，故 $u(x,y)=$ 常数；结合边界上 $u=A$ 得 $u(x,y)=A,\\ (x,y)\\in D$。",
+      "summary": "第15题(2)解答（同前页，画面略完整）",
+      "clarity": "good"
+    },
+    {
+      "id": 150,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "16",
+          "statement": "设 $L$ 是圆 $x^2+y^2=a^2$，求 $I=\\oint_L\\frac{x\\,\\mathrm{d}y-y\\,\\mathrm{d}x}{ax^2+2bxy+cy^2}\\ (a>0,\\ ac-b^2>0)$。",
+          "answer": "$\\frac{2\\pi}{\\sqrt{ac-b^2}}$",
+          "note": "投影幻灯片（第23张）。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "当 $(x,y)\\ne(0,0)$ 时 $\\frac{\\partial P}{\\partial y}=\\frac{\\partial Q}{\\partial x}$，故作曲线 $C:ax^2+2bxy+cy^2=1$ 取逆时针方向，由格林公式得 $\\oint_L\\frac{x\\mathrm{d}y-y\\mathrm{d}x}{ax^2+2bxy+cy^2}=\\oint_C x\\,\\mathrm{d}y-y\\,\\mathrm{d}x$。又 $ax^2+2bxy+cy^2=a\\left(x+\\frac{b}{a}y\\right)^2+\\left(c-\\frac{b^2}{a}\\right)y^2$，令 $x+\\frac{b}{a}y=\\frac{1}{\\sqrt a}\\cos t$、$y=\\frac{\\sqrt a}{\\sqrt{ac-b^2}}\\sin t$，则 $x\\,\\mathrm{d}y-y\\,\\mathrm{d}x=\\frac{\\mathrm{d}t}{\\sqrt{ac-b^2}}$。于是 $I=\\int_0^{2\\pi}\\frac{\\mathrm{d}t}{\\sqrt{ac-b^2}}=\\frac{2\\pi}{\\sqrt{ac-b^2}}$。",
+      "summary": "第16题：格林公式加椭圆参数化，得 $\\frac{2\\pi}{\\sqrt{ac-b^2}}$",
+      "clarity": "good"
+    },
+    {
+      "id": 151,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "17",
+          "statement": "设 $S$ 为椭球面 $\\frac{x^2}{a^2}+\\frac{y^2}{b^2}+\\frac{z^2}{c^2}=1\\ (a,b,c>0)$，$p$ 为坐标原点 $O(0,0,0)$ 到椭球面 $S$ 上任一点 $P(x,y,z)$ 处的切平面的距离，计算 $\\mathop{\\iint}\\limits_S\\frac{1}{p}\\,\\mathrm{d}S$ 的值。",
+          "answer": "$\\frac{4\\pi abc}{3}\\left(\\frac{1}{a^2}+\\frac{1}{b^2}+\\frac{1}{c^2}\\right)$",
+          "note": "投影幻灯片（第24张）。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "椭球面 $S$ 上任一点 $P(x,y,z)$ 处的切平面方程为 $\\frac{xX}{a^2}+\\frac{yY}{b^2}+\\frac{zZ}{c^2}=1$，故坐标原点 $O$ 到切平面的距离为 $p=\\frac{1}{\\sqrt{\\frac{x^2}{a^4}+\\frac{y^2}{b^4}+\\frac{z^2}{c^4}}}$。取坐标面 $xoy$ 上方的椭球面 $S_1$，其方程为 $z=c\\sqrt{1-\\frac{x^2}{a^2}-\\frac{y^2}{b^2}}$，在 $xoy$ 平面的投影为 $D_{xy}:\\frac{x^2}{a^2}+\\frac{y^2}{b^2}\\le1$。",
+      "summary": "第17题：求椭球面上 $1/p$ 的曲面积分，建立切平面与投影",
+      "clarity": "good"
+    },
+    {
+      "id": 152,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "由 $z_x=-\\frac{c^2x}{a^2z}$、$z_y=-\\frac{c^2y}{b^2z}$ 得 $\\mathrm{d}S=\\sqrt{1+z_x^2+z_y^2}\\,\\mathrm{d}x\\mathrm{d}y=\\frac{c^2}{z}\\sqrt{\\frac{x^2}{a^4}+\\frac{y^2}{b^4}+\\frac{z^2}{c^2}}\\,\\mathrm{d}x\\mathrm{d}y$。由对称性 $\\mathop{\\iint}_S\\frac{1}{p}\\mathrm{d}S=2\\mathop{\\iint}_{D_{xy}}\\sqrt{\\frac{x^2}{a^4}+\\frac{y^2}{b^4}+\\frac{z^2(x,y)}{c^4}}\\cdot\\frac{c^2}{z(x,y)}\\sqrt{\\frac{x^2}{a^4}+\\frac{y^2}{b^4}+\\frac{z^2(x,y)}{c^4}}\\,\\mathrm{d}x\\mathrm{d}y=2c\\mathop{\\iint}_{D_{xy}}\\left[\\frac{x^2}{a^4}+\\frac{y^2}{b^4}+\\frac{1}{c^2}\\left(1-\\frac{x^2}{a^2}-\\frac{y^2}{b^2}\\right)\\right]\\frac{1}{\\sqrt{1-\\frac{x^2}{a^2}-\\frac{y^2}{b^2}}}\\,\\mathrm{d}x\\mathrm{d}y$。再令 $x=ar\\cos\\theta,\\ y=br\\sin\\theta$，化为 $2abc\\int_0^{2\\pi}\\mathrm{d}\\theta\\int_0^1\\left[\\frac{r^2\\cos^2\\theta}{a^2}+\\frac{r^2\\sin^2\\theta}{b^2}+\\frac{1}{c^2}(1-r^2)\\right]\\frac{r}{\\sqrt{1-r^2}}\\,\\mathrm{d}r$，积分得 $\\frac{4}{3}\\pi abc\\left(\\frac{1}{a^2}+\\frac{1}{b^2}+\\frac{1}{c^2}\\right)$。",
+      "summary": "第17题解答：算 $\\mathrm{d}S$ 并化为极坐标，得 $\\frac{4}{3}\\pi abc(\\frac1{a^2}+\\frac1{b^2}+\\frac1{c^2})$",
+      "clarity": "good"
+    },
+    {
+      "id": 153,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "17",
+          "statement": "设 $S$ 为椭球面 $\\frac{x^2}{a^2}+\\frac{y^2}{b^2}+\\frac{z^2}{c^2}=1\\ (a,b,c>0)$，$p$ 为坐标原点 $O(0,0,0)$ 到椭球面 $S$ 上任一点 $P(x,y,z)$ 处的切平面的距离，计算 $\\mathop{\\iint}\\limits_S\\frac{1}{p}\\,\\mathrm{d}S$ 的值。",
+          "answer": "$\\frac{4\\pi abc}{3}\\left(\\frac{1}{a^2}+\\frac{1}{b^2}+\\frac{1}{c^2}\\right)$",
+          "note": "投影幻灯片（第26张），给出另一种解法（用法向量）。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "椭球面 $S$ 上点 $P(x,y,z)$ 处的切平面为 $\\frac{xX}{a^2}+\\frac{yY}{b^2}+\\frac{zZ}{c^2}=1$，原点 $O$ 到它的距离为 $p=\\frac{1}{\\sqrt{\\frac{x^2}{a^4}+\\frac{y^2}{b^4}+\\frac{z^2}{c^4}}}$。记 $\\vec n=\\left(\\frac{x}{a^2},\\frac{y}{b^2},\\frac{z}{c^2}\\right)$，$\\vec n_0=\\frac{1}{\\sqrt{\\frac{x^2}{a^4}+\\frac{y^2}{b^4}+\\frac{z^2}{c^4}}}\\left(\\frac{x}{a^2},\\frac{y}{b^2},\\frac{z}{c^2}\\right)$，则 $\\mathop{\\iint}_S\\frac{1}{p}\\mathrm{d}S=\\mathop{\\iint}_S\\sqrt{\\frac{x^2}{a^4}+\\frac{y^2}{b^4}+\\frac{z^2}{c^4}}\\,\\mathrm{d}S=\\mathop{\\iint}_S\\left(\\frac{x}{a^2},\\frac{y}{b^2},\\frac{z}{c^2}\\right)\\vec n_0\\,\\mathrm{d}S$。",
+      "summary": "第17题另解：引入单位法向量把被积函数化为面积分",
+      "clarity": "good"
+    },
+    {
+      "id": 154,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "17",
+          "statement": "设 $S$ 为椭球面 $\\frac{x^2}{a^2}+\\frac{y^2}{b^2}+\\frac{z^2}{c^2}=1\\ (a,b,c>0)$，$p$ 为坐标原点 $O(0,0,0)$ 到椭球面 $S$ 上任一点 $P(x,y,z)$ 处的切平面的距离，计算 $\\mathop{\\iint}\\limits_S\\frac{1}{p}\\,\\mathrm{d}S$ 的值。",
+          "answer": "$\\frac{4\\pi abc}{3}\\left(\\frac{1}{a^2}+\\frac{1}{b^2}+\\frac{1}{c^2}\\right)$",
+          "note": "投影幻灯片（第27张），第17题另解的收尾（用高斯公式）。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "把 $\\left(\\frac{x}{a^2},\\frac{y}{b^2},\\frac{z}{c^2}\\right)\\vec n_0\\,\\mathrm{d}S$ 写成 $\\left(\\frac{x}{a^2},\\frac{y}{b^2},\\frac{z}{c^2}\\right)(\\mathrm{d}y\\mathrm{d}z,\\mathrm{d}z\\mathrm{d}x,\\mathrm{d}x\\mathrm{d}y)$，即 $\\mathop{\\iint}_S\\frac{1}{p}\\mathrm{d}S=\\mathop{\\iint}_S\\frac{x}{a^2}\\mathrm{d}y\\mathrm{d}z+\\frac{y}{b^2}\\mathrm{d}z\\mathrm{d}x+\\frac{z}{c^2}\\mathrm{d}x\\mathrm{d}y$。再用高斯公式得 $=\\iiint_V\\left(\\frac{1}{a^2}+\\frac{1}{b^2}+\\frac{1}{c^2}\\right)\\mathrm{d}V=\\frac{4\\pi abc}{3}\\left(\\frac{1}{a^2}+\\frac{1}{b^2}+\\frac{1}{c^2}\\right)$。",
+      "summary": "第17题另解收尾：高斯公式得 $\\frac{4}{3}\\pi abc(\\frac1{a^2}+\\frac1{b^2}+\\frac1{c^2})$",
+      "clarity": "good"
+    }
+  ]
+}

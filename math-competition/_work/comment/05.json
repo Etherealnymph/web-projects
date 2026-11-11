@@ -1,0 +1,85 @@
+{
+  "chunk": 5,
+  "items": [
+    {
+      "pid": 65,
+      "commentary": "考点：球壳引力化为积分。对称性使 $F_x=F_y=0$，只算 $F_z=\\iint_\\Sigma\\frac{G\\rho(z-a)}{\\rho^3}dS$，代入 $dS=R^2\\sin\\varphi\\,d\\varphi\\,d\\theta$ 后内层对 $u=\\cos\\varphi$ 积分即得 $-GM/a^2$。易错：漏掉 $R^2\\sin\\varphi$ 或把分母写成 $(z+a)$；结论就是质量集中于球心的 Newton 壳定理。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 66,
+      "commentary": "考点：第一类曲面积分 + 球面参数化。代入 $dS=a^2\\sin\\varphi\\,d\\varphi\\,d\\theta$ 算出 $\\rho^2=a^2(2+2\\cos\\varphi)$，$\\sin\\varphi\\,d\\varphi$ 恰凑成 $d\\sqrt{2+2\\cos\\varphi}$，一积即出 $2-\\sqrt2$。易错：极点在球心下方，故是 $2+2\\cos\\varphi$ 而非 $2-2\\cos\\varphi$，$\\varphi$ 也只取 $[0,\\pi/2]$。",
+      "solution_clean": "取上半球面参数：$x=a\\sin\\varphi\\cos\\theta,\\ y=a\\sin\\varphi\\sin\\theta,\\ z=a\\cos\\varphi$，$0\\le\\varphi\\le\\frac{\\pi}{2}$，$0\\le\\theta\\le2\\pi$，$dS=a^2\\sin\\varphi\\,d\\varphi\\,d\\theta$。\n$\\rho^2=x^2+y^2+(z+a)^2=a^2(2+2\\cos\\varphi)$，$\\sqrt{\\rho^2}=a\\sqrt{2+2\\cos\\varphi}$。\n$I=\\int_0^{2\\pi}\\!\\!d\\theta\\int_0^{\\pi/2}\\frac{a^2\\sin\\varphi}{a\\sqrt{2+2\\cos\\varphi}}\\,d\\varphi=2\\pi a\\int_0^{\\pi/2}\\frac{\\sin\\varphi\\,d\\varphi}{\\sqrt{2+2\\cos\\varphi}}$。\n而 $\\int_0^{\\pi/2}\\frac{\\sin\\varphi\\,d\\varphi}{\\sqrt{2+2\\cos\\varphi}}=\\left[-\\sqrt{2+2\\cos\\varphi}\\right]_0^{\\pi/2}=2-\\sqrt2$。\n故 $I=2\\pi a(2-\\sqrt2)$（$a=1$ 时与题给 $2\\pi(2-\\sqrt2)$ 一致）。"
+    },
+    {
+      "pid": 67,
+      "commentary": "考点：Chebyshev 不等式，把同增译成非负二重积分。$(f(x)-f(y))(g(x)-g(y))\\ge0$ 在 $[a,b]^2$ 上积分，用关于 $y=x$ 的对称并项即得 $\\iint f(x)g(x)\\ge\\iint f(x)g(y)$。易错：$\\iint_D f(x)g(x)=(b-a)\\int_a^b fg$ 中的 $(b-a)$ 常被漏；一增一减时不等号反向。",
+      "solution_clean": "令 $D=[a,b]\\times[a,b]$。$f,g$ 同增 $\\Rightarrow (f(x)-f(y))(g(x)-g(y))\\ge0$，故\n$I=\\iint_D(f(x)-f(y))(g(x)-g(y))\\,dxdy\\ge0$。\n展开并用对称性 $\\iint_D f(x)g(x)=\\iint_D f(y)g(y)$、$\\iint_D f(x)g(y)=\\iint_D g(x)f(y)$，得\n$I=2\\iint_D f(x)g(x)\\,dxdy-2\\iint_D f(x)g(y)\\,dxdy\\ge0$。\n其中 $\\iint_D f(x)g(y)\\,dxdy=\\Big(\\int_a^b f\\Big)\\Big(\\int_a^b g\\Big)$，$\\iint_D f(x)g(x)\\,dxdy=(b-a)\\int_a^b fg$。\n故 $\\Big(\\int_a^b f\\Big)\\Big(\\int_a^b g\\Big)\\le(b-a)\\int_a^b fg$。"
+    },
+    {
+      "pid": 68,
+      "commentary": "考点：把第 16 题特殊化，取 $g(x)=x$。$x$ 在 $[0,1]$ 上增，直接代入得 $\\int_0^1x\\,dx\\cdot\\int_0^1f\\le\\int_0^1xf$，即 $\\frac12\\int f\\le\\int xf$，不必另造二重积分。易错：$f$ 连续即可，别加可导条件；等号在 $f$ 为常数时取到。",
+      "solution_clean": "取 $g(x)=x$，在 $[0,1]$ 上连续且单调增加，满足第 16 题条件（$a=0,\\ b=1$）。\n代入即得 $\\int_0^1f(x)\\,dx\\int_0^1x\\,dx\\le(1-0)\\int_0^1xf(x)\\,dx$。\n因 $\\int_0^1x\\,dx=\\frac12$，故 $\\frac12\\int_0^1f(x)\\,dx\\le\\int_0^1xf(x)\\,dx$。\n等价写法：$\\int_0^1(2x-1)f(x)\\,dx\\ge0$。"
+    },
+    {
+      "pid": 69,
+      "commentary": "考点：二重积分对称性造非负被积函数。$f$ 增给 $(x-y)(f(x)-f(y))\\ge0$，在 $[0,1]^2$ 上展开后按 $y=x$ 对称并项得 $2\\int_0^1xf-\\int_0^1f\\ge0$。易错：$\\iint_D xf(y)=\\frac12\\int_0^1f$ 靠 $\\int_0^1x\\,dx=\\frac12$，漏这个因子最致命。",
+      "solution_clean": "令 $D=[0,1]\\times[0,1]$。$f$ 增 $\\Rightarrow (x-y)(f(x)-f(y))\\ge0$，故\n$0\\le\\iint_D(x-y)(f(x)-f(y))\\,dxdy=\\iint_D\\big[xf(x)+yf(y)-xf(y)-yf(x)\\big]dxdy$。\n由对称性 $\\iint_D xf(x)=\\iint_D yf(y)$，$\\iint_D xf(y)=\\iint_D yf(x)$，上式\n$=2\\iint_D xf(x)\\,dxdy-2\\iint_D xf(y)\\,dxdy=2\\int_0^1xf(x)\\,dx-\\int_0^1f(y)\\,dy$。\n即 $2\\int_0^1xf(x)\\,dx\\ge\\int_0^1f(x)\\,dx$，得证。"
+    },
+    {
+      "pid": 70,
+      "commentary": "考点：球面平均势型曲面积分，须按点在球内、球外分情形。由余弦定理化成一维积分 $\\int_{-1}^1\\frac{du}{\\sqrt{a^2-2ar_0u+r_0^2}}$，得 $r_0>a$ 时 $4\\pi a^2/r_0$，$r_0<a$ 时 $4\\pi a$。易错：两式不能混用，$r_0=a$ 处恰为 $4\\pi a$。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 71,
+      "commentary": "考点：积分方程整体积分 + 交换次序，把 $u$ 压成 $a=\\int_0^1u$。令 $t=y-x$ 后二重积分化为 $\\frac12a^2$，于是 $a=1+\\frac{\\lambda}{2}a^2$，由 $\\lambda a^2-2a+2=0$ 有正根得 $\\lambda\\le\\frac12$。易错：结果用判别式给出，$a=2$ 时取等。",
+      "solution_clean": "两边在 $[0,1]$ 上积分，记 $a=\\int_0^1u(x)\\,dx$，得\n$a=1+\\lambda\\int_0^1dx\\int_x^1u(y)u(y-x)\\,dy$。\n交换次序并令 $t=y-x$：$\\int_0^1u(y)\\!\\left(\\int_0^yu(t)\\,dt\\right)dy=\\frac12\\left(\\int_0^1u(t)\\,dt\\right)^2=\\frac{a^2}{2}$。\n故 $a=1+\\frac{\\lambda}{2}a^2$，即 $\\lambda a^2-2a+2=0$。\n它有正根，故 $\\Delta=4-8\\lambda\\ge0$，即 $\\lambda\\le\\frac12$（$a=2$ 时取等）。"
+    },
+    {
+      "pid": 72,
+      "commentary": "考点：二重积分换元 + 偶函数对称性。令 $u=y-x,\\ v=y+x$，$|J|=\\frac12$，区域变 $|u|+|v|\\le2a$；用 $f$ 偶折到 $u\\ge0$，得 $\\int_0^{2a}f(u)\\cdot2(2a-u)\\,du$。易错：漏乘 $\\frac12$，或把 $v$ 的限写成 $\\pm a$，实际长度是 $4a-2u$。",
+      "solution_clean": "令 $u=y-x,\\ v=y+x$，则 $x=\\frac{v-u}{2},\\ y=\\frac{u+v}{2}$，$|J|=\\frac12$；$D=[-a,a]^2$ 变为 $D_1:|u|+|v|\\le2a$。\n$\\int_{-a}^{a}\\!dx\\int_{-a}^{a}f(y-x)\\,dy=\\iint_{D_1}f(u)\\cdot\\frac12\\,dudv$。\n因 $f$ 为偶函数，被积函数关于 $u=0$ 对称，折半得\n$\\iint_{D_1}\\frac12f(u)\\,dudv=\\int_0^{2a}\\!f(u)\\,du\\int_{-(2a-u)}^{2a-u}dv$。\n内层长度为 $2(2a-u)=4a-2u$，故原式 $=\\int_0^{2a}f(u)(4a-2u)\\,du$。"
+    },
+    {
+      "pid": 73,
+      "commentary": "考点：唯一性——两解作差后迭代估计。$g=u_1-u_2$ 满足 $g=\\int_0^x\\!\\!\\int_0^yg$，由 $|g|\\le M$ 归纳出 $|g|\\le M\\frac{x^ny^n}{n!\\,n!}\\to0$。易错：每积一次多出因子 $\\frac1{n+1}$，正是 $n!n!$ 的来源；只估一次 $|g|\\le Mxy$ 不够。",
+      "solution_clean": "设 $u_1,u_2$ 是两个连续解，令 $g=u_1-u_2$，则 $g$ 连续且\n$g(x,y)=\\int_0^x\\!\\!\\int_0^yg(u,v)\\,du\\,dv$。\n$g$ 在 $[0,1]^2$ 上有界，设 $|g|\\le M$，则 $|g(x,y)|\\le Mxy$；归纳得\n$|g(x,y)|\\le M\\frac{x^ny^n}{n!\\,n!}$ 对一切 $n\\ge1$ 成立。\n固定 $x,y$，$M\\frac{x^ny^n}{n!\\,n!}\\to0\\ (n\\to\\infty)$，故 $|g(x,y)|\\le0$，即 $g\\equiv0$。\n所以至多有一个连续解。"
+    },
+    {
+      "pid": 74,
+      "commentary": "考点：裂项求和 + 截面法。记 $a_k$ 为调和部分和，通项拆成 $\\frac{a_k}{k+1}-\\frac{a_k}{k+2}$，借 $a_{k+1}-a_k=\\frac1{k+1}$ 相消得 $a=1$；截面是半径 $z+1$ 的圆，$V=\\int_0^1\\pi(z+1)^2dz=\\frac{7\\pi}{3}$。易错：截面半径是 $z+1$ 而非 $z$。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 75,
+      "commentary": "考点：三重积分先一后二 + 换元。$x$ 的限为 $\\frac z2\\le x\\le z$，投影到 $yOz$ 面得 $\\frac{\\sqrt z}2\\le y\\le\\sqrt z$，累次积分即得 $\\frac{14\\sqrt2}{27}$。易错：开方取正靠 $y>0$；(2) 中 $\\cos\\frac{z^2}{y^2}$ 提示先对 $y$ 换元 $t=\\frac{z^2}{y^2}$。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 76,
+      "commentary": "考点：Gauss 公式补面 + 取体积极限。补底圆盘 $D$ 得 $-\\iint_D R\\,dxdy=\\iiint_\\Omega(P_x+R_z)dV$；令 $r\\to0$ 得 $P_x+R_z\\equiv0$，回代又得 $\\iint_D R=0$ 对一切圆盘成立，故 $R\\equiv0$、$P_x\\equiv0$。易错：只停在 $P_x+R_z=0$ 就推不出 $P_x=0$。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 77,
+      "commentary": "考点：混合积轮换 + 二重向量积展开。$(a\\times b)\\cdot(c\\times d)=((c\\times d)\\times a)\\cdot b$，再用 $(u\\times v)\\times w=v(u\\cdot w)-u(v\\cdot w)$ 展开即得行列式。易错：两行是 $(a\\cdot c,a\\cdot d)$ 与 $(b\\cdot c,b\\cdot d)$，顺序易反，可取 $a=b=e_1$ 验算。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 78,
+      "commentary": "考点：单位向量组合的模长展开与向量极限。关键式 $|\\lambda\\overrightarrow{OA}+\\mu\\overrightarrow{OB}|^2=\\lambda^2+\\mu^2+2\\lambda\\mu\\cos\\theta$，再按 $\\lambda$ 与 $n$ 的关系分段。注意：照片里原式 $[?]$ 处被裁切，只能定方法，无法复原原题。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 79,
+      "commentary": "考点：三重积分估值。$\\sqrt[3]{t}$ 单增，只需估 $f=x+2y-2z+5$：梯度模为 $3$ 给出 $f\\in[2,8]$，上界由 $\\sqrt[3]f\\le2$ 得 $\\frac{8\\pi}{3}$。易错：下界只取 $\\sqrt[3]2$ 太弱，须用球上均值 $\\bar f=5$ 加 $\\sqrt[3]{t}$ 的凹性（不低于弦）加强。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 80,
+      "commentary": "考点：三重积分 + 取整夹逼。由 $r-1\\le[r]\\le r$ 夹住，$\\iiint_{V_n}r\\,dV=\\pi n^4$ 用球面坐标即出，误差不超过 $\\frac43\\pi n^3=o(n^4)$。易错：差不到 $1$ 也要乘体积才成 $o(n^4)$；被积函数是 $[r]$，不能直接换 $r$。",
+      "solution_clean": "球面坐标：$\\iiint_{V_n}r\\,dV=\\int_0^{2\\pi}\\!d\\theta\\int_0^{\\pi}\\!\\sin\\varphi\\,d\\varphi\\int_0^nr^3dr=\\pi n^4$。\n由 $r-1\\le[r]\\le r$ 得\n$\\pi n^4-\\frac{4}{3}\\pi n^3=\\iiint_{V_n}(r-1)\\,dV<\\iiint_{V_n}[r]\\,dV\\le\\iiint_{V_n}r\\,dV=\\pi n^4$。\n两边除以 $n^4$，$\\frac{4\\pi}{3n}\\to0$，由夹逼准则\n$\\lim_{n\\to\\infty}\\frac{1}{n^4}\\iiint_{V_n}[r]\\,dxdydz=\\pi$。"
+    }
+  ]
+}

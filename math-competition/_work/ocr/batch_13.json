@@ -1,0 +1,231 @@
+{
+  "batch": 13,
+  "date": "2026-10-06",
+  "pages": [
+    {
+      "id": 155,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "18",
+          "statement": "求曲面积分 $$I=\\iint_{S}[x+\\cos(y-z)]\\,dydz+(2y+e^{-z})\\,dzdx+[3z+\\sin(x-y)]\\,dxdy,$$ 其中 $S$ 为封闭曲面 $|x-y+z|+|y-z+x|+|z-x+y|=1$ 取外侧。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：由高斯公式得 $I=\\iiint_{\\Omega}(1+2+3)\\,dxdydz=6\\iiint_{\\Omega}dxdydz$，其中 $\\Omega$ 为封闭曲面所围成的区域。令 $u=x-y+z,\\ v=y-z+x,\\ w=z-x+y$，则 $\\frac{\\partial(u,v,w)}{\\partial(x,y,z)}=4$，故 $|J|=\\frac{1}{4}$，即 $V:|u|+|v|+|w|=1$。于是 $I=6\\iiint_{\\Omega}dxdydz=\\frac{3}{2}\\iiint_{V}dudvdw=\\frac{3}{2}\\times 8\\times\\frac{1}{3}\\times\\frac{1}{2}=2$。",
+      "summary": "第18题：高斯公式化三重积分，变量代换得 $I=2$",
+      "clarity": "good"
+    },
+    {
+      "id": 156,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "19",
+          "statement": "设 $f(x)$ 为 $R$ 上连续的周期为 1 的周期函数,且满足 $0\\le f(x)\\le 1$ 与 $\\int_{0}^{1}f(x)\\,dx=1$,证明: 当 $0\\le x\\le 13$ 时,则 $$\\int_{0}^{\\sqrt{x}}f(t)\\,dt+\\int_{0}^{\\sqrt{x+27}}f(t)\\,dt+\\int_{0}^{\\sqrt{13-x}}f(t)\\,dt\\le 11,$$ 并给出等号成立的条件。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：由 $0\\le f(x)\\le 1$ 得三段积分之和不超过 $\\sqrt{x}+\\sqrt{x+27}+\\sqrt{13-x}$。又 $\\sqrt{x}+\\sqrt{x+27}+\\sqrt{13-x}=1\\cdot\\sqrt{x}+\\sqrt{2}\\sqrt{\\frac{1}{2}(x+27)}+\\sqrt{\\frac{2}{3}}\\sqrt{\\frac{3}{2}(13-x)}$，由柯西不等式 $\\le\\sqrt{1+2+\\frac{2}{3}}\\cdot\\sqrt{x+\\frac{1}{2}(x+27)+\\frac{3}{2}(13-x)}=\\sqrt{\\frac{11}{3}}\\sqrt{33}=11$。由对应分量成比例时等号成立，可得 $x=9$。",
+      "summary": "第19题：周期函数积分不等式，柯西不等式证到 11",
+      "clarity": "good"
+    },
+    {
+      "id": 157,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "未编号",
+          "statement": "设曲线 $L$ 是空间区域 $0\\le x\\le 1,0\\le y\\le 1,0\\le z\\le 1$ 的表面与平面 $x+y+z=\\frac{3}{2}$ 的交线,计算 $$\\oint_{L}(z^{2}-y^{2})\\,dx+(x^{2}-z^{2})\\,dy+(y^{2}-x^{2})\\,dz$$ 的值。",
+          "answer": "$\\pm\\frac{9}{2}$",
+          "note": "题干前无题号，疑为第20题；答案处标有“答案：$\\pm\\frac{9}{2}$”。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "本页上半为第19题的收尾：由对应分量成比例时等号成立可得 $x=9$；当 $x=9$ 时，三段积分化为 $\\int_{0}^{3}f(t)\\,dt+\\int_{0}^{6}f(t)\\,dt+\\int_{0}^{2}f(t)\\,dt=3\\int_{0}^{1}f(t)\\,dt+6\\int_{0}^{1}f(t)\\,dt+2\\int_{0}^{1}f(t)\\,dt=11$。下半为新题，只给出答案 $\\pm\\frac{9}{2}$，无推导过程。",
+      "summary": "第19题收尾（$x=9$ 取等），新题求截线积分，答案 $\\pm\\frac{9}{2}$",
+      "clarity": "good"
+    },
+    {
+      "id": 158,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "证明:当 $p\\ge 1$ 时,$$\\sum_{n=1}^{\\infty}\\frac{1}{(n+1)\\sqrt[p]{n}}<p.$$",
+          "answer": "",
+          "note": "本页与第162页为同一张幻灯片，字迹较模糊。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：$u_n=\\frac{1}{(n+1)\\sqrt[p]{n}}=n^{\\frac{p-1}{p}}\\left(\\frac{1}{n}-\\frac{1}{n+1}\\right)=n^{\\frac{p-1}{p}}\\left[\\left(\\frac{1}{\\sqrt[p]{n}}\\right)^{p}-\\left(\\frac{1}{\\sqrt[p]{n+1}}\\right)^{p}\\right]$，对 $x^{p}$ 用拉格朗日中值定理得 $u_n=n^{\\frac{p-1}{p}}p\\xi^{p-1}\\left(\\frac{1}{\\sqrt[p]{n}}-\\frac{1}{\\sqrt[p]{n+1}}\\right)$，$\\xi\\in\\left(\\frac{1}{\\sqrt[p]{n+1}},\\frac{1}{\\sqrt[p]{n}}\\right)$。再取 $\\xi=\\frac{1}{\\sqrt[p]{n+\\theta}},\\theta\\in(0,1)$，得 $u_n=p\\left(\\frac{n}{n+\\theta}\\right)^{\\frac{p-1}{p}}\\left(\\frac{1}{\\sqrt[p]{n}}-\\frac{1}{\\sqrt[p]{n+1}}\\right)<p\\left(\\frac{1}{\\sqrt[p]{n}}-\\frac{1}{\\sqrt[p]{n+1}}\\right)$，求和即得 $\\sum_{n=1}^{\\infty}u_n<p\\lim_{n\\to\\infty}\\left(1-\\frac{1}{\\sqrt[p]{n+1}}\\right)=p$。",
+      "summary": "第2题：中值定理加望远镜求和，证级数之和小于 $p$",
+      "clarity": "partial"
+    },
+    {
+      "id": 159,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "板书（判别法小结）：柯西收敛准则——数项级数 $\\sum_{n=1}^{\\infty}u_n$ 收敛的充要条件为 $\\forall\\varepsilon>0,\\exists N$，当 $n>N$ 及任意正整数 $p$ 时均有 $|S_{n+p}-S_n|<\\varepsilon$，即 $|u_{n+1}+u_{n+2}+\\cdots+u_{n+p}|<\\varepsilon$。Cauchy 积分判别法——设 $f(x)$ 在区间 $[1,+\\infty)$ 上连续、非负、单调减少，则无穷级数 $\\sum_{n=1}^{\\infty}f(n)$ 与反常积分 $\\int_{1}^{+\\infty}f(x)\\,dx$ 同敛散。狄利克雷判别法——若 1)$\\{\\alpha_n\\}$ 单调趋于 0；2) $B_n=\\beta_1+\\beta_2+\\cdots+\\beta_n$ 有界 $(\\forall n)$，则级数 $\\sum_{n=1}^{\\infty}\\alpha_n\\beta_n$ 收敛。阿贝尔判别法——若 1)$\\{\\alpha_n\\}$ 单调且有界，即 $|\\alpha_n|\\le k\\,(\\forall n)$；2) $\\lim_{n\\to\\infty}B_n$ 存在，则级数 $\\sum_{n=1}^{\\infty}\\alpha_n\\beta_n$ 收敛。",
+      "summary": "板书：柯西准则、积分判别法、狄利克雷与阿贝尔判别法",
+      "clarity": "good"
+    },
+    {
+      "id": 160,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "1",
+          "statement": "设 $u_n>0$,且 $S_n=u_1+u_2+\\cdots+u_n$,证明:1)当 $\\alpha>1$ 时,级数 $\\sum_{n=1}^{\\infty}\\frac{u_n}{S_n^{\\alpha}}$ 收敛;2)当 $\\alpha\\le 1$,且 $S_n\\to\\infty,(n\\to\\infty)$ 时,级数 $\\sum_{n=1}^{\\infty}\\frac{u_n}{S_n^{\\alpha}}$ 发散。",
+          "answer": "",
+          "note": "幻灯片标题为“一、正项级数”。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：$u_n>0$，故 $\\{S_n\\}$ 单调增加，$S_n\\to A$（有限数）或 $S_n\\to\\infty\\,(n\\to\\infty)$。当 $\\alpha>1$ 时，对函数 $x^{1-\\alpha}$ 在区间 $[S_{n-1},S_n]$ 上用拉格朗日中值定理，有 $S_n^{1-\\alpha}-S_{n-1}^{1-\\alpha}=(1-\\alpha)\\xi^{-\\alpha}(S_n-S_{n-1})$，$S_{n-1}<\\xi<S_n$，即有 $\\frac{1}{S_{n-1}^{\\alpha-1}}-\\frac{1}{S_n^{\\alpha-1}}=(\\alpha-1)\\frac{u_n}{\\xi^{\\alpha}}>(\\alpha-1)\\frac{u_n}{S_n^{\\alpha}}$，再对左端望远镜求和。",
+      "summary": "正项级数第1题：$S_n$ 幂次级数的收敛性（$\\alpha>1$ 部分）",
+      "clarity": "good"
+    },
+    {
+      "id": 161,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "接上页：$\\sum_{n=2}^{\\infty}\\left(\\frac{1}{S_{n-1}^{\\alpha-1}}-\\frac{1}{S_n^{\\alpha-1}}\\right)=\\lim_{n\\to\\infty}\\left(\\frac{1}{S_1^{\\alpha-1}}-\\frac{1}{S_n^{\\alpha-1}}\\right)$，当 $S_n\\to A$ 时该极限为 $\\frac{1}{S_1^{\\alpha-1}}-\\frac{1}{A^{\\alpha-1}}$，当 $S_n\\to\\infty$ 时为 $\\frac{1}{S_1^{\\alpha-1}}$，由比较判别法知 $\\sum_{n=1}^{\\infty}\\frac{u_n}{S_n^{\\alpha}}$ 收敛。2)当 $\\alpha=1$ 时，由 $\\sum_{k=n+1}^{n+p}\\frac{u_k}{S_k}\\ge\\frac{1}{S_{n+p}}\\sum_{k=n+1}^{n+p}u_k=\\frac{S_{n+p}-S_n}{S_{n+p}}=1-\\frac{S_n}{S_{n+p}}$，取 $p$ 充分大使 $\\frac{S_n}{S_{n+p}}<\\frac{1}{2}$，得该片段和 $\\ge\\frac{1}{2}$，由柯西收敛准则知 $\\sum\\frac{u_n}{S_n}$ 发散；当 $\\alpha<1$ 时 $\\frac{u_n}{S_n^{\\alpha}}\\ge\\frac{u_n}{S_n}$，由比较判别法知 $\\sum_{n=1}^{\\infty}\\frac{u_n}{S_n^{\\alpha}}$ 发散。",
+      "summary": "第1题续：$\\alpha>1$ 收敛，$\\alpha=1$ 与 $\\alpha<1$ 发散",
+      "clarity": "good"
+    },
+    {
+      "id": 162,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "证明:当 $p\\ge 1$ 时,$$\\sum_{n=1}^{\\infty}\\frac{1}{(n+1)\\sqrt[p]{n}}<p.$$",
+          "answer": "",
+          "note": "与第158页为同一张幻灯片，此张更清晰。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：$u_n=\\frac{1}{(n+1)\\sqrt[p]{n}}=n^{\\frac{p-1}{p}}\\cdot\\frac{1}{n(n+1)}=n^{\\frac{p-1}{p}}\\left(\\frac{1}{n}-\\frac{1}{n+1}\\right)=n^{\\frac{p-1}{p}}\\left[\\left(\\frac{1}{\\sqrt[p]{n}}\\right)^{p}-\\left(\\frac{1}{\\sqrt[p]{n+1}}\\right)^{p}\\right]$，对 $x^{p}$ 用拉格朗日中值定理得 $u_n=n^{\\frac{p-1}{p}}p\\xi^{p-1}\\left(\\frac{1}{\\sqrt[p]{n}}-\\frac{1}{\\sqrt[p]{n+1}}\\right)$，$\\xi\\in\\left(\\frac{1}{\\sqrt[p]{n+1}},\\frac{1}{\\sqrt[p]{n}}\\right)$；写成 $\\xi=\\frac{1}{\\sqrt[p]{n+\\theta}},\\theta\\in(0,1)$ 得 $u_n=pn^{\\frac{p-1}{p}}\\left(\\frac{1}{\\sqrt[p]{n+\\theta}}\\right)^{p-1}\\left(\\frac{1}{\\sqrt[p]{n}}-\\frac{1}{\\sqrt[p]{n+1}}\\right)=p\\left(\\frac{n}{n+\\theta}\\right)^{\\frac{p-1}{p}}\\left(\\frac{1}{\\sqrt[p]{n}}-\\frac{1}{\\sqrt[p]{n+1}}\\right)<p\\left(\\frac{1}{\\sqrt[p]{n}}-\\frac{1}{\\sqrt[p]{n+1}}\\right)$。求和得 $\\sum_{n=1}^{\\infty}\\frac{1}{(n+1)\\sqrt[p]{n}}<p\\sum_{n=1}^{\\infty}\\left(\\frac{1}{\\sqrt[p]{n}}-\\frac{1}{\\sqrt[p]{n+1}}\\right)=p\\lim_{n\\to\\infty}\\left(1-\\frac{1}{\\sqrt[p]{n+1}}\\right)=p$。",
+      "summary": "第2题（同前页更清晰）：证级数之和小于 $p$",
+      "clarity": "good"
+    },
+    {
+      "id": 163,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "3",
+          "statement": "设 $\\sum_{n=0}^{\\infty}a_n$ 是收敛的正项级数,证明存在正数 $c_0,c_1,\\cdots,c_n,\\cdots$,使得 $\\lim_{n\\to\\infty}c_n=\\infty$,并且级数 $\\sum_{n=0}^{\\infty}c_na_n$ 也是收敛的。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：$\\sum_{n=0}^{\\infty}a_n$ 收敛，故余项 $r_n=\\sum_{k=n}^{\\infty}a_k\\to 0\\,(n\\to\\infty)$，由柯西收敛准则存在正整数递增数列 $\\{N_k\\}$ 满足 $\\sum_{n=N_k}^{N_{k+1}}a_n<\\frac{1}{k^{3}}$。令 $c_n=1\\,(n<N_1)$，$c_n=k\\,(N_k\\le n\\le N_{k+1})$，则 $\\lim_{n\\to\\infty}c_n=\\infty$。又 $\\sum_{n=0}^{\\infty}c_na_n=\\sum_{n=0}^{N_1-1}a_n+\\sum_{k=1}^{\\infty}k\\sum_{n=N_k}^{N_{k+1}}a_n\\le\\sum_{n=0}^{N_1-1}a_n+\\sum_{k=1}^{\\infty}\\frac{k}{k^{3}}=\\sum_{n=0}^{N_1-1}a_n+\\sum_{k=1}^{\\infty}\\frac{1}{k^{2}}$，其任一部分和均有上界，故级数收敛。",
+      "summary": "第3题：构造 $c_n\\to\\infty$ 使 $\\sum c_na_n$ 仍收敛",
+      "clarity": "good"
+    },
+    {
+      "id": 164,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "4",
+          "statement": "设 $\\alpha>0$,$\\{p_n\\}$ 是一个数列,并且 $p_n>0$,$p_{n+1}\\ge p_n$,证明: 级数 $\\sum_{n=1}^{\\infty}\\frac{p_n-p_{n-1}}{p_np_{n-1}^{\\alpha}}$ 收敛。",
+          "answer": "",
+          "note": "本页最末一式被幻灯片下边界截断。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：当 $\\alpha=1$ 时，由 $p_k>0,p_{k+1}\\ge p_k$ 得 $\\sum_{k=1}^{n}\\frac{p_k-p_{k-1}}{p_kp_{k-1}}=\\sum_{k=1}^{n}\\left(\\frac{1}{p_{k-1}}-\\frac{1}{p_k}\\right)=\\frac{1}{p_0}-\\frac{1}{p_n}<\\frac{1}{p_0}$。当 $\\alpha>1$ 时，$\\sum_{k=1}^{n}\\frac{p_k-p_{k-1}}{p_kp_{k-1}^{\\alpha}}=\\sum_{k=1}^{n}\\frac{1}{p_{k-1}^{\\alpha-1}}\\left(\\frac{1}{p_{k-1}}-\\frac{1}{p_k}\\right)\\le\\frac{1}{p_0^{\\alpha-1}}\\sum_{k=1}^{n}\\left(\\frac{1}{p_{k-1}}-\\frac{1}{p_k}\\right)\\le\\frac{1}{p_0^{\\alpha-1}}\\left(\\frac{1}{p_0}-\\frac{1}{p_n}\\right)\\le\\frac{1}{p_0^{\\alpha}}$。当 $0<\\alpha<1$ 时，$1-\\alpha>0$，$\\frac{p_k-p_{k-1}}{p_kp_{k-1}^{\\alpha}}=p_{k-1}^{1-\\alpha}\\left(\\frac{1}{p_{k-1}}-\\frac{1}{p_k}\\right)=p_{k-1}^{1-\\alpha}\\left[\\left(\\frac{1}{p_{k-1}^{\\alpha}}\\right)^{\\frac{1}{\\alpha}}-\\left(\\frac{1}{p_k^{\\alpha}}\\right)^{\\frac{1}{\\alpha}}\\right]$…（此式后段被页面截断）。",
+      "summary": "第4题：差分型级数收敛，$\\alpha=1$ 与 $\\alpha>1$ 部分",
+      "clarity": "good"
+    },
+    {
+      "id": 165,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "接上页（$0<\\alpha<1$ 的情形）：$\\frac{p_k-p_{k-1}}{p_kp_{k-1}^{\\alpha}}=p_{k-1}^{1-\\alpha}\\left[\\left(\\frac{1}{p_{k-1}^{\\alpha}}\\right)^{\\frac{1}{\\alpha}}-\\left(\\frac{1}{p_k^{\\alpha}}\\right)^{\\frac{1}{\\alpha}}\\right]$，对 $x^{\\frac{1}{\\alpha}}$ 用中值定理得 $=\\frac{1}{\\alpha}p_{k-1}^{1-\\alpha}\\left[\\frac{1}{(p_{k-1}+\\theta)^{\\alpha}}\\right]^{\\frac{1-\\alpha}{\\alpha}}\\left(\\frac{1}{p_{k-1}^{\\alpha}}-\\frac{1}{p_k^{\\alpha}}\\right)=\\frac{1}{\\alpha}\\left(\\frac{p_{k-1}}{p_{k-1}+\\theta}\\right)^{1-\\alpha}\\left(\\frac{1}{p_{k-1}^{\\alpha}}-\\frac{1}{p_k^{\\alpha}}\\right)\\le\\frac{1}{\\alpha}\\left(\\frac{1}{p_{k-1}^{\\alpha}}-\\frac{1}{p_k^{\\alpha}}\\right)$。求和得 $\\sum_{k=1}^{n}\\frac{p_k-p_{k-1}}{p_kp_{k-1}^{\\alpha}}\\le\\frac{1}{\\alpha}\\cdot\\frac{1}{p_0^{\\alpha}}$，故原级数收敛。",
+      "summary": "第4题续：$0<\\alpha<1$ 情形，中值定理后望远镜求和",
+      "clarity": "good"
+    },
+    {
+      "id": 166,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "5",
+          "statement": "设 $a_n=\\left(1-\\frac{p\\ln n}{n}\\right)^{n}$,讨论 $\\sum_{n=1}^{\\infty}a_n$ 敛散性.($p$ 为常数)",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "分析：$a_n=e^{n\\ln(1-\\frac{p\\ln n}{n})}$，$n\\to+\\infty$ 时 $\\frac{\\ln n}{n}\\to 0$，$\\ln(1-\\frac{p\\ln n}{n})\\sim-\\frac{p\\ln n}{n}$，故 $a_n\\sim e^{-p\\ln n}=n^{-p}$。解：$\\lim_{n\\to\\infty}\\ln(n^{p}a_n)=\\lim_{n\\to\\infty}[p\\ln n+n\\ln(1-\\frac{p\\ln n}{n})]=\\lim_{x\\to 0}\\frac{1}{x}[\\ln(1+px\\ln x)-px\\ln x]=\\lim_{x\\to 0}[\\frac{p(\\ln x+1)}{1+px\\ln x}-p(\\ln x+1)]=\\lim_{x\\to 0}\\frac{-p^{2}(x\\ln^{2}x+x\\ln x)}{1+px\\ln x}=0$，故 $\\lim_{n\\to\\infty}n^{p}a_n=1$，于是 $p>1$ 时级数 $\\sum_{n=1}^{\\infty}a_n$ 收敛，$p\\le 1$ 时级数发散。",
+      "summary": "第5题：$(1-\\frac{p\\ln n}{n})^{n}$ 型级数的敛散性讨论",
+      "clarity": "good"
+    },
+    {
+      "id": 167,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "6",
+          "statement": "讨论 $\\sum_{n=1}^{\\infty}\\frac{1}{n^{1+\\frac{1}{n}}}$ 敛散性.",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：$\\lim_{n\\to\\infty}\\frac{\\frac{1}{n^{1+1/n}}}{\\frac{1}{n}}=1$，而 $\\sum_{n=1}^{\\infty}\\frac{1}{n}$ 发散，故由极限判别法的极限形式知，原级数发散。",
+      "summary": "第6题：$\\sum\\frac{1}{n^{1+1/n}}$ 与调和级数比较，发散",
+      "clarity": "good"
+    },
+    {
+      "id": 168,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "7",
+          "statement": "证明级数 $\\sum_{n=1}^{\\infty}\\frac{\\sqrt[n]{n}-1}{n^{\\alpha}}$ 当 $\\alpha>0$ 时收敛,$\\alpha\\le 0$ 时发散。",
+          "answer": "",
+          "note": ""
+        },
+        {
+          "label": "Ex",
+          "statement": "判断级数 $\\sum_{n=1}^{\\infty}\\left(n^{\\frac{1}{n^{2}+1}}-1\\right)$ 敛散性。",
+          "answer": "",
+          "note": "页面末尾的练习（Ex），无解答。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：1)当 $\\alpha>0$ 时，$\\lim_{n\\to\\infty}\\frac{\\ln n}{n^{\\alpha/2}}=\\lim_{x\\to\\infty}\\frac{\\ln x}{x^{\\alpha/2}}=\\lim_{x\\to\\infty}\\frac{1/x}{\\frac{\\alpha}{2}x^{\\alpha/2-1}}=0$；又 $n\\to\\infty$ 时 $\\sqrt[n]{n}-1\\sim\\ln[1+(\\sqrt[n]{n}-1)]=\\frac{\\ln n}{n}$，与 $\\sum_{n=1}^{\\infty}\\frac{1}{n^{\\alpha/2+1}}$ 比较可知 $\\sum_{n=1}^{\\infty}\\frac{\\sqrt[n]{n}-1}{n^{\\alpha}}$ 收敛。2)当 $\\alpha\\le 0$ 时，$\\frac{\\ln n}{n^{\\alpha+1}}=\\frac{\\ln n}{n^{\\alpha}}\\cdot\\frac{1}{n}\\ge\\frac{1}{n}$，由 $\\sum_{n=1}^{\\infty}\\frac{1}{n}$ 发散知 $\\sum_{n=1}^{\\infty}\\frac{\\sqrt[n]{n}-1}{n^{\\alpha}}$ 发散。",
+      "summary": "第7题：$\\sum\\frac{\\sqrt[n]{n}-1}{n^{\\alpha}}$ 的敛散性，附练习 Ex",
+      "clarity": "partial"
+    },
+    {
+      "id": 169,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "8",
+          "statement": "设 $0<p_1<p_2<\\cdots<p_n<\\cdots$,证明:$\\sum_{n=1}^{\\infty}\\frac{1}{p_n}$ 收敛 $\\Leftrightarrow$ $\\sum_{n=1}^{\\infty}\\frac{n}{p_1+p_2+\\cdots+p_n}$ 收敛。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：由 $p_1+p_2+\\cdots+p_n<np_n$ 得 $0<\\frac{1}{p_n}<\\frac{n}{p_1+p_2+\\cdots+p_n}$，故后者收敛时由比较判别法知 $\\sum\\frac{1}{p_n}$ 收敛。反之，由 $p_1+p_2+\\cdots+p_{2n}\\ge p_{n+1}+p_{n+2}+\\cdots+p_{2n}\\ge np_n$ 及 $p_1+p_2+\\cdots+p_{2n-1}\\ge p_n+p_{n+1}+\\cdots+p_{2n-1}\\ge np_n$，得 $\\frac{2n}{p_1+\\cdots+p_{2n}}<\\frac{2n}{p_{n+1}+\\cdots+p_{2n}}\\le\\frac{2n}{np_n}=\\frac{2}{p_n}$，$\\frac{2n-1}{p_1+\\cdots+p_{2n-1}}\\le\\frac{2n}{np_n}=\\frac{2}{p_n}$，故 $\\sum\\frac{1}{p_n}$ 收敛时正项级数 $\\sum_{n=1}^{\\infty}\\frac{n}{p_1+\\cdots+p_n}$ 收敛。",
+      "summary": "第8题：$\\sum\\frac{1}{p_n}$ 与 $\\sum\\frac{n}{p_1+\\cdots+p_n}$ 同敛散",
+      "clarity": "good"
+    }
+  ]
+}

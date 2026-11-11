@@ -1,0 +1,85 @@
+{
+  "chunk": 8,
+  "items": [
+    {
+      "pid": 113,
+      "commentary": "考点是压缩型中值定理控制差分，以及由部分和极限反推数列极限。破题全在一式 $|x_{n+1}-x_n|\\le\\frac12|x_n-x_{n-1}|$，级数通项被等比控制故绝对收敛；再由 $s_n=x_{n+1}-x_1$ 得 $x_n$ 收敛。易错：$f(0)=1$ 不等于 $x_1=1$；要严格得到 $A<2$，须用 $A=f(A)$ 解出 $A=\\frac{1}{1-f'(\\zeta)}$，仅用 $x_{n+1}<1+\\frac12x_n$ 只能得 $A\\le2$。",
+      "solution_clean": "(1) $|x_{n+1}-x_n|=|f(x_n)-f(x_{n-1})|\\le\\frac12|x_n-x_{n-1}|$，通项被等比数列控制，故 $\\sum(x_{n+1}-x_n)$ 绝对收敛。\n(2) $s_n=\\sum_{k=1}^{n}(x_{k+1}-x_k)=x_{n+1}-x_1$ 收敛，故 $\\lim_{n\\to\\infty}x_n=A$ 存在。\n由 $f$ 连续得 $A=f(A)$，又 $A=f(0)+f'(\\zeta)A=1+f'(\\zeta)A$，即 $A=\\frac{1}{1-f'(\\zeta)}$，由 $0<f'<\\frac12$ 得 $1<A<2$。"
+    },
+    {
+      "pid": 114,
+      "commentary": "考点是正项级数比较判别法加对数二阶展开。破题：把通项拆成 $n^{-(p+x)}y_n^{x}$，其中 $y_n=n\\big(1-\\frac{x\\ln n}{n}\\big)^{n/x}$，由 $\\ln y_n=-\\frac{x\\ln^2 n}{2n}+o\\big(\\frac{\\ln^2 n}{n}\\big)\\to0$ 得 $y_n\\to1$，故通项与 $\\frac{1}{n^{p+x}}$ 同阶，临界线就是 $p+x=1$。易错：只展开一阶会漏掉这个缓变因子从而误判；$x\\ne0$ 时还要说明 $n$ 充分大后底数为正。",
+      "solution_clean": "$n$ 充分大时 $1-\\frac{x\\ln n}{n}>0$，为正项级数。记 $y_n=n\\big(1-\\frac{x\\ln n}{n}\\big)^{n/x}$，则通项 $=\\frac{y_n^{x}}{n^{p+x}}$。\n$\\ln y_n=\\ln n+\\frac{n}{x}\\ln\\big(1-\\frac{x\\ln n}{n}\\big)=\\ln n-\\ln n-\\frac{x\\ln^2 n}{2n}+o\\big(\\frac{\\ln^2n}{n}\\big)\\to0$，故 $y_n\\to1$，与 $\\frac{1}{n^{p+x}}$ 的比值趋于 1。\n于是 $p+x>1$ 时收敛，$p+x\\le1$ 时发散。"
+    },
+    {
+      "pid": 115,
+      "commentary": "考点是 Cauchy 凝聚判别法，本质为二进分块放缩。破题：在第 $k$ 块 $2^k<j\\le2^{k+1}$ 上把 $a_j$ 夹在 $a_{2^{k+1}}$ 与 $a_{2^k}$ 之间，块和是 $2^ka_{2^k}$ 量级，于是 $S_{2^{n+1}-1}\\le a_1+\\sigma_n$ 而 $S_{2^{n+1}}\\ge\\frac12\\sigma_n$，两部分和的有界性等价。易错：只有上界不够，发散方向必须靠下界；单调与非负是放缩前提，缺一不可。",
+      "solution_clean": "设 $S_n=\\sum_{k=1}^{n}a_k$，$\\sigma_n=\\sum_{k=1}^{n}2^ka_{2^k}$；$a_k\\downarrow0$ 故 $a_k\\ge0$，且 $2^k<j\\le2^{k+1}$ 时 $a_{2^{k+1}}\\le a_j\\le a_{2^k}$。\n上界：$S_{2^{n+1}-1}=a_1+\\sum_{k=1}^{n}\\sum_{j=2^k+1}^{2^{k+1}}a_j\\le a_1+\\sum_{k=1}^{n}2^ka_{2^k}=a_1+\\sigma_n$。\n下界：$S_{2^{n+1}}\\ge a_1+\\sum_{k=1}^{n}2^{k-1}a_{2^k}\\ge\\frac12\\sigma_n$。\n故 $\\{S_n\\}$ 有界 $\\Leftrightarrow\\{\\sigma_n\\}$ 有界，两级数同敛散。"
+    },
+    {
+      "pid": 116,
+      "commentary": "考点是用级数尾块之和去控制 $na_n$。破题：条件对每个 $j\\in[n,2n]$ 都给出 $a_{2n}\\le100a_j$，把这 $n$ 个不等式按 $j=n,\\dots,2n-1$ 相加，立马得到 $na_{2n}\\le100(S_{2n-1}-S_{n-1})\\to0$。易错：下标范围 $n\\le k\\le2n$ 随 $n$ 变动，不能换成固定的 $a_1$；奇数项要乘 2 凑成 $2na_{2n-1}$ 才能套同一手法。",
+      "solution_clean": "由条件，对 $j=n,\\dots,2n-1$ 有 $a_{2n}\\le100a_j$，相加得 $na_{2n}\\le100(S_{2n-1}-S_{n-1})$。\n$\\sum a_n$ 收敛故 $S_{2n-1}-S_{n-1}\\to0$，于是 $2na_{2n}\\to0$。\n同法由 $a_{2n-1}\\le100a_j$ 得 $2na_{2n-1}\\le200(S_{2n-1}-S_{n-1})\\to0$，故 $(2n-1)a_{2n-1}\\to0$。\n奇偶两列都趋于 0，故 $\\lim_{n\\to\\infty}na_n=0$。"
+    },
+    {
+      "pid": 117,
+      "commentary": "考点是拆集合分类加优级数。破题：当 $(a_n)^{\\frac{n}{n+1}}\\ge2a_n$ 时可解出 $a_n\\le2^{-(n+1)}$，这部分通项本身就像等比；剩下的 $n$ 直接 $\\le2a_n$，两段各自可和。易错：别指望 $a_n^{\\frac{n}{n+1}}\\le a_n$，方向正好相反（$0<a_n<1$ 时它比 $a_n$ 大）；这类题先找「通项何时被放大」的分界点。",
+      "solution_clean": "令 $T=\\{n\\ge1:(a_n)^{\\frac{n}{n+1}}<2a_n\\}$。$n\\notin T$ 时 $(a_n)^{\\frac{1}{n+1}}\\le\\frac12$，即 $a_n\\le2^{-(n+1)}$，从而 $(a_n)^{\\frac{n}{n+1}}\\le2^{-n}$。\n故 $\\sum_{n=1}^{\\infty}(a_n)^{\\frac{n}{n+1}}=\\sum_{n\\in T}+\\sum_{n\\notin T}\\le2\\sum_{n\\in T}a_n+\\sum_{n\\notin T}2^{-n}\\le2\\sum_{n=1}^{\\infty}a_n+\\sum_{n=1}^{\\infty}2^{-n}$，右端收敛。\n由比较判别法，$\\sum(a_n)^{\\frac{n}{n+1}}$ 收敛。"
+    },
+    {
+      "pid": 118,
+      "commentary": "考点是二阶常系数线性递推的通项加等比级数求和。破题：特征根 $r_{1,2}=\\frac{1\\pm\\sqrt5}{2}$ 给出 $a_n=\\frac{1}{\\sqrt5}(r_1^n-r_2^n)$，公比 $\\left|\\frac{r_{1,2}}{2}\\right|<1$ 既保证收敛，又直接给出求和式。易错：拆成两个级数之前必须先说收敛；$r_2<0$，比公比时要取绝对值，真正决定敛散的是 $\\frac{r_1}{2}\\approx0.809$。",
+      "solution_clean": "特征方程 $r^2-r-1=0$，$r_{1,2}=\\frac{1\\pm\\sqrt5}{2}$，由 $a_1=a_2=1$ 得 $a_n=\\frac{1}{\\sqrt5}(r_1^n-r_2^n)$。\n$\\left|\\frac{r_1}{2}\\right|,\\left|\\frac{r_2}{2}\\right|<1$，故 $\\sum_{n=1}^{\\infty}\\frac{a_n}{2^n}=\\frac{1}{\\sqrt5}\\Big[\\sum_{n=1}^{\\infty}\\big(\\frac{r_1}{2}\\big)^n-\\sum_{n=1}^{\\infty}\\big(\\frac{r_2}{2}\\big)^n\\Big]$ 收敛。\n由 $\\sum_{n\\ge1}\\big(\\frac{r}{2}\\big)^n=\\frac{r}{2-r}$，而 $\\frac{r_1}{2-r_1}=2+\\sqrt5$，$\\frac{r_2}{2-r_2}=2-\\sqrt5$，\n得和 $=\\frac{1}{\\sqrt5}\\big[(2+\\sqrt5)-(2-\\sqrt5)\\big]=2$。"
+    },
+    {
+      "pid": 119,
+      "commentary": "考点是 Fibonacci 通项与「对递推求和再取极限」。破题：$b_n=\\frac12b_{n-1}+\\frac14b_{n-2}$，从 $k=3$ 加到 $n$ 得 $s_n-\\frac34=\\frac12\\big(s_{n-1}-\\frac12\\big)+\\frac14s_{n-2}$，令 $n\\to\\infty$ 直接解出 $s=2$，比拆两个等比省事。易错：取极限前先用比值判别法（$\\frac{1+\\sqrt5}{4}<1$）确认收敛；移位时要减掉 $b_1,b_2$，下标极易写错。",
+      "solution_clean": "由 $a_n=a_{n-1}+a_{n-2}$ 得 $b_n=\\frac12b_{n-1}+\\frac14b_{n-2}$，其中 $b_n=\\frac{a_n}{2^n}$，$b_1=\\frac12$，$b_2=\\frac14$。\n$\\lim_{n\\to\\infty}\\frac{b_{n+1}}{b_n}=\\frac12\\cdot\\frac{1+\\sqrt5}{2}=\\frac{1+\\sqrt5}{4}<1$，故 $\\sum b_n$ 收敛，记和为 $s$。\n对 $k=3,\\dots,n$ 求和：$s_n-\\frac12-\\frac14=\\frac12\\big(s_{n-1}-\\frac12\\big)+\\frac14s_{n-2}$。\n令 $n\\to\\infty$：$s-\\frac34=\\frac12\\big(s-\\frac12\\big)+\\frac14s=\\frac34s-\\frac14$，故 $s=2$。"
+    },
+    {
+      "pid": 120,
+      "commentary": "考点是 Abel 分部求和把 $\\sum ka_k$ 换成部分和，再用 Cesàro 平均。破题：$\\sum_{k=1}^{n}ka_k=nS_n-\\sum_{k=1}^{n-1}S_k$，除以 $n$ 后第二项是 $S_k$ 的算术平均，随 $S_n\\to S$ 也趋于 $S$，两项相消得 0。易错：只说 $ka_k\\to0$ 或 $S_n$ 有界都不够，必须整体估计；关键是系数 $k$ 恰被 $n$ 除掉，换成 $k^2$ 结论就不成立。",
+      "solution_clean": "分部求和：$\\sum_{k=1}^{n}ka_k=nS_n-\\sum_{k=1}^{n-1}S_k$，其中 $S_k=\\sum_{j=1}^{k}a_j$。\n故 $\\frac{1}{n}\\sum_{k=1}^{n}ka_k=S_n-\\frac{1}{n}\\sum_{k=1}^{n-1}S_k$。\n由 Cesàro 定理，$S_k\\to S$ 推出 $\\frac{1}{n-1}\\sum_{k=1}^{n-1}S_k\\to S$，从而 $\\frac{1}{n}\\sum_{k=1}^{n-1}S_k\\to S$。\n于是 $\\lim_{n\\to\\infty}\\frac{\\sum_{k=1}^{n}ka_k}{n}=S-S=0$。"
+    },
+    {
+      "pid": 121,
+      "commentary": "考点是调和—几何—算术均值链加加权 AM-GM，落点是上一题的结论。破题：先用 $\\frac{n}{\\sum 1/a_k}\\le\\big(a_1\\cdots a_n\\big)^{1/n}$ 消去倒数和，再把 $a_1,2a_2,\\dots,na_n$ 用 AM-GM 塞进 $\\sqrt[n]{n!}$，得左端 $\\le\\frac{n}{\\sqrt[n]{n!}}\\cdot\\frac{\\sum ka_k}{n}$。易错：只用 $\\le\\frac{S_n}{n}$ 只能得有界而非 0；$\\frac{n}{\\sqrt[n]{n!}}\\to e$ 只是有界因子，不能当 1 略去。",
+      "solution_clean": "由 $\\frac{n}{\\sum_{k=1}^{n}1/a_k}\\le\\big(a_1\\cdots a_n\\big)^{1/n}$ 得 $\\frac{n^2}{\\sum 1/a_k}\\le n\\big(a_1\\cdots a_n\\big)^{1/n}$。\n对 $a_1,2a_2,\\dots,na_n$ 用 AM-GM：$\\big(a_1\\cdots a_n\\big)^{1/n}=\\Big(\\frac{a_1(2a_2)\\cdots(na_n)}{n!}\\Big)^{1/n}\\le\\frac{1}{\\sqrt[n]{n!}}\\cdot\\frac{a_1+2a_2+\\cdots+na_n}{n}$。\n故 $0\\le\\frac{n^2}{\\frac{1}{a_1}+\\cdots+\\frac{1}{a_n}}\\le\\frac{n}{\\sqrt[n]{n!}}\\cdot\\frac{a_1+2a_2+\\cdots+na_n}{n}$。\n$\\frac{n}{\\sqrt[n]{n!}}\\to e$，又由上一题 $\\frac{a_1+2a_2+\\cdots+na_n}{n}\\to0$，故所证极限为 0。"
+    },
+    {
+      "pid": 122,
+      "commentary": "考点是递推数列单调有界加几何压缩。破题：先归纳 $x_n\\in[\\sqrt6,3]$ 且递增，再把 $3-x_n=\\frac{3-x_{n-1}}{3+\\sqrt{6+x_{n-1}}}$ 的分母放大成 $>3$，得统一压缩比 $\\frac13$，开方后与 $3^{-n/2}$ 比较。易错：直接求 $\\sqrt{3-x_n}$ 的比值极限需先知道 $x_n\\to3$，属循环论证；上界 3 正是不动点，先证出来才好压缩。",
+      "solution_clean": "归纳证 $\\sqrt6\\le x_n\\le3$ 且 $\\{x_n\\}$ 递增（$x_{n+1}-x_n=\\frac{6+x_n-x_n^2}{\\sqrt{6+x_n}+x_n}>0$）。\n$3-x_n=3-\\sqrt{6+x_{n-1}}=\\frac{3-x_{n-1}}{3+\\sqrt{6+x_{n-1}}}<\\frac13(3-x_{n-1})<\\cdots<3^{-n}(3-x_0)$。\n故 $\\sqrt{3-x_n}<\\sqrt{3-x_0}\\cdot\\big(\\frac{1}{\\sqrt3}\\big)^{n}$，而 $\\sum\\big(\\frac{1}{\\sqrt3}\\big)^n$ 收敛。\n由比较判别法，$\\sum_{n=0}^{\\infty}\\sqrt{3-x_n}$ 收敛。"
+    },
+    {
+      "pid": 123,
+      "commentary": "考点是反正切和差公式配裂项（望远镜级数）。破题：$\\frac{2}{4n^2+4n+1}$ 恰是 $\\frac{(2n+2)-2n}{1+2n(2n+2)}$，用 $\\arctan x-\\arctan y=\\arctan\\frac{x-y}{1+xy}$ 化成 $\\arctan(2n+2)-\\arctan(2n)$，部分和只剩首末两项。易错：分母正是 $(2n+1)^2$，别顺手去配方或夹逼；末项 $\\arctan(2N+2)\\to\\frac{\\pi}{2}$ 容易漏，答案里那个 $\\frac{\\pi}{2}$ 就来自此处。",
+      "solution_clean": "$\\frac{2}{4n^2+4n+1}=\\frac{(2n+2)-2n}{1+2n(2n+2)}$，由 $\\arctan x-\\arctan y=\\arctan\\frac{x-y}{1+xy}$ 得\n$\\arctan\\frac{2}{4n^2+4n+1}=\\arctan(2n+2)-\\arctan(2n)$。\n部分和 $S_N=\\arctan(2N+2)-\\arctan2\\to\\frac{\\pi}{2}-\\arctan2$。"
+    },
+    {
+      "pid": 124,
+      "commentary": "考点同上一题：反正切和差公式配裂项。破题：$\\frac{3}{9n^2+9n+1}=\\frac{(3n+3)-3n}{1+3n(3n+3)}$，通项裂成 $\\arctan(3n+3)-\\arctan(3n)$，部分和即 $\\arctan(3N+3)-\\arctan3$。易错：分子 3 必须恰好等于 $x-y$，凑错一分就全盘失效；可记住一般式 $\\sum\\arctan\\frac{m}{m^2n(n+1)+1}=\\frac{\\pi}{2}-\\arctan m$。",
+      "solution_clean": "$\\frac{3}{9n^2+9n+1}=\\frac{(3n+3)-3n}{1+3n(3n+3)}$，故 $\\arctan\\frac{3}{9n^2+9n+1}=\\arctan(3n+3)-\\arctan(3n)$。\n部分和 $S_N=\\arctan(3N+3)-\\arctan3$。\n令 $N\\to\\infty$，$\\arctan(3N+3)\\to\\frac{\\pi}{2}$，故和为 $\\frac{\\pi}{2}-\\arctan3$。"
+    },
+    {
+      "pid": 125,
+      "commentary": "考点是用复指数（或积化和差）求 $\\sum a^n\\cos n\\theta$，按 $|a|$ 分类。破题：记 $z=ae^{i\\theta}$，$\\sum_{k\\le n}z^k$ 的实部就是部分和，$|z|<1$ 时取极限得 $\\frac{a\\cos\\theta-a^2}{1-2a\\cos\\theta+a^2}$。易错：$|a|\\ge1$ 时不能只写「振荡」，要指出 $\\cos n\\theta$ 不趋于 0 故通项不趋于 0；$a=\\pm1$ 这类边界必须单独说明。",
+      "solution_clean": "$|a|\\ge1$ 时 $|a^n\\cos n\\theta|$ 不趋于 0，级数发散；$|a|<1$ 时 $|a^n\\cos n\\theta|\\le|a|^n$，绝对收敛。\n$|a|<1$ 时令 $z=ae^{i\\theta}$，$S_n=\\sum_{k=1}^{n}a^k\\cos k\\theta=\\operatorname{Re}\\frac{z(1-z^n)}{1-z}$。\n$z^n\\to0$，故和 $=\\operatorname{Re}\\frac{z}{1-z}=\\frac{a\\cos\\theta-a^2}{1-2a\\cos\\theta+a^2}$。"
+    },
+    {
+      "pid": 126,
+      "commentary": "考点是莱布尼茨判别法，难点在证明平均数列单调。破题：$b_n=\\frac{S_n}{n}$ 递减等价于 $S_n\\ge na_{n+1}$，而 $S_n-na_{n+1}\\ge n(a_n-a_{n+1})\\ge0$ 由 $a_n\\downarrow$ 直接得到；$b_n\\to0$ 则是 $a_n\\to0$ 的算术平均。易错：先要说明 $a_n\\downarrow0$ 蕴含 $a_n\\ge0$；只验 $b_n\\to0$ 而漏掉单调性，是这类题最常见的失分。",
+      "solution_clean": "$a_n\\downarrow0\\Rightarrow a_n\\ge0$，令 $b_n=\\frac{a_1+\\cdots+a_n}{n}$，由算术平均得 $b_n\\to0$。\n$b_n-b_{n+1}=\\frac{(n+1)S_n-nS_{n+1}}{n(n+1)}=\\frac{S_n-na_{n+1}}{n(n+1)}\\ge\\frac{n(a_n-a_{n+1})}{n(n+1)}\\ge0$，故 $\\{b_n\\}$ 单调减。\n由莱布尼茨准则，$\\sum_{n=1}^{\\infty}(-1)^nb_n$ 收敛。"
+    },
+    {
+      "pid": 127,
+      "commentary": "考点是积分第一中值定理加莱布尼茨判别。破题：$p>1$ 时直接 $|a_n|\\le\\int_n^{n+1}\\frac{dx}{x^p}$；$0<p\\le1$ 时把缓变的 $\\frac{1}{1+x^p}$ 提到积分号外，剩下 $\\int_n^{n+1}\\sin\\pi x\\,dx=\\frac{2(-1)^n}{\\pi}$，于是 $a_n=(-1)^nb_n$。易错：中值定理要求 $\\sin\\pi x$ 在区间内不变号；$b_n$ 递减源于 $\\xi_{n+1}>\\xi_n$，别误以为靠 $\\frac{1}{1+x^p}$ 自身单调。",
+      "solution_clean": "(1) $p>1$：$|a_n|\\le\\int_n^{n+1}\\frac{dx}{1+x^p}\\le\\frac{1}{n^p}$，故 $\\sum a_n$ 绝对收敛。\n(2) $0<p\\le1$：$\\sin\\pi x$ 在 $[n,n+1]$ 上不变号，由积分第一中值定理 $a_n=\\frac{1}{1+\\xi_n^p}\\int_n^{n+1}\\sin\\pi x\\,dx=\\frac{2(-1)^n}{\\pi(1+\\xi_n^p)}$，$n<\\xi_n<n+1$。\n记 $a_n=(-1)^nb_n$，则 $b_n=\\frac{2}{\\pi(1+\\xi_n^p)}$；$\\xi_n$ 递增故 $b_n$ 递减，且 $0<b_n<\\frac{2}{\\pi(1+n^p)}\\to0$。\n由莱布尼茨准则，$\\sum a_n$ 收敛。"
+    },
+    {
+      "pid": 128,
+      "commentary": "考点是反常积分按零点切块化成级数，再用莱布尼茨（Dirichlet）判别。破题：在每段 $[\\sqrt{n\\pi},\\sqrt{(n+1)\\pi}]$ 上被积函数变号一次，$t=x^2$ 后比较 $\\frac{1}{\\sqrt t}$ 与 $\\frac{1}{\\sqrt t+\\pi}$ 的移位，得 $|u_n|$ 递减且趋于 0。易错：$\\int|\\sin x^2|dx$ 发散，绝不能用绝对收敛去证；只证 $|u_n|\\to0$ 不够，递减性必须靠移位比较。",
+      "solution_clean": "令 $u_n=\\int_{\\sqrt{n\\pi}}^{\\sqrt{(n+1)\\pi}}\\sin x^2\\,dx$，则 $\\sum_{n=0}^{N}u_n=\\int_0^{\\sqrt{(N+1)\\pi}}\\sin x^2dx$，故只需证 $\\sum u_n$ 收敛。\n$t=x^2$ 得 $2u_n=\\int_{n\\pi}^{(n+1)\\pi}\\frac{\\sin t}{\\sqrt t}dt$，各项符号交替。\n$2|u_n|=\\int_{n\\pi}^{(n+1)\\pi}\\frac{|\\sin t|}{\\sqrt t}dt>\\int_{n\\pi}^{(n+1)\\pi}\\frac{|\\sin t|}{\\sqrt t+\\pi}dt=\\int_{(n+1)\\pi}^{(n+2)\\pi}\\frac{|\\sin t|}{\\sqrt t}dt=2|u_{n+1}|$，故 $\\{|u_n|\\}$ 递减。\n又 $2|u_n|\\le\\frac{1}{\\sqrt{n\\pi}}\\cdot\\pi\\to0$，由莱布尼茨准则 $\\sum u_n$ 收敛，即原积分收敛。"
+    }
+  ]
+}

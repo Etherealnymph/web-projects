@@ -1,0 +1,232 @@
+{
+  "batch": 21,
+  "date": "2026-10-31",
+  "pages": [
+    {
+      "id": 263,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "(2) 将函数 $f(x)=\\frac{x^2}{4}-\\frac{\\pi x}{2}$ 在 $[0,\\pi]$ 上展开成余弦级数，设 $a_n(n=1,2,\\cdots)$ 为其傅里叶系数，则数项级数 $\\sum_{n=1}^{\\infty}a_n$ 的和为（　）.",
+          "answer": "$\\frac{\\pi^2}{6}$",
+          "note": "题号原文写作“(2)”；本页下方附解答"
+        }
+      ],
+      "has_solution": true,
+      "solution": "将 $f(x)$ 展开成余弦级数：$f(x)=\\frac{a_0}{2}+\\sum_{n=1}^{\\infty}a_n\\cos nx$，其中 $a_0=\\frac{2}{\\pi}\\int_0^{\\pi}f(x)dx=-\\frac{\\pi^2}{3}$。由 $f(0)=\\frac{a_0}{2}+\\sum_{n=1}^{\\infty}a_n$ 得 $\\sum_{n=1}^{\\infty}a_n=f(0)-\\frac{a_0}{2}=\\frac{\\pi^2}{6}$。",
+      "summary": "第(2)题：由余弦级数求系数和，答案 π²/6",
+      "clarity": "good"
+    },
+    {
+      "id": 264,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "3",
+          "statement": "(3) 设 $\\rho(\\xi)=\\frac{1}{\\pi}\\cdot\\frac{y}{(\\xi-x)^2+y^2}$，$f(y)=\\int_{-\\infty}^{+\\infty}|\\xi-x|^{\\frac{1}{2}}\\rho(\\xi)d\\xi$，其中 $\\xi,x$ 为任意实数，$y$ 为正实数，则 $f(x)$ 的表达式为（　）.",
+          "answer": "$f(x)=\\sqrt{2x}$",
+          "note": "题号原文写作“(3)”"
+        }
+      ],
+      "has_solution": true,
+      "solution": "$f(y)=\\frac{1}{\\pi}\\int_{-\\infty}^{+\\infty}|\\xi-x|^{\\frac{1}{2}}\\frac{y}{(\\xi-x)^2+y^2}d\\xi=\\frac{2y}{\\pi}\\int_0^{+\\infty}\\frac{\\sqrt{t}}{t^2+y^2}dt$，令 $t=u^2$ 得 $=\\frac{4y}{\\pi}\\int_0^{+\\infty}\\frac{u^2}{u^4+y^2}du=\\frac{2y}{\\pi}\\int_0^{+\\infty}\\frac{u^2+y+u^2-y}{u^4+y^2}du=\\frac{4y}{\\pi}\\cdot\\frac{\\pi}{2\\sqrt{2y}}=\\sqrt{2y}$，故 $f(x)=\\sqrt{2x}$。",
+      "summary": "第(3)题：含 Cauchy 核的积分求 f(x)，解 √(2x)",
+      "clarity": "good"
+    },
+    {
+      "id": 265,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "3",
+          "statement": "(3) 设 $\\rho(\\xi)=\\frac{1}{\\pi}\\cdot\\frac{y}{(\\xi-x)^2+y^2}$，$f(y)=\\int_{-\\infty}^{+\\infty}|\\xi-x|^{\\frac{1}{2}}\\rho(\\xi)d\\xi$，其中 $\\xi,x$ 为任意实数，$y$ 为正实数，则 $f(x)$ 的表达式为（　）.",
+          "answer": "$f(x)=\\sqrt{2x}$",
+          "note": "与 264.jpg 为同一页（重复拍摄）"
+        }
+      ],
+      "has_solution": true,
+      "solution": "$f(y)=\\frac{1}{\\pi}\\int_{-\\infty}^{+\\infty}|\\xi-x|^{\\frac{1}{2}}\\frac{y}{(\\xi-x)^2+y^2}d\\xi=\\frac{2y}{\\pi}\\int_0^{+\\infty}\\frac{\\sqrt{t}}{t^2+y^2}dt=\\frac{4y}{\\pi}\\int_0^{+\\infty}\\frac{u^2}{u^4+y^2}du=\\frac{2y}{\\pi}\\int_0^{+\\infty}\\frac{u^2+y+u^2-y}{u^4+y^2}du=\\frac{4y}{\\pi}\\cdot\\frac{\\pi}{2\\sqrt{2y}}=\\sqrt{2y}$，故 $f(x)=\\sqrt{2x}$。",
+      "summary": "第(3)题同 264.jpg，重复拍摄",
+      "clarity": "good"
+    },
+    {
+      "id": 266,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "4",
+          "statement": "(4) 计算 $\\int_0^{\\frac{\\pi}{2}}\\frac{\\arctan(2\\tan x)}{\\tan x}dx=$（　）.",
+          "answer": "$\\frac{\\pi}{2}\\ln 3$",
+          "note": "题号原文写作“(4)”"
+        }
+      ],
+      "has_solution": true,
+      "solution": "令 $I(a)=\\int_0^{\\frac{\\pi}{2}}\\frac{\\arctan(a\\tan x)}{\\tan x}dx=\\int_0^{+\\infty}\\frac{\\arctan(at)}{t(1+t^2)}dt$，$I(0)=0$。求导得 $I'(a)=\\int_0^{+\\infty}\\frac{1}{(1+t^2)(1+(at)^2)}dt=\\frac{a}{a^2-1}\\int_0^{+\\infty}\\left(\\frac{1}{1+u^2}-\\frac{1}{a^2+u^2}\\right)du=\\frac{\\pi}{2(a+1)}$；积分得 $I(a)=\\int_0^a\\frac{\\pi}{2(a+1)}da=\\frac{\\pi}{2}\\ln(a+1)$，故 $I(2)=\\frac{\\pi}{2}\\ln 3$。",
+      "summary": "第(4)题：含参积分求 arctan 积分值，解 (π/2)ln3",
+      "clarity": "good"
+    },
+    {
+      "id": 267,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "5",
+          "statement": "(5) 给定面密度为 1 的平面薄板 $D:x^2\\le y\\le 1$，计算该薄板过 $D$ 的质心和点 $(1,1)$ 的直线 $L$ 的转动惯量（　）.",
+          "answer": "质心为 $(0,\\frac{3}{5})$，$I_L=\\frac{352}{3045}$",
+          "note": "“过”字处字迹较淡，疑为“过 D 的质心与点 (1,1) 的直线 L”；题号原文写作“(5)”"
+        }
+      ],
+      "has_solution": true,
+      "solution": "$\\because\\bar{x}=0$，$\\bar{y}=\\frac{\\iint_D y\\,dxdy}{\\iint_D dxdy}=\\frac{\\int_{-1}^{1}dx\\int_{x^2}^{1}y\\,dy}{\\int_{-1}^{1}dx\\int_{x^2}^{1}dy}=\\frac{3}{5}$，$\\therefore$ 薄板的质心为 $(0,\\frac{3}{5})$。直线 $L:2x-5y+3=0$，$D$ 上任意点 $(x,y)$ 到直线 $L$ 的距离为 $\\frac{|2x-5y+3|}{\\sqrt{29}}$，故所求的转动惯量 $I_L=\\frac{1}{29}\\iint_D(2x-5y+3)^2d\\sigma=\\frac{352}{3045}$。",
+      "summary": "第(5)题：薄板质心与转动惯量，解 352/3045",
+      "clarity": "good"
+    },
+    {
+      "id": 268,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "6",
+          "statement": "(6) 已知 $\\int_0^{+\\infty}\\frac{\\sin x}{x}dx=\\frac{\\pi}{2}$，求 $\\int_0^{+\\infty}\\left(\\frac{\\sin x}{x}\\right)^2dx$ 及 $\\int_0^{+\\infty}\\left(\\frac{\\sin ax}{x}\\right)^2dx\\ (a>0)$ 的值.",
+          "answer": "$\\int_0^{+\\infty}\\left(\\frac{\\sin x}{x}\\right)^2dx=\\frac{\\pi}{2}$，$\\int_0^{+\\infty}\\left(\\frac{\\sin ax}{x}\\right)^2dx=\\frac{a\\pi}{2}$",
+          "note": "题号原文写作“(6)”"
+        }
+      ],
+      "has_solution": true,
+      "solution": "由分部积分法，$\\int_0^{+\\infty}\\left(\\frac{\\sin x}{x}\\right)^2dx=\\int_0^{+\\infty}\\sin^2x\\,d\\left(-\\frac{1}{x}\\right)=-\\frac{\\sin^2x}{x}\\Big|_0^{+\\infty}+\\int_0^{+\\infty}\\frac{\\sin 2x}{x}dx=\\int_0^{+\\infty}\\frac{\\sin t}{t}dt=\\frac{\\pi}{2}$；再令 $t=ax$，得 $\\int_0^{+\\infty}\\left(\\frac{\\sin ax}{x}\\right)^2dx=a\\int_0^{+\\infty}\\left(\\frac{\\sin t}{t}\\right)^2dt=\\frac{a\\pi}{2}$。",
+      "summary": "第(6)题：分部积分求 sin²x/x² 型积分值",
+      "clarity": "good"
+    },
+    {
+      "id": 269,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "二",
+          "statement": "二、设 $f(x)\\in C[0,1]\\cap D^{(2)}(0,1)$，且 $f(0)=f(1)=0$，$f''(x)<0,\\ \\forall x\\in(0,1)$。若 $f(x)$ 在 $[0,1]$ 的最大值 $M>0$，求证：对任意自然数 $n$ 为正整数，(1) 存在唯一的 $x_n\\in(0,1)$，使得 $f'(x_n)=\\frac{M}{n}$；(2) 极限 $\\lim_{n\\to\\infty}x_n$ 存在，并且 $f\\left(\\lim_{n\\to\\infty}x_n\\right)=M$.",
+          "answer": "",
+          "note": "本页给出第(1)问的证明，照片略模糊"
+        }
+      ],
+      "has_solution": true,
+      "solution": "令 $F(x)=f(x)-\\frac{M}{n}x$，由题意知 $\\exists x_0\\in(0,1)$ 使 $f(x_0)=M$；$F(1)=-\\frac{M}{n}<0$，$F(x_0)=M\\left(1-\\frac{x_0}{n}\\right)>0$，由零点定理 $\\exists\\xi\\in(x_0,1)$ 使 $F(\\xi)=0$。又 $F(0)=0$，故在 $(0,\\xi)$ 上由罗尔定理知 $\\exists x_n\\in(0,\\xi)$ 使 $F'(x_n)=f'(x_n)-\\frac{M}{n}=0$。",
+      "summary": "第二题：证存在 x_n 使 f'(x_n)=M/n（解(1)）",
+      "clarity": "partial"
+    },
+    {
+      "id": 270,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "二",
+          "statement": "二、设 $f(x)\\in C[0,1]\\cap D^{(2)}(0,1)$，且 $f(0)=f(1)=0$，$f''(x)<0,\\ \\forall x\\in(0,1)$。若 $f(x)$ 在 $[0,1]$ 的最大值 $M>0$，求证：对任意自然数 $n$ 为正整数，(1) 存在唯一的 $x_n\\in(0,1)$，使得 $f'(x_n)=\\frac{M}{n}$；(2) 极限 $\\lim_{n\\to\\infty}x_n$ 存在，并且 $f\\left(\\lim_{n\\to\\infty}x_n\\right)=M$.",
+          "answer": "",
+          "note": "与 269.jpg 为同一页（重复拍摄，更模糊）"
+        }
+      ],
+      "has_solution": true,
+      "solution": "令 $F(x)=f(x)-\\frac{M}{n}x$，由题意知 $\\exists x_0\\in(0,1)$ 使 $f(x_0)=M$；$F(1)=-\\frac{M}{n}<0$，$F(x_0)=M\\left(1-\\frac{x_0}{n}\\right)>0$，由零点定理 $\\exists\\xi\\in(x_0,1)$ 使 $F(\\xi)=0$。又 $F(0)=0$，故在 $(0,\\xi)$ 上由罗尔定理知 $\\exists x_n\\in(0,\\xi)$ 使 $F'(x_n)=f'(x_n)-\\frac{M}{n}=0$。",
+      "summary": "第二题(1)之证明，与 269.jpg 重复拍摄",
+      "clarity": "partial"
+    },
+    {
+      "id": 271,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "二",
+          "statement": "二、设 $f(x)\\in C[0,1]\\cap D^{(2)}(0,1)$，且 $f(0)=f(1)=0$，$f''(x)<0,\\ \\forall x\\in(0,1)$。若 $f(x)$ 在 $[0,1]$ 的最大值 $M>0$，求证：对任意自然数 $n$ 为正整数，(1) 存在唯一的 $x_n\\in(0,1)$，使得 $f'(x_n)=\\frac{M}{n}$；(2) 极限 $\\lim_{n\\to\\infty}x_n$ 存在，并且 $f\\left(\\lim_{n\\to\\infty}x_n\\right)=M$.",
+          "answer": "",
+          "note": "本页给出第(2)问的证明"
+        }
+      ],
+      "has_solution": true,
+      "solution": "$\\because f''(x)<0$，$\\therefore f'(x)$ 单调递减，$\\therefore f'(x_n)=\\frac{M}{n}>\\frac{M}{n+1}=f'(x_{n+1})$，$\\therefore x_n<x_{n+1}<1$，$\\therefore\\{x_n\\}$ 是单调增加的有界数列，故极限 $\\lim_{n\\to\\infty}x_n$ 存在。设 $\\lim_{n\\to\\infty}x_n=a$，由 $f'(x)$ 的连续性得 $f'(a)=f'\\left(\\lim_{n\\to\\infty}x_n\\right)=\\lim_{n\\to\\infty}f'(x_n)=\\lim_{n\\to\\infty}\\frac{M}{n}=0$；$\\because f''(x)<0$，$f'(a)=0$，$f'(x_0)=0$，$\\therefore a=x_0$，$\\therefore f\\left(\\lim_{n\\to\\infty}x_n\\right)=f(a)=f(x_0)=M$。",
+      "summary": "第二题：证 x_n 极限存在且 f(极限)=M",
+      "clarity": "good"
+    },
+    {
+      "id": 272,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "3",
+          "statement": "3. 设 $f(x)=\\arctan x$，$A$ 为常数，若 $B=\\lim_{n\\to\\infty}\\left[\\sum_{k=1}^{n}f\\left(\\frac{k}{n}\\right)-An\\right]$ 存在，求 $A$、$B$.",
+          "answer": "$A=\\frac{\\pi}{4}-\\frac{\\ln 2}{2}$",
+          "note": "$B$ 的计算见下一页 273.jpg"
+        }
+      ],
+      "has_solution": true,
+      "solution": "$A=\\lim_{n\\to\\infty}\\frac{1}{n}\\sum_{k=1}^{n}f\\left(\\frac{k}{n}\\right)=\\int_0^1 f(x)dx=x\\arctan x\\Big|_0^1-\\int_0^1\\frac{x}{1+x^2}dx=\\frac{\\pi}{4}-\\frac{\\ln 2}{2}$。又 $\\sum_{k=1}^{n}f\\left(\\frac{k}{n}\\right)-An=\\sum_{k=1}^{n}f\\left(\\frac{k}{n}\\right)-n\\int_0^1 f(x)dx=n\\sum_{k=1}^{n}\\int_{\\frac{k-1}{n}}^{\\frac{k}{n}}\\left[f\\left(\\frac{k}{n}\\right)-f(x)\\right]dx=n\\sum_{k=1}^{n}\\int_{\\frac{k-1}{n}}^{\\frac{k}{n}}\\frac{f\\left(\\frac{k}{n}\\right)-f(x)}{\\frac{k}{n}-x}\\left(\\frac{k}{n}-x\\right)dx$。",
+      "summary": "第3题：求 A、B 使极限存在，A=π/4-ln2/2",
+      "clarity": "good"
+    },
+    {
+      "id": 273,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "接上页：$=n\\sum_{k=1}^{n}\\frac{f\\left(\\frac{k}{n}\\right)-f(\\xi_{n,k})}{\\frac{k}{n}-\\xi_{n,k}}\\int_{\\frac{k-1}{n}}^{\\frac{k}{n}}\\left(\\frac{k}{n}-x\\right)dx=n\\sum_{k=1}^{n}f'(\\eta_{n,k})\\int_{\\frac{k-1}{n}}^{\\frac{k}{n}}\\left(\\frac{k}{n}-x\\right)dx=n\\sum_{k=1}^{n}f'(\\eta_{n,k})\\cdot\\frac{1}{2n^2}$。$\\therefore B=\\lim_{n\\to\\infty}n\\sum_{k=1}^{n}f'(\\eta_{n,k})\\cdot\\frac{1}{2n^2}=\\frac{1}{2}\\int_0^1 f'(x)dx=\\frac{1}{2}\\arctan 1=\\frac{\\pi}{8}$。",
+      "summary": "承接第3题：继续计算得 B=π/8",
+      "clarity": "partial"
+    },
+    {
+      "id": 274,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "4",
+          "statement": "4. 设 $f(x)$ 在 $[-1,1]$ 上二阶导数连续，证明：$\\exists\\xi\\in[-1,1]$，使 $\\int_{-1}^{1}xf(x)dx=\\frac{2}{3}f'(\\xi)+\\frac{1}{3}\\xi f''(\\xi)$.",
+          "answer": "",
+          "note": "照片较模糊，题干右端按可见笔画录为 $\\frac{2}{3}f'(\\xi)+\\frac{1}{3}\\xi f''(\\xi)$"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：$\\because[xf(x)]'=f(x)+xf'(x)$，$[xf(x)]''=2f'(x)+xf''(x)$，$\\therefore xf(x)=0+f(0)x+\\left[2f'(\\xi_x)+\\xi_x f''(\\xi_x)\\right]\\frac{x^2}{2}$。$\\therefore\\int_{-1}^{1}xf(x)dx=\\int_{-1}^{1}f(0)x\\,dx+\\int_{-1}^{1}\\left[2f'(\\xi_x)+\\xi_x f''(\\xi_x)\\right]\\frac{x^2}{2}dx=\\left[2f'(\\xi)+\\xi f''(\\xi)\\right]\\int_{-1}^{1}\\frac{x^2}{2}dx=\\frac{2}{3}f'(\\xi)+\\frac{1}{3}\\xi f''(\\xi)$。",
+      "summary": "第4题：用二阶泰勒展开证积分中值等式",
+      "clarity": "partial"
+    },
+    {
+      "id": 275,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "*5",
+          "statement": "*5. 设 $n>1$ 为正整数，令 $S_n=\\left(\\frac{1}{n}\\right)^n+\\left(\\frac{2}{n}\\right)^n+\\cdots+\\left(\\frac{n-1}{n}\\right)^n$，证明数列 $S_n$ 单调增加且有界，并计算 $\\lim_{n\\to\\infty}S_n$.",
+          "answer": "",
+          "note": "题号原文带星号；极限值见下一页 276.jpg"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：$\\because k+1=\\frac{k}{n}+\\frac{k}{n}+\\cdots+\\frac{k}{n}+1>(n+1)\\sqrt[n+1]{\\left(\\frac{k}{n}\\right)^n}$，$\\therefore\\left(\\frac{k}{n}\\right)^n<\\left(\\frac{k+1}{n+1}\\right)^{n+1}$。于是 $S_{n+1}=\\left(\\frac{1}{n+1}\\right)^{n+1}+\\left(\\frac{2}{n+1}\\right)^{n+1}+\\cdots+\\left(\\frac{n}{n+1}\\right)^{n+1}>\\left(\\frac{1}{n+1}\\right)^{n+1}+\\left(\\frac{1}{n}\\right)^n+\\cdots+\\left(\\frac{n-1}{n}\\right)^n>S_n$，即 $S_n$ 单调增加。又 $\\frac{S_n}{n}<\\int_0^1 x^n dx=\\frac{1}{n+1}$，$\\therefore S_n<\\frac{n}{n+1}<1$，即 $S_n$ 有界。",
+      "summary": "第*5题：证 S_n 单调增加且有界（上界 1）",
+      "clarity": "good"
+    },
+    {
+      "id": 276,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "(2) $\\because x\\ne 0$ 时 $e^x>1+x$，$\\therefore\\left(1-\\frac{k}{n}\\right)^n<e^{n\\left(-\\frac{k}{n}\\right)}=e^{-k}$，$\\therefore S_n=\\sum_{k=1}^{n-1}\\left(\\frac{n-k}{n}\\right)^n<\\sum_{k=1}^{n-1}e^{-k}<\\sum_{k=1}^{\\infty}e^{-k}=\\frac{1}{e-1}$，$\\therefore\\lim_{n\\to\\infty}S_n=S\\le\\frac{1}{e-1}$。又对于任意正整数 $m,n>m$，$\\because S_n>\\sum_{k=1}^{m}\\left(\\frac{n-k}{n}\\right)^n$，$\\therefore n\\to\\infty$ 时 $S>\\sum_{k=1}^{m}e^{-k}$，再让 $m\\to\\infty$，$S\\ge\\frac{1}{e-1}$，$\\therefore\\lim_{n\\to\\infty}S_n=\\frac{1}{e-1}$。",
+      "summary": "承接第*5题：用 e^x>1+x 求极限 1/(e-1)",
+      "clarity": "good"
+    },
+    {
+      "id": 277,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "6",
+          "statement": "6. 计算三重积分 $\\iiint_{\\Omega}xyz\\,dxdydz$，其中 $\\Omega$ 位于第一象限，由下列曲面围成：$x^2+y^2=mz$，$x^2+y^2=nz$，$xy=a^2$，$xy=b^2$，$y=\\alpha x$，$y=\\beta x$，其中 $0<a<b$，$0<\\alpha<\\beta$，$0<m<n$.",
+          "answer": "",
+          "note": "本页为换元后三重积分的化简，未给出最终数值"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：设 $\\frac{x^2+y^2}{z}=u$，$xy=v$，$\\frac{y}{x}=w$，由 $x>0,y>0,z>0$ 得 $x=\\sqrt{\\frac{v}{w}}$，$y=\\sqrt{vw}$，$z=\\frac{v}{u}\\left(w+\\frac{1}{w}\\right)$，其中 $m\\le u\\le n$，$a^2\\le v\\le b^2$，$\\alpha\\le w\\le\\beta$。从而 $\\left|\\frac{\\partial(x,y,z)}{\\partial(u,v,w)}\\right|=\\frac{1}{\\left|\\frac{\\partial(u,v,w)}{\\partial(x,y,z)}\\right|}=\\frac{z^2}{x^2+y^2}\\cdot\\frac{x}{2y}=\\frac{v}{2u^2w}\\left(w+\\frac{1}{w}\\right)$，故 $\\iiint_{\\Omega}xyz\\,dxdydz=\\frac{1}{2}\\iiint_{\\Omega'}\\frac{v^3}{u^3}\\left(w+\\frac{2}{w}+\\frac{1}{w^3}\\right)dudvdw$。",
+      "summary": "第6题：三重积分换元 u,v,w 后化简被积式",
+      "clarity": "good"
+    }
+  ]
+}

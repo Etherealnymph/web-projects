@@ -1,0 +1,225 @@
+{
+  "batch": 16,
+  "date": "2026-10-17",
+  "pages": [
+    {
+      "id": 195,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "12",
+          "statement": "讨论级数 $\\sum\\limits_{n=1}^{\\infty}u_n=\\frac{1}{1^p}-\\frac{1}{2^q}+\\frac{1}{3^p}-\\frac{1}{4^q}+\\cdots+\\frac{1}{(2n-1)^p}-\\frac{1}{(2n)^q}+\\cdots$，$(p>0,q>0)$ 的绝对收敛与条件收敛。",
+          "answer": "",
+          "note": "投影屏幕正中一题，画面偏紫，文字清晰。"
+        }
+      ],
+      "has_solution": false,
+      "solution": "",
+      "summary": "第12题：讨论 p,q>0 时该交错级数的绝对与条件收敛",
+      "clarity": "good"
+    },
+    {
+      "id": 196,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "14",
+          "statement": "设 $a_n=\\sum\\limits_{k=1}^{n}\\frac{1}{k}-\\ln n$，1) 证明：$\\lim\\limits_{n\\to\\infty}a_n$ 存在；2) 记 $\\lim\\limits_{n\\to\\infty}a_n=C$，讨论级数 $\\sum\\limits_{n=1}^{\\infty}(a_n-C)$ 敛散性。",
+          "answer": "",
+          "note": "投影幕右侧被画面边缘略裁，字迹清楚。"
+        }
+      ],
+      "has_solution": false,
+      "solution": "",
+      "summary": "第14题：证 a_n 极限存在并讨论 Σ(a_n−C) 的敛散性",
+      "clarity": "good"
+    },
+    {
+      "id": 197,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "16",
+          "statement": "设 $u_n=\\int_0^1\\frac{dt}{(1+t^4)^n}\\quad(n\\ge 1)$。1) 证明数列 $\\{u_n\\}$ 收敛，并求极限 $\\lim\\limits_{n\\to\\infty}u_n$；2) 证明级数 $\\sum\\limits_{n=1}^{\\infty}(-1)^nu_n$ 条件收敛。",
+          "answer": "",
+          "note": "题下已有第1问证明开头（取 $0<\\alpha<\\frac{\\varepsilon}{2}$ 分段）。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证 1)：$\\forall\\varepsilon>0$，取 $0<\\alpha<\\frac{\\varepsilon}{2}$，将积分区间分成两段，得 $u_n=\\int_0^1\\frac{dt}{(1+t^4)^n}=\\int_0^{\\alpha}\\frac{dt}{(1+t^4)^n}+\\int_{\\alpha}^1\\frac{dt}{(1+t^4)^n}$；又 $\\int_{\\alpha}^1\\frac{dt}{(1+t^4)^n}\\le\\frac{1-\\alpha}{(1+\\alpha^4)^n}<\\frac{1}{(1+\\alpha^4)^n}\\to 0\\ (n\\to\\infty)$。",
+      "summary": "第16题：积分型数列极限存在性及交错级数条件收敛",
+      "clarity": "good"
+    },
+    {
+      "id": 198,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "设正项级数 $\\sum\\limits_{n=1}^{\\infty}a_n$ 的部分和为 $s_n$，求级数 $\\sum\\limits_{n=1}^{\\infty}a_ne^{-s_n}$ 的收敛[?]。",
+          "answer": "",
+          "note": "投影反光、字迹很淡；末字模糊，疑为「性」。题下仅有「解」字，未见解答内容。"
+        }
+      ],
+      "has_solution": false,
+      "solution": "",
+      "summary": "第2题（字迹模糊）：正项级数部分和下 Σa_n e^{-s_n} 的收敛性",
+      "clarity": "partial"
+    },
+    {
+      "id": 199,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "7",
+          "statement": "设级数 $\\sum\\limits_{n=0}^{\\infty}u_n$ 收敛，$u_n>0$，$u_n>u_{n+1}\\ (n=1,2,\\cdots)$，证明：$\\lim\\limits_{n\\to\\infty}nu_n=0$。",
+          "answer": "",
+          "note": "屏幕左侧可见其他幻灯片的题干片段。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：由 $\\sum u_n$ 收敛及柯西准则，$\\forall\\varepsilon>0,\\ \\exists N$，当 $n>N$ 时 $0<u_{N+1}+u_{N+2}+\\cdots+u_n<\\frac{\\varepsilon}{2}$。又 $\\{u_n\\}$ 单调减少，故 $(n-N)u_n<u_{N+1}+u_{N+2}+\\cdots+u_n<\\frac{\\varepsilon}{2}$，令 $n=2N$ 得 $Nu_{2N}<\\frac{\\varepsilon}{2}$。于是当 $n>2N$ 时 $nu_n=(n-N)u_n+(2N-N)u_n<(n-N)u_n+(2N-N)u_{2N}<\\frac{\\varepsilon}{2}+\\frac{\\varepsilon}{2}=\\varepsilon$，故 $\\lim\\limits_{n\\to\\infty}nu_n=0$。",
+      "summary": "第7题：单调递减正项级数收敛则 nu_n→0，柯西准则证明",
+      "clarity": "good"
+    },
+    {
+      "id": 200,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "10",
+          "statement": "证明级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{1+\\frac{1}{2}+\\frac{1}{3}+\\cdots+\\frac{1}{n}}{(n+1)(n+2)}$ 收敛，并求其和。",
+          "answer": "",
+          "note": "投影屏右侧，屏幕左边为同批幻灯片的缩略图。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "记 $a_n=1+\\frac{1}{2}+\\cdots+\\frac{1}{n}$，则 $0<a_n<1+\\int_1^n\\frac{dx}{x}=1+\\ln n<\\sqrt{n}$，故 $u_n\\le\\frac{\\sqrt{n}}{(n+1)(n+2)}<\\frac{1}{n^{3/2}}$，由 $\\sum\\frac{1}{n^{3/2}}$ 收敛得 $\\sum u_n$ 收敛。2) 求和：法一令 $S(x)=\\sum\\limits_{n=1}^{\\infty}\\frac{a_n}{(n+1)(n+2)}x^{n+2}$，收敛半径 $R=1$，且 $S''(x)=\\sum\\limits_{n=1}^{\\infty}a_nx^n=\\sum\\limits_{n=1}^{\\infty}\\left(\\frac{x}{1}\\cdot x^{n-1}+\\frac{x^2}{2}\\cdot x^{n-2}+\\cdots+\\frac{x^n}{n}\\cdot 1\\right)$。",
+      "summary": "第10题：证该级数收敛（比较法）并给出求和的幂级数法",
+      "clarity": "good"
+    },
+    {
+      "id": 201,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "10",
+          "statement": "证明级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{1+\\frac{1}{2}+\\frac{1}{3}+\\cdots+\\frac{1}{n}}{(n+1)(n+2)}$ 收敛，并求其和。",
+          "answer": "",
+          "note": "与上一张（200）为同一页幻灯片的重拍，字迹更清晰。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "法二：由 $0<a_n=1+\\frac{1}{2}+\\cdots+\\frac{1}{n}<1+\\int_1^n\\frac{dx}{x}=1+\\ln n<\\sqrt{n}$，得 $u_n\\le\\frac{\\sqrt{n}}{(n+1)(n+2)}<\\frac{1}{n^{3/2}}$，故 $\\sum\\frac{1}{n^{3/2}}$ 收敛推出 $\\sum u_n$ 收敛。2) 求级数的和：法一令 $S(x)=\\sum\\limits_{n=1}^{\\infty}\\frac{a_n}{(n+1)(n+2)}x^{n+2}$，级数收敛半径 $R=1$，且有 $S''(x)=\\sum\\limits_{n=1}^{\\infty}a_nx^n=\\sum\\limits_{n=1}^{\\infty}\\left(\\frac{x}{1}\\cdot x^{n-1}+\\frac{x^2}{2}\\cdot x^{n-2}+\\cdots+\\frac{x^n}{n}\\cdot 1\\right)$。",
+      "summary": "第10题（重拍）：收敛性比较法与求和法一（幂级数）",
+      "clarity": "good"
+    },
+    {
+      "id": 202,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "接第10题求和法一：$S''(x)=\\sum\\limits_{n=1}^{\\infty}a_nx^n=\\sum\\limits_{n=1}^{\\infty}\\left(\\frac{x}{1}\\cdot x^{n-1}+\\frac{x^2}{2}\\cdot x^{n-2}+\\cdots+\\frac{x^n}{n}\\cdot 1\\right)=\\sum\\limits_{n=1}^{\\infty}\\frac{x^n}{n}\\cdot\\sum\\limits_{n=0}^{\\infty}x^n=\\int_0^x\\sum\\limits_{n=1}^{\\infty}x^{n-1}dx\\cdot\\frac{1}{1-x}=-\\frac{\\ln(1-x)}{1-x}\\ (|x|<1)$。由 $S(0)=S'(0)=0$ 得 $S'(x)=-\\int_0^x\\frac{\\ln(1-t)}{1-t}dt=\\frac{1}{2}[\\ln(1-x)]^2$，再积分得 $S(x)=\\frac{1}{2}\\int_0^x[\\ln(1-t)]^2dt=-\\frac{1}{2}(1-x)[\\ln(1-x)]^2+(1-x)\\ln(1-x)+x$，故 $S(1)=S(1-0)=1$。",
+      "summary": "第10题求和（续）：幂级数逐项求导积分，得和 S=1",
+      "clarity": "good"
+    },
+    {
+      "id": 203,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "第10题求和法二：对任意自然数 $n\\ge 2$，部分和 $S_n=\\sum\\limits_{k=1}^{n}\\frac{1+\\frac{1}{2}+\\cdots+\\frac{1}{k}}{(k+1)(k+2)}=\\sum\\limits_{k=1}^{n}\\frac{a_k}{(k+1)(k+2)}=\\sum\\limits_{k=1}^{n}\\left(\\frac{a_k}{k+1}-\\frac{a_k}{k+2}\\right)$，裂项整理得 $=\\frac{1}{2}a_1+\\frac{1}{3}(a_2-a_1)+\\cdots+\\frac{1}{n+1}(a_n-a_{n-1})-\\frac{1}{n+2}a_n=\\frac{1}{1\\cdot 2}+\\frac{1}{2\\cdot 3}+\\cdots+\\frac{1}{n(n+1)}-\\frac{a_n}{n+2}=1-\\frac{1}{n}-\\frac{a_n}{n+2}$。由 $0<a_n<1+\\ln n$ 得 $0<\\frac{a_n}{n+2}<\\frac{1+\\ln n}{n+2}$ 且 $\\lim\\limits_{n\\to\\infty}\\frac{1+\\ln n}{n+2}=0$，故 $\\lim\\limits_{n\\to\\infty}\\frac{a_n}{n+2}=0$，$S=\\lim\\limits_{n\\to\\infty}S_n=1-0-0=1$。",
+      "summary": "第10题求和法二：和式裂项相消，极限得 1",
+      "clarity": "good"
+    },
+    {
+      "id": 204,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "11",
+          "statement": "设级数 $\\sum\\limits_{n=1}^{\\infty}a_n$ 收敛于 $A$，证明 $\\sum\\limits_{n=1}^{\\infty}\\frac{a_1+2a_2+\\cdots+na_n}{n(n+1)}$ 收敛于 $A$。",
+          "answer": "",
+          "note": "证明中记 $\\sigma_{n-1}$ 处字母略糊，按上下文记为 $\\sigma_{n-1}=\\sum\\limits_{k=1}^{n-1}\\frac{T_k}{k(k+1)}$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：记 $S_n=\\sum\\limits_{k=1}^{n}a_k$，$T_n=\\sum\\limits_{k=1}^{n}ka_k$，$T_0=0$，则 $a_k=\\frac{T_k-T_{k-1}}{k}$，$T_n=nS_n-(S_1+S_2+\\cdots+S_{n-1})$。于是 $S_n=\\sum\\limits_{k=1}^{n}\\frac{T_k-T_{k-1}}{k}=\\sum\\limits_{k=1}^{n-1}\\left(\\frac{T_k}{k}-\\frac{T_k}{k+1}\\right)+\\frac{T_n}{n}=\\sum\\limits_{k=1}^{n-1}\\frac{T_k}{k(k+1)}+\\frac{T_n}{n}$，得 $\\sum\\limits_{k=1}^{n-1}\\frac{T_k}{k(k+1)}=S_n-\\frac{T_n}{n}$；又 $\\lim\\limits_{n\\to\\infty}\\frac{T_n}{n}=\\lim\\limits_{n\\to\\infty}\\left(S_n-\\frac{S_1+S_2+\\cdots+S_{n-1}}{n}\\right)=A-A=0$，故 $\\lim\\limits_{n\\to\\infty}\\sum\\limits_{k=1}^{n-1}\\frac{T_k}{k(k+1)}=\\lim\\limits_{n\\to\\infty}\\left(S_n-\\frac{T_n}{n}\\right)=A$。",
+      "summary": "第11题：Abel 变换证该加权级数亦收敛于 A",
+      "clarity": "good"
+    },
+    {
+      "id": 205,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "12",
+          "statement": "讨论级数 $\\sum\\limits_{n=1}^{\\infty}u_n=\\frac{1}{1^p}-\\frac{1}{2^q}+\\frac{1}{3^p}-\\frac{1}{4^q}+\\cdots+\\frac{1}{(2n-1)^p}-\\frac{1}{(2n)^q}+\\cdots$，$(p>0,q>0)$ 的绝对收敛与条件收敛。",
+          "answer": "",
+          "note": "与 195 为同一题，本页附解答。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：(1) 若 $p,q>1$，则 $\\sum u_n$ 绝对收敛；(2) 若 $0<p=q\\le 1$，则 $\\sum u_n$ 条件收敛。(3) 因通项趋于 0，原级数与 $\\sum\\limits_{n=1}^{\\infty}\\left(\\frac{1}{(2n-1)^p}-\\frac{1}{(2n)^q}\\right)$ 收敛性相同：若 $p>1,0<q\\le 1$ 或 $q>1,0<p\\le 1$，则 $\\sum\\frac{1}{(2n-1)^p}$ 与 $\\sum\\frac{1}{(2n)^q}$ 一个收敛一个发散，故原级数发散；若 $0<p<q<1$，则 $\\frac{1}{(2n-1)^p}-\\frac{1}{(2n)^q}>0$ 且与 $\\frac{1}{(2n-1)^p}$ 同阶，故 $\\sum\\left(\\frac{1}{(2n-1)^p}-\\frac{1}{(2n)^q}\\right)$ 发散，从而 $\\sum u_n$ 发散。",
+      "summary": "第12题解答：按 p,q 与 1 的大小分类讨论绝对/条件收敛",
+      "clarity": "good"
+    },
+    {
+      "id": 206,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "13",
+          "statement": "设 $u_n>0\\ (n=1,2,\\cdots)$ 且 $\\lim\\limits_{n\\to\\infty}\\frac{\\ln u_n}{\\ln n}=a$ 存在，证明：若 $a<-1$ 则 $\\sum\\limits_{n=1}^{\\infty}u_n$ 收敛；若 $a>-1$ 则 $\\sum\\limits_{n=1}^{\\infty}u_n$ 发散。",
+          "answer": "",
+          "note": "证明中用了 $i.e.$ 即 $u_n<\\frac{1}{n^{-(a+\\varepsilon)}}$ 的形式。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：由 $\\lim\\frac{\\ln u_n}{\\ln n}=a$，$\\forall\\varepsilon>0,\\exists N$，当 $n>N$ 时 $a-\\varepsilon<\\frac{\\ln u_n}{\\ln n}<a+\\varepsilon$。若 $a<-1$，取 $a+\\varepsilon<-1$，则 $\\ln u_n<(a+\\varepsilon)\\ln n$，即 $u_n<\\frac{1}{n^{-(a+\\varepsilon)}}$，而 $-(a+\\varepsilon)>1$，故 $\\sum\\frac{1}{n^{-(a+\\varepsilon)}}$ 收敛，从而 $\\sum u_n$ 收敛；若 $a>-1$，取 $a-\\varepsilon>-1$，则 $\\ln u_n>(a-\\varepsilon)\\ln n$，即 $u_n>\\frac{1}{n^{-(a-\\varepsilon)}}$，而 $-(a-\\varepsilon)<1$，故 $\\sum\\frac{1}{n^{-(a-\\varepsilon)}}$ 发散，从而 $\\sum u_n$ 发散。",
+      "summary": "第13题：用对数比较判别法由 lim(ln u_n/ln n) 判敛散",
+      "clarity": "good"
+    },
+    {
+      "id": 207,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "1",
+          "statement": "证明：数列 $a_n=1+\\frac{1}{2}+\\frac{1}{3}+\\cdots+\\frac{1}{n}-\\ln n\\ (n=1,2,\\cdots)$ 收敛，从而有极限，记为 $C$。",
+          "answer": "",
+          "note": "本页为小节标题「六、利用两个准则计算极限」下的第 1 题。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：利用 $\\frac{x}{1+x}<\\ln(1+x)<x\\ (x>0)$，得 $a_{n+1}-a_n=\\frac{1}{n+1}-\\ln\\left(1+\\frac{1}{n}\\right)<0$，故 $\\{a_n\\}$ 单调减少；又 $a_n>\\ln\\frac{2}{1}+\\ln\\frac{3}{2}+\\cdots+\\ln\\frac{n+1}{n}-\\ln n=\\ln(n+1)-\\ln n>0$，故 $\\{a_n\\}$ 有界，从而收敛。记 $C=\\lim\\limits_{n\\to\\infty}a_n=0.57721\\cdots$ 为欧拉常数，于是 $1+\\frac{1}{2}+\\cdots+\\frac{1}{n}=C+\\ln n+\\varepsilon_n$，$\\lim\\limits_{n\\to\\infty}\\varepsilon_n=0$。",
+      "summary": "欧拉常数：证调和和减 ln n 单调有界，引出 C≈0.5772",
+      "clarity": "good"
+    },
+    {
+      "id": 208,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "14",
+          "statement": "设 $a_n=\\sum\\limits_{k=1}^{n}\\frac{1}{k}-\\ln n$，1) 证明：$\\lim\\limits_{n\\to\\infty}a_n$ 存在；2) 记 $\\lim\\limits_{n\\to\\infty}a_n=C$，讨论级数 $\\sum\\limits_{n=1}^{\\infty}(a_n-C)$ 敛散性。",
+          "answer": "",
+          "note": "第1问标注「略（见第一章第六节1T）」，其中节号处字迹略糊。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证 1) 略。解 2)：以 $a_n$ 为部分和的级数为 $1+\\sum\\limits_{n=2}^{\\infty}\\left[\\frac{1}{n}-\\ln n+\\ln(n-1)\\right]=C$，记 $a_n-C=\\varepsilon_n>0$，则 $a_n-C=-\\sum\\limits_{k=n+1}^{\\infty}\\left[\\frac{1}{k}-\\ln k+\\ln(k-1)\\right]=\\sum\\limits_{k=n+1}^{\\infty}\\left[\\ln\\left(1+\\frac{1}{k-1}\\right)-\\frac{1}{k}\\right]$。由泰勒公式，$x>0$ 时 $\\ln(1+x)=x-\\frac{x^2}{2}+\\frac{x^3}{3}+o(x^3)>x-\\frac{x^2}{2}$，故 $a_n-C>\\sum\\limits_{k=n+1}^{\\infty}\\left[\\frac{1}{k-1}-\\frac{1}{2(k-1)^2}-\\frac{1}{k}\\right]$；记此下界为 $b_n$，下面证明正项级数 $\\sum b_n$ 发散。",
+      "summary": "第14题（2）：由泰勒展开把 a_n−C 夹在可比正项级数间",
+      "clarity": "good"
+    },
+    {
+      "id": 209,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "接第14题：记 $b_n=\\sum\\limits_{k=n+1}^{\\infty}\\left[\\frac{1}{k-1}-\\frac{1}{2(k-1)^2}-\\frac{1}{k}\\right]$，证明正项级数 $\\sum b_n$ 发散。设 $c_n=n\\sum\\limits_{k=n+1}^{\\infty}\\left[\\frac{1}{k-1}-\\frac{1}{2(k-1)(k-2)}-\\frac{1}{k}\\right]$，$d_n=n\\sum\\limits_{k=n+1}^{\\infty}\\left[\\frac{1}{k-1}-\\frac{1}{2k(k-1)}-\\frac{1}{k}\\right]$，则 $c_n<nb_n<d_n$；当 $n\\to\\infty$ 时 $c_n\\to\\frac{1}{2}$，$d_n\\to\\frac{1}{2}$，故 $\\lim\\limits_{n\\to\\infty}nb_n=\\frac{1}{2}$，由比较判别法的极限形式得 $\\sum b_n$ 发散，从而 $\\sum\\limits_{n=1}^{\\infty}(a_n-C)$ 发散。",
+      "summary": "第14题收尾：由 nb_n→1/2 比较判别法得级数发散",
+      "clarity": "good"
+    }
+  ]
+}

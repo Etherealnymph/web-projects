@@ -1,0 +1,224 @@
+{
+  "batch": 18,
+  "date": "2026-10-17",
+  "pages": [
+    {
+      "id": 225,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "即 $a_0=a_1=1,\\ a_{n+2}-a_{n+1}-a_n=0$，即 $a_{n+1}=a_{n+2}-a_n$；且知 $a_2=a_1+a_0\\ge 2,\\ a_3=a_2+a_1\\ge 3,\\cdots$，由归纳法知 $a_n\\ge n$。$\\therefore$ 当 $n\\to\\infty$ 时，有 $a_n\\to\\infty$。$\\therefore S_n=\\sum_{k=0}^{n}\\frac{a_{k+1}}{a_k a_{k+2}}=\\sum_{k=0}^{n}\\frac{a_{k+2}-a_k}{a_k a_{k+2}}=\\sum_{k=0}^{n}\\left(\\frac{1}{a_k}-\\frac{1}{a_{k+2}}\\right)=\\frac{1}{a_0}+\\frac{1}{a_1}-\\frac{1}{a_{n+1}}-\\frac{1}{a_{n+2}}$。$\\because$ 当 $n\\to\\infty$ 时，$\\frac{1}{a_{n+1}}\\to 0,\\ \\frac{1}{a_{n+2}}\\to 0$，$\\therefore \\lim_{n\\to\\infty}S_n=\\frac{1}{a_0}+\\frac{1}{a_1}=2$。",
+      "summary": "斐波那契型数列裂项求 $S_n$ 的极限为 2",
+      "clarity": "good"
+    },
+    {
+      "id": 226,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "8",
+          "statement": "8. 判定级数 $\\sum_{n=1}^{\\infty}\\frac{\\cos nx-\\cos(n+1)x}{n}$ 的敛散性。",
+          "answer": "收敛",
+          "note": "图为题目与证明；结论为原级数收敛"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：用柯西准则估计 $|S_{n+p}-S_n|=\\left|\\frac{\\cos(n+1)x-\\cos(n+2)x}{n+1}+\\cdots+\\frac{\\cos(n+p)x-\\cos(n+p+1)x}{n+p}\\right|$，经分部（Abel）重排得 $=\\left|\\frac{\\cos(n+1)x}{n+1}-\\frac{\\cos(n+p+1)x}{n+p}-\\frac{\\cos(n+2)x}{(n+1)(n+2)}-\\cdots-\\frac{\\cos(n+p)x}{(n+p-1)(n+p)}\\right|$。放大得 $\\le\\frac{1}{n+1}+\\frac{1}{n+p}+\\frac{1}{(n+1)(n+2)}+\\cdots+\\frac{1}{(n+p-1)(n+p)}=\\frac{2}{n+1}\\to 0\\ (n\\to\\infty)$。由柯西准则知，原级数收敛。",
+      "summary": "第8题：用柯西准则与分部估计证级数收敛",
+      "clarity": "good"
+    },
+    {
+      "id": 227,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "9",
+          "statement": "9.设函数 $f(x)$ 在 $R$ 上可导，且 $f(x)=f(x+2)=f(x+\\sqrt3)$，用傅里叶级数理论证明 $f(x)$ 为常数。",
+          "answer": "",
+          "note": "证明未完，接下一页"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：由 $f(x)=f(x+2)=f(x+\\sqrt3)$ 知 $f(x)$ 是以 $2,\\sqrt3$ 为周期的函数，故在 $[-1,1]$ 上其傅里叶系数为 $a_n=\\int_{-1}^{1}f(x)\\cos n\\pi x\\,dx$，$b_n=\\int_{-1}^{1}f(x)\\sin n\\pi x\\,dx$。由 $f(x)=f(x+\\sqrt3)$ 作代换 $t=x+\\sqrt3$，得 $a_n=\\int_{-1}^{1}f(x+\\sqrt3)\\cos n\\pi x\\,dx=\\int_{-1+\\sqrt3}^{1+\\sqrt3}f(t)\\cos n\\pi(t-\\sqrt3)dt$，再按两角和的余弦展开。",
+      "summary": "第9题：以 2 与 √3 为周期的可导函数为常数（上）",
+      "clarity": "good"
+    },
+    {
+      "id": 228,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "续上：$a_n=\\cos\\sqrt3n\\pi\\int_{-1+\\sqrt3}^{1+\\sqrt3}f(t)\\cos n\\pi t\\,dt+\\sin\\sqrt3n\\pi\\int_{-1+\\sqrt3}^{1+\\sqrt3}f(t)\\sin n\\pi t\\,dt$，利用 $\\sqrt3$ 周期性把区间化回 $[-1,1]$，得 $a_n=a_n\\cos\\sqrt3n\\pi+b_n\\sin\\sqrt3n\\pi$；同理 $b_n=b_n\\cos\\sqrt3n\\pi-a_n\\sin\\sqrt3n\\pi$。联立解得 $a_n=b_n=0\\ (n=1,2,\\cdots)$。因 $f$ 可导，故 $f(x)=\\frac{a_0}{2}+\\sum_{n=1}^{\\infty}(a_n\\cos n\\pi x+b_n\\sin n\\pi x)=\\frac{a_0}{2}$，其中 $a_0=\\int_{-1}^{1}f(x)dx$ 为常数。",
+      "summary": "第9题续：解得 $a_n=b_n=0$，故 $f$ 为常数",
+      "clarity": "good"
+    },
+    {
+      "id": 229,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "10",
+          "statement": "10 设 $a_{n+2}=\\frac{1}{n+1}(na_{n+1}+a_n),\\ n\\ge 2,\\ a_0=0,\\ a_1=1$，求证：$\\lim_{n\\to\\infty}a_n=e^{-1}$。",
+          "answer": "",
+          "note": "本页为解1，解2见下一页"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解1：设 $f(x)=\\sum_{n=0}^{\\infty}a_{n+1}x^n$，由题设 $a_0=0$ 求导并比较系数，得 $f'(x)=\\sum_{n=1}^{\\infty}na_{n+1}x^{n-1}=\\sum_{n=0}^{\\infty}(n+1)a_{n+2}x^n=\\sum_{n=0}^{\\infty}na_{n+1}x^n+\\sum_{n=0}^{\\infty}a_nx^n=x(f'(x)+f(x))$，且 $f(0)=a_1=1$。解此方程得 $f(x)=\\frac{e^{-x}}{1-x}$。由柯西乘积 $f(x)=\\left(\\sum_{n=0}^{\\infty}x^n\\right)\\left(\\sum_{n=0}^{\\infty}\\frac{(-1)^n}{n!}x^n\\right)=\\sum_{n=0}^{\\infty}\\left(\\sum_{k=0}^{n}\\frac{(-1)^k}{k!}\\right)x^n$，故 $a_n=\\sum_{k=0}^{n}\\frac{(-1)^k}{k!}$，$\\lim_{n\\to\\infty}a_n=\\sum_{k=0}^{\\infty}\\frac{(-1)^k}{k!}=e^{-1}$。",
+      "summary": "第10题解1：母函数法，$\\lim a_n=e^{-1}$",
+      "clarity": "good"
+    },
+    {
+      "id": 230,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "10",
+          "statement": "10 设 $a_{n+2}=\\frac{1}{n+1}(na_{n+1}+a_n),\\ n\\ge 2,\\ a_0=0,\\ a_1=1$，求证：$\\lim_{n\\to\\infty}a_n=e^{-1}$。",
+          "answer": "",
+          "note": "本题解2"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解2：$\\because a_{n+2}=\\frac{1}{n+1}(na_{n+1}+a_n)\\Rightarrow (n+1)a_{n+2}=na_{n+1}+a_n$，$\\therefore (n+1)(a_{n+2}-a_{n+1})=-(a_{n+1}-a_n)$。令 $b_{n+1}=a_{n+2}-a_{n+1}$，则 $b_{n+1}=-\\frac{1}{n+1}b_n$，$\\therefore b_{n+1}=-\\frac{1}{n+1}\\left(-\\frac{1}{n}\\right)b_{n-1}=\\cdots=(-1)^{n+1}\\frac{1}{(n+1)!}b_0=(-1)^{n+1}\\frac{1}{(n+1)!}$，故 $b_n=(-1)^n\\frac{1}{n!}$。$\\therefore a_n=\\sum_{k=0}^{n-1}(a_{k+1}-a_k)=\\sum_{k=0}^{n-1}(-1)^k\\frac{1}{k!}$，$\\therefore \\lim_{n\\to\\infty}a_n=\\sum_{k=0}^{\\infty}\\frac{(-1)^k}{k!}=e^{-1}$。",
+      "summary": "第10题解2：差分递推得 $a_n$ 的部分和式",
+      "clarity": "good"
+    },
+    {
+      "id": 231,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "四",
+          "statement": "四.(10分) 计算级数 $I=\\sum_{k=0}^{\\infty}\\frac{1}{(k+1)(2k+1)(4k+1)(4k+3)}$ 的和。",
+          "answer": "$2\\ln 2-\\frac{\\pi}{3}$",
+          "note": "题首标注“四.(10分)”，为试卷第四大题"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：作幂级数 $F(x)=\\sum_{k=0}^{\\infty}\\frac{x^{4k+1}}{(k+1)(2k+1)(4k+1)(4k+3)}$，收敛域为 $x\\in[-1,1]$。四阶求导得 $F^{(4)}(x)=8\\sum_{k=0}^{\\infty}x^{4k}=\\frac{8}{1-x^4}$，且 $F(0)=F'(0)=F''(0)=F'''(0)=0$。于是 $I=F(1)=8\\int_0^1\\frac{1}{1-x^4}dx\\int_x^1dt\\int_t^1dz\\int_z^1dy=8\\int_0^1\\frac{(1-x)^3}{6(1-x^4)}dx=\\frac{4}{3}\\int_0^1\\frac{(1-x)^2}{(1+x^2)(1+x)}dx=2\\ln2-\\frac{\\pi}{3}$。",
+      "summary": "第四题：幂级数四次求导加多重积分求和",
+      "clarity": "good"
+    },
+    {
+      "id": 232,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "11",
+          "statement": "11.计算幂级数 $\\sum_{n=0}^{\\infty}\\left(\\frac{1}{2^n}-\\sin\\frac{1}{2^n}\\right)x^n$ 的收敛半径。",
+          "answer": "$R=8$",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：$\\because \\frac{1}{2^n}>\\sin\\frac{1}{2^n}$，$\\therefore \\frac{1}{2^n}-\\sin\\frac{1}{2^n}>0$。由根值/比值法算系数极限 $\\rho=\\lim_{n\\to\\infty}\\frac{\\frac{1}{2^{n+1}}-\\sin\\frac{1}{2^{n+1}}}{\\frac{1}{2^n}-\\sin\\frac{1}{2^n}}$，令 $x=\\frac{1}{2^n}\\to0$ 化为 $\\lim_{x\\to0}\\frac{\\frac{x}{2}-\\sin\\frac{x}{2}}{x-\\sin x}$。用洛必达与等价无穷小得 $=\\lim_{x\\to0}\\frac{\\frac{1}{2}-\\frac{1}{2}\\cos\\frac{x}{2}}{1-\\cos x}=\\lim_{x\\to0}\\frac{\\frac{1}{4}\\sin\\frac{x}{2}}{\\sin x}=\\frac{1}{8}$，$\\therefore R=8$。",
+      "summary": "第11题：系数之比求极限，收敛半径 $R=8$",
+      "clarity": "good"
+    },
+    {
+      "id": 233,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "12",
+          "statement": "12.计算幂级数 $\\sum_{n=1}^{\\infty}\\frac{2+(-1)^n\\sin n}{n}x^n$ 的收敛半径和收敛域。",
+          "answer": "收敛半径 $R=1$，收敛域 $[-1,1)$。",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：$\\because \\frac{1}{n}|x|^n\\le\\left|\\frac{2+(-1)^n\\sin n}{n}x^n\\right|\\le\\frac{3}{n}|x|^n$，当 $|x|<1$ 时 $\\sum\\frac{3}{n}|x|^n$ 收敛，故原级数绝对收敛；当 $|x|>1$ 时 $\\sum\\frac{1}{n}|x|^n$ 发散，故原级数发散。由阿贝尔定理知 $R=1$，收敛区间 $(-1,1)$。$x=1$ 时 $\\frac{2+(-1)^n\\sin n}{n}>\\frac{1}{n}$，故 $\\sum$ 发散；$x=-1$ 时 $\\sum\\frac{2(-1)^n}{n}$ 收敛，而 $\\sum\\frac{\\sin n}{n}$ 由狄利克雷判别法收敛，故收敛域为 $[-1,1)$。",
+      "summary": "第12题：比较法定 $R=1$，端点判定得 $[-1,1)$",
+      "clarity": "good"
+    },
+    {
+      "id": 234,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "13",
+          "statement": "13.设 $f(x)$ 是仅有正实根的多项式函数，满足 $\\frac{f'(x)}{f(x)}=-\\sum_{n=0}^{\\infty}c_nx^n$，试证 $c_n>0\\ (n\\ge 0)$，极限 $\\lim_{n\\to\\infty}\\frac{1}{\\sqrt[n]{c_n}}$ 存在，且等于 $f(x)$ 的最小根。",
+          "answer": "",
+          "note": "证明接下一页"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：$\\because f(x)$ 是仅有正实根的多项式，不妨设其全部根为 $0<a_1<a_2<\\cdots<a_k$，$\\therefore f(x)=A(x-a_1)^{r_1}(x-a_2)^{r_2}\\cdots(x-a_k)^{r_k}$，$r_i$ 为根 $a_i$ 的重数 $(i=1,2,\\cdots,k,\\ r_i\\ge1)$。逐项求导并相加得 $f'(x)=f(x)\\left(\\frac{r_1}{x-a_1}+\\cdots+\\frac{r_k}{x-a_k}\\right)$，即 $\\frac{f'(x)}{f(x)}=\\frac{r_1}{x-a_1}+\\cdots+\\frac{r_k}{x-a_k}$。再由 $\\frac{1}{x-a_i}=-\\frac{1}{a_i}\\cdot\\frac{1}{1-x/a_i}=-\\frac{1}{a_i}\\sum_{n=0}^{\\infty}\\left(\\frac{x}{a_i}\\right)^n$（$|x|<a_1$）展开为幂级数。",
+      "summary": "第13题：部分分式展开 $f'/f$ 求系数（上）",
+      "clarity": "good"
+    },
+    {
+      "id": 235,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "续上：$-\\frac{f'(x)}{f(x)}=\\frac{r_1}{a_1}\\sum_{n=0}^{\\infty}\\left(\\frac{x}{a_1}\\right)^n+\\frac{r_2}{a_2}\\sum_{n=0}^{\\infty}\\left(\\frac{x}{a_2}\\right)^n+\\cdots+\\frac{r_k}{a_k}\\sum_{n=0}^{\\infty}\\left(\\frac{x}{a_k}\\right)^n=\\sum_{n=0}^{\\infty}\\left(\\frac{r_1}{a_1^{n+1}}+\\frac{r_2}{a_2^{n+1}}+\\cdots+\\frac{r_k}{a_k^{n+1}}\\right)x^n$。由幂级数的唯一性知 $c_n=\\frac{r_1}{a_1^{n+1}}+\\frac{r_2}{a_2^{n+1}}+\\cdots+\\frac{r_k}{a_k^{n+1}}>0$。对足够大的 $n$，$\\max\\left\\{\\frac{r_1}{a_1^{n+1}},\\frac{r_2}{a_2^{n+1}},\\cdots,\\frac{r_k}{a_k^{n+1}}\\right\\}=\\frac{r_1}{a_1^{n+1}}$，且 $\\sqrt[n]{\\frac{r_1}{a_1^{n+1}}}=\\sqrt[n]{\\frac{r_1}{a_1^n}\\cdot\\frac{1}{a_1}}\\to\\frac{1}{a_1}\\ (n\\to\\infty)$，$\\therefore$ 由夹逼定理可得 $\\lim_{n\\to\\infty}\\frac{1}{\\sqrt[n]{c_n}}=a_1$。",
+      "summary": "第13题续：比较最大项加夹逼得极限为最小根",
+      "clarity": "good"
+    },
+    {
+      "id": 236,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "14",
+          "statement": "14.设球面为 $\\Sigma:(x-1)^2+(y+1)^2+(z-2)^2=9$，曲面 $S$ 是以 $A(5,-3,-2)$ 为顶点且与球面 $\\Sigma$ 相切的圆锥面，$\\Omega$ 是由球面与锥面 $S$ 所围成的空间区域。1) 求空间区域 $\\Omega$ 的体积；2) 在空间区域 $\\Omega$ 内与球面 $\\Sigma$ 和锥面 $S$ 都相切的球面记为 $S_1,\\cdots$，与球面 $S_{n-1}$ 和锥面 $S$ 相切的球面记为 $S_n$，设球面 $S_n$ 的半径为 $r_n$，求级数 $\\sum_{n=1}^{\\infty}r_n\\left(1+\\frac{1}{2}+\\cdots+\\frac{1}{n}\\right)$ 的和。",
+          "answer": "1) $V=\\frac{9}{2}\\pi$",
+          "note": "第2)问解答在下一页"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：由题意知，球心 $(1,-1,2)$ 与锥面顶点 $A$ 之间的距离为 $d=6$，故问题转化为球面 $\\Sigma:x^2+y^2+z^2=9$ 与锥面 $S:(z-6)^2=x^2+y^2$ 相切，二者围成的空间区域仍记为 $\\Omega$。1) 在 $yOz$ 平面上，过点 $(0,6)$ 与圆 $z=\\sqrt{9-y^2}$ 相切的直线与该圆围成的平面图形绕 $z$ 轴旋转而成的旋转体即 $\\Omega$，故 $V=\\frac{\\pi}{3}\\left(\\frac{3\\sqrt3}{2}\\right)^2\\cdot\\frac{9}{2}-\\pi\\int_{3/2}^{3}(9-z^2)dz=\\frac{9}{2}\\pi$。",
+      "summary": "第14题：锥面与球面所围区域体积为 $\\frac{9}{2}\\pi$",
+      "clarity": "good"
+    },
+    {
+      "id": 237,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "解2)：由题意 $\\frac{r_1}{3}=\\frac{3-r_1}{6}\\Rightarrow r_1=1$，通式 $\\frac{r_n}{3}=\\frac{3-2r_1-2r_2-\\cdots-2r_{n-1}-r_n}{6}$，解得 $r_n=\\frac{3-2r_1-2r_2-\\cdots-2r_{n-1}}{3}$，即 $r_n=\\frac{1}{3^{n-1}}$。记 $H_n=1+\\frac{1}{2}+\\cdots+\\frac{1}{n}$，考虑幂级数 $S(x)=\\sum_{n=1}^{\\infty}H_nx^n$：由 $\\lim_{n\\to\\infty}H_n=+\\infty$ 且 $\\lim_{n\\to\\infty}\\frac{H_{n+1}}{H_n}=1$，得收敛域为 $(-1,1)$；当 $|x|<1$ 时 $S(x)=\\sum H_nx^n=x\\sum H_nx^n+\\sum\\frac{1}{n}x^n=xS(x)-\\ln(1-x)$，故 $S(x)=-\\frac{\\ln(1-x)}{1-x}$。于是 $\\sum_{n=1}^{\\infty}r_nH_n=\\sum_{n=1}^{\\infty}H_n\\frac{1}{3^{n-1}}=3\\sum_{n=1}^{\\infty}H_n\\frac{1}{3^n}=3S\\left(\\frac{1}{3}\\right)=\\frac{9}{2}\\ln\\frac{3}{2}$。",
+      "summary": "第14题续：$r_n=3^{-(n-1)}$，级数和为 $\\frac{9}{2}\\ln\\frac{3}{2}$",
+      "clarity": "good"
+    },
+    {
+      "id": 238,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "例1",
+          "statement": "例 1设函数 $f(x)=\\sin^2x\\sin 2x$，讨论 $f(x)$ 在区间 $(0,\\pi)$ 上的单调性及 $f(x)$ 最大值；",
+          "answer": "$\\max_{x\\in(0,\\pi)}|f(x)|=\\frac{3\\sqrt3}{8}$",
+          "note": ""
+        },
+        {
+          "label": "2",
+          "statement": "2. 判断级数 $\\sum_{n=1}^{\\infty}a_n$ 的敛散性，其中 $a_n=\\sin^2x\\sin^2 2x\\cdots\\sin^2 2^nx,\\ x\\in R$。",
+          "answer": "",
+          "note": "本页末尾似被裁切，级数敛散性的结论未出现在画面中"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：1) $\\because f(x)=\\sin^2x\\sin2x$ 是周期为 $\\pi$ 的函数，$f'(x)=2\\sin^2x(3-4\\sin^2x)=-8\\sin^2x\\left(\\sin x-\\frac{\\sqrt3}{2}\\right)\\left(\\sin x+\\frac{\\sqrt3}{2}\\right)$，令 $f'(x)=0$ 可得 $x_1=\\frac{\\pi}{3},\\ x_2=\\frac{2\\pi}{3}$。由 (1) 知 $f(x)=\\sin^2x\\sin2x\\le\\frac{3\\sqrt3}{8}$：当 $x\\in(0,\\frac{\\pi}{3})$ 时 $f'(x)>0$ 单调递增；当 $x\\in(\\frac{\\pi}{3},\\frac{2\\pi}{3})$ 时 $f'(x)<0$ 单调递减；当 $x\\in(\\frac{2\\pi}{3},\\pi)$ 时 $f'(x)>0$ 单调递增，故 $\\max_{x\\in(0,\\pi)}|f(x)|=|f(x_1)|=\\frac{3\\sqrt3}{8}$。2) 由 (1) 知 $|f(x)|=|\\sin^2x\\sin2x|\\le\\frac{3\\sqrt3}{8}$，依次得 $|\\sin^22x\\sin2^2x|\\le\\frac{3\\sqrt3}{8}$，$|\\sin^22^2x\\sin2^3x|\\le\\frac{3\\sqrt3}{8}$，$\\cdots$，$|\\sin^22^{n-1}x\\sin2^nx|\\le\\frac{3\\sqrt3}{8}$。",
+      "summary": "例1：单调性与最大值；第2题逐项放大估计",
+      "clarity": "good"
+    },
+    {
+      "id": 239,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "1",
+          "statement": "1.求曲面 $z=xy,\\ x+y+z=1,\\ x=0,\\ y=0,\\ z=0$ 所围区域的体积。",
+          "answer": "$V=\\frac{17}{12}-2\\ln2$",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：立体 $\\Omega=\\{(x,y,z)\\mid(x,y)\\in D,\\ 0\\le z\\le\\min\\{xy,1-x-y\\}\\}$，其中 $D=\\{(x,y)\\mid x\\ge0,\\ y\\ge0,\\ x+y\\le1\\}$。则按 $z$ 先积并分块：$V=\\int_0^1dy\\int_0^{\\frac{1-y}{1+y}}xy\\,dx+\\int_0^1dy\\int_{\\frac{1-y}{1+y}}^{1-y}(1-x-y)dx=\\left(4\\ln2-\\frac{11}{4}\\right)+\\left(\\frac{25}{6}-6\\ln2\\right)=\\frac{17}{12}-2\\ln2$。",
+      "summary": "第1题：分块二重积分求体积 $\\frac{17}{12}-2\\ln2$",
+      "clarity": "good"
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+"chunk": 9,
+"items": [
+{
+"pid": 129,
+"label": "5",
+"statement": "令 $a_n=1-\\frac{1}{2}+\\frac{1}{3}-\\frac{1}{4}+\\cdots+\\frac{(-1)^{n-1}}{n}-\\ln 2$，证明：级数 $\\sum_{n=1}^{\\infty}a_n$ 收敛并求其和。",
+"answer": "$\\ln 2-\\frac{1}{2}$",
+"notebook_candidate": "把 $a_n$ 写成 $\\int_0^1[1-x+x^2-\\cdots+(-1)^{n-1}x^{n-1}]dx-\\int_0^1\\frac{dx}{1+x}=\\int_0^1\\frac{(-1)^{n-1}x^n}{1+x}dx$。部分和 $S_n=\\sum_{k=1}^{n}\\int_0^1\\frac{(-1)^{k-1}x^k}{1+x}dx=\\int_0^1\\frac{1}{1+x}\\sum_{k=1}^{n}(-1)^{k-1}x^kdx=\\int_0^1\\frac{x+(-1)^{n+1}x^{n+1}}{(1+x)^2}dx=\\left(\\ln2-\\frac{1}{2}\\right)+\\int_0^1\\frac{(-1)^{n+1}x^{n+1}}{(1+x)^2}dx$，而余项绝对值 $\\le\\int_0^1x^{n+1}dx=\\frac{1}{n+2}\\to0$，故 $\\lim_{n\\to\\infty}S_n=\\ln2-\\frac{1}{2}$，即 $\\sum_{n=1}^{\\infty}a_n=\\ln2-\\frac{1}{2}$。"
+},
+{
+"pid": 130,
+"label": "6",
+"statement": "判别级数 $\\sum_{n=1}^{\\infty}(-1)^{[\\sqrt{n}]}\\cdot\\frac{1}{n}$ 的收敛性，其中 $[\\ ]$ 是取整函数。",
+"answer": "",
+"notebook_candidate": "将级数中相邻的同号项合并，组成交错级数 $\\sum_{n=1}^{\\infty}(-1)^na_n$，其中 $a_n=\\frac{1}{n^2}+\\frac{1}{n^2+1}+\\cdots+\\frac{1}{n^2+2n}=\\frac{1}{n}\\sum_{k=0}^{2n}\\frac{1}{1+k/n^2}=\\frac{1}{n}\\sum_{k=0}^{2n}\\left[1-\\frac{k}{n^2}+o\\left(\\frac{k}{n^2}\\right)\\right]=\\frac{1}{n^2}\\left[(2n+1)-\\frac{2n+1}{n}+o(1)\\right]=\\frac{2}{n}-\\frac{1}{n^2}+o\\left(\\frac{1}{n^2}\\right)$，从而 $a_n-a_{n+1}=\\frac{2}{n^2}+o\\left(\\frac{1}{n^2}\\right)$，故 $a_n$ 单调递减且 $a_n\\to0$，于是 $\\sum_{n=1}^{\\infty}(-1)^na_n$ 收敛，即原级数收敛。"
+},
+{
+"pid": 131,
+"label": "7",
+"statement": "设级数 $\\sum_{n=0}^{\\infty}u_n$ 收敛，$u_n>0,u_n>u_{n+1}(n=1,2,\\cdots)$，证明：$\\lim_{n\\to\\infty}nu_n=0$。",
+"answer": "",
+"notebook_candidate": "由柯西准则，$\\forall\\varepsilon>0,\\exists N$，当 $n>N$ 时 $0<u_{N+1}+u_{N+2}+\\cdots+u_n<\\frac{\\varepsilon}{2}$；由 $\\{u_n\\}$ 单调减少得 $(n-N)u_n<u_{N+1}+\\cdots+u_n<\\frac{\\varepsilon}{2}$，令 $n=2N$ 得 $Nu_{2N}<\\frac{\\varepsilon}{2}$。于是当 $n>2N$ 时 $nu_n=(n-N)u_n+(2N-N)u_n<(n-N)u_n+(2N-N)u_{2N}<\\frac{\\varepsilon}{2}+\\frac{\\varepsilon}{2}=\\varepsilon$，故 $\\lim_{n\\to\\infty}nu_n=0$。"
+},
+{
+"pid": 132,
+"label": "12",
+"statement": "讨论级数 $\\sum\\limits_{n=1}^{\\infty}u_n=\\frac{1}{1^p}-\\frac{1}{2^q}+\\frac{1}{3^p}-\\frac{1}{4^q}+\\cdots+\\frac{1}{(2n-1)^p}-\\frac{1}{(2n)^q}+\\cdots$，$(p>0,q>0)$ 的绝对收敛与条件收敛。",
+"answer": "",
+"notebook_candidate": "解：(1) 若 $p,q>1$，则 $\\sum u_n$ 绝对收敛；(2) 若 $0<p=q\\le 1$，则 $\\sum u_n$ 条件收敛。(3) 因通项趋于 0，原级数与 $\\sum\\limits_{n=1}^{\\infty}\\left(\\frac{1}{(2n-1)^p}-\\frac{1}{(2n)^q}\\right)$ 收敛性相同：若 $p>1,0<q\\le 1$ 或 $q>1,0<p\\le 1$，则 $\\sum\\frac{1}{(2n-1)^p}$ 与 $\\sum\\frac{1}{(2n)^q}$ 一个收敛一个发散，故原级数发散；若 $0<p<q<1$，则 $\\frac{1}{(2n-1)^p}-\\frac{1}{(2n)^q}>0$ 且与 $\\frac{1}{(2n-1)^p}$ 同阶，故 $\\sum\\left(\\frac{1}{(2n-1)^p}-\\frac{1}{(2n)^q}\\right)$ 发散，从而 $\\sum u_n$ 发散。"
+},
+{
+"pid": 133,
+"label": "14",
+"statement": "设 $a_n=\\sum\\limits_{k=1}^{n}\\frac{1}{k}-\\ln n$，1) 证明：$\\lim\\limits_{n\\to\\infty}a_n$ 存在；2) 记 $\\lim\\limits_{n\\to\\infty}a_n=C$，讨论级数 $\\sum\\limits_{n=1}^{\\infty}(a_n-C)$ 敛散性。",
+"answer": "",
+"notebook_candidate": "证 1) 略。解 2)：以 $a_n$ 为部分和的级数为 $1+\\sum\\limits_{n=2}^{\\infty}\\left[\\frac{1}{n}-\\ln n+\\ln(n-1)\\right]=C$，记 $a_n-C=\\varepsilon_n>0$，则 $a_n-C=-\\sum\\limits_{k=n+1}^{\\infty}\\left[\\frac{1}{k}-\\ln k+\\ln(k-1)\\right]=\\sum\\limits_{k=n+1}^{\\infty}\\left[\\ln\\left(1+\\frac{1}{k-1}\\right)-\\frac{1}{k}\\right]$。由泰勒公式，$x>0$ 时 $\\ln(1+x)=x-\\frac{x^2}{2}+\\frac{x^3}{3}+o(x^3)>x-\\frac{x^2}{2}$，故 $a_n-C>\\sum\\limits_{k=n+1}^{\\infty}\\left[\\frac{1}{k-1}-\\frac{1}{2(k-1)^2}-\\frac{1}{k}\\right]$；记此下界为 $b_n$，下面证明正项级数 $\\sum b_n$ 发散。"
+},
+{
+"pid": 134,
+"label": "16",
+"statement": "设 $u_n=\\int_0^1\\frac{dt}{(1+t^4)^n}\\quad(n\\ge 1)$。1) 证明数列 $\\{u_n\\}$ 收敛，并求极限 $\\lim\\limits_{n\\to\\infty}u_n$；2) 证明级数 $\\sum\\limits_{n=1}^{\\infty}(-1)^nu_n$ 条件收敛。",
+"answer": "",
+"notebook_candidate": "证 1)：$\\forall\\varepsilon>0$，取 $0<\\alpha<\\frac{\\varepsilon}{2}$，将积分区间分成两段，得 $u_n=\\int_0^1\\frac{dt}{(1+t^4)^n}=\\int_0^{\\alpha}\\frac{dt}{(1+t^4)^n}+\\int_{\\alpha}^1\\frac{dt}{(1+t^4)^n}$；又 $\\int_{\\alpha}^1\\frac{dt}{(1+t^4)^n}\\le\\frac{1-\\alpha}{(1+\\alpha^4)^n}<\\frac{1}{(1+\\alpha^4)^n}\\to 0\\ (n\\to\\infty)$。"
+},
+{
+"pid": 135,
+"label": "2",
+"statement": "设正项级数 $\\sum\\limits_{n=1}^{\\infty}a_n$ 的部分和为 $s_n$，求级数 $\\sum\\limits_{n=1}^{\\infty}a_ne^{-s_n}$ 的收敛[?]。",
+"answer": "",
+"notebook_candidate": ""
+},
+{
+"pid": 136,
+"label": "7",
+"statement": "设级数 $\\sum\\limits_{n=0}^{\\infty}u_n$ 收敛，$u_n>0$，$u_n>u_{n+1}\\ (n=1,2,\\cdots)$，证明：$\\lim\\limits_{n\\to\\infty}nu_n=0$。",
+"answer": "",
+"notebook_candidate": "证：由 $\\sum u_n$ 收敛及柯西准则，$\\forall\\varepsilon>0,\\ \\exists N$，当 $n>N$ 时 $0<u_{N+1}+u_{N+2}+\\cdots+u_n<\\frac{\\varepsilon}{2}$。又 $\\{u_n\\}$ 单调减少，故 $(n-N)u_n<u_{N+1}+u_{N+2}+\\cdots+u_n<\\frac{\\varepsilon}{2}$，令 $n=2N$ 得 $Nu_{2N}<\\frac{\\varepsilon}{2}$。于是当 $n>2N$ 时 $nu_n=(n-N)u_n+(2N-N)u_n<(n-N)u_n+(2N-N)u_{2N}<\\frac{\\varepsilon}{2}+\\frac{\\varepsilon}{2}=\\varepsilon$，故 $\\lim\\limits_{n\\to\\infty}nu_n=0$。"
+},
+{
+"pid": 137,
+"label": "10",
+"statement": "证明级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{1+\\frac{1}{2}+\\frac{1}{3}+\\cdots+\\frac{1}{n}}{(n+1)(n+2)}$ 收敛，并求其和。",
+"answer": "",
+"notebook_candidate": "法二：由 $0<a_n=1+\\frac{1}{2}+\\cdots+\\frac{1}{n}<1+\\int_1^n\\frac{dx}{x}=1+\\ln n<\\sqrt{n}$，得 $u_n\\le\\frac{\\sqrt{n}}{(n+1)(n+2)}<\\frac{1}{n^{3/2}}$，故 $\\sum\\frac{1}{n^{3/2}}$ 收敛推出 $\\sum u_n$ 收敛。2) 求级数的和：法一令 $S(x)=\\sum\\limits_{n=1}^{\\infty}\\frac{a_n}{(n+1)(n+2)}x^{n+2}$，级数收敛半径 $R=1$，且有 $S''(x)=\\sum\\limits_{n=1}^{\\infty}a_nx^n=\\sum\\limits_{n=1}^{\\infty}\\left(\\frac{x}{1}\\cdot x^{n-1}+\\frac{x^2}{2}\\cdot x^{n-2}+\\cdots+\\frac{x^n}{n}\\cdot 1\\right)$。"
+},
+{
+"pid": 138,
+"label": "11",
+"statement": "设级数 $\\sum\\limits_{n=1}^{\\infty}a_n$ 收敛于 $A$，证明 $\\sum\\limits_{n=1}^{\\infty}\\frac{a_1+2a_2+\\cdots+na_n}{n(n+1)}$ 收敛于 $A$。",
+"answer": "",
+"notebook_candidate": "证：记 $S_n=\\sum\\limits_{k=1}^{n}a_k$，$T_n=\\sum\\limits_{k=1}^{n}ka_k$，$T_0=0$，则 $a_k=\\frac{T_k-T_{k-1}}{k}$，$T_n=nS_n-(S_1+S_2+\\cdots+S_{n-1})$。于是 $S_n=\\sum\\limits_{k=1}^{n}\\frac{T_k-T_{k-1}}{k}=\\sum\\limits_{k=1}^{n-1}\\left(\\frac{T_k}{k}-\\frac{T_k}{k+1}\\right)+\\frac{T_n}{n}=\\sum\\limits_{k=1}^{n-1}\\frac{T_k}{k(k+1)}+\\frac{T_n}{n}$，得 $\\sum\\limits_{k=1}^{n-1}\\frac{T_k}{k(k+1)}=S_n-\\frac{T_n}{n}$；又 $\\lim\\limits_{n\\to\\infty}\\frac{T_n}{n}=\\lim\\limits_{n\\to\\infty}\\left(S_n-\\frac{S_1+S_2+\\cdots+S_{n-1}}{n}\\right)=A-A=0$，故 $\\lim\\limits_{n\\to\\infty}\\sum\\limits_{k=1}^{n-1}\\frac{T_k}{k(k+1)}=\\lim\\limits_{n\\to\\infty}\\left(S_n-\\frac{T_n}{n}\\right)=A$。"
+},
+{
+"pid": 139,
+"label": "13",
+"statement": "设 $u_n>0\\ (n=1,2,\\cdots)$ 且 $\\lim\\limits_{n\\to\\infty}\\frac{\\ln u_n}{\\ln n}=a$ 存在，证明：若 $a<-1$ 则 $\\sum\\limits_{n=1}^{\\infty}u_n$ 收敛；若 $a>-1$ 则 $\\sum\\limits_{n=1}^{\\infty}u_n$ 发散。",
+"answer": "",
+"notebook_candidate": "证：由 $\\lim\\frac{\\ln u_n}{\\ln n}=a$，$\\forall\\varepsilon>0,\\exists N$，当 $n>N$ 时 $a-\\varepsilon<\\frac{\\ln u_n}{\\ln n}<a+\\varepsilon$。若 $a<-1$，取 $a+\\varepsilon<-1$，则 $\\ln u_n<(a+\\varepsilon)\\ln n$，即 $u_n<\\frac{1}{n^{-(a+\\varepsilon)}}$，而 $-(a+\\varepsilon)>1$，故 $\\sum\\frac{1}{n^{-(a+\\varepsilon)}}$ 收敛，从而 $\\sum u_n$ 收敛；若 $a>-1$，取 $a-\\varepsilon>-1$，则 $\\ln u_n>(a-\\varepsilon)\\ln n$，即 $u_n>\\frac{1}{n^{-(a-\\varepsilon)}}$，而 $-(a-\\varepsilon)<1$，故 $\\sum\\frac{1}{n^{-(a-\\varepsilon)}}$ 发散，从而 $\\sum u_n$ 发散。"
+},
+{
+"pid": 140,
+"label": "1",
+"statement": "证明：数列 $a_n=1+\\frac{1}{2}+\\frac{1}{3}+\\cdots+\\frac{1}{n}-\\ln n\\ (n=1,2,\\cdots)$ 收敛，从而有极限，记为 $C$。",
+"answer": "",
+"notebook_candidate": "证：利用 $\\frac{x}{1+x}<\\ln(1+x)<x\\ (x>0)$，得 $a_{n+1}-a_n=\\frac{1}{n+1}-\\ln\\left(1+\\frac{1}{n}\\right)<0$，故 $\\{a_n\\}$ 单调减少；又 $a_n>\\ln\\frac{2}{1}+\\ln\\frac{3}{2}+\\cdots+\\ln\\frac{n+1}{n}-\\ln n=\\ln(n+1)-\\ln n>0$，故 $\\{a_n\\}$ 有界，从而收敛。记 $C=\\lim\\limits_{n\\to\\infty}a_n=0.57721\\cdots$ 为欧拉常数，于是 $1+\\frac{1}{2}+\\cdots+\\frac{1}{n}=C+\\ln n+\\varepsilon_n$，$\\lim\\limits_{n\\to\\infty}\\varepsilon_n=0$。"
+},
+{
+"pid": 141,
+"label": "15.1)1)",
+"statement": "$1+\\frac{1}{2}-\\frac{1}{3}-\\frac{1}{4}+\\frac{1}{5}+\\frac{1}{6}-\\frac{1}{7}-\\frac{1}{8}+\\cdots$",
+"answer": "级数收敛",
+"notebook_candidate": "解：1) 记 $\\alpha_n=\\frac{1}{n}$，取 $\\beta_1=1,\\beta_2=1,\\beta_3=-1,\\beta_4=-1,\\cdots$，显然 $B_n=\\beta_1+\\beta_2+\\cdots+\\beta_n$ 满足 $0\\le B_n\\le 2$，$\\alpha_n$ 单调而 $\\lim\\limits_{n\\to\\infty}\\alpha_n=0$，满足狄利克雷判别法的条件，知级数收敛。2) 三阶一组记为 $v_n=\\frac{1}{3n+1}+\\frac{1}{3n+2}-\\frac{1}{3n+3}=\\frac{9n^2+18n+7}{(3n+1)(3n+2)(3n+3)}$，当 $n\\to\\infty$ 时 $v_n\\sim\\frac{1}{3n}$，故 $\\sum\\limits_{n=1}^{\\infty}v_n$ 发散，从而原级数发散。页末附「狄利克雷判别法」：若级数 $\\sum\\limits_{n=1}^{\\infty}\\alpha_n\\beta_n$ 满足 1) $\\{\\alpha_n\\}$ 单调趋于 0；2) 设 $B_n=\\beta_1+\\beta_2+\\cdots+\\beta_n$ 有界 $(\\forall n)$，则级数 $\\sum\\limits_{n=1}^{\\infty}\\alpha_n\\beta_n$ 收敛。"
+},
+{
+"pid": 142,
+"label": "15.1)2)",
+"statement": "$1+\\frac{1}{2}-\\frac{1}{3}+\\frac{1}{4}+\\frac{1}{5}-\\frac{1}{6}+\\frac{1}{7}+\\frac{1}{8}-\\frac{1}{9}+\\cdots+\\frac{1}{3n+1}+\\frac{1}{3n+2}-\\frac{1}{3n+3}+\\cdots$",
+"answer": "级数发散",
+"notebook_candidate": "解：1) 记 $\\alpha_n=\\frac{1}{n}$，取 $\\beta_1=1,\\beta_2=1,\\beta_3=-1,\\beta_4=-1,\\cdots$，显然 $B_n=\\beta_1+\\beta_2+\\cdots+\\beta_n$ 满足 $0\\le B_n\\le 2$，$\\alpha_n$ 单调而 $\\lim\\limits_{n\\to\\infty}\\alpha_n=0$，满足狄利克雷判别法的条件，知级数收敛。2) 三阶一组记为 $v_n=\\frac{1}{3n+1}+\\frac{1}{3n+2}-\\frac{1}{3n+3}=\\frac{9n^2+18n+7}{(3n+1)(3n+2)(3n+3)}$，当 $n\\to\\infty$ 时 $v_n\\sim\\frac{1}{3n}$，故 $\\sum\\limits_{n=1}^{\\infty}v_n$ 发散，从而原级数发散。页末附「狄利克雷判别法」：若级数 $\\sum\\limits_{n=1}^{\\infty}\\alpha_n\\beta_n$ 满足 1) $\\{\\alpha_n\\}$ 单调趋于 0；2) 设 $B_n=\\beta_1+\\beta_2+\\cdots+\\beta_n$ 有界 $(\\forall n)$，则级数 $\\sum\\limits_{n=1}^{\\infty}\\alpha_n\\beta_n$ 收敛。"
+},
+{
+"pid": 143,
+"label": "16",
+"statement": "设 $u_n=\\int_0^1\\frac{dt}{(1+t^4)^n}$（$n\\ge1$）。1) 证明数列 $\\{u_n\\}$ 收敛，并求极限 $\\lim\\limits_{n\\to\\infty}u_n$；2) 证明级数 $\\sum\\limits_{n=1}^{\\infty}(-1)^nu_n$ 条件收敛。",
+"answer": "",
+"notebook_candidate": "证：1) $\\forall\\varepsilon>0$，取 $0<\\alpha<\\frac{\\varepsilon}{2}$，把积分区间分成两段：$u_n=\\int_0^{\\alpha}\\frac{dt}{(1+t^4)^n}+\\int_{\\alpha}^{1}\\frac{dt}{(1+t^4)^n}$，其中 $\\int_{\\alpha}^{1}\\frac{dt}{(1+t^4)^n}\\le\\frac{1-\\alpha}{(1+\\alpha^4)^n}\\to0\\ (n\\to\\infty)$，故 $\\exists N>0$，当 $n>N$ 时 $\\int_{\\alpha}^{1}\\frac{dt}{(1+t^4)^n}<\\frac{\\varepsilon}{2}$，于是 $0\\le u_n<\\alpha+\\frac{\\varepsilon}{2}<\\varepsilon$，即 $\\lim\\limits_{n\\to\\infty}u_n=0$。2) 因 $u_{n+1}=\\int_0^1\\frac{dt}{(1+t^4)^{n+1}}\\le\\int_0^1\\frac{dt}{(1+t^4)^n}=u_n$，$\\{u_n\\}$ 单调递减且 $\\lim\\limits_{n\\to\\infty}u_n=0$，由莱布尼兹判别法知 $\\sum\\limits_{n=1}^{\\infty}(-1)^nu_n$ 收敛；又 $n\\ge2$ 时 $u_n\\ge\\int_0^1\\frac{dt}{(1+t)^n}=\\frac{1}{n-1}\\left(1-\\frac{1}{2^{n-1}}\\right)$，而 $\\sum\\frac{1}{n-1}$ 发散、$\\sum\\frac{1}{n-1}\\cdot\\frac{1}{2^{n-1}}$ 收敛，故 $\\sum\\limits_{n=2}^{\\infty}\\frac{1}{n-1}\\left(1-\\frac{1}{2^{n-1}}\\right)$ 发散，即原级数条件收敛。"
+},
+{
+"pid": 144,
+"label": "16",
+"statement": "3) 证明当 $p\\ge1$ 时级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{u_n}{n^p}$ 收敛，并求级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{u_n}{n}$ 的和。",
+"answer": "$\\sum\\limits_{n=1}^{\\infty}\\frac{u_n}{n}=\\ln 2+\\frac{\\sqrt{2}}{2}\\left[\\pi+2\\ln(1+\\sqrt{2})\\right]$",
+"notebook_candidate": "解：先求 $\\sum\\limits_{n=1}^{\\infty}\\frac{u_n}{n}$ 的和。由分部积分 $u_n=\\int_0^1\\frac{dt}{(1+t^4)^n}=\\frac{t}{(1+t^4)^n}\\Big|_0^1+n\\int_0^1\\frac{4t^4}{(1+t^4)^{n+1}}dt=\\frac{1}{2^n}+4n(u_n-u_{n+1})$，得 $\\frac{u_n}{n}=\\frac{1}{n2^n}+4(u_n-u_{n+1})$，故 $\\sum\\limits_{n=1}^{\\infty}\\frac{u_n}{n}=\\sum\\limits_{n=1}^{\\infty}\\frac{1}{n2^n}+4u_1$。令 $S(x)=\\sum\\limits_{n=1}^{\\infty}\\frac{x^n}{n}$，$x\\in[-1,1)$，则 $S'(x)=\\sum\\limits_{n=1}^{\\infty}x^{n-1}=\\frac{1}{1-x}$，$S(x)=-\\ln(1-x)$，取 $x=\\frac{1}{2}$ 得 $\\sum\\limits_{n=1}^{\\infty}\\frac{1}{n2^n}=\\ln 2$；又 $u_1=\\int_0^1\\frac{dt}{1+t^4}=\\frac{\\sqrt{2}}{8}\\left[\\pi+2\\ln(1+\\sqrt{2})\\right]$，故和为 $\\ln2+\\frac{\\sqrt{2}}{2}\\left[\\pi+2\\ln(1+\\sqrt{2})\\right]$。当 $p\\ge1$ 时，$\\frac{u_n}{n^p}\\le\\frac{u_n}{n}$，且 $\\sum\\frac{u_n}{n}$ 收敛，故 $\\sum\\frac{u_n}{n^p}$ 收敛。"
+}
+]
+}

@@ -1,0 +1,232 @@
+{
+  "batch": 6,
+  "date": "2026-09-12",
+  "pages": [
+    {
+      "id": 65,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "2.设函数 $f$ 在区域 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$ 上四[?]连续可微，且在区域 $D$ 的边界上为 $0$，如果 $\\left|\\frac{\\partial^4 f}{\\partial x^2\\partial y^2}\\right|\\le 1$，证明 $\\left|\\iint_D f(x,y)[?]\\right|[?]$",
+          "answer": "",
+          "note": "画面右侧约三分之一被人影/反光遮挡，题干第二行的不等式右端不可见"
+        }
+      ],
+      "has_solution": true,
+      "solution": "分析：设 $\\varphi(x)$ 在区间 $[0,1]$ 上具有二阶连续导数，则由分部积分可得 $\\int_0^1\\varphi(x)\\,dx=-\\frac{1}{2}\\int_0^1(x-x^2)\\varphi''(x)\\,dx$。证明：由题设条件，在 $D$ 的边界上 $f(x,y)=0$，于是 $f(0,y)=f(1,y)=f(x,0)=f(x,1)=0$。把 $\\iint_D f(x,y)\\,dxdy$ 写成 $\\int_0^1dy\\left[\\int_0^1f(x,y)\\,dx\\right]$ 后对 $x$ 用上述分部积分公式，得 $-\\frac{1}{2}\\int_0^1\\!\\!\\int_0^1(x-x^2)f_{xx}^{(2)}(x,y)\\,dxdy$，再化为 $-\\frac{1}{2}\\int_0^1(x-x^2)\\,dx\\int_0^1f_{xx}^{(2)}(x,y)\\,dy$。",
+      "summary": "第2题：四阶混合偏导有界的二重积分估计，右侧被遮挡",
+      "clarity": "partial"
+    },
+    {
+      "id": 66,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "2.设函数 $f$ 在区域 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$ 上四次连续可微，且在区域 $D$ 的边界上为 $0$，如果 $\\left|\\frac{\\partial^4 f}{\\partial x^2\\partial y^2}\\right|\\le 1$，证明 $\\left|\\iint_D f(x,y)\\,dxdy\\right|\\le\\frac{1}{144}$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "分析：设 $\\varphi(x)$ 在区间 $[0,1]$ 上具有二阶连续导数，且 $\\varphi(0)=\\varphi(1)=0$，则由分部积分可得 $\\int_0^1\\varphi(x)\\,dx=-\\frac{1}{2}\\int_0^1(x-x^2)\\varphi''(x)\\,dx$。证明：由题设条件，在 $D$ 的边界上 $f(x,y)=0$，于是知 $f(0,y)=f(1,y)=f(x,0)=f(x,1)=0$。先算 $\\iint_D f\\,dxdy=\\int_0^1dy\\left[\\int_0^1f(x,y)\\,dx\\right]$（方框注：$\\int_0^1f(x,y)\\,dx$ 中的 $y$ 看成常数），对 $x$ 分部积分得 $-\\frac{1}{2}\\int_0^1\\!\\!\\int_0^1(x-x^2)f_{xx}^{(2)}(x,y)\\,dxdy$（方框注：$F(x)=f(x,y)$，由 $f(0,y)=f(1,y)$ 得 $F(0)=F(1)$），再对 $y$ 分部积分得 $-\\frac{1}{2}\\int_0^1(x-x^2)\\,dx\\int_0^1f_{xx}^{(2)}(x,y)\\,dy$。",
+      "summary": "第2题：由边界为0估计二重积分，证法一开头",
+      "clarity": "good"
+    },
+    {
+      "id": 67,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "练习",
+          "statement": "练习：设 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$，$I=\\iint_D f(x,y)\\,dxdy$，其中函数 $f(x,y)$ 在 $D$ 上有连续的偏导数，对任何 $x,y$ 有 $f(0,y)=f(x,0)=0$，且 $\\left|\\frac{\\partial^2 f}{\\partial x\\partial y}\\right|\\le 1$，证明：$I\\le\\frac{1}{4}$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "接上题：$\\iint_D f\\,dxdy=-\\frac{1}{2}\\int_0^1(x-x^2)\\,dx\\left[-\\frac{1}{2}\\int_0^1(y-y^2)f_{xxyy}^{(4)}(x,y)\\,dy\\right]$。这一步对 $y$ 再用一次分部积分，依据方框中 $f(x,0)=f(x,1)=0\\Rightarrow f_{xx}^{(2)}(x,0)=f_{xx}^{(2)}(x,1)=0$、$G(y)=f_{xx}^{(2)}(x,y)\\Rightarrow G(0)=G(1)$。于是 $\\iint_D f\\,dxdy=\\frac{1}{4}\\int_0^1(x-x^2)\\,dx\\int_0^1(y-y^2)f_{xxyy}^{(4)}(x,y)\\,dy$，取绝对值并用 $\\left|f_{xxyy}^{(4)}\\right|\\le 1$，得 $\\le\\frac{1}{4}\\int_0^1(x-x^2)\\,dx\\int_0^1(y-y^2)\\,dy=\\frac{1}{4}\\left[\\int_0^1(x-x^2)\\,dx\\right]^2=\\frac{1}{144}$。",
+      "summary": "第2题解法收尾并给出练习（$I\\le\\frac14$）",
+      "clarity": "good"
+    },
+    {
+      "id": 68,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "练习",
+          "statement": "练习：设 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$，$I=\\iint_D f(x,y)\\,dxdy$，其中函数 $f(x,y)$ 在 $D$ 上有连续的偏导数，对任何 $x,y$ 有 $f(0,y)=f(x,0)=0$，且 $\\left|\\frac{\\partial^2 f}{\\partial x\\partial y}\\right|\\le 1$，证明：$I\\le\\frac{1}{4}$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "与前一页同一张幻灯片（角度稍异）：接上题，$\\iint_D f\\,dxdy=-\\frac{1}{2}\\int_0^1(x-x^2)\\,dx\\left[-\\frac{1}{2}\\int_0^1(y-y^2)f_{xxyy}^{(4)}(x,y)\\,dy\\right]$，方框注明 $f(x,0)=f(x,1)=0\\Rightarrow f_{xx}^{(2)}(x,0)=f_{xx}^{(2)}(x,1)=0$ 且 $G(y)=f_{xx}^{(2)}(x,y)\\Rightarrow G(0)=G(1)$。整理得 $\\iint_D f\\,dxdy=\\frac{1}{4}\\int_0^1(x-x^2)\\,dx\\int_0^1(y-y^2)f_{xxyy}^{(4)}(x,y)\\,dy\\le\\frac{1}{4}\\int_0^1(x-x^2)\\,dx\\int_0^1(y-y^2)\\,dy=\\frac{1}{144}$（图中把 $\\left|f_{xxyy}^{(4)}\\right|$ 圈出并标“$\\le 1$”）。",
+      "summary": "重拍：第2题收尾与练习 $I\\le\\frac14$",
+      "clarity": "good"
+    },
+    {
+      "id": 69,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "用极坐标与 Green 公式处理 $\\iint_D(xf_x+yf_y)\\,dxdy$：$\\because\\iint_D(xf_x+yf_y)\\,dxdy=\\int_0^{2\\pi}d\\theta\\int_0^1(f_xr\\cos\\theta+f_yr\\sin\\theta)r\\,dr$，交换积分次序得 $=\\int_0^1rdr\\int_0^{2\\pi}(f_xr\\cos\\theta+f_yr\\sin\\theta)\\,d\\theta$。方框给出 $dx=-r\\sin\\theta\\,d\\theta,\\ dy=r\\cos\\theta\\,d\\theta$，故内层积分为 $\\int_0^{2\\pi}(f_x\\,dy-f_y\\,dx)$，再用 Green 公式得 $\\iint_{x^2+y^2\\le r^2}(f_{xx}+f_{yy})\\,dxdy$。最终 $\\iint_D(xf_x+yf_y)\\,dxdy=\\int_0^1rdr\\iint_{x^2+y^2\\le r^2}(f_{xx}+f_{yy})\\,dxdy$。",
+      "summary": "板书：极坐标加 Green 公式化二重积分",
+      "clarity": "good"
+    },
+    {
+      "id": 70,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "例12",
+          "statement": "例12.计算积分 $$I=\\int_0^{2\\pi}d\\varphi\\int_0^{\\pi}e^{\\sin\\theta(\\cos\\varphi-\\sin\\varphi)}\\sin\\theta\\,d\\theta.$$",
+          "answer": "$$I=\\sqrt{2}\\pi\\left(e^{\\sqrt{2}}-e^{-\\sqrt{2}}\\right)$$",
+          "note": "题旁小方框注“球面坐标”；图中手写补注 $x-y=\\sqrt{2}t$"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：设球面 $\\Sigma:x^2+y^2+z^2=1$，由球面参数方程 $x=\\sin\\theta\\cos\\varphi,\\ y=\\sin\\theta\\sin\\varphi,\\ z=\\cos\\theta$，$dS=\\sin\\theta\\,d\\theta\\,d\\varphi$，故 $I=\\iint_\\Sigma e^{x-y}\\,dS$。设平面 $P_t:\\frac{x-y}{\\sqrt{2}}=t,-1\\le t\\le 1$，原点到该平面距离为 $|t|$，它截 $\\Sigma$ 所得球带面积 $dS(t)=2\\pi\\sqrt{1-t^2}\\cdot\\frac{1}{\\sqrt{1-t^2}}dt=2\\pi\\,dt$（方框：$r(t)=\\sqrt{1-t^2}\\Rightarrow dl=\\sqrt{1+r'^2(t)}\\,dt=\\sqrt{1+\\left(\\frac{1}{2}\\cdot\\frac{-2t}{\\sqrt{1-t^2}}\\right)^2}dt=\\frac{1}{\\sqrt{1-t^2}}dt$）。于是 $I=\\int_{-1}^{1}e^{\\sqrt{2}t}2\\pi\\,dt=\\sqrt{2}\\pi\\left(e^{\\sqrt{2}}-e^{-\\sqrt{2}}\\right)$。",
+      "summary": "例12：用球面坐标与球带面积算指数积分",
+      "clarity": "good"
+    },
+    {
+      "id": 71,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "1",
+          "statement": "1.计算 $$\\lim_{n\\to\\infty}\\sum_{i=1}^{n}\\sum_{j=1}^{2n}\\frac{2}{n^2}\\left[\\frac{2i+j}{n}\\right],$$ 此处 $[x]$ 是不超过 $x$ 的最大整数。",
+          "answer": "$$6$$",
+          "note": "幻灯片中另给出二重积分定义方框：$\\iint_D f(x,y)\\,dxdy=\\lim_{\\lambda\\to 0}\\sum_{i=1}^{n}\\sum_{j=1}^{n}f(\\xi_i,\\eta_j)\\Delta\\sigma_i$"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：和式是 $f(x,y)=[x+y]$ 在方形区域 $D:0\\le x\\le 2,0\\le y\\le 2$ 上的一个积分和。将 $x$ 轴上的区间 $n$ 等分、$y$ 轴上的区间 $2n$ 等分，则各小矩形面积 $\\Delta\\sigma_i=\\frac{2}{n^2}$，取 $\\Delta\\sigma_i$ 的右上顶点 $\\left(\\frac{2i}{n},\\frac{j}{n}\\right)$ 的函数值；由于 $f(x,y)$ 在 $D$ 上分片连续，二重积分存在。故极限 $=\\iint_D[x+y]\\,dxdy=\\iint_{D_1}0\\,dxdy+\\iint_{D_2}1\\,dxdy+\\iint_{D_3}2\\,dxdy+\\iint_{D_4}3\\,dxdy=6$（右侧配区域分块示意图）。",
+      "summary": "第1题：用二重积分定义求和式极限，答案6",
+      "clarity": "good"
+    },
+    {
+      "id": 72,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "2.设函数 $f$ 在区域 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$ 上四次连续可微，且在区域 $D$ 的边界上为 $0$，如果 $\\left|\\frac{\\partial^4 f}{\\partial x^2\\partial y^2}\\right|\\le 1$，证明 $\\left|\\iint_D f(x,y)\\,dxdy\\right|\\le\\frac{1}{144}$。",
+          "answer": "",
+          "note": "屏幕顶端题干首行略有裁切；方框给出分部积分公式 $\\int_a^b uv'\\,dx=uv\\big|_a^b-\\int_a^b vu'\\,dx$"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证明（另一方法）：设 $g(x,y)=x(1-x)y(1-y)$，则 $\\frac{\\partial^4 g}{\\partial x^2\\partial y^2}=4$，$\\iint_Dx(1-x)y(1-y)\\,dxdy=\\frac{1}{36}$。于是 $4\\iint_D f\\,dxdy=\\iint_D\\frac{\\partial^4 g}{\\partial x^2\\partial y^2}f\\,dxdy=\\int_0^1\\!\\!\\int_0^1\\frac{\\partial^4 g}{\\partial x^2\\partial y^2}f\\,dxdy$，对 $x$ 分部积分并利用 $f(0,y)=f(1,y)=0$ 消去边界项，得 $-\\int_0^1\\left(\\int_0^1\\frac{\\partial^3 g}{\\partial x\\partial y^2}\\frac{\\partial f}{\\partial x}\\,dx\\right)dy$，再分部积分得 $-\\int_0^1\\left(\\int_0^1\\frac{\\partial f}{\\partial x}\\,d\\frac{\\partial^2 g}{\\partial y^2}\\right)dy$。",
+      "summary": "第2题：构造 $g=x(1-x)y(1-y)$ 分部积分",
+      "clarity": "partial"
+    },
+    {
+      "id": 73,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "2.设函数 $f$ 在区域 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$ 上四次连续可微，且在区域 $D$ 的边界上为 $0$，如果 $\\left|\\frac{\\partial^4 f}{\\partial x^2\\partial y^2}\\right|\\le 1$，证明 $\\left|\\iint_D f(x,y)\\,dxdy\\right|\\le\\frac{1}{144}$。",
+          "answer": "",
+          "note": "屏幕顶端题干首行略有裁切；方框给出 $\\int_a^b uv'\\,dx=uv\\big|_a^b-\\int_a^b vu'\\,dx$"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证明：设 $g(x,y)=x(1-x)y(1-y)$，$\\frac{\\partial^4 g}{\\partial x^2\\partial y^2}=4$，且 $\\iint_Dx(1-x)y(1-y)\\,dxdy=\\frac{1}{36}$。故 $4\\iint_D f(x,y)\\,dxdy=\\iint_D\\frac{\\partial^4 g}{\\partial x^2\\partial y^2}f\\,dxdy=\\int_0^1\\!\\!\\int_0^1\\frac{\\partial^4 g}{\\partial x^2\\partial y^2}f\\,dxdy=\\int_0^1\\left(\\int_0^1f(x,y)\\,d\\frac{\\partial^3 g}{\\partial x\\partial y^2}\\right)dy$。再对 $x$ 分部积分：$=\\int_0^1f(x,y)\\frac{\\partial^3 g}{\\partial x\\partial y^2}\\Big|_0^1dy-\\int_0^1\\!\\!\\int_0^1\\frac{\\partial^3 g}{\\partial x\\partial y^2}\\frac{\\partial f}{\\partial x}\\,dxdy$，由方框 $f(0,y)=f(1,y)=0$ 得 $=-\\int_0^1\\left(\\int_0^1\\frac{\\partial^3 g}{\\partial x\\partial y^2}\\frac{\\partial f}{\\partial x}\\,dx\\right)dy=-\\int_0^1\\left(\\int_0^1\\frac{\\partial f}{\\partial x}d\\frac{\\partial^2 g}{\\partial y^2}\\right)dy$。",
+      "summary": "重拍：第2题第二证法前段",
+      "clarity": "good"
+    },
+    {
+      "id": 74,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "2.设函数 $f$ 在区域 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$ 上四次连续可微，且在区域 $D$ 的边界上为 $0$，如果 $\\left|\\frac{\\partial^4 f}{\\partial x^2\\partial y^2}\\right|\\le 1$，证明 $\\left|\\iint_D f(x,y)\\,dxdy\\right|\\le\\frac{1}{144}$。",
+          "answer": "",
+          "note": "屏幕顶端题干首行略有裁切；方框给出分部积分公式"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证明：取 $g(x,y)=x(1-x)y(1-y)$，由 $\\frac{\\partial^4 g}{\\partial x^2\\partial y^2}=4$ 与 $\\iint_Dx(1-x)y(1-y)\\,dxdy=\\frac{1}{36}$，把 $4\\iint_D f\\,dxdy$ 写成 $\\iint_D\\frac{\\partial^4 g}{\\partial x^2\\partial y^2}f\\,dxdy$。两次分部积分（$f$ 在边界为 $0$ 消去边界项）依次得 $-\\int_0^1\\left(\\int_0^1\\frac{\\partial^3 g}{\\partial x\\partial y^2}\\frac{\\partial f}{\\partial x}\\,dx\\right)dy$ 与 $-\\int_0^1\\left(\\int_0^1\\frac{\\partial f}{\\partial x}d\\frac{\\partial^2 g}{\\partial y^2}\\right)dy$。",
+      "summary": "重拍：第2题第二证法前段（同前一页）",
+      "clarity": "good"
+    },
+    {
+      "id": 75,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "接上：由方框 $g(x,y)=x(1-x)y(1-y)$，$\\frac{\\partial^2 g}{\\partial y^2}=-2x(1-x)$，$\\left.\\frac{\\partial^2 g}{\\partial y^2}\\right|_0^1=0$，故 $4\\iint_D f\\,dxdy=-\\int_0^1\\frac{\\partial f}{\\partial x}\\frac{\\partial^2 g}{\\partial y^2}\\Big|_0^1dy+\\int_0^1\\!\\!\\int_0^1\\frac{\\partial^2 g}{\\partial y^2}\\frac{\\partial^2 f}{\\partial x^2}\\,dxdy=\\iint_D\\frac{\\partial^2 f}{\\partial x^2}\\frac{\\partial^2 g}{\\partial y^2}\\,dxdy$。又由“同理”得 $\\iint_D\\frac{\\partial^4 f}{\\partial x^2\\partial y^2}g\\,dxdy=\\iint_D\\frac{\\partial^2 f}{\\partial x^2}\\frac{\\partial^2 g}{\\partial y^2}\\,dxdy$。于是 $4\\left|\\iint_D f(x,y)\\,dxdy\\right|=\\left|\\iint_D\\frac{\\partial^4 f}{\\partial x^2\\partial y^2}g(x,y)\\,dxdy\\right|\\le\\iint_Dg(x,y)\\,dxdy=\\frac{1}{36}$，即 $\\left|\\iint_D f(x,y)\\,dxdy\\right|\\le\\frac{1}{144}$。",
+      "summary": "第2题第二证法收尾，得 $\\frac{1}{144}$ 估计",
+      "clarity": "good"
+    },
+    {
+      "id": 76,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "2.设函数 $f$ 在区域 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$ 上四次连续可微，且在区域 $D$ 的边界上为 $0$，如果 $\\left|\\frac{\\partial^4 f}{\\partial x^2\\partial y^2}\\right|\\le 1$，证明 $\\left|\\iint_D f(x,y)\\,dxdy\\right|\\le\\frac{1}{144}$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "分析：设 $\\varphi(x)$ 在 $[0,1]$ 上具有二阶连续导数且 $\\varphi(0)=\\varphi(1)=0$，则由分部积分得 $\\int_0^1\\varphi(x)\\,dx=-\\frac{1}{2}\\int_0^1(x-x^2)\\varphi''(x)\\,dx$。证明：由题设在 $D$ 的边界上 $f=0$，故 $f(0,y)=f(1,y)=f(x,0)=f(x,1)=0$。把 $\\iint_Df\\,dxdy$ 化为 $\\int_0^1dy\\left[\\int_0^1f(x,y)\\,dx\\right]$，对 $x$ 用上述公式（视 $y$ 为常数）得 $-\\frac{1}{2}\\int_0^1\\!\\!\\int_0^1(x-x^2)f_{xx}^{(2)}(x,y)\\,dxdy$，再对 $y$ 用一次得 $-\\frac{1}{2}\\int_0^1(x-x^2)\\,dx\\int_0^1f_{xx}^{(2)}(x,y)\\,dy$。",
+      "summary": "重拍：第2题第一证法前段（分析＋首个分部积分）",
+      "clarity": "good"
+    },
+    {
+      "id": 77,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "2.设函数 $f$ 在区域 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$ 上四次连续可微，且在区域 $D$ 的边界上为 $0$，如果 $\\left|\\frac{\\partial^4 f}{\\partial x^2\\partial y^2}\\right|\\le 1$，证明 $\\left|\\iint_D f(x,y)\\,dxdy\\right|\\le\\frac{1}{144}$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "分析：设 $\\varphi(x)$ 在 $[0,1]$ 上二阶连续可导且 $\\varphi(0)=\\varphi(1)=0$，由分部积分得 $\\int_0^1\\varphi(x)\\,dx=-\\frac{1}{2}\\int_0^1(x-x^2)\\varphi''(x)\\,dx$。证明：由题设边界上 $f(x,y)=0$，即 $f(0,y)=f(1,y)=f(x,0)=f(x,1)=0$。于是 $\\iint_Df\\,dxdy=\\int_0^1dy\\left[\\int_0^1f(x,y)\\,dx\\right]=-\\frac{1}{2}\\int_0^1\\!\\!\\int_0^1(x-x^2)f_{xx}^{(2)}(x,y)\\,dxdy=-\\frac{1}{2}\\int_0^1(x-x^2)\\,dx\\int_0^1f_{xx}^{(2)}(x,y)\\,dy$。",
+      "summary": "重拍：第2题第一证法前段（与前一页相同）",
+      "clarity": "good"
+    },
+    {
+      "id": 78,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "练习",
+          "statement": "练习：设 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$，$I=\\iint_D f(x,y)\\,dxdy$，其中函数 $f(x,y)$ 在 $D$ 上有连续的偏导数，对任何 $x,y$ 有 $f(0,y)=f(x,0)=0$，且 $\\left|\\frac{\\partial^2 f}{\\partial x\\partial y}\\right|\\le 1$，证明：$I\\le\\frac{1}{4}$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "接上题：$\\iint_Df\\,dxdy=-\\frac{1}{2}\\int_0^1(x-x^2)\\,dx\\left[-\\frac{1}{2}\\int_0^1(y-y^2)f_{xxyy}^{(4)}(x,y)\\,dy\\right]$，方框注明 $\\int_0^1f_{xx}^2(x,y)\\,dy$ 中把 $x$ 看成常数，且 $f(x,0)=f(x,1)=0\\Rightarrow f_{xx}^{(2)}(x,0)=f_{xx}^{(2)}(x,1)=0$，$G(y)=f_{xx}^{(2)}(x,y)\\Rightarrow G(0)=G(1)$。故 $\\iint_Df\\,dxdy=\\frac{1}{4}\\int_0^1(x-x^2)\\,dx\\int_0^1(y-y^2)f_{xxyy}^{(4)}(x,y)\\,dy\\le\\frac{1}{4}\\int_0^1(x-x^2)\\,dx\\int_0^1(y-y^2)\\,dy=\\frac{1}{4}\\left[\\int_0^1(x-x^2)\\,dx\\right]^2=\\frac{1}{144}$。",
+      "summary": "第2题收尾与练习 $I\\le\\frac14$（重拍）",
+      "clarity": "good"
+    },
+    {
+      "id": 79,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "练习",
+          "statement": "练习：设 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$，$I=\\iint_D f(x,y)\\,dxdy$，其中函数 $f(x,y)$ 在 $D$ 上有连续的偏导数，对任何 $x,y$ 有 $f(0,y)=f(x,0)=0$，且 $\\left|\\frac{\\partial^2 f}{\\partial x\\partial y}\\right|\\le 1$，证明：$I\\le\\frac{1}{4}$。",
+          "answer": "",
+          "note": "底部方框注：令 $g(x,y)=(1-x)(1-y)$"
+        }
+      ],
+      "has_solution": true,
+      "solution": "接上题解法：$\\iint_Df\\,dxdy=-\\frac{1}{2}\\int_0^1(x-x^2)\\,dx\\left[-\\frac{1}{2}\\int_0^1(y-y^2)f_{xxyy}^{(4)}(x,y)\\,dy\\right]$，其中用到 $f(x,0)=f(x,1)=0\\Rightarrow f_{xx}^{(2)}(x,0)=f_{xx}^{(2)}(x,1)=0$ 与 $G(y)=f_{xx}^{(2)}(x,y)\\Rightarrow G(0)=G(1)$。整理得 $\\iint_Df\\,dxdy=\\frac{1}{4}\\int_0^1(x-x^2)\\,dx\\int_0^1(y-y^2)f_{xxyy}^{(4)}(x,y)\\,dy\\le\\frac{1}{4}\\int_0^1(x-x^2)\\,dx\\int_0^1(y-y^2)\\,dy=\\frac{1}{144}$。页面下方给出练习的提示：“注：令 $g(x,y)=(1-x)(1-y)$”。",
+      "summary": "第2题收尾、练习 $I\\le\\frac14$ 及提示 $g=(1-x)(1-y)$",
+      "clarity": "good"
+    }
+  ]
+}

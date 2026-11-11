@@ -1,0 +1,117 @@
+{
+"chunk": 10,
+"items": [
+{
+"pid": 145,
+"label": "17",
+"statement": "设 $a_n=\\frac{4n+\\sqrt{4n^2-1}}{\\sqrt{2n+1}+\\sqrt{2n-1}}$（$n\\ge1$），$S_n=\\sum\\limits_{k=1}^{n}a_k$，讨论级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{(-1)^n}{\\sqrt{n+1}\\,S_n^{p}}$ 的绝对收敛和条件收敛性。",
+"answer": "",
+"notebook_candidate": "解：令 $b_n=\\sqrt{2n-1}$，则 $b_{n+1}^2+b_n^2=4n$，$a_n=\\frac{b_{n+1}^3-b_n^3}{b_{n+1}^2-b_n^2}=\\frac{1}{2}(b_{n+1}^3-b_n^3)$，故 $S_n=\\frac{1}{2}\\left(b_{n+1}^3-1\\right)=\\frac{1}{2}\\left(\\sqrt{(2n+1)^3}-1\\right)>0$；由比较判别法（极限形式）得 $\\frac{3p+1}{2}>1$ 即 $p>\\frac{1}{6}$ 时收敛，$0<\\frac{3p+1}{2}\\le1$ 即 $0<p\\le\\frac{1}{6}$ 时发散；又 $0<p\\le\\frac{1}{6}$ 时由莱布尼兹定理知 $\\sum\\frac{(-1)^n}{\\sqrt{n+1}S_n^p}$ 收敛。结论：$p>\\frac{1}{6}$ 时绝对收敛，$0<p\\le\\frac{1}{6}$ 时条件收敛。"
+},
+{
+"pid": 146,
+"label": "18",
+"statement": "设 $a>0$，$b>0$，$c>0$，试研究级数 $\\sum\\limits_{n=1}^{\\infty}\\left(\\sqrt[n]{a}-\\frac{\\sqrt[n]{b}+\\sqrt[n]{c}}{2}\\right)$ 的敛散性。",
+"answer": "当 $\\frac{a^2}{bc}=1$ 时级数收敛，当 $\\frac{a^2}{bc}\\neq1$ 时级数发散",
+"notebook_candidate": "解：设 $u_n=\\sqrt[n]{a}-\\frac{\\sqrt[n]{b}+\\sqrt[n]{c}}{2}=\\frac{1}{2}\\left[2(\\sqrt[n]{a}-1)-(\\sqrt[n]{b}-1)-(\\sqrt[n]{c}-1)\\right]$，得 $\\lim\\limits_{n\\to\\infty}nu_n=\\frac{1}{2}(2\\ln a-\\ln b-\\ln c)=\\frac{1}{2}\\ln\\frac{a^2}{bc}$。当 $\\frac{a^2}{bc}>1$ 时 $\\sum u_n$ 为正项级数，当 $\\frac{a^2}{bc}<1$ 时为负项级数，由比较判别法的极限形式知级数发散；当 $\\frac{a^2}{bc}=1$ 时 $u_n=(bc)^{\\frac{1}{2n}}-\\frac{1}{2}\\left(b^{\\frac{1}{n}}+c^{\\frac{1}{n}}\\right)=-\\frac{1}{2}\\sqrt[2n]{c}\\left[\\left(\\frac{b}{c}\\right)^{\\frac{1}{2n}}-1\\right]^2\\le0$，$\\sum(-u_n)$ 为正项级数，$\\lim\\limits_{n\\to\\infty}\\left[(2n)^2(-u_n)\\right]=\\frac{1}{2}\\left(\\ln\\frac{b}{c}\\right)^2$，由 $\\sum\\limits_{n=1}^{\\infty}\\frac{1}{4n^2}$ 收敛得 $\\sum(-u_n)$ 收敛，从而 $\\sum u_n$ 收敛。故 $\\frac{a^2}{bc}=1$ 时收敛，$\\frac{a^2}{bc}\\neq1$ 时发散。"
+},
+{
+"pid": 147,
+"label": "17",
+"statement": "设 $a_n=\\frac{4n+\\sqrt{4n^2-1}}{\\sqrt{2n+1}+\\sqrt{2n-1}}$，$n\\ge1$，$S_n=\\sum\\limits_{k=1}^{n}a_k$，判断级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{(-1)^n}{\\sqrt{n+1}\\,S_n^{p}}$ 的绝对收敛和条件收敛性。",
+"answer": "$p>\\frac{1}{6}$ 时绝对收敛；$0<p\\le\\frac{1}{6}$ 时条件收敛",
+"notebook_candidate": "解：令 $b_n=\\sqrt{2n-1}$，则 $b_{n+1}^2+b_n^2=4n$，$a_n=\\frac{b_{n+1}^2+b_n^2+b_{n+1}b_n}{b_{n+1}+b_n}=\\frac{b_{n+1}^3-b_n^3}{b_{n+1}^2-b_n^2}=\\frac{1}{2}\\left(b_{n+1}^3-b_n^3\\right)$，故 $S_n=\\sum\\limits_{k=1}^{n}a_k=\\frac{1}{2}\\left(b_{n+1}^3-1\\right)=\\frac{1}{2}\\left(\\sqrt{(2n+1)^3}-1\\right)>0$。再由 $\\lim\\limits_{n\\to\\infty}\\frac{n^{\\frac{3p+1}{2}}}{\\sqrt{n+1}\\,S_n^{p}}=\\lim\\limits_{n\\to\\infty}\\left|\\frac{2}{\\sqrt{(2+\\frac{1}{n})^3}-\\frac{1}{\\sqrt{n^3}}}\\right|^{p}=\\frac{1}{\\sqrt{2^p}}$，得 $\\frac{3p+1}{2}>1$ 即 $p>\\frac{1}{6}$ 时收敛，$0<\\frac{3p+1}{2}\\le1$ 即 $0<p\\le\\frac{1}{6}$ 时发散；又 $0<p\\le\\frac{1}{6}$ 时由莱布尼兹定理知 $\\sum\\frac{(-1)^n}{\\sqrt{n+1}S_n^p}$ 收敛。故 $p>\\frac{1}{6}$ 时绝对收敛，$0<p\\le\\frac{1}{6}$ 时条件收敛。"
+},
+{
+"pid": 148,
+"label": "1",
+"statement": "求幂级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{x^n}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}$ 的收敛域。",
+"answer": "收敛域为 $x\\in[-1,1)$",
+"notebook_candidate": "证：记 $a_n=\\frac{1}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}$，由 $\\lim\\limits_{n\\to\\infty}\\left(1+\\frac{1}{2}+\\cdots+\\frac{1}{n}\\right)=+\\infty$，得 $\\lim\\limits_{n\\to\\infty}\\left|\\frac{a_{n+1}}{a_n}\\right|=\\lim\\frac{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n+1}}=1-\\lim\\frac{\\frac{1}{n+1}}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}+\\frac{1}{n+1}}=1$，故收敛半径 $R=1$。当 $x=-1$ 时由莱布尼兹准则知级数收敛；当 $x=1$ 时，由 $1+\\frac{1}{2}+\\cdots+\\frac{1}{n}=C+\\ln n+\\varepsilon_n$（$C$ 为欧拉常数，$\\varepsilon_n$ 为无穷小量）得 $\\lim\\limits_{n\\to\\infty}\\frac{a_n}{1/\\ln n}=1$，故 $\\sum\\limits_{n=1}^{\\infty}\\frac{1}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}$ 发散，收敛域为 $x\\in[-1,1)$。"
+},
+{
+"pid": 149,
+"label": "1'",
+"statement": "求 $\\sum\\limits_{n=1}^{\\infty}\\left(1+\\frac{1}{2}+\\cdots+\\frac{1}{n}\\right)x^n$ 的收敛域及和函数。",
+"answer": "",
+"notebook_candidate": "证：记 $a_n=\\frac{1}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}$，由 $\\lim\\limits_{n\\to\\infty}\\left(1+\\frac{1}{2}+\\cdots+\\frac{1}{n}\\right)=+\\infty$，得 $\\lim\\limits_{n\\to\\infty}\\left|\\frac{a_{n+1}}{a_n}\\right|=\\lim\\frac{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n+1}}=1-\\lim\\frac{\\frac{1}{n+1}}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}+\\frac{1}{n+1}}=1$，故收敛半径 $R=1$。当 $x=-1$ 时由莱布尼兹准则知级数收敛；当 $x=1$ 时，由 $1+\\frac{1}{2}+\\cdots+\\frac{1}{n}=C+\\ln n+\\varepsilon_n$（$C$ 为欧拉常数，$\\varepsilon_n$ 为无穷小量）得 $\\lim\\limits_{n\\to\\infty}\\frac{a_n}{1/\\ln n}=1$，故 $\\sum\\limits_{n=1}^{\\infty}\\frac{1}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}$ 发散，收敛域为 $x\\in[-1,1)$。"
+},
+{
+"pid": 150,
+"label": "2",
+"statement": "设正项级数 $\\sum\\limits_{n=1}^{\\infty}a_n$ 的部分和为 $s_n$，求级数 $\\sum\\limits_{n=1}^{\\infty}a_ne^{-s_nx}$ 的收敛域。",
+"answer": "",
+"notebook_candidate": "解：a) 若 $\\sum a_n$ 收敛，则 $\\{s_n\\}$ 有界，即 $\\exists M>0$，$\\forall n$ 有 $s_n\\le M$，由 $0\\le a_ne^{-s_nx}\\le a_ne^{s_n|x|}\\le a_ne^{M|x|}$ 及 $\\sum a_n$ 收敛，比较判别法得 $\\sum a_ne^{-s_nx}$ 收敛，即 $x\\in(-\\infty,+\\infty)$ 都收敛。b) 若 $\\sum a_n$ 发散，则 $\\lim\\limits_{n\\to\\infty}s_n=+\\infty$：当 $x\\le0$ 时 $a_ne^{-s_nx}\\ge a_n$，故 $\\sum a_ne^{-s_nx}$ 发散；当 $x>0$ 时 $0\\le a_ne^{-s_nx}=e^{-s_nx}(s_n-s_{n-1})\\le\\int_{s_{n-1}}^{s_n}e^{-tx}dt$，于是 $\\sum\\limits_{n=1}^{\\infty}\\int_{s_{n-1}}^{s_n}e^{-tx}dt=\\int_0^{+\\infty}e^{-tx}dt=\\frac{1}{x}$，故 $\\sum a_ne^{-s_nx}$ 收敛。结论：$\\sum a_n$ 收敛时收敛域为 $(-\\infty,+\\infty)$，$\\sum a_n$ 发散时收敛域为 $(0,+\\infty)$。"
+},
+{
+"pid": 151,
+"label": "3",
+"statement": "定义 $S_0=1$，$S_n$ 为某一类 $n\\times n$ 对称矩阵的总数（$n\\ge1$），这类矩阵的元素为非负整数，且 $\\sum\\limits_{i=1}^{n}a_{ij}=1$（$j=1,2,\\cdots,n$），求级数 $\\sum\\limits_{n=0}^{\\infty}S_n\\frac{x^n}{n!}$ 的和函数。",
+"answer": "",
+"notebook_candidate": "解：设 $(a_{ij})_{n\\times n}$ 中 $a_{1k}=1$，若 $k=1$ 则有 $S_{n-1}$ 个方法构成这 $n$ 阶矩阵；若 $k\\neq1$，则 $a_{1k}=a_{k1}=1$，删去第一行第 $k$ 行及第一列第 $k$ 列后剩下 $(n-2)\\times(n-2)$ 对称矩阵，得递推 $S_n=S_{n-1}+(n-1)S_{n-2}$。令 $F(x)=\\sum\\limits_{n=0}^{\\infty}S_n\\frac{x^n}{n!}$，$a_n=\\frac{S_n}{n!}$，分 $\\frac{S_{n+1}}{S_n}$ 有界与 $\\lim\\frac{S_{n+1}}{S_n}=\\infty$ 两种情形证明 $\\lim\\limits_{n\\to\\infty}\\frac{a_{n+1}}{a_n}=0$，故级数收敛区间为 $(-\\infty,+\\infty)$。"
+},
+{
+"pid": 152,
+"label": "4",
+"statement": "设 $f(x)=\\sum\\limits_{n=1}^{\\infty}\\frac{\\cos nx}{\\sqrt{n^3+n}}$，$F(x)$ 是 $f(x)$ 的一个原函数，$F(0)=0$。证明：$\\frac{\\sqrt{2}}{2}-\\frac{1}{15}<F\\left(\\frac{\\pi}{2}\\right)<\\frac{\\sqrt{2}}{2}$。",
+"answer": "",
+"notebook_candidate": "证：因 $\\left|\\frac{\\cos nx}{\\sqrt{n^3+n}}\\right|\\le\\frac{1}{\\sqrt{n^3+n}}$，而 $\\sum\\limits_{n=1}^{\\infty}\\frac{1}{\\sqrt{n^3+n}}$ 收敛，故 $\\sum\\limits_{n=1}^{\\infty}\\frac{\\cos nx}{\\sqrt{n^3+n}}$ 在 $R$ 上一致收敛，可逐项积分：$F(x)=\\int_0^xf(t)dt=\\sum\\limits_{n=1}^{\\infty}\\frac{\\sin nx}{n\\sqrt{n^3+n}}$，$F\\left(\\frac{\\pi}{2}\\right)=\\sum\\limits_{k=1}^{\\infty}\\frac{(-1)^{k-1}}{(2k-1)\\sqrt{(2k-1)^3+(2k-1)}}$。由莱布尼兹定理 $F\\left(\\frac{\\pi}{2}\\right)<a_1=\\frac{\\sqrt{2}}{2}$，$|R_2|<a_2=\\frac{1}{3\\sqrt{30}}$，即 $\\left|F\\left(\\frac{\\pi}{2}\\right)-\\frac{\\sqrt{2}}{2}\\right|<\\frac{1}{3\\sqrt{30}}$，故 $\\frac{\\sqrt{2}}{2}>F\\left(\\frac{\\pi}{2}\\right)>\\frac{\\sqrt{2}}{2}-\\frac{1}{3\\sqrt{30}}>\\frac{\\sqrt{2}}{2}-\\frac{1}{15}$。"
+},
+{
+"pid": 153,
+"label": "5",
+"statement": "设 $f(x)=\\sum\\limits_{n=0}^{\\infty}a_nx^n$（$|x|<+\\infty$，$a_n>0$），$\\sum\\limits_{n=0}^{\\infty}a_nn!$ 收敛，证明：$\\int_0^{+\\infty}e^{-x}f(x)dx=\\sum\\limits_{n=0}^{\\infty}a_nn!$。",
+"answer": "",
+"notebook_candidate": "证：由 $e^x=1+x+\\frac{x^2}{2!}+\\cdots+\\frac{x^n}{n!}+\\cdots$ 得当 $x>0$ 时 $e^x>\\frac{x^n}{n!}$，即 $e^{-x}x^n<n!$，从而 $a_ne^{-x}x^n<a_nn!$；因 $\\sum\\limits_{n=0}^{\\infty}a_nn!$ 收敛，由优级数判别法知 $\\sum\\limits_{n=0}^{\\infty}a_ne^{-x}x^n$ 在 $(0,+\\infty)$ 上一致收敛，故 $\\forall A>0$ 有 $\\int_0^A\\sum\\limits_{n=0}^{\\infty}a_ne^{-x}x^ndx=\\sum\\limits_{n=0}^{\\infty}a_n\\int_0^Ae^{-x}x^ndx$；令 $A\\to+\\infty$，得 $\\int_0^{+\\infty}\\sum\\limits_{n=0}^{\\infty}a_ne^{-x}x^ndx=\\sum\\limits_{n=0}^{\\infty}a_n\\int_0^{+\\infty}e^{-x}x^ndx=\\sum\\limits_{n=0}^{\\infty}a_n\\Gamma(n+1)=\\sum\\limits_{n=0}^{\\infty}a_nn!$。"
+},
+{
+"pid": 154,
+"label": "6",
+"statement": "求级数 $\\left(\\sum\\limits_{n=1}^{\\infty}x^n\\right)^3$ 中 $x^{21}$ 的系数。",
+"answer": "系数 $a_{21}=\\frac{19\\times20}{2}=190$",
+"notebook_candidate": "证（解）：$\\left(\\sum\\limits_{n=1}^{\\infty}x^n\\right)^3=\\left(\\frac{x}{1-x}\\right)^3=\\left(\\frac{1}{1-x}\\right)^3x^3$，$|x|<1$。由 $\\frac{1}{1-x}=\\sum\\limits_{n=0}^{\\infty}x^n$ 及 $\\frac{1}{(1-x)^3}=\\frac{1}{2}\\left(\\frac{1}{1-x}\\right)''=\\sum\\limits_{n=0}^{\\infty}\\frac{(n+1)(n+2)}{2}x^n$，得 $\\left(\\sum\\limits_{n=1}^{\\infty}x^n\\right)^3=\\sum\\limits_{n=0}^{\\infty}\\frac{(n+1)(n+2)}{2}x^{n+3}$，令 $n+3=21$ 即 $n=18$，得 $a_{21}=\\frac{19\\times20}{2}=190$。"
+},
+{
+"pid": 155,
+"label": "7",
+"statement": "设 $f(x)=\\frac{1}{1-x-x^2}$，$a_n=\\frac{1}{n!}f^{(n)}(0)$，求证：级数 $\\sum\\limits_{n=0}^{\\infty}\\frac{a_{n+1}}{a_na_{n+2}}$ 收敛，并求其和。",
+"answer": "",
+"notebook_candidate": "证：由 $f(x)=\\frac{1}{1-x-x^2}$ 得 $1=(1-x-x^2)f(x)$。设 $f(x)=\\sum\\limits_{k=0}^{\\infty}a_kx^k$，其中 $a_k=\\frac{f^{(k)}(0)}{k!}$，代入比较系数：$1=a_0+(a_1-a_0)x+\\sum\\limits_{n=0}^{\\infty}(a_{n+2}-a_{n+1}-a_n)x^{n+2}$，故 $a_0=a_1=1$，$a_{n+2}-a_{n+1}-a_n=0$，即 $a_{n+1}=a_{n+2}-a_n$。（后续求和部分本页未拍到）"
+},
+{
+"pid": 156,
+"label": "8",
+"statement": "8. 判定级数 $\\sum_{n=1}^{\\infty}\\frac{\\cos nx-\\cos(n+1)x}{n}$ 的敛散性。",
+"answer": "收敛",
+"notebook_candidate": "证：用柯西准则估计 $|S_{n+p}-S_n|=\\left|\\frac{\\cos(n+1)x-\\cos(n+2)x}{n+1}+\\cdots+\\frac{\\cos(n+p)x-\\cos(n+p+1)x}{n+p}\\right|$，经分部（Abel）重排得 $=\\left|\\frac{\\cos(n+1)x}{n+1}-\\frac{\\cos(n+p+1)x}{n+p}-\\frac{\\cos(n+2)x}{(n+1)(n+2)}-\\cdots-\\frac{\\cos(n+p)x}{(n+p-1)(n+p)}\\right|$。放大得 $\\le\\frac{1}{n+1}+\\frac{1}{n+p}+\\frac{1}{(n+1)(n+2)}+\\cdots+\\frac{1}{(n+p-1)(n+p)}=\\frac{2}{n+1}\\to 0\\ (n\\to\\infty)$。由柯西准则知，原级数收敛。"
+},
+{
+"pid": 157,
+"label": "9",
+"statement": "9.设函数 $f(x)$ 在 $R$ 上可导，且 $f(x)=f(x+2)=f(x+\\sqrt3)$，用傅里叶级数理论证明 $f(x)$ 为常数。",
+"answer": "",
+"notebook_candidate": "证：由 $f(x)=f(x+2)=f(x+\\sqrt3)$ 知 $f(x)$ 是以 $2,\\sqrt3$ 为周期的函数，故在 $[-1,1]$ 上其傅里叶系数为 $a_n=\\int_{-1}^{1}f(x)\\cos n\\pi x\\,dx$，$b_n=\\int_{-1}^{1}f(x)\\sin n\\pi x\\,dx$。由 $f(x)=f(x+\\sqrt3)$ 作代换 $t=x+\\sqrt3$，得 $a_n=\\int_{-1}^{1}f(x+\\sqrt3)\\cos n\\pi x\\,dx=\\int_{-1+\\sqrt3}^{1+\\sqrt3}f(t)\\cos n\\pi(t-\\sqrt3)dt$，再按两角和的余弦展开。"
+},
+{
+"pid": 158,
+"label": "10",
+"statement": "10 设 $a_{n+2}=\\frac{1}{n+1}(na_{n+1}+a_n),\\ n\\ge 2,\\ a_0=0,\\ a_1=1$，求证：$\\lim_{n\\to\\infty}a_n=e^{-1}$。",
+"answer": "",
+"notebook_candidate": "解1：设 $f(x)=\\sum_{n=0}^{\\infty}a_{n+1}x^n$，由题设 $a_0=0$ 求导并比较系数，得 $f'(x)=\\sum_{n=1}^{\\infty}na_{n+1}x^{n-1}=\\sum_{n=0}^{\\infty}(n+1)a_{n+2}x^n=\\sum_{n=0}^{\\infty}na_{n+1}x^n+\\sum_{n=0}^{\\infty}a_nx^n=x(f'(x)+f(x))$，且 $f(0)=a_1=1$。解此方程得 $f(x)=\\frac{e^{-x}}{1-x}$。由柯西乘积 $f(x)=\\left(\\sum_{n=0}^{\\infty}x^n\\right)\\left(\\sum_{n=0}^{\\infty}\\frac{(-1)^n}{n!}x^n\\right)=\\sum_{n=0}^{\\infty}\\left(\\sum_{k=0}^{n}\\frac{(-1)^k}{k!}\\right)x^n$，故 $a_n=\\sum_{k=0}^{n}\\frac{(-1)^k}{k!}$，$\\lim_{n\\to\\infty}a_n=\\sum_{k=0}^{\\infty}\\frac{(-1)^k}{k!}=e^{-1}$。"
+},
+{
+"pid": 159,
+"label": "四",
+"statement": "四.(10分) 计算级数 $I=\\sum_{k=0}^{\\infty}\\frac{1}{(k+1)(2k+1)(4k+1)(4k+3)}$ 的和。",
+"answer": "$2\\ln 2-\\frac{\\pi}{3}$",
+"notebook_candidate": "解：作幂级数 $F(x)=\\sum_{k=0}^{\\infty}\\frac{x^{4k+1}}{(k+1)(2k+1)(4k+1)(4k+3)}$，收敛域为 $x\\in[-1,1]$。四阶求导得 $F^{(4)}(x)=8\\sum_{k=0}^{\\infty}x^{4k}=\\frac{8}{1-x^4}$，且 $F(0)=F'(0)=F''(0)=F'''(0)=0$。于是 $I=F(1)=8\\int_0^1\\frac{1}{1-x^4}dx\\int_x^1dt\\int_t^1dz\\int_z^1dy=8\\int_0^1\\frac{(1-x)^3}{6(1-x^4)}dx=\\frac{4}{3}\\int_0^1\\frac{(1-x)^2}{(1+x^2)(1+x)}dx=2\\ln2-\\frac{\\pi}{3}$。"
+},
+{
+"pid": 160,
+"label": "11",
+"statement": "11.计算幂级数 $\\sum_{n=0}^{\\infty}\\left(\\frac{1}{2^n}-\\sin\\frac{1}{2^n}\\right)x^n$ 的收敛半径。",
+"answer": "$R=8$",
+"notebook_candidate": "解：$\\because \\frac{1}{2^n}>\\sin\\frac{1}{2^n}$，$\\therefore \\frac{1}{2^n}-\\sin\\frac{1}{2^n}>0$。由根值/比值法算系数极限 $\\rho=\\lim_{n\\to\\infty}\\frac{\\frac{1}{2^{n+1}}-\\sin\\frac{1}{2^{n+1}}}{\\frac{1}{2^n}-\\sin\\frac{1}{2^n}}$，令 $x=\\frac{1}{2^n}\\to0$ 化为 $\\lim_{x\\to0}\\frac{\\frac{x}{2}-\\sin\\frac{x}{2}}{x-\\sin x}$。用洛必达与等价无穷小得 $=\\lim_{x\\to0}\\frac{\\frac{1}{2}-\\frac{1}{2}\\cos\\frac{x}{2}}{1-\\cos x}=\\lim_{x\\to0}\\frac{\\frac{1}{4}\\sin\\frac{x}{2}}{\\sin x}=\\frac{1}{8}$，$\\therefore R=8$。"
+}
+]
+}

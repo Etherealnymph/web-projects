@@ -1,0 +1,117 @@
+{
+"chunk": 12,
+"items": [
+{
+"pid": 177,
+"label": "七",
+"statement": "设 $a_n>0$，$b_{n+1}=b_n+\\frac{a_n}{b_n}$，$(n=1,2,\\cdots)$，证明：若 $b_1=1$，则级数 $\\sum_{n=1}^{\\infty}a_n$ 收敛的充分必要条件是数列 $\\{b_n\\}$ 收敛。",
+"answer": "",
+"notebook_candidate": "证：由 $b_n(b_{n+1}-b_n)=a_n$，$b_1=1$，$a_n>0$ 得 $b_n>1$ 且 $b_n$ 单调增加，且 $0<b_{n+1}-b_n<a_n<(b_{n+1}+b_n)(b_{n+1}-b_n)=b_{n+1}^{2}-b_n^{2}$。若 $\\sum_{n=1}^{\\infty}a_n$ 收敛，则 $\\sum_{n=1}^{\\infty}(b_{n+1}-b_n)$ 收敛，设其和为 $S$，则 $S=\\lim_{n\\to\\infty}(b_{n+1}-b_1)$，故 $\\lim_{n\\to\\infty}b_n=S+1$，$\\{b_n\\}$ 收敛。反之若 $\\lim_{n\\to\\infty}b_n=b$，则 $\\lim_{n\\to\\infty}b_n^{2}=b^{2}$，级数 $\\sum_{n=1}^{\\infty}(b_{n+1}^{2}-b_n^{2})$ 收敛（部分和趋于 $b^{2}-1$），由比较判别法得 $\\sum_{n=1}^{\\infty}a_n$ 收敛。"
+},
+{
+"pid": 178,
+"label": "未编号",
+"statement": "设 $f(x)$ 是闭区间 $[a,b]$ 上的非负连续函数，证明：$$\\lim_{n\\to\\infty}\\sqrt[n]{\\int_a^b f^n(x)\\,dx}=\\max_{x\\in[a,b]}f(x)$$",
+"answer": "",
+"notebook_candidate": ""
+},
+{
+"pid": 179,
+"label": "3",
+"statement": "计算极限 $$\\lim_{n\\to\\infty}\\int_0^{\\pi}x^{2024}|\\sin nx|\\,dx.$$",
+"answer": "",
+"notebook_candidate": "解：把 $[0,\\pi]$ 分成 $n$ 个小区间并用积分中值定理，得 $\\lim_{n\\to\\infty}\\int_0^{\\pi}x^{2024}|\\sin nx|dx=\\lim\\sum_{k=1}^{n}\\xi_k^{2024}\\int_{\\frac{(k-1)\\pi}{n}}^{\\frac{k\\pi}{n}}|\\sin nx|dx$，其中 $\\xi_k\\in(\\frac{(k-1)\\pi}{n},\\frac{k\\pi}{n})$。令 $t=nx$，则每个小区间上的积分为 $\\frac1n\\int_{(k-1)\\pi}^{k\\pi}|\\sin t|dt=\\frac{2}{n}$。于是原式 $=\\lim\\sum_{k=1}^{n}\\xi_k^{2024}\\frac{2}{n}=\\frac{2}{\\pi}\\lim\\sum_{k=1}^{n}\\xi_k^{2024}\\frac{\\pi}{n}=\\frac{2}{\\pi}\\int_0^{\\pi}x^{2024}dx=\\frac{2\\pi^{2024}}{2025}$。"
+},
+{
+"pid": 180,
+"label": "5",
+"statement": "设 $S$ 为空间分片光滑的封闭有界曲面，其面积为 $A>0$，函数 $f(x,y,z)$ 在曲面 $S$ 上连续且恒为正数，计算 $$\\lim_{n\\to\\infty}\\left[\\frac{1}{A}\\iint_S f^n(x,y,z)\\,dS\\right]^{\\frac1n}.$$",
+"answer": "",
+"notebook_candidate": "解：令 $F(t)=\\frac1A\\iint_S f^t(x,y,z)\\,dS$，则 $F(0)=1$，原极限 $=\\lim_{t\\to0}[F(t)]^{\\frac1t}=\\lim_{t\\to0}e^{\\frac1t\\ln F(t)}$。而 $\\lim_{t\\to0}\\frac{\\ln[F(t)]-\\ln[F(0)]}{t-0}=(\\ln[F(t)])'|_{t=0}=F'(0)$，故原极限 $=e^{F'(0)}$。又 $F'(0)=\\left[\\frac1A\\iint_S f^t(x,y,z)dS\\right]'_{t=0}=\\frac1A\\iint_S f^t\\ln f\\,dS\\Big|_{t=0}=\\frac1A\\iint_S\\ln[f(x,y,z)]\\,dS$。所以原极限 $=e^{\\frac1A\\iint_S\\ln[f(x,y,z)]dS}$。"
+},
+{
+"pid": 181,
+"label": "二",
+"statement": "设 $f(x,y,z)$ 在空间区域 $\\Omega$ 上有连续偏导数，$\\Gamma:\\ x=x(t),\\ y=y(t),\\ z=z(t)$，$t\\in(\\alpha,\\beta)$ 是 $\\Omega$ 中的一条光滑曲线。若 $P_0$ 是 $f(x,y,z)$ 在 $\\Gamma$ 上的极值点，求证：(1) $\\frac{\\partial f(P_0)}{\\partial\\tau}=0$，其中 $\\tau$ 是 $\\Gamma$ 在 $P_0$ 点的单位切向量；(2) $\\Gamma$ 在 $P_0$ 点的切线位于等值面 $f(x,y,z)=f(P_0)$ 在点 $P_0$ 的切平面上。",
+"answer": "",
+"notebook_candidate": "证(1)：设 $P_0(x(t_0),y(t_0),z(t_0))$，即 $u=f(x(t),y(t),z(t))$ 在 $t_0$ 取得极值，则 $\\frac{du}{dt}\\big|_{P_0}=f_x(P_0)x'(t_0)+f_y(P_0)y'(t_0)+f_z(P_0)z'(t_0)$。把 $x'(t_0),y'(t_0),z'(t_0)$ 写成方向余弦形式，得 $\\frac{du}{dt}\\big|_{P_0}=\\sqrt{x'^2(t_0)+y'^2(t_0)+z'^2(t_0)}\\,[f_x(P_0)\\cos\\alpha+f_y(P_0)\\cos\\beta+f_z(P_0)\\cos\\gamma]=\\sqrt{x'^2(t_0)+y'^2(t_0)+z'^2(t_0)}\\,\\frac{\\partial f(P_0)}{\\partial\\tau}=0$，故 $\\frac{\\partial f(P_0)}{\\partial\\tau}=0$。"
+},
+{
+"pid": 182,
+"label": "3",
+"statement": "设 $f$ 和 $g$ 是 $R$ 上的非常数可微实值函数，且对每对实数 $x$ 和 $y$ 有 $$f(x+y)=f(x)f(y)-g(x)g(y),\\qquad g(x+y)=f(x)g(y)+g(x)f(y),$$ 如果 $f'(0)=0$，求证：对一切 $x$，有 $[f(x)]^2+[g(x)]^2=1$。",
+"answer": "",
+"notebook_candidate": "先补完上一页第（2）问：$\\frac{\\partial f(P_0)}{\\partial\\tau}=\\mathrm{grad}f(P_0)\\cdot\\tau=0$，故 $\\mathrm{grad}f(P_0)\\perp\\tau$；而 $\\mathrm{grad}f(P_0)$ 是等值面 $f(x,y,z)=f(P_0)$ 在 $P_0$ 的法向量，$\\tau$ 是切线方向，故 $\\Gamma$ 在 $P_0$ 的切线位于该等值面的切平面上。第3题证：两个方程都对 $y$ 求导，得 $f'(x+y)=f(x)f'(y)-g(x)g'(y)$、$g'(x+y)=f(x)g'(y)+g(x)f'(y)$；令 $y=0$ 并由 $f'(0)=0$ 得 $f'(x)=-g(x)g'(0)$、$g'(x)=f(x)g'(0)$。"
+},
+{
+"pid": 183,
+"label": "4",
+"statement": "证明：$$\\int_0^1 x^{-x}\\,dx=\\sum_{n=1}^{\\infty}\\left(\\frac1n\\right)^n.$$",
+"answer": "",
+"notebook_candidate": "证：$x^{-x}=e^{-x\\ln x}=\\sum_{n=0}^{\\infty}\\frac{(-x\\ln x)^n}{n!}$，逐项积分得 $\\int_0^1x^{-x}dx=\\sum_{n=0}^{\\infty}\\frac{(-1)^n}{n!}\\int_0^1x^n\\ln^n x\\,dx$。记 $I(m,n)=\\int_0^1x^m\\ln^n x\\,dx$，分部积分得 $I(m,n)=-\\frac{n}{m+1}I(m,n-1)$，故 $I(m,n)=\\frac{(-1)^nn!}{(m+1)^n}I(m,0)=\\frac{(-1)^nn!}{(m+1)^{n+1}}$，取 $m=n$ 得 $I(n,n)=\\frac{(-1)^nn!}{(n+1)^{n+1}}$。代回即得原式 $=\\sum_{n=0}^{\\infty}\\frac{1}{(n+1)^{n+1}}=\\sum_{n=1}^{\\infty}\\frac1{n^n}$。"
+},
+{
+"pid": 184,
+"label": "5",
+"statement": "设 $f(x)$ 在闭区间 $[0,1]$ 上连续，且 $\\int_0^1 f(x)dx=2$，试求 $$\\int_0^1\\int_x^1\\int_x^y f(x)f(y)f(z)\\,dz\\,dy\\,dx$$ 的值。",
+"answer": "$\\frac{4}{3}$",
+"notebook_candidate": "解：令 $F(u)=\\int_0^u f(t)dt$，则 $F(0)=0$，$F(1)=2$。原式 $=\\int_0^1f(x)dx\\int_x^1f(y)dy\\int_x^y f(z)dz=\\int_0^1f(x)dx\\int_x^1[F(y)-F(x)]\\,dF(y)$。内层积分为 $\\left[\\frac12F^2(y)-F(x)F(y)\\right]_x^1$，即 $\\frac12F^2(1)-\\frac12F^2(x)-F(x)F(1)+F^2(x)$。于是原式 $=\\int_0^1f(x)\\left[2+\\frac12F^2(x)-2F(x)\\right]dF(x)=\\frac43$。"
+},
+{
+"pid": 185,
+"label": "6",
+"statement": "设 $f(x)\\in C[0,1]$，且满足 $\\int_0^1 x^n f(x)\\,dx=1$，$\\int_0^1 x^k f(x)\\,dx=0$ $(k=0,1,\\cdots,n-1)$，证明：$\\max_{0\\le x\\le1}|f(x)|\\ge 2^n(n+1)$。",
+"answer": "",
+"notebook_candidate": "证：由 $f(x)\\in C[0,1]$ 得 $|f(x)|\\in C[0,1]$，存在 $\\xi$ 使 $|f(\\xi)|=\\max_{x\\in[0,1]}|f(x)|$。先算 $\\int_0^1\\left|x-\\frac12\\right|^n dx=\\int_0^{1/2}(\\frac12-x)^ndx+\\int_{1/2}^1(x-\\frac12)^ndx=\\frac{1}{2^n(n+1)}$。由已知条件组合得 $1=\\left|\\int_0^1(x-\\frac12)^n f(x)dx\\right|\\le\\int_0^1\\left|x-\\frac12\\right|^n|f(x)|dx\\le|f(\\xi)|\\cdot\\frac{1}{2^n(n+1)}$。故 $\\max_{0\\le x\\le1}|f(x)|\\ge 2^n(n+1)$。"
+},
+{
+"pid": 186,
+"label": "7",
+"statement": "设 $a_n=\\ln\\left(1+\\frac1n\\right)$，$b_n=\\sum_{k=n}^{2n-1}a_k^3$。1) 证明级数 $\\sum_{n=1}^{\\infty}a_na_{2n}a_{2n+1}$ 收敛；2) 利用 $b_n$ 求级数 $\\sum_{n=1}^{\\infty}a_na_{2n}a_{2n+1}$ 的和。",
+"answer": "",
+"notebook_candidate": "1) $a_na_{2n}a_{2n+1}=\\ln(1+\\frac1n)\\ln(1+\\frac1{2n})\\ln(1+\\frac1{2n+1})\\sim\\frac1n\\cdot\\frac1{2n}\\cdot\\frac1{2n+1}$，而 $\\sum\\frac1{n^3}$ 收敛，故所给级数收敛。2) 由 $a_{2n}+a_{2n+1}=\\ln(1+\\frac1{2n})+\\ln(1+\\frac1{2n+1})=\\ln(1+\\frac1n)=a_n$，得 $b_n-b_{n+1}=a_n^3-a_{2n}^3-a_{2n+1}^3=3a_na_{2n}a_{2n+1}$；又 $\\sum a_n^3$ 收敛故 $\\lim_{n\\to\\infty}b_n=0$，于是 $\\sum_{n=1}^{\\infty}a_na_{2n}a_{2n+1}=\\frac13\\lim_{n\\to\\infty}(b_1-b_{n+1})=\\frac13b_1=\\frac13a_1^3=\\frac13(\\ln2)^3$。"
+},
+{
+"pid": 187,
+"label": "2",
+"statement": "(2) 将函数 $f(x)=\\frac{x^2}{4}-\\frac{\\pi x}{2}$ 在 $[0,\\pi]$ 上展开成余弦级数，设 $a_n(n=1,2,\\cdots)$ 为其傅里叶系数，则数项级数 $\\sum_{n=1}^{\\infty}a_n$ 的和为（　）.",
+"answer": "$\\frac{\\pi^2}{6}$",
+"notebook_candidate": "将 $f(x)$ 展开成余弦级数：$f(x)=\\frac{a_0}{2}+\\sum_{n=1}^{\\infty}a_n\\cos nx$，其中 $a_0=\\frac{2}{\\pi}\\int_0^{\\pi}f(x)dx=-\\frac{\\pi^2}{3}$。由 $f(0)=\\frac{a_0}{2}+\\sum_{n=1}^{\\infty}a_n$ 得 $\\sum_{n=1}^{\\infty}a_n=f(0)-\\frac{a_0}{2}=\\frac{\\pi^2}{6}$。"
+},
+{
+"pid": 188,
+"label": "3",
+"statement": "(3) 设 $\\rho(\\xi)=\\frac{1}{\\pi}\\cdot\\frac{y}{(\\xi-x)^2+y^2}$，$f(y)=\\int_{-\\infty}^{+\\infty}|\\xi-x|^{\\frac{1}{2}}\\rho(\\xi)d\\xi$，其中 $\\xi,x$ 为任意实数，$y$ 为正实数，则 $f(x)$ 的表达式为（　）.",
+"answer": "$f(x)=\\sqrt{2x}$",
+"notebook_candidate": "$f(y)=\\frac{1}{\\pi}\\int_{-\\infty}^{+\\infty}|\\xi-x|^{\\frac{1}{2}}\\frac{y}{(\\xi-x)^2+y^2}d\\xi=\\frac{2y}{\\pi}\\int_0^{+\\infty}\\frac{\\sqrt{t}}{t^2+y^2}dt$，令 $t=u^2$ 得 $=\\frac{4y}{\\pi}\\int_0^{+\\infty}\\frac{u^2}{u^4+y^2}du=\\frac{2y}{\\pi}\\int_0^{+\\infty}\\frac{u^2+y+u^2-y}{u^4+y^2}du=\\frac{4y}{\\pi}\\cdot\\frac{\\pi}{2\\sqrt{2y}}=\\sqrt{2y}$，故 $f(x)=\\sqrt{2x}$。"
+},
+{
+"pid": 189,
+"label": "4",
+"statement": "(4) 计算 $\\int_0^{\\frac{\\pi}{2}}\\frac{\\arctan(2\\tan x)}{\\tan x}dx=$（　）.",
+"answer": "$\\frac{\\pi}{2}\\ln 3$",
+"notebook_candidate": "令 $I(a)=\\int_0^{\\frac{\\pi}{2}}\\frac{\\arctan(a\\tan x)}{\\tan x}dx=\\int_0^{+\\infty}\\frac{\\arctan(at)}{t(1+t^2)}dt$，$I(0)=0$。求导得 $I'(a)=\\int_0^{+\\infty}\\frac{1}{(1+t^2)(1+(at)^2)}dt=\\frac{a}{a^2-1}\\int_0^{+\\infty}\\left(\\frac{1}{1+u^2}-\\frac{1}{a^2+u^2}\\right)du=\\frac{\\pi}{2(a+1)}$；积分得 $I(a)=\\int_0^a\\frac{\\pi}{2(a+1)}da=\\frac{\\pi}{2}\\ln(a+1)$，故 $I(2)=\\frac{\\pi}{2}\\ln 3$。"
+},
+{
+"pid": 190,
+"label": "5",
+"statement": "(5) 给定面密度为 1 的平面薄板 $D:x^2\\le y\\le 1$，计算该薄板过 $D$ 的质心和点 $(1,1)$ 的直线 $L$ 的转动惯量（　）.",
+"answer": "质心为 $(0,\\frac{3}{5})$，$I_L=\\frac{352}{3045}$",
+"notebook_candidate": "$\\because\\bar{x}=0$，$\\bar{y}=\\frac{\\iint_D y\\,dxdy}{\\iint_D dxdy}=\\frac{\\int_{-1}^{1}dx\\int_{x^2}^{1}y\\,dy}{\\int_{-1}^{1}dx\\int_{x^2}^{1}dy}=\\frac{3}{5}$，$\\therefore$ 薄板的质心为 $(0,\\frac{3}{5})$。直线 $L:2x-5y+3=0$，$D$ 上任意点 $(x,y)$ 到直线 $L$ 的距离为 $\\frac{|2x-5y+3|}{\\sqrt{29}}$，故所求的转动惯量 $I_L=\\frac{1}{29}\\iint_D(2x-5y+3)^2d\\sigma=\\frac{352}{3045}$。"
+},
+{
+"pid": 191,
+"label": "6",
+"statement": "(6) 已知 $\\int_0^{+\\infty}\\frac{\\sin x}{x}dx=\\frac{\\pi}{2}$，求 $\\int_0^{+\\infty}\\left(\\frac{\\sin x}{x}\\right)^2dx$ 及 $\\int_0^{+\\infty}\\left(\\frac{\\sin ax}{x}\\right)^2dx\\ (a>0)$ 的值.",
+"answer": "$\\int_0^{+\\infty}\\left(\\frac{\\sin x}{x}\\right)^2dx=\\frac{\\pi}{2}$，$\\int_0^{+\\infty}\\left(\\frac{\\sin ax}{x}\\right)^2dx=\\frac{a\\pi}{2}$",
+"notebook_candidate": "由分部积分法，$\\int_0^{+\\infty}\\left(\\frac{\\sin x}{x}\\right)^2dx=\\int_0^{+\\infty}\\sin^2x\\,d\\left(-\\frac{1}{x}\\right)=-\\frac{\\sin^2x}{x}\\Big|_0^{+\\infty}+\\int_0^{+\\infty}\\frac{\\sin 2x}{x}dx=\\int_0^{+\\infty}\\frac{\\sin t}{t}dt=\\frac{\\pi}{2}$；再令 $t=ax$，得 $\\int_0^{+\\infty}\\left(\\frac{\\sin ax}{x}\\right)^2dx=a\\int_0^{+\\infty}\\left(\\frac{\\sin t}{t}\\right)^2dt=\\frac{a\\pi}{2}$。"
+},
+{
+"pid": 192,
+"label": "二",
+"statement": "二、设 $f(x)\\in C[0,1]\\cap D^{(2)}(0,1)$，且 $f(0)=f(1)=0$，$f''(x)<0,\\ \\forall x\\in(0,1)$。若 $f(x)$ 在 $[0,1]$ 的最大值 $M>0$，求证：对任意自然数 $n$ 为正整数，(1) 存在唯一的 $x_n\\in(0,1)$，使得 $f'(x_n)=\\frac{M}{n}$；(2) 极限 $\\lim_{n\\to\\infty}x_n$ 存在，并且 $f\\left(\\lim_{n\\to\\infty}x_n\\right)=M$.",
+"answer": "",
+"notebook_candidate": "$\\because f''(x)<0$，$\\therefore f'(x)$ 单调递减，$\\therefore f'(x_n)=\\frac{M}{n}>\\frac{M}{n+1}=f'(x_{n+1})$，$\\therefore x_n<x_{n+1}<1$，$\\therefore\\{x_n\\}$ 是单调增加的有界数列，故极限 $\\lim_{n\\to\\infty}x_n$ 存在。设 $\\lim_{n\\to\\infty}x_n=a$，由 $f'(x)$ 的连续性得 $f'(a)=f'\\left(\\lim_{n\\to\\infty}x_n\\right)=\\lim_{n\\to\\infty}f'(x_n)=\\lim_{n\\to\\infty}\\frac{M}{n}=0$；$\\because f''(x)<0$，$f'(a)=0$，$f'(x_0)=0$，$\\therefore a=x_0$，$\\therefore f\\left(\\lim_{n\\to\\infty}x_n\\right)=f(a)=f(x_0)=M$。"
+}
+]
+}

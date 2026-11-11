@@ -1,0 +1,85 @@
+{
+  "chunk": 9,
+  "items": [
+    {
+      "pid": 129,
+      "commentary": "考点：把通项写成「前 $n$ 项符号和 $-$ 全和」的积分表示，再对有限和换序。破题：用有限几何和得 $a_n=\\int_0^1\\frac{(-1)^{n-1}x^n}{1+x}dx$，部分和化为 $\\int_0^1\\frac{x+(-1)^{n+1}x^{n+1}}{(1+x)^2}dx$，主项积分正好是 $\\ln2-\\frac12$。易错：收尾必须估余项 $\\le\\int_0^1x^{n+1}dx=\\frac{1}{n+2}\\to0$；$a_n$ 是差而非通项，别用 $a_n\\to0$ 代替敛散性论证。",
+      "solution_clean": "$a_n=\\sum_{k=1}^{n}\\frac{(-1)^{k-1}}{k}-\\ln2=\\int_0^1\\Big[\\sum_{k=0}^{n-1}(-1)^kx^k-\\frac{1}{1+x}\\Big]dx=\\int_0^1\\frac{(-1)^{n-1}x^n}{1+x}dx$。\n$S_n=\\sum_{k=1}^{n}a_k=\\int_0^1\\frac{x+(-1)^{n+1}x^{n+1}}{(1+x)^2}dx=\\Big(\\ln2-\\frac12\\Big)+\\int_0^1\\frac{(-1)^{n+1}x^{n+1}}{(1+x)^2}dx$，其中 $\\int_0^1\\frac{x\\,dx}{(1+x)^2}=\\ln2-\\frac12$。\n余项的绝对值 $\\le\\int_0^1x^{n+1}dx=\\frac{1}{n+2}\\to0$。\n故 $\\sum_{n=1}^{\\infty}a_n=\\lim_{n\\to\\infty}S_n=\\ln2-\\frac12$。"
+    },
+    {
+      "pid": 130,
+      "commentary": "考点：按 $[\\sqrt{n}]$ 把同号项并块，化为交错级数用 Leibniz。破题：第 $k$ 块是 $n=k^2,\\dots,k^2+2k$ 的 $2k+1$ 项，块和 $a_k=\\frac{2}{k}-\\frac{1}{k^2}+O(k^{-3})$，故 $a_k\\downarrow0$。易错：合并后还须交代块内残项 $<a_k\\to0$，才能断言原级数与块级数同敛散同和；只有相邻同号项能并，隔项配对无效。",
+      "solution_clean": "第 $k$ 块（$[\\sqrt{n}]=k$）为 $n=k^2,\\dots,k^2+2k$，块和 $a_k=\\sum_{j=0}^{2k}\\frac{1}{k^2+j}$。\n由 $\\frac{1}{k^2+j}=\\frac{1}{k^2}\\big(1-\\frac{j}{k^2}+O(\\frac{j^2}{k^4})\\big)$ 得 $a_k=\\frac{2k+1}{k^2}-\\frac{k(2k+1)}{k^4}+O(k^{-3})=\\frac{2}{k}-\\frac{1}{k^2}+O(k^{-3})$。\n故 $a_k-a_{k+1}=\\frac{2}{k^2}+O(k^{-3})>0$（$k$ 充分大），$\\{a_k\\}$ 递减且 $a_k\\to0$，由 Leibniz 判别法 $\\sum(-1)^ka_k$ 收敛。\n块内残项不超过 $a_k\\to0$，故原级数部分和有极限，原级数收敛。"
+    },
+    {
+      "pid": 131,
+      "commentary": "考点：Cauchy 收敛准则配单调性做「块估计」。破题：固定 $N$ 后用 $u_n\\le u_j$ 把 Cauchy 段压成 $(n-N)u_n$，再令 $n=2N$ 得 $Nu_{2N}<\\frac{\\varepsilon}{2}$，于是 $nu_n=(n-N)u_n+Nu_n$ 两项各占 $\\frac{\\varepsilon}{2}$。易错：由 $u_n\\to0$ 推不出 $nu_n\\to0$；先定 $N$、再放 $n$ 的顺序不能颠倒。",
+      "solution_clean": "由 $\\sum u_n$ 收敛及 Cauchy 准则，$\\forall\\varepsilon>0,\\ \\exists N$，当 $n>N$ 时 $0<u_{N+1}+\\cdots+u_n<\\frac{\\varepsilon}{2}$。\n$u_n$ 单调递减 $\\Rightarrow (n-N)u_n\\le u_{N+1}+\\cdots+u_n<\\frac{\\varepsilon}{2}$。\n取 $n=2N$ 得 $Nu_{2N}<\\frac{\\varepsilon}{2}$。\n$n>2N$ 时 $nu_n=(n-N)u_n+Nu_n\\le(n-N)u_n+Nu_{2N}<\\frac{\\varepsilon}{2}+\\frac{\\varepsilon}{2}=\\varepsilon$，故 $\\lim_{n\\to\\infty}nu_n=0$。"
+    },
+    {
+      "pid": 132,
+      "commentary": "考点：奇偶配对后与 $p$ 级数比较。破题：通项趋于 0，故与 $b_n=\\frac{1}{(2n-1)^p}-\\frac{1}{(2n)^q}$ 同敛散；$p=q$ 时 $b_n\\sim\\frac{p}{(2n)^{p+1}}$ 恒收敛，所以只有 $p=q\\le1$ 才条件收敛。易错：$p\\ne q$ 时 $b_n$ 只剩 $n^{-\\min(p,q)}$ 的量级，必发散；答案须按「$p,q>1$ 绝对、$p=q\\le1$ 条件、其余发散」三段写全，别漏 $0<q<p<1$。",
+      "solution_clean": "通项趋于 0，故原级数与 $\\sum b_n$（$b_n=\\frac{1}{(2n-1)^p}-\\frac{1}{(2n)^q}$）同敛散。\n1) $p>1,\\ q>1$：$\\sum\\frac{1}{(2n-1)^p}$ 与 $\\sum\\frac{1}{(2n)^q}$ 均收敛，故绝对收敛。\n2) $p=q$：$b_n=\\frac{1}{(2n-1)^p}-\\frac{1}{(2n)^p}\\sim\\frac{p}{(2n)^{p+1}}$，$\\sum b_n$ 收敛；而 $p\\le1$ 时 $\\sum\\frac{1}{n^p}$ 发散，故条件收敛。\n3) 其余情形：$|b_n|$ 与 $n^{-\\min(p,q)}$ 同阶且不变号，$\\min(p,q)\\le1$，故 $\\sum b_n$ 发散，原级数发散。"
+    },
+    {
+      "pid": 133,
+      "commentary": "考点：欧拉常数的尾项表示与级数比较。破题：$a_n-C=\\sum_{k>n}\\big[\\ln\\frac{k}{k-1}-\\frac{1}{k}\\big]$，用 $\\ln(1+x)>x-\\frac{x^2}{2}$ 得下界 $b_n=\\frac{1}{n}-\\frac{1}{2}\\sum_{k>n}\\frac{1}{k^2}\\sim\\frac{1}{2n}$，故 $\\sum(a_n-C)$ 发散到 $+\\infty$。易错：$a_n\\to C$ 绝不意味着尾项级数收敛；只写 $a_n-C>0$ 也不够，要给 $\\frac{1}{2n}$ 的同阶下界才能断言发散。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 134,
+      "commentary": "考点：含参积分数列极限的「分段截断」加 Leibniz。破题：把 $[0,1]$ 切成 $[0,\\alpha]$ 与 $[\\alpha,1]$，后者 $\\le(1+\\alpha^4)^{-n}\\to0$，前者 $\\le\\alpha$，故 $u_n\\to0$；再由 $u_{n+1}\\le u_n$ 得交错级数收敛。易错：证不绝对收敛需下界 $u_n\\ge\\int_0^1\\frac{dt}{(1+t)^n}=\\frac{1-2^{1-n}}{n-1}$，若用 $u_n\\le2^{-n}$ 会误判为绝对收敛——决定阶的是 $t\\to0$ 附近的积分质量。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 135,
+      "commentary": "考点：正项级数的「积分（望远镜）比较」。破题：$a_ne^{-s_n}=\\int_{s_{n-1}}^{s_n}e^{-s_n}dx\\le\\int_{s_{n-1}}^{s_n}e^{-x}dx$，求和得 $\\le\\int_{s_0}^{\\infty}e^{-x}dx<\\infty$，故收敛。易错：别套比值或根值判别，$e^{-s_n}$ 与 $a_n$ 之间没有固定比值；关键是认出 $a_n$ 恰是 $s_n$ 的增量。推广：对任意 $\\lambda>0$，$\\sum a_ne^{-\\lambda s_n}$ 都收敛。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 136,
+      "commentary": "考点：Cauchy 准则加单调性。破题：先把 Cauchy 段换成 $(n-N)u_n$，令 $n=2N$ 压住 $Nu_{2N}$，再对 $n>2N$ 拆 $nu_n=(n-N)u_n+Nu_n$ 逐项控制。易错：$N$ 要先固定再令 $n$ 增大；直接对 $nu_n$ 用 Cauchy 段会漏掉 $n-N$ 与 $N$ 的差别。可记结论：收敛的正项级数若通项单调，则 $u_n=o(\\frac1n)$，与 $\\sum\\frac{1}{n\\ln^2n}$ 对照更直观。",
+      "solution_clean": "由 $\\sum u_n$ 收敛及 Cauchy 准则，$\\forall\\varepsilon>0,\\ \\exists N$，当 $n>N$ 时 $0<u_{N+1}+\\cdots+u_n<\\frac{\\varepsilon}{2}$。\n由 $u_n$ 单调递减得 $(n-N)u_n\\le u_{N+1}+\\cdots+u_n<\\frac{\\varepsilon}{2}$。\n取 $n=2N$ 得 $Nu_{2N}<\\frac{\\varepsilon}{2}$。\n$n>2N$ 时 $nu_n=(n-N)u_n+Nu_n\\le(n-N)u_n+Nu_{2N}<\\frac{\\varepsilon}{2}+\\frac{\\varepsilon}{2}=\\varepsilon$，故 $\\lim_{n\\to\\infty}nu_n=0$。"
+    },
+    {
+      "pid": 137,
+      "commentary": "考点：先估阶定收敛，再用分部求和（或幂级数）求精确和。破题：$H_n<1+\\ln n<\\sqrt{n}$ 给出 $u_n<\\frac{1}{n^{3/2}}$；求和把 $\\frac{1}{(n+1)(n+2)}=\\frac{1}{n+1}-\\frac{1}{n+2}$ 拆开做 Abel 分部，$H_n-H_{n-1}=\\frac1n$ 使中间项塌缩，只剩边界项 $\\frac{H_N}{N+2}\\to0$，和为 $1$。易错：不可用 $H_n\\sim\\ln n$ 的下界去判发散；移项时要保留 $H_1$ 的贡献。",
+      "solution_clean": ""
+    },
+    {
+      "pid": 138,
+      "commentary": "考点：Abel 分部求和（和之变换）处理带 $n$ 权的级数。破题：目标部分和恰为 $\\sum_{k\\le n}\\frac{T_k}{k(k+1)}$，$T_k=\\sum_{j\\le k}ja_j$；由 $a_k=\\frac{T_k-T_{k-1}}{k}$ 反解出恒等式 $\\sum_{k=1}^{n-1}\\frac{T_k}{k(k+1)}=S_n-\\frac{T_n}{n}$，再用 $\\frac{T_n}{n}=S_n-\\frac{S_1+\\cdots+S_{n-1}}{n}\\to A-A=0$。易错：直接对 $\\sum\\frac{T_k}{k(k+1)}$ 用比较判别会失效（$T_k$ 无界），必须回到 $S_n$；末步是 Cesàro 平均。",
+      "solution_clean": "记 $S_n=\\sum_{k=1}^{n}a_k$，$T_n=\\sum_{k=1}^{n}ka_k$（$T_0=0$），则 $a_k=\\frac{T_k-T_{k-1}}{k}$，且 $T_n=nS_n-(S_1+\\cdots+S_{n-1})$。\n$S_n=\\sum_{k=1}^{n}\\frac{T_k-T_{k-1}}{k}=\\sum_{k=1}^{n-1}\\frac{T_k}{k(k+1)}+\\frac{T_n}{n}$，故 $\\sum_{k=1}^{n-1}\\frac{T_k}{k(k+1)}=S_n-\\frac{T_n}{n}$。\n又 $\\frac{T_n}{n}=S_n-\\frac{S_1+\\cdots+S_{n-1}}{n}\\to A-A=0$（Cesàro）。\n故 $\\lim_{n\\to\\infty}\\sum_{k=1}^{n-1}\\frac{T_k}{k(k+1)}=A$，即 $\\sum_{n=1}^{\\infty}\\frac{a_1+2a_2+\\cdots+na_n}{n(n+1)}=A$。"
+    },
+    {
+      "pid": 139,
+      "commentary": "考点：对数判别法，与 $p$ 级数比较。破题：$\\frac{\\ln u_n}{\\ln n}\\to a$ 即 $u_n=n^{a+o(1)}$；$a<-1$ 时取 $\\varepsilon$ 使 $a+\\varepsilon<-1$ 得 $u_n<n^{a+\\varepsilon}$；$a>-1$ 时取 $a-\\varepsilon>-1$ 得 $u_n>n^{a-\\varepsilon}$。易错：$a=-1$ 是临界情形，判别失效（$\\frac{1}{n\\ln n}$ 发散、$\\frac{1}{n\\ln^2n}$ 收敛）；两种情形的 $\\varepsilon$ 方向相反，写反则全错。",
+      "solution_clean": "由 $\\lim_{n\\to\\infty}\\frac{\\ln u_n}{\\ln n}=a$，$\\forall\\varepsilon>0,\\ \\exists N$，当 $n>N$ 时 $a-\\varepsilon<\\frac{\\ln u_n}{\\ln n}<a+\\varepsilon$。\n若 $a<-1$，取 $\\varepsilon>0$ 使 $a+\\varepsilon<-1$，则 $u_n<n^{a+\\varepsilon}=\\frac{1}{n^{-(a+\\varepsilon)}}$，而 $-(a+\\varepsilon)>1$，故 $\\sum u_n$ 收敛。\n若 $a>-1$，取 $\\varepsilon>0$ 使 $a-\\varepsilon>-1$，则 $u_n>n^{a-\\varepsilon}=\\frac{1}{n^{-(a-\\varepsilon)}}$，而 $-(a-\\varepsilon)<1$，$\\sum n^{a-\\varepsilon}$ 发散，故 $\\sum u_n$ 发散。"
+    },
+    {
+      "pid": 140,
+      "commentary": "考点：单调有界证极限（欧拉常数）。破题：$a_{n+1}-a_n=\\frac{1}{n+1}-\\ln(1+\\frac1n)<0$ 给单调，$\\sum_{k\\le n}\\frac1k>\\ln(n+1)$ 给 $a_n>\\ln(1+\\frac1n)>0$ 有界。易错：只证单调不证有界；两个方向都靠 $\\ln(1+x)$ 的夹逼（$\\frac{x}{1+x}<\\ln(1+x)<x$）。可记：$H_n=C+\\ln n+\\varepsilon_n$，$\\varepsilon_n\\to0$，$C=0.5772\\cdots$。",
+      "solution_clean": "由 $\\frac{x}{1+x}<\\ln(1+x)<x\\ (x>0)$，取 $x=\\frac1n$ 得 $a_{n+1}-a_n=\\frac{1}{n+1}-\\ln\\big(1+\\frac1n\\big)<0$，故 $\\{a_n\\}$ 单调递减。\n又 $a_n>\\sum_{k=1}^{n}\\ln\\frac{k+1}{k}-\\ln n=\\ln(n+1)-\\ln n=\\ln\\big(1+\\frac1n\\big)>0$，有下界。\n由单调有界定理，$\\lim_{n\\to\\infty}a_n=C$ 存在，$C=0.57721\\cdots$ 为欧拉常数，即 $H_n=C+\\ln n+\\varepsilon_n$，$\\varepsilon_n\\to0$。"
+    },
+    {
+      "pid": 141,
+      "commentary": "考点：Dirichlet 判别法（部分和有界乘单调零因子）。破题：符号写成 $\\beta_n:1,1,-1,-1,\\dots$，部分和 $B_n\\in\\{0,1,2\\}$ 天然有界，配 $\\alpha_n=\\frac1n\\downarrow0$ 即得收敛。易错：这不是交错级数，Leibniz 用不上；也不必真的算出四项一组之和。与下一题的 $+,+,-$ 周期对照：一个部分和有界、一个块和发散，正是分水岭。",
+      "solution_clean": "取 $\\alpha_n=\\frac{1}{n}$，$\\beta_n$ 为周期 $1,1,-1,-1,\\dots$，则 $B_n=\\beta_1+\\cdots+\\beta_n$ 只取 $0,1,2$，故 $|B_n|\\le2$ 有界。\n$\\{\\alpha_n\\}$ 单调递减且 $\\alpha_n\\to0$。\n由 Dirichlet 判别法，$\\sum_{n=1}^{\\infty}\\alpha_n\\beta_n$ 收敛，即原级数收敛。"
+    },
+    {
+      "pid": 142,
+      "commentary": "考点：按周期分组判发散。破题：三项一组 $v_n=\\frac{1}{3n+1}+\\frac{1}{3n+2}-\\frac{1}{3n+3}=\\frac{9n^2+18n+7}{(3n+1)(3n+2)(3n+3)}\\sim\\frac{1}{3n}$，块和为正且趋于 $+\\infty$，故部分和无界。易错：这里不是交错级数，别用 Leibniz；必须说明每块为正，否则「块和发散」推不出「部分和发散」。对照上题：$+,+,-,-$ 对称抵消，$+,+,-$ 抵消不掉。",
+      "solution_clean": "三项一组（$n\\ge0$）：$v_n=\\frac{1}{3n+1}+\\frac{1}{3n+2}-\\frac{1}{3n+3}=\\frac{9n^2+18n+7}{(3n+1)(3n+2)(3n+3)}$。\n$v_n>0$ 且 $v_n\\sim\\frac{1}{3n}$，故 $\\sum v_n$ 发散到 $+\\infty$。\n而 $S_{3N}=\\sum_{n=0}^{N-1}v_n\\to+\\infty$，部分和无界，故原级数发散。"
+    },
+    {
+      "pid": 143,
+      "commentary": "考点：含参积分数列极限（分段截断）、Leibniz 与不绝对收敛的下界估计。破题：$u_n\\to0$ 靠把 $[0,1]$ 切成 $[0,\\alpha]$ 与 $[\\alpha,1]$；条件收敛靠 $u_{n+1}\\le u_n$；不绝对收敛靠 $u_n\\ge\\int_0^1\\frac{dt}{(1+t)^n}=\\frac{1-2^{1-n}}{n-1}\\sim\\frac1n$。易错：别用 $u_n\\le2^{-n}$ 误判为绝对收敛——决定阶的是 $t\\to0$ 附近的积分质量。",
+      "solution_clean": "1) 取 $0<\\alpha<\\frac{\\varepsilon}{2}$，则 $u_n=\\int_0^{\\alpha}+\\int_{\\alpha}^{1}$，其中 $\\int_{\\alpha}^{1}\\frac{dt}{(1+t^4)^n}\\le\\frac{1-\\alpha}{(1+\\alpha^4)^n}\\to0$，故 $n$ 充分大时 $0\\le u_n<\\alpha+\\frac{\\varepsilon}{2}<\\varepsilon$，即 $\\lim_{n\\to\\infty}u_n=0$。\n2) $u_{n+1}\\le u_n$ 且 $u_n\\to0$，由 Leibniz 判别法 $\\sum_{n=1}^{\\infty}(-1)^nu_n$ 收敛。\n又 $n\\ge2$ 时 $u_n\\ge\\int_0^1\\frac{dt}{(1+t)^n}=\\frac{1}{n-1}\\big(1-\\frac{1}{2^{n-1}}\\big)$，而 $\\sum\\frac{1}{n-1}$ 发散、$\\sum\\frac{1}{(n-1)2^{n-1}}$ 收敛，故 $\\sum u_n$ 发散，即原级数条件收敛。"
+    },
+    {
+      "pid": 144,
+      "commentary": "考点：分部积分造望远镜，把 $u_n$ 与 $u_{n+1}$ 挂上钩。破题：$\\int_0^1\\frac{dt}{(1+t^4)^n}=\\frac{1}{2^n}+4n(u_n-u_{n+1})$，两边同除 $n$ 得 $\\frac{u_n}{n}=\\frac{1}{n2^n}+4(u_n-u_{n+1})$，于是幂级数 $-\\ln(1-x)$ 与望远镜各算一块。易错：真正要算的积分只有 $u_1=\\int_0^1\\frac{dt}{1+t^4}$；判 $p\\ge1$ 时用 $\\frac{u_n}{n^p}\\le\\frac{u_n}{n}$，不等号方向别写反。",
+      "solution_clean": "分部积分：$u_n=\\Big[\\frac{t}{(1+t^4)^n}\\Big]_0^1+4n\\int_0^1\\frac{t^4\\,dt}{(1+t^4)^{n+1}}=\\frac{1}{2^n}+4n\\int_0^1\\frac{(1+t^4)-1}{(1+t^4)^{n+1}}dt$，即 $u_n=\\frac{1}{2^n}+4n(u_n-u_{n+1})$。\n故 $\\frac{u_n}{n}=\\frac{1}{n2^n}+4(u_n-u_{n+1})$，求和得 $\\sum_{n=1}^{\\infty}\\frac{u_n}{n}=\\sum_{n=1}^{\\infty}\\frac{1}{n2^n}+4u_1=\\ln2+4u_1$。\n而 $u_1=\\int_0^1\\frac{dt}{1+t^4}=\\frac{\\sqrt2}{8}\\big[\\pi+2\\ln(1+\\sqrt2)\\big]$，故 $\\sum\\frac{u_n}{n}=\\ln2+\\frac{\\sqrt2}{2}\\big[\\pi+2\\ln(1+\\sqrt2)\\big]$。\n当 $p\\ge1$ 时 $\\frac{u_n}{n^p}\\le\\frac{u_n}{n}$，由比较判别法 $\\sum\\frac{u_n}{n^p}$ 收敛。"
+    }
+  ]
+}

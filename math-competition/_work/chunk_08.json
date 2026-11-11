@@ -1,0 +1,117 @@
+{
+"chunk": 8,
+"items": [
+{
+"pid": 113,
+"label": "11",
+"statement": "已知函数 $f(x)$ 可导，且 $f(0)=1$，$0<f'(x)<\\frac{1}{2}$，设数列 $\\{x_n\\}$ 满足 $x_{n+1}=f(x_n)$ $(n=1,2,\\cdots)$，证明：(1) 级数 $\\sum_{n=1}^{\\infty}(x_{n+1}-x_n)$ 绝对收敛；(2) $\\lim_{n\\to\\infty}x_n$ 存在，且 $0<\\lim_{n\\to\\infty}x_n<2$。",
+"answer": "",
+"notebook_candidate": "证 (2)：$s_n=\\sum_{k=1}^{n}(x_{k+1}-x_k)=x_{n+1}-x_1$，由 (1) 知 $\\sum_{n=1}^{\\infty}(x_{n+1}-x_n)$ 收敛，故 $\\lim_{n\\to\\infty}s_n=\\lim_{n\\to\\infty}(x_{n+1}-x_1)$ 存在，即 $\\lim_{n\\to\\infty}x_n$ 存在，设为 $A$。又 $x_{n+1}=f(x_n)=f(0)+f'(\\zeta)x_n<1+\\frac{1}{2}x_n$，由此估计 $A$ 的范围（见下页）。"
+},
+{
+"pid": 114,
+"label": "例12",
+"statement": "讨论级数 $\\sum_{n=1}^{\\infty}\\frac{1}{n^p}\\left(1-\\frac{x\\ln n}{n}\\right)^n$ 的敛散性与参数 $p,x$ 的关系。",
+"answer": "",
+"notebook_candidate": "解：$n$ 充分大时 $1-\\frac{x\\ln n}{n}>0$，故为正项级数。与 $\\frac{1}{n^{p+x}}$ 比较，比值的极限为 $\\lim_{n\\to\\infty}\\left[n\\left(1-\\frac{x\\ln n}{n}\\right)^{\\frac{n}{x}}\\right]^x=\\lim_{n\\to\\infty}(y_n)^x$。而 $\\ln y_n=\\ln n+\\frac{n}{x}\\ln\\left(1-\\frac{x\\ln n}{n}\\right)$，用 $\\ln(1+t)=t-\\frac{t^2}{2}+o(t^2)$ 展开得 $\\ln y_n=-\\frac{1}{2}\\cdot\\frac{x\\ln^2n}{n}+o\\left(\\frac{x\\ln^2n}{n}\\right)\\to0$，故 $\\lim y_n=1$。于是 $p+x>1$ 时级数收敛，$p+x\\le1$ 时级数发散。"
+},
+{
+"pid": 115,
+"label": "13",
+"statement": "设 $\\sum_{n=1}^{\\infty}a_n$ 为正项级数，$a_n$ 单调减少，证明：$\\sum_{n=1}^{\\infty}a_n$ 收敛 $\\Leftrightarrow \\sum_{n=1}^{\\infty}2^na_{2^n}$ 收敛。",
+"answer": "",
+"notebook_candidate": "证：设两级数的部分和分别为 $S_n$ 与 $\\sigma_n$，由 $a_n$ 单调减少且非负，$S_{2^n}<a_1+(a_2+a_3)+\\cdots+(a_{2^n}+\\cdots+a_{2^{n+1}-1})<a_1+2a_2+\\cdots+2^na_{2^n}=\\sigma_n$。另一方面 $S_{2^n}=a_1+a_2+(a_3+a_4)+\\cdots+(a_{2^{n-1}+1}+\\cdots+a_{2^n})>\\frac{1}{2}a_1+a_2+2a_4+\\cdots+2^{n-1}a_{2^n}=\\frac{1}{2}\\sigma_n$。故 $S_n$ 有界 $\\Leftrightarrow\\sigma_n$ 有界，两级数同敛散。"
+},
+{
+"pid": 116,
+"label": "14",
+"statement": "设 $\\{a_n\\}$ 是实数列，它满足不等式 $0\\le a_k\\le 100a_n$，其中 $n\\le k\\le 2n$，$n=1,2,\\cdots$，又级数 $\\sum_{n=0}^{\\infty}a_n$ 收敛，证明 $\\lim_{n\\to\\infty}na_n=0$。",
+"answer": "",
+"notebook_candidate": "证：由 $0\\le a_k\\le100a_n$（$n\\le k\\le2n$）取 $k=2n$，得 $0\\le a_{2n}\\le100a_n,100a_{n+1},\\cdots,100a_{2n-1}$，相加得 $0\\le na_{2n}\\le100(a_n+a_{n+1}+\\cdots+a_{2n-1})$。因 $\\sum a_n$ 收敛，$\\lim_{n\\to\\infty}(S_{2n}-S_n)=\\lim_{n\\to\\infty}(a_n+a_{n+1}+\\cdots+a_{2n-1})=0$，故 $\\lim_{n\\to\\infty}(2n)a_{2n}=0$。又 $0\\le(2n-1)a_{2n-1}\\le2na_{2n-1}\\le200(a_n+a_{n+1}+\\cdots+a_{2n-1})$，故 $\\lim_{n\\to\\infty}(2n-1)a_{2n-1}=0$，从而 $\\lim_{n\\to\\infty}na_n=0$。"
+},
+{
+"pid": 117,
+"label": "15",
+"statement": "设正项级数 $\\sum_{n=1}^{\\infty}a_n$ 收敛，证明：级数 $\\sum_{n=1}^{\\infty}(a_n)^{\\frac{n}{n+1}}$ 收敛。",
+"answer": "",
+"notebook_candidate": "证：令 $T=\\{n\\in N\\mid (a_n)^{\\frac{n}{n+1}}<2a_n\\}$。当 $n\\notin T$ 时 $(a_n)^{\\frac{n}{n+1}}\\ge2a_n$，即 $(a_n)^{\\frac{1}{n+1}}\\le\\frac{1}{2}$，故 $(a_n)^{\\frac{n}{n+1}}\\le\\left(\\frac{1}{2}\\right)^n$。于是 $\\sum_{n=1}^{\\infty}(a_n)^{\\frac{n}{n+1}}=\\sum_{n\\in T}(a_n)^{\\frac{n}{n+1}}+\\sum_{n\\notin T}(a_n)^{\\frac{n}{n+1}}\\le\\sum_{n=1}^{\\infty}2a_n+\\sum_{n=1}^{\\infty}\\frac{1}{2^n}$。右端两个级数均收敛，故原级数收敛。"
+},
+{
+"pid": 118,
+"label": "16",
+"statement": "已知某级数的部分和为 $S_n=\\frac{1}{2}+\\frac{1}{2^2}+\\frac{2}{2^3}+\\frac{3}{2^4}+\\frac{5}{2^5}+\\frac{8}{2^6}+\\frac{13}{2^7}+\\cdots+\\frac{a_{n-1}}{2^{n-1}}+\\frac{a_n}{2^n}$，其中 $a_n=a_{n-1}+a_{n-2}$ $(n=3,4,5,\\cdots)$；(1) 证明此级数收敛；(2) 求此级数的和。",
+"answer": "2",
+"notebook_candidate": "证：对递推 $a_n=a_{n-1}+a_{n-2}$ 写特征方程 $r^2-r-1=0$，得 $r_1=\\frac{1+\\sqrt5}{2}$、$r_2=\\frac{1-\\sqrt5}{2}$，通项 $a_n=Ar_1^n+Br_2^n$；由 $a_1=a_2=1$ 定出 $A=\\frac{1}{\\sqrt5}$、$B=-\\frac{1}{\\sqrt5}$。从而 $\\sum_{n=1}^{\\infty}\\frac{a_n}{2^n}=A\\sum_{n=1}^{\\infty}\\left(\\frac{r_1}{2}\\right)^n+B\\sum_{n=1}^{\\infty}\\left(\\frac{r_2}{2}\\right)^n$，两个等比级数均收敛（公比 $\\frac{r_1}{2}$、$\\frac{r_2}{2}$ 绝对值小于 1），故级数收敛。再由等比求和得 $\\sum_{n=1}^{\\infty}\\frac{a_n}{2^n}=A\\frac{r_1/2}{1-r_1/2}+B\\frac{r_2/2}{1-r_2/2}=2$。"
+},
+{
+"pid": 119,
+"label": "Ex",
+"statement": "设 $a_1=a_2=1$，$a_n=a_{n-1}+a_{n-2}$ $(n\\ge3)$，求级数 $\\sum_{n=1}^{\\infty}\\frac{a_n}{2^n}$ 的和。",
+"answer": "2",
+"notebook_candidate": "解：通项 $a_n=\\frac{1}{\\sqrt5}\\left[\\left(\\frac{1+\\sqrt5}{2}\\right)^{n+1}-\\left(\\frac{1-\\sqrt5}{2}\\right)^{n+1}\\right]$。记 $b_n=\\frac{a_n}{2^n}$，则 $\\lim_{n\\to\\infty}\\frac{b_{n+1}}{b_n}=\\frac{1+\\sqrt5}{4}<1$，故级数收敛。由 $a_n=a_{n-1}+a_{n-2}$ 得 $b_n=\\frac{1}{2}b_{n-1}+\\frac{1}{4}b_{n-2}$，对 $k=3,\\cdots,n$ 相加得 $s_n-\\frac{1}{2}-\\frac{1}{2^2}=\\frac{1}{2}\\left(s_{n-1}-\\frac{1}{2}\\right)+\\frac{1}{4}s_{n-2}$。令 $\\lim_{n\\to\\infty}s_n=s$，两边取极限得 $s=2$，即 $\\sum_{n=1}^{\\infty}\\frac{a_n}{2^n}=2$。"
+},
+{
+"pid": 120,
+"label": "17",
+"statement": "设正项级数 $\\sum_{n=1}^{\\infty}a_n$ 收敛，证明：$\\lim_{n\\to\\infty}\\frac{\\sum_{k=1}^{n}ka_k}{n}=0$。",
+"answer": "",
+"notebook_candidate": "证：设 $S=\\sum_{n=1}^{\\infty}a_n$，$S_n=\\sum_{k=1}^{n}a_k$，则 $S_n\\to S$（$n\\to\\infty$）。由 $\\sum_{k=1}^{n}ka_k=nS_n-\\sum_{k=1}^{n-1}S_k$，有 $\\lim_{n\\to\\infty}\\frac{\\sum_{k=1}^{n}ka_k}{n}=\\lim_{n\\to\\infty}\\left(S_n-\\frac{1}{n}\\sum_{k=1}^{n-1}S_k\\right)$。把 $\\frac{1}{n}\\sum_{k=1}^{n-1}S_k$ 写成 $\\frac{n-1}{n}\\cdot\\frac{1}{n-1}\\sum_{k=1}^{n-1}S_k$，由 $S_n\\to S$ 知其极限为 $S$，故原极限 $=S-S=0$。"
+},
+{
+"pid": 121,
+"label": "18",
+"statement": "设正项级数 $\\sum_{n=1}^{\\infty}a_n$ 收敛，证明：$\\lim_{n\\to\\infty}\\frac{n^2}{\\frac{1}{a_1}+\\frac{1}{a_2}+\\cdots+\\frac{1}{a_n}}=0$。",
+"answer": "",
+"notebook_candidate": "证：由 $0\\le\\frac{n}{\\frac{1}{a_1}+\\cdots+\\frac{1}{a_n}}\\le\\sqrt[n]{a_1a_2\\cdots a_n}\\le\\frac{a_1+a_2+\\cdots+a_n}{n}$ 同乘 $n$，得 $0\\le\\frac{n^2}{\\frac{1}{a_1}+\\cdots+\\frac{1}{a_n}}\\le n\\sqrt[n]{a_1a_2\\cdots a_n}\\le n\\cdot\\frac{a_1+a_2+\\cdots+a_n}{n}$。再用加权均值不等式 $\\sqrt[n]{a_1(2a_2)\\cdots(na_n)}\\le\\frac{a_1+2a_2+\\cdots+na_n}{n}$，得 $\\frac{n^2}{\\frac{1}{a_1}+\\cdots+\\frac{1}{a_n}}\\le\\frac{n}{\\sqrt[n]{n!}}\\cdot\\frac{a_1+2a_2+\\cdots+na_n}{n}$。因 $\\lim_{n\\to\\infty}\\frac{n}{\\sqrt[n]{n!}}=e$，$\\lim_{n\\to\\infty}\\frac{a_1+2a_2+\\cdots+na_n}{n}=0$，故所证极限为 $0$。"
+},
+{
+"pid": 122,
+"label": "20",
+"statement": "设 $x_0=\\sqrt{6}$，$x_{n+1}=\\sqrt{6+x_n}$，$n=0,1,2,\\cdots$，判断级数 $\\sum_{n=0}^{\\infty}\\sqrt{3-x_n}$ 的敛散性。",
+"answer": "",
+"notebook_candidate": "由数学归纳法知 $\\sqrt{6}\\le x_n\\le 3$，$n=0,1,2,\\cdots$，且 $\\{x_n\\}$ 是单调增加数列。由 $3-x_n=3-\\sqrt{6+x_{n-1}}=\\frac{3-x_{n-1}}{3+\\sqrt{6+x_{n-1}}}<\\frac{1}{3}(3-x_{n-1})<\\cdots<\\left(\\frac{1}{3}\\right)^n(3-x_0)$，得 $\\sqrt{3-x_n}<\\left(\\frac{1}{3}\\right)^{\\frac{n}{2}}\\sqrt{3-x_0}$，而 $\\sum_{n=1}^{\\infty}\\left(\\frac{1}{3}\\right)^{\\frac{n}{2}}\\sqrt{3-x_0}$ 收敛，故由比较判别法知 $\\sum_{n=1}^{\\infty}\\sqrt{3-x_n}$ 收敛。"
+},
+{
+"pid": 123,
+"label": "4",
+"statement": "级数 $\\sum_{n=1}^{\\infty}\\arctan\\frac{2}{4n^2+4n+1}=\\left(\\ \\frac{\\pi}{2}-\\arctan 2\\ \\right)$。",
+"answer": "$\\frac{\\pi}{2}-\\arctan 2$",
+"notebook_candidate": "第4题：由 $\\frac{2}{4n^2+4n+1}=\\frac{(2n+2)-2n}{1+2n(2n+2)}$ 及 $\\arctan\\frac{x-y}{1+xy}=\\arctan x-\\arctan y$，通项化为 $\\arctan(2n+2)-\\arctan(2n)$，部分和望远镜化后取极限得 $\\lim_{N\\to\\infty}\\arctan(2N+2)-\\arctan 2=\\frac{\\pi}{2}-\\arctan 2$。第7题同理：$\\arctan\\frac{3}{9n^2+9n+1}=\\arctan\\frac{3n+3-3n}{1+3n(3n+3)}=\\arctan(3n+3)-\\arctan 3n$，故和为 $\\frac{\\pi}{2}-\\arctan 3$。"
+},
+{
+"pid": 124,
+"label": "7",
+"statement": "计算级数的和 $\\sum_{n=1}^{\\infty}\\arctan\\frac{3}{9n^2+9n+1}=\\left(\\ \\frac{\\pi}{2}-\\arctan 3\\ \\right)$。",
+"answer": "$\\frac{\\pi}{2}-\\arctan 3$",
+"notebook_candidate": "第4题：由 $\\frac{2}{4n^2+4n+1}=\\frac{(2n+2)-2n}{1+2n(2n+2)}$ 及 $\\arctan\\frac{x-y}{1+xy}=\\arctan x-\\arctan y$，通项化为 $\\arctan(2n+2)-\\arctan(2n)$，部分和望远镜化后取极限得 $\\lim_{N\\to\\infty}\\arctan(2N+2)-\\arctan 2=\\frac{\\pi}{2}-\\arctan 2$。第7题同理：$\\arctan\\frac{3}{9n^2+9n+1}=\\arctan\\frac{3n+3-3n}{1+3n(3n+3)}=\\arctan(3n+3)-\\arctan 3n$，故和为 $\\frac{\\pi}{2}-\\arctan 3$。"
+},
+{
+"pid": 125,
+"label": "1",
+"statement": "讨论级数的 $\\sum_{n=1}^{\\infty}a^n\\cos n\\theta$ 敛散性，并求级数的和。",
+"answer": "",
+"notebook_candidate": "当 $|a|\\ge 1$ 时级数通项不趋于 0，级数发散；当 $|a|<1$ 时 $|a^n\\cos n\\theta|\\le|a|^n$ 且 $\\sum|a|^n$ 收敛，故 $\\sum a^n\\cos n\\theta$ 绝对收敛。令 $S_n=\\sum_{k=1}^{n}a^k\\cos k\\theta$，由 $2a\\cos\\theta S_n=\\sum_{k=1}^{n}a^{k+1}[\\cos(k+1)\\theta+\\cos(k-1)\\theta]=[a^{n+1}\\cos(n+1)\\theta+S_n-a\\cos\\theta]+[a^2\\cos\\theta+a^3S_n-a^{n+2}\\cos n\\theta]$ 解得 $S_n=\\frac{a^{n+2}\\cos n\\theta-a^{n+1}\\cos(n+1)\\theta+a\\cos\\theta-a^2}{1-2a\\cos\\theta+a^2}\\to\\frac{a\\cos\\theta-a^2}{1-2a\\cos\\theta+a^2}\\ (n\\to\\infty)$。"
+},
+{
+"pid": 126,
+"label": "2",
+"statement": "设数列 $\\{a_n\\}$ 单调减少，且 $\\lim_{n\\to\\infty}a_n=0$，证明：$\\sum_{n=1}^{\\infty}(-1)^n\\frac{a_1+a_2+\\cdots+a_n}{n}$ 收敛。",
+"answer": "",
+"notebook_candidate": "由 $\\{a_n\\}$ 单调减少且 $\\lim a_n=0$ 得 $a_n\\ge0$。令 $b_n=\\frac{a_1+a_2+\\cdots+a_n}{n}$，则 $\\sum(-1)^nb_n$ 为交错级数且 $\\lim b_n=0$；又 $nb_n-nb_{n+1}=nb_n-(n+1)b_{n+1}+b_{n+1}=b_{n+1}-a_{n+1}$，故 $b_n-b_{n+1}=\\frac{b_{n+1}-a_{n+1}}{n}\\ge0$（或 $b_n-b_{n+1}=\\frac{a_1+a_2+\\cdots+a_n-na_{n+1}}{n(n+1)}>0$），即 $\\{b_n\\}$ 单调减少，由莱布尼兹准则知原级数收敛。"
+},
+{
+"pid": 127,
+"label": "3",
+"statement": "设 $a_n=\\int_n^{n+1}\\frac{\\sin\\pi x}{1+x^p}dx,(n=1,2,\\cdots),p>0$，证明：(1) 当 $p>1$ 时级数 $\\sum_{n=1}^{\\infty}a_n$ 绝对收敛；(2) 当 $0<p\\le1$ 时级数 $\\sum_{n=1}^{\\infty}a_n$ 收敛。",
+"answer": "",
+"notebook_candidate": "(1) 当 $p>1$ 时 $|a_n|\\le\\int_n^{n+1}\\frac{1}{1+x^p}dx\\le\\frac{1}{n^p}$，故 $\\sum a_n$ 绝对收敛。(2) 当 $0<p\\le1$ 时 $a_n=\\frac{1}{1+\\xi_n^p}\\int_n^{n+1}\\sin\\pi x\\,dx=\\frac{2(-1)^n}{\\pi}\\cdot\\frac{1}{1+\\xi_n^p}$（$n<\\xi_n<n+1$），记 $a_n=(-1)^nb_n$，则 $0<b_{n+1}=\\frac{2}{\\pi}\\cdot\\frac{1}{1+\\xi_{n+1}^p}<\\frac{2}{\\pi}\\cdot\\frac{1}{1+\\xi_n^p}=b_n$，$\\{b_n\\}$ 单调递减，又 $0<b_n<\\frac{2}{\\pi(1+n^p)}$ 故 $b_n\\to0$，由莱布尼兹准则知原级数收敛。"
+},
+{
+"pid": 128,
+"label": "4",
+"statement": "证明积分 $\\int_0^{+\\infty}\\sin(x^2)dx$ 收敛。",
+"answer": "",
+"notebook_candidate": "令 $u_n=\\int_{\\sqrt{n\\pi}}^{\\sqrt{(n+1)\\pi}}\\sin(x^2)dx\\ (n\\ge0)$，则 $\\sum_{n=0}^{\\infty}u_n$ 收敛即原积分收敛，且 $\\sum u_n$ 为交错级数。作代换 $t=x^2$ 得 $2|u_n|=\\left|\\int_{n\\pi}^{(n+1)\\pi}\\frac{\\sin t}{\\sqrt{t}}dt\\right|>\\left|\\int_{n\\pi}^{(n+1)\\pi}\\frac{\\sin t}{\\sqrt{t}+\\pi}dt\\right|=\\left|\\int_{(n+1)\\pi}^{(n+2)\\pi}\\frac{\\sin t}{\\sqrt{t}}dt\\right|=2|u_{n+1}|$；又 $2|u_n|\\le\\int_{n\\pi}^{(n+1)\\pi}\\frac{1}{\\sqrt{n\\pi}}dt=\\sqrt{\\frac{\\pi}{n}}$，故 $|u_n|\\downarrow0$，由莱布尼兹准则得 $\\sum u_n$ 收敛，即原积分收敛。"
+}
+]
+}

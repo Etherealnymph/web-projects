@@ -1,0 +1,117 @@
+{
+"chunk": 2,
+"items": [
+{
+"pid": 17,
+"label": "13",
+"statement": "设函数 $f(x),g(x)$ 是 $[0,1]\\to[0,1]$ 上的连续函数，且 $f(x)$ 单调增加，证明 $\\int_0^1 f(g(x))dx-\\int_0^1 g(x)dx\\le\\int_0^1 f(x)dx$。",
+"answer": "",
+"notebook_candidate": "证明：令 $F(x)=f(x)-x$，则问题转化为证 $\\int_0^1[F(g(x))-F(x)]dx\\le\\int_0^1 xdx=\\frac{1}{2}$；只需证 $F_{\\max}(x)-\\int_0^1 F(x)dx\\le\\int_0^1 xdx=\\frac{1}{2}$，即 $\\int_0^1 F(x)dx\\ge F_{\\max}(x)-\\frac{1}{2}$。记 $F_{\\max}(x)=F(x_0)=a$，由 $0\\le f(x)\\le1$ 得 $-x\\le F(x)\\le1-x$，故 $a\\le1-x_0$。"
+},
+{
+"pid": 18,
+"label": "14",
+"statement": "设函数 $f(x)$ 的导数 $f'(x)$ 在 $[0,1]$ 上连续，$f(0)=f(1)=0$，且满足 $\\int_0^1[f'(x)]^2dx-8\\int_0^1 f(x)dx+\\frac{4}{3}=0$，计算 $f(x)$。",
+"answer": "$f(x)=2x-2x^2$。",
+"notebook_candidate": "解：由 $\\int_0^1 f(x)dx=-\\int_0^1 xf'(x)dx$、$\\int_0^1 f'(x)dx=0$、$\\int_0^1(4x^2-4x+1)dx=\\frac{1}{3}$，把原式化为 $\\int_0^1[f'(x)+4x-2]^2dx=0$，故 $f'(x)=2-4x$，即 $f(x)=2x-2x^2+C$；由 $f(0)=0$ 得 $C=0$，故 $f(x)=2x-2x^2$。"
+},
+{
+"pid": 19,
+"label": "1",
+"statement": "求 $\\lim_{n\\to\\infty}\\left(\\frac{1}{a}+\\frac{2}{a^2}+\\cdots+\\frac{n}{a^n}\\right)$，$(a>1)$。",
+"answer": "",
+"notebook_candidate": "解：∵ $S(x)=\\sum_{n=1}^{\\infty}nx^n=x\\left(\\sum_{n=1}^{\\infty}x^n\\right)'=x\\left(\\frac{x}{1-x}\\right)'=\\frac{x}{(1-x)^2}$，$|x|<1$，∴ 原极限 $=S\\left(\\frac{1}{a}\\right)=\\frac{a}{(1-a)^2}$。"
+},
+{
+"pid": 20,
+"label": "2",
+"statement": "已知 $x_0=1$，$x_1=\\frac{1}{x_0^3+4}$，$\\cdots$，$x_{n+1}=\\frac{1}{x_n^3+4}$，$\\cdots$，求证：(1) 数列 $\\{x_n\\}$ 收敛；(2) $\\{x_n\\}$ 的极限值 $a$ 是方程 $x^4+4x-1=0$ 的唯一正根。",
+"answer": "",
+"notebook_candidate": "证 (1)：易知 $0<x_n<1$，且 $|x_{n+1}-x_n|=\\left|\\frac{1}{x_n^3+4}-\\frac{1}{x_{n-1}^3+4}\\right|=\\frac{|x_n^3-x_{n-1}^3|}{(x_n^3+4)(x_{n-1}^3+4)}\\le\\frac{|x_n-x_{n-1}||x_n^2+x_nx_{n-1}+x_{n-1}^2|}{4^2}<\\frac{3|x_n-x_{n-1}|}{16}<\\left(\\frac{3}{16}\\right)^2|x_{n-1}-x_{n-2}|<\\cdots<\\left(\\frac{3}{16}\\right)^n|x_1-x_0|=\\frac{4}{5}\\left(\\frac{3}{16}\\right)^n$。∴ $\\sum_{n=0}^{\\infty}\\left(\\frac{3}{16}\\right)^n$ 收敛，∴ $\\sum_{n=0}^{\\infty}(x_{n+1}-x_n)$ 收敛（绝对收敛），其部分和 $S_n=x_{n+1}-x_0$，∴ $\\{x_n\\}$ 收敛。"
+},
+{
+"pid": 21,
+"label": "3",
+"statement": "设 $x_n=\\frac{1}{2\\ln2}+\\frac{1}{3\\ln3}+\\cdots+\\frac{1}{n\\ln n}-\\ln\\ln n$，$(n=1,2,\\cdots)$，证明 $\\{x_n\\}$ 收敛。",
+"answer": "",
+"notebook_candidate": "第3题证：∵ $|x_{n+1}-x_n|=\\left|\\frac{1}{(n+1)\\ln(n+1)}-\\frac{1}{\\xi_n\\ln\\xi_n}\\right|\\le\\frac{1}{n\\ln n}-\\frac{1}{(n+1)\\ln(n+1)}$，∴ $S_n=\\sum_{k=2}^{n}|x_{k+1}-x_k|\\le\\frac{1}{2\\ln2}$，∴ $\\sum_{k=2}^{\\infty}|x_{k+1}-x_k|$ 收敛，∴ $\\sum_{k=2}^{\\infty}(x_{n+1}-x_n)$ 收敛，∴ $\\{x_n\\}$ 收敛。第4题证：∵ $\\lim_{n\\to\\infty}\\frac{x_{n+1}}{x_n}=\\lim_{n\\to\\infty}\\frac{5}{2}\\cdot\\frac{1}{\\left(1+\\frac{1}{n}\\right)^n}=\\frac{5}{2e}$，∴ 正项级数 $\\sum_{n=1}^{\\infty}x_n$ 收敛，∴ $\\lim_{n\\to\\infty}x_n=0$。"
+},
+{
+"pid": 22,
+"label": "4",
+"statement": "证明数列 $x_n=\\frac{5^n\\cdot n!}{(2n)^n}$（$n=1,2,\\cdots$）有极限，并求此极限。",
+"answer": "",
+"notebook_candidate": "第3题证：∵ $|x_{n+1}-x_n|=\\left|\\frac{1}{(n+1)\\ln(n+1)}-\\frac{1}{\\xi_n\\ln\\xi_n}\\right|\\le\\frac{1}{n\\ln n}-\\frac{1}{(n+1)\\ln(n+1)}$，∴ $S_n=\\sum_{k=2}^{n}|x_{k+1}-x_k|\\le\\frac{1}{2\\ln2}$，∴ $\\sum_{k=2}^{\\infty}|x_{k+1}-x_k|$ 收敛，∴ $\\sum_{k=2}^{\\infty}(x_{n+1}-x_n)$ 收敛，∴ $\\{x_n\\}$ 收敛。第4题证：∵ $\\lim_{n\\to\\infty}\\frac{x_{n+1}}{x_n}=\\lim_{n\\to\\infty}\\frac{5}{2}\\cdot\\frac{1}{\\left(1+\\frac{1}{n}\\right)^n}=\\frac{5}{2e}$，∴ 正项级数 $\\sum_{n=1}^{\\infty}x_n$ 收敛，∴ $\\lim_{n\\to\\infty}x_n=0$。"
+},
+{
+"pid": 23,
+"label": "5",
+"statement": "求极限：$\\lim_{n\\to\\infty}\\int_0^{\\frac{\\pi}{2}}\\frac{\\sin 2nx}{\\sin x}dx$。",
+"answer": "",
+"notebook_candidate": "解：∵ $\\frac{\\sin2nx}{\\sin x}=2[\\cos x+\\cos3x+\\cdots+\\cos(2n-1)x]$，∴ $\\int_0^{\\frac{\\pi}{2}}\\frac{\\sin2nx}{\\sin x}dx=2\\int_0^{\\frac{\\pi}{2}}[\\cos x+\\cos3x+\\cdots+\\cos(2n-1)x]dx=2\\left[\\sin x+\\frac{\\sin3x}{3}+\\cdots+\\frac{\\sin(2n-1)x}{2n-1}\\right]_0^{\\frac{\\pi}{2}}=2\\left[1-\\frac{1}{3}+\\frac{1}{5}-\\cdots+(-1)^{n-1}\\frac{1}{2n-1}\\right]$，故原极限 $=2\\lim_{n\\to\\infty}\\left[1-\\frac{1}{3}+\\frac{1}{5}-\\cdots+(-1)^{n-1}\\frac{1}{2n-1}\\right]$。"
+},
+{
+"pid": 24,
+"label": "1",
+"statement": "讨论积分 $\\int_0^{\\frac{\\pi}{2}}\\frac{dx}{\\sin^p x\\cos^q x}(p>0,q>0)$。",
+"answer": "",
+"notebook_candidate": "指出 $x=0,\\frac{\\pi}{2}$ 都是被积函数的奇点，把积分拆成 $\\int_0^{\\pi/4}+\\int_{\\pi/4}^{\\pi/2}$ 两个积分。对 $x=0$ 端，由 $\\lim_{x\\to0^+}x^p\\frac{1}{\\sin^p x\\cos^q x}=1$ 及 $\\int_0^{\\pi/4}\\frac{dx}{x^p}$ 当 $0<p<1$ 时收敛、当 $p\\ge1$ 时发散，得 $\\int_0^{\\pi/4}\\frac{dx}{\\sin^p x\\cos^q x}$ 当 $0<p<1$ 时收敛，当 $p\\ge1$ 时发散。"
+},
+{
+"pid": 25,
+"label": "5",
+"statement": "计算 $I=\\iint_D e^{\\frac{y}{x+y}}dxdy$，其中 $D=\\{(x,y)|x+y\\le1,x\\ge0,y\\ge0\\}$。",
+"answer": "$\\frac{1}{2}(e-1)$",
+"notebook_candidate": "设 $\\frac{y}{x+y}=t$ 为等值线，则 $0\\le t\\le1$，$y=\\frac{t}{1-t}x$；该直线与 $x+y=1$ 的交点坐标为 $(1-t,t)$。$\\sigma(t)$ 的面积为 $\\sigma(t)=\\frac{1}{2}t$，故 $d\\sigma(t)=\\frac{1}{2}dt$。于是 $I=\\int_0^1 e^t d\\sigma(t)=\\int_0^1 e^t\\frac{1}{2}dt=\\frac{1}{2}\\int_0^1 e^t dt=\\frac{1}{2}(e-1)$。"
+},
+{
+"pid": 26,
+"label": "补",
+"statement": "已知曲面 $17x^2+17y^2+8z^2+30xy+34x+30y-16z-7=0$ 所围得区域被曲面 $S_2:17x^2+17y^2+30xy+34x+30y-32z-57=0$ 分成上下两部分，计算上下两部分区域的体积之比。",
+"answer": "$V_1:V_2=\\frac{67}{189}$",
+"notebook_candidate": "写出二次型矩阵 $A=\\begin{pmatrix}17&15&0\\\\15&17&0\\\\0&0&8\\end{pmatrix}$，其特征值为 $\\lambda_1=32,\\lambda_2=2,\\lambda_3=8$，对应单位特征向量 $p_1=\\begin{pmatrix}\\frac{\\sqrt2}{2}\\\\\\frac{\\sqrt2}{2}\\\\0\\end{pmatrix},p_2=\\begin{pmatrix}\\frac{\\sqrt2}{2}\\\\-\\frac{\\sqrt2}{2}\\\\0\\end{pmatrix},p_3=\\begin{pmatrix}0\\\\0\\\\1\\end{pmatrix}$。取正交矩阵 $P=(p_1,p_2,p_3)$，令 $\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}=P\\begin{pmatrix}x'\\\\y'\\\\z'\\end{pmatrix}$ 作正交变换。"
+},
+{
+"pid": 27,
+"label": "6",
+"statement": "找出所有可微函数 $f:(0,+\\infty)\\to(0,+\\infty)$，对于这样一个函数存在 $a>0$，使得对于 $\\forall x>0$，有 $f'(\\frac{a}{x})=\\frac{x}{f(x)}$。",
+"answer": "$f(x)=cx^{\\frac{a}{b}}(c>0)$",
+"notebook_candidate": "分析：由 $f'(\\frac{a}{x})f(x)=x$ 得 $f'(x)f(\\frac{a}{x})=\\frac{a}{x}$，从而 $[f(\\frac{a}{x})f(x)]'=f'(x)f(\\frac{a}{x})+f'(\\frac{a}{x})f(x)(-\\frac{a}{x^2})=\\frac{a}{x}+x(-\\frac{a}{x^2})=0$。设 $g(x)=f(\\frac{a}{x})f(x)$，则 $g(x)=b$（常数），即 $\\frac{f'(x)}{f(x)}=\\frac{a}{bx}$，积分得 $\\ln f(x)=\\frac{a}{b}\\ln x+\\ln c$，故 $f(x)=cx^{\\frac{a}{b}}(c>0)$。"
+},
+{
+"pid": 28,
+"label": "12",
+"statement": "设方程 $y''-\\frac{1}{x}y'+q(x)y=0$ 有两个特解 $y_1(x)$ 和 $y_2(x)$，且 $y_1\\cdot y_2=1$，求 $q(x)$，并求方程的通解。",
+"answer": "$q(x)=0$",
+"notebook_candidate": "(1) 取 $y_1=a$，由 $y_1\\cdot y_2=1$ 知 $a\\neq0$，且 $y_1(x)=a$ 是所给微分方程 $y''-\\frac{1}{x}y'+q(x)y=0$ 的特解，故 $aq(x)=0$，由此推得 $q(x)=0$。于是方程化为 $y''-\\frac{1}{x}y'=0$，得特解 $x^2$，它与 $y_1(x)=a$ 无关，故通解为 $y=C_1a+C_2x^2$。"
+},
+{
+"pid": 29,
+"label": "(1)",
+"statement": "$y'=e^{x}-\\frac{2}{x}$",
+"answer": "",
+"notebook_candidate": ""
+},
+{
+"pid": 30,
+"label": "(2)",
+"statement": "$y'=\\frac{y^2}{4}+\\frac{1}{x^2}$",
+"answer": "",
+"notebook_candidate": ""
+},
+{
+"pid": 31,
+"label": "(3)",
+"statement": "$y'\\cos y=(1+\\cos x\\sin y)\\sin y$",
+"answer": "",
+"notebook_candidate": ""
+},
+{
+"pid": 32,
+"label": "(4)",
+"statement": "$y'+x=\\sqrt{x^2+y}$",
+"answer": "",
+"notebook_candidate": ""
+}
+]
+}

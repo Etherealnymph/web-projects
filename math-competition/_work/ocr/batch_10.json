@@ -1,0 +1,225 @@
+{
+  "batch": 10,
+  "date": "2026-09-19",
+  "pages": [
+    {
+      "id": 119,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "27",
+          "statement": "设 $P(x,y,z)$，$R(x,y,z)$ 在空间中具有连续偏导数，记上半球面 $S$：$z=z_0+\\sqrt{R^2-(x-x_0)^2-(y-y_0)^2}$，方向向上。若对任意的点 $(x_0,y_0,z_0)$ 和 $r>0$，为任意实数，第二类曲面积分 $$\\iint_S P\\,dydz+R\\,dxdy=0$$，证明：$\\dfrac{\\partial P}{\\partial x}\\equiv 0$。",
+          "answer": "",
+          "note": "屏幕右侧标注「Gauss公式」；板书末行被讲者遮挡，部分字符不可辨。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：记上半球面 $S$ 的底平面为 $D$，$z=z_0$ 方向向下，$S$ 和 $D$ 围成的区域为 $\\Omega$。由 Gauss 公式 $$\\left(\\iint_S+\\iint_D\\right)P\\,dydz+R\\,dxdy=\\iiint_\\Omega\\left(\\frac{\\partial P}{\\partial x}+\\frac{\\partial R}{\\partial z}\\right)dV.$$ $\\because\\iint_D P\\,dydz+R\\,dxdy=-\\iint_D R\\,dxdy$（框注 $D: z=z_0\\Rightarrow dz=0$），由题设 $\\iint_S P\\,dydz+R\\,dxdy=0$，故 $-\\iint_D R\\,dxdy=\\iiint_\\Omega\\left(\\frac{\\partial P}{\\partial x}+\\frac{\\partial R}{\\partial z}\\right)dV$。最后一行写：对 $\\forall r>0$ 及任意点 $(x_0,y_0,z_0)$，$R(x_0,y_0,z_0)=0$。",
+      "summary": "第27题：用Gauss公式由已知曲面积分证偏导为零",
+      "clarity": "partial"
+    },
+    {
+      "id": 120,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "例4",
+          "statement": "证明(Lagrange恒等式)：对任意向量 $a,b,c,d$，有 $$(a\\times b)\\cdot(c\\times d)=\\begin{vmatrix}a\\cdot c & a\\cdot d\\\\ b\\cdot c & b\\cdot d\\end{vmatrix}$$",
+          "answer": "",
+          "note": "题干下方即「证明：」，解答仅显示首行，后文被屏幕下缘裁切。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证明：$(a\\times b)\\cdot(c\\times d)=(a,b,c\\times d)=(c\\times d,a,b)=[(c\\times d)\\times a]\\cdot b$（后续式子被裁切，无法辨认）。",
+      "summary": "例4：证明Lagrange恒等式(混合积表示)",
+      "clarity": "good"
+    },
+    {
+      "id": 121,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "例1",
+          "statement": "1.向量的基本运算。例1. 设单位向量 $\\overrightarrow{OA}$ 和 $\\overrightarrow{OB}$ 的夹角为 $\\theta\\ (0<\\theta<\\frac{\\pi}{2})$，$\\lambda$ 为正常数，求 $\\lim_{n\\to\\infty}\\frac{1}{n}\\left(\\lambda\\overrightarrow{OA}+[?]\\right)$",
+          "answer": "",
+          "note": "此图为整间教室远景，投影屏上文字很小，题干括号内后半部分不可辨（记为 $[?]$）；黑板上另有手绘图形与 $\\vec{a}\\cdot\\vec{b}=|\\vec{a}||\\vec{b}|\\cos\\theta$ 一类式子，亦不可辨。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "屏上「解：」后可见 $\\because|\\overrightarrow{OA}+\\overrightarrow{OB}|^2=a^2+b^2-2ab\\cos(\\pi-\\theta)=a^2+b^2+2ab\\cos\\theta$，其后各式（含 $\\lim$ 与 $\\frac{1-\\cos\\theta[?]}{[?]}$）过小，无法辨认。",
+      "summary": "向量的基本运算例1：单位向量夹角与和向量的极限",
+      "clarity": "partial"
+    },
+    {
+      "id": 122,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "25",
+          "statement": "设 $\\Omega:\\ x^2+y^2+z^2\\le 1$，证明：$$\\frac{4\\sqrt{2}}{3}\\pi\\le \\iiint_\\Omega\\sqrt[3]{x+2y-2z+5}\\,dV\\le \\frac{8\\pi}{3}$$",
+          "answer": "",
+          "note": "页面上方是上题解答片段 (3)：将 $x_0=\\frac{x}{t},\\ y_0=\\frac{y}{t},\\ z_0+1=\\frac{z}{t}$ 代入球面方程与切平面方程，得 $x^2+y^2+z^2=4t^2$、$x^2+y^2+z^2+z=4t$，联立消去 $t$ 得 $(x^2+y^2+z^2+z)^2=4(x^2+y^2+z^2)$；并算得 $V=\\iiint_\\Omega dV=\\int_0^{2\\pi}d\\varphi\\int_0^{\\pi}d\\theta\\int_0^{2-\\cos\\varphi}\\rho^2\\sin\\varphi\\,d\\rho=\\frac{40}{3}\\pi$（标注「球坐标」）。题下框注估值引理 $m\\le f(\\Omega)\\le M\\Rightarrow mV_\\Omega\\le\\iiint_\\Omega f(\\Omega)d\\Omega\\le MV_\\Omega$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：设 $f(x,y,z)=x+2y-2z+5$。(1) $f_x=1\\ne 0\\Rightarrow f(x,y,z)$ 在 $\\Omega$ 内部无驻点，必在边界上取得最值；(2) 令 $L(x,y,z,\\lambda)=x+2y-2z+5+\\lambda(x^2+y^2+z^2-1)$。",
+      "summary": "第25题：估三重积分上下界，转边界最值问题",
+      "clarity": "good"
+    },
+    {
+      "id": 123,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "由 $L_x=1+2\\lambda x=0$，$L_y=2+2\\lambda y=0$，$L_z=-2+2\\lambda z=0$，$L_\\lambda=x^2+y^2+z^2-1=0$ 得驻点 $P_1\\left(\\frac{1}{3},\\frac{2}{3},-\\frac{2}{3}\\right)$，$P_2\\left(-\\frac{1}{3},-\\frac{2}{3},\\frac{2}{3}\\right)$。$\\because f(P_1)=8,\\ f(P_2)=2$，$\\therefore$ 函数 $f(x,y,z)$ 在闭区域 $\\Omega$ 上的最大值是 8、最小值是 2。于是 $\\sqrt[3]{2}V_\\Omega\\le\\iiint_\\Omega\\sqrt[3]{x+2y-2z+5}\\,dV\\le 2V_\\Omega$，即 $\\frac{4\\sqrt[3]{2}}{3}\\pi\\le\\iiint_\\Omega\\sqrt[3]{x+2y-2z+5}\\,dV\\le\\frac{8}{3}\\pi$。",
+      "summary": "第25题解答：拉格朗日乘子法求最值后夹逼估计",
+      "clarity": "good"
+    },
+    {
+      "id": 124,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "25",
+          "statement": "证明：$$\\lim_{n\\to\\infty}\\frac{1}{n^4}\\iiint_{V_n}[r]\\,dxdydz=\\pi$$ 其中 $V_n=\\{(x,y,z)\\mid x^2+y^2+z^2\\le n^2\\}$，$r=\\sqrt{x^2+y^2+z^2}$，$[r]$ 表示 $r$ 的整数部分。",
+          "answer": "答案为 $\\pi$（即所证等式）。",
+          "note": "题号与前一页第25题重复，疑为 26。右侧框注「球坐标」：$x=r\\sin\\varphi\\cos\\theta,\\ y=r\\sin\\varphi\\sin\\theta,\\ z=r\\cos\\varphi$，$0\\le r\\le n,\\ 0\\le\\varphi\\le\\pi,\\ 0\\le\\theta\\le 2\\pi$，$dV=r^2\\sin\\varphi\\,dr\\,d\\varphi\\,d\\theta$；并标「夹逼准则」。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：$\\iiint_{V_n} r\\,dxdydz=\\int_0^{2\\pi}d\\theta\\int_0^{\\pi}\\sin\\varphi\\,d\\varphi\\int_0^{n}r^3dr=\\pi n^4$。由 $r-1\\le[r]\\le r$ 及 $V_n$ 的体积为 $\\frac{4}{3}\\pi n^3$，故积分满足 $\\pi n^4-\\frac{4}{3}\\pi n^3<\\iiint_{V_n}[r]\\,dxdydz\\le\\iiint_{V_n} r\\,dxdydz=\\pi n^4$，再用夹逼准则得 $\\lim_{n\\to\\infty}\\frac{1}{n^4}\\iiint_{V_n}[r]\\,dxdydz=\\pi$。",
+      "summary": "第25题：用夹逼准则证含整数部分的三重积分极限",
+      "clarity": "good"
+    },
+    {
+      "id": 125,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "26",
+          "statement": "设 $f(x)$ 在 $[0,1]$ 上连续可导，且 $f(1)=1+f(0)$，求：$$\\int_0^1 dx\\int_0^x\\frac{f'(y)}{\\sqrt{(1-x)(x-y)}}\\,dy$$",
+          "answer": "$\\pi$",
+          "note": "框注「交换积分次序」；右侧框给出 $x=\\frac{1+y}{2}-\\frac{1-y}{2}\\sin t$，$x=1\\Leftrightarrow t=-\\frac{\\pi}{2}$，$x=y\\Leftrightarrow t=\\frac{\\pi}{2}$，$dx=-\\frac{1-y}{2}\\cos t\\,dt$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：$\\int_0^1dx\\int_0^x\\frac{f'(y)}{\\sqrt{(1-x)(x-y)}}dy=\\int_0^1 dy\\int_y^1\\frac{f'(y)}{\\sqrt{\\left(\\frac{1-y}{2}\\right)^2-\\left(\\frac{1+y}{2}-x\\right)^2}}dx$（交换积分次序）。令 $\\frac{1+y}{2}-x=\\frac{1-y}{2}\\sin t$，即 $x=\\frac{1+y}{2}-\\frac{1-y}{2}\\sin t$，化为 $\\int_0^1 f'(y)dy\\int_{-\\frac{\\pi}{2}}^{\\frac{\\pi}{2}}dt=\\pi[f(1)-f(0)]=\\pi$（用 $f(1)=1+f(0)$）。",
+      "summary": "第26题：交换积分次序算含导数的二重积分得π",
+      "clarity": "good"
+    },
+    {
+      "id": 126,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "27",
+          "statement": "设 $P(x,y,z)$，$R(x,y,z)$ 在空间中具有连续偏导数，记上半球面 $S$：$z=z_0+\\sqrt{R^2-(x-x_0)^2-(y-y_0)^2}$，方向向上。若对任意的点 $(x_0,y_0,z_0)$ 和 $r>0$，为任意实数，第二类曲面积分 $$\\iint_S P\\,dydz+R\\,dxdy=0$$，证明：$\\dfrac{\\partial P}{\\partial x}\\equiv 0$。",
+          "answer": "",
+          "note": "屏幕右侧标注「Gauss公式」。与第119页为同一题。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：记上半球面 $S$ 的底平面为 $D$，$z=z_0$ 方向向下，$S$ 和 $D$ 围成的区域为 $\\Omega$。由 Gauss 公式 $$\\left(\\iint_S+\\iint_D\\right)P\\,dydz+R\\,dxdy=\\iiint_\\Omega\\left(\\frac{\\partial P}{\\partial x}+\\frac{\\partial R}{\\partial z}\\right)dV.$$ 又 $\\because\\iint_D P\\,dydz+R\\,dxdy=-\\iint_D R\\,dxdy$（$D: z=z_0\\Rightarrow dz=0$），由题设 $\\iint_S P\\,dydz+R\\,dxdy=0$，得 $-\\iint_D R\\,dxdy=\\iiint_\\Omega\\left(\\frac{\\partial P}{\\partial x}+\\frac{\\partial R}{\\partial z}\\right)dV$。末行：对 $\\forall r>0$ 及任意点 $(x_0,y_0,z_0)$，$R(x_0,y_0,z_0)=0$。",
+      "summary": "第27题：Gauss公式化曲面积分，导出待证偏导为零",
+      "clarity": "good"
+    },
+    {
+      "id": 127,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "承上页：对 $\\forall r>0$ 及任意点 $(x_0,y_0,z_0)$，$R(x_0,y_0,z_0)=0$。否则 $\\iint_D R\\,dxdy=-R(\\xi,\\eta,z_0)\\cdot\\pi r^2$，$(\\xi,\\eta,z_0)\\in D$（积分中值定理）；当 $r\\to 0$ 时 $R(\\xi,\\eta,z_0)\\to R(x_0,y_0,z_0)$，故 $\\iint_D R\\,dxdy$ 是 $r$ 的二阶无穷小量。(1) 若 $\\frac{\\partial P}{\\partial x}+\\frac{\\partial R}{\\partial z}\\ne 0$，则 $\\iiint_\\Omega\\left(\\frac{\\partial P}{\\partial x}+\\frac{\\partial R}{\\partial z}\\right)dV=\\left(\\frac{\\partial P}{\\partial x}+\\frac{\\partial R}{\\partial z}\\right)\\Big|_{(\\xi,\\eta,z_0)}\\cdot\\frac{2\\pi r^3}{3}$ 是 $r$ 的三阶无穷小量，矛盾；(2) 若 $\\frac{\\partial P}{\\partial x}+\\frac{\\partial R}{\\partial z}=0$，当 $r\\to 0$ 时该体积分是 $r$ 的高于三阶的无穷小量，仍有 $-\\iint_D R\\,dxdy$ 与 $\\iiint_\\Omega(\\cdot)dV$ 阶不匹配，矛盾！故对 $\\forall r>0$ 及任意点 $(x_0,y_0,z_0)$，$R(x_0,y_0,z_0)=0$，即 $R(x,y,z)=0$，$\\therefore \\frac{\\partial P}{\\partial x}=0$。",
+      "summary": "第27题续：积分中值定理比较无穷小阶的反证",
+      "clarity": "good"
+    },
+    {
+      "id": 128,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "练习",
+          "statement": "设 $P(x,y)$，$Q(x,y)$ 在全平面上有连续的一阶偏导数，沿平面上任意半圆周 $L: y=y_0+\\sqrt{R^2-(x-x_0)^2}$，曲线积分 $\\int_L P\\,dx+Q\\,dy=0$，其中 $x_0,y_0$ 为任意实数，$R$ 为任意正实数，证明：(1) $P(x,y)=0$；(2) $\\dfrac{\\partial Q}{\\partial x}=0$。",
+          "answer": "",
+          "note": "右侧标注「Green公式」；解答中标注「积分中值定理」。第(2)问见下一页。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：(1) $\\forall(x_0,y_0)\\in R^2$，$\\forall R>0$，以 $(x_0,y_0)$ 为圆心、$R$ 为半径作上半圆周（逆时针方向），起点为 $A(x_0-R,y_0)$、终点为 $B(x_0+R,y_0)$，则由 Green 公式 $$\\int_{x_0-R}^{x_0+R}P(x,y_0)dx=\\int_{L+AB}P\\,dx+Q\\,dy=\\iint_D(Q_x-P_y)\\,dxdy.$$ 由积分中值定理 $P(c,y_0)\\cdot 2R=(Q_x-P_y)|_{(\\xi,\\eta)}\\frac{\\pi}{2}R^2$，$c\\in(x_0-R,x_0+R)$，即 $P(c,y_0)=(Q_x-P_y)|_{(\\xi,\\eta)}\\frac{\\pi}{4}R$。令 $R\\to 0$，则 $c\\to x_0$，$(\\xi,\\eta)\\to(x_0,y_0)$，故 $P(x_0,y_0)=0$，由 $(x_0,y_0)$ 的任意性可得 $P(x,y)=0$。",
+      "summary": "练习(1)：半圆周上积分为零推出 P≡0",
+      "clarity": "good"
+    },
+    {
+      "id": 129,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "(2) 反设 $\\exists(a,b)\\in R^2$，使得 $Q_x(a,b)>0$，则 $\\exists(a,b)$ 的邻域 $U$，使得 $Q_x|_{(x,y)\\in U}>0$。在邻域内取上半圆周 $L$（逆时针），则 $$0=\\int_{AB}P\\,dx=\\int_{L+AB}P\\,dx+Q\\,dy=\\iint_D Q_x\\,dxdy>0,$$ 矛盾！$\\therefore \\frac{\\partial Q}{\\partial x}=0$。",
+      "summary": "练习(2)：反设 Q_x 大于零导出矛盾",
+      "clarity": "good"
+    },
+    {
+      "id": 130,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "例28",
+          "statement": "计算 $$\\iiint_V\\frac{1}{(1+x^2+y^2+z^2)^2}\\,dxdydz$$ 其中 $V: 0\\le x\\le 1,\\ 0\\le y\\le 1,\\ 0\\le z\\le 1$。",
+          "answer": "",
+          "note": "框注：$V$ 关于 $y=x$ 对称，$f(x,y,z)=\\frac{1}{(1+x^2+y^2+z^2)^2}=f(y,x,z)$；另注「$2r\\,dr=d(1+r^2+z^2)$」「$r\\cos\\theta=x=1\\Leftrightarrow r=\\sec\\theta$」「交换积分次序」。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：由对称性 $$\\iiint_V\\frac{dxdydz}{(1+x^2+y^2+z^2)^2}=2\\int_0^1 dz\\iint_D\\frac{dxdy}{(1+x^2+y^2+z^2)^2},\\quad D:\\begin{cases}0\\le x\\le 1\\\\ 0\\le y\\le x\\end{cases}$$ 令 $x=r\\cos\\theta,\\ y=r\\sin\\theta$，则 $0\\le\\theta\\le\\frac{\\pi}{4}$，$0\\le r\\le\\sec\\theta$。用 $2r\\,dr=d(1+r^2+z^2)$ 得原式 $=2\\int_0^1dz\\int_0^{\\pi/4}d\\theta\\int_0^{\\sec\\theta}\\frac{r\\,dr}{(1+r^2+z^2)^2}=\\int_0^1dz\\int_0^{\\pi/4}\\left(\\frac{1}{1+z^2}-\\frac{1}{1+\\sec^2\\theta+z^2}\\right)d\\theta$，随后交换积分次序。",
+      "summary": "例28：用对称性与极坐标算正方体上三重积分",
+      "clarity": "good"
+    },
+    {
+      "id": 131,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "例28",
+          "statement": "计算 $$\\iiint_V\\frac{1}{(1+x^2+y^2+z^2)^2}\\,dxdydz$$ 其中 $V: 0\\le x\\le 1,\\ 0\\le y\\le 1,\\ 0\\le z\\le 1$。",
+          "answer": "$\\dfrac{\\pi^2}{32}$",
+          "note": "本页为第130页解答的继续，题干在顶部重复一次。框注：令 $z=\\tan t,\\ t\\in\\left[0,\\frac{\\pi}{4}\\right]\\Rightarrow z=1\\Leftrightarrow t=\\frac{\\pi}{4},\\ dz=\\sec^2 t\\,dt$，$z=0\\Leftrightarrow t=0$；又 $D$ 关于 $\\theta=t$ 对称 $\\Rightarrow \\iint_D f(\\theta,t)d\\theta dt=\\iint_D f(t,\\theta)d\\theta dt=\\frac{1}{2}\\left[\\iint_D f(\\theta,t)d\\theta dt+\\iint_D f(t,\\theta)d\\theta dt\\right]$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "接上页：原式 $=\\frac{\\pi^2}{16}-\\int_0^{\\pi/4}d\\theta\\int_0^1\\frac{1}{1+\\sec^2\\theta+z^2}dz$，令 $z=\\tan t$ 得 $=\\frac{\\pi^2}{16}-\\int_0^{\\pi/4}d\\theta\\int_0^{\\pi/4}\\frac{\\sec^2 t}{\\sec^2\\theta+\\sec^2 t}dt$。利用 $D$ 关于 $\\theta=t$ 的对称性，把该积分与其交换 $\\theta,t$ 后的积分平均，得 $=\\frac{\\pi^2}{16}-\\frac{1}{2}\\int_0^{\\pi/4}d\\theta\\int_0^{\\pi/4}\\frac{\\sec^2\\theta+\\sec^2 t}{\\sec^2\\theta+\\sec^2 t}dt=\\frac{\\pi^2}{16}-\\frac{1}{2}\\cdot\\frac{\\pi^2}{16}=\\frac{\\pi^2}{32}$。",
+      "summary": "例28解答：换元加对称平均算出 π²/32",
+      "clarity": "good"
+    },
+    {
+      "id": 132,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "31届考题",
+          "statement": "(31届考题) 计算 $$I=\\iint_D\\frac{dxdy}{(1+x^2+y^2)^2}$$ 的值，其中 $D=\\{(x,y)\\mid 0\\le x\\le 1,\\ 0\\le y\\le 1\\}$。",
+          "answer": "$\\dfrac{1}{\\sqrt{2}}\\arctan\\dfrac{1}{\\sqrt{2}}$",
+          "note": "框注：$D$ 关于 $y=x$ 对称，$f(x,y)=f(y,x)\\Rightarrow \\iint_D\\frac{dxdy}{(1+x^2+y^2)^2}=2\\iint_{D_1}\\frac{dxdy}{(1+x^2+y^2)^2}$，$D_1:\\begin{cases}0\\le x\\le 1\\\\ 0\\le y\\le x\\end{cases}$；令 $x=r\\cos\\theta,\\ y=r\\sin\\theta\\Rightarrow D_1:\\begin{cases}0\\le\\theta\\le\\frac{\\pi}{4}\\\\ 0\\le r\\le\\sec\\theta\\end{cases}$；末框令 $u=\\tan\\theta,\\ d\\theta=\\frac{1}{1+u^2}du$，$\\theta=0\\Leftrightarrow u=0$，$\\theta=\\frac{\\pi}{4}\\Leftrightarrow u=1$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：由对称性 $I=2\\iint_{D_1}\\frac{dxdy}{(1+x^2+y^2)^2}=2\\int_0^{\\pi/4}d\\theta\\int_0^{\\sec\\theta}\\frac{r\\,dr}{(1+r^2)^2}=\\int_0^{\\pi/4}\\left(1-\\frac{1}{1+\\sec^2\\theta}\\right)d\\theta=\\frac{\\pi}{4}-\\int_0^{\\pi/4}\\frac{1}{2+\\tan^2\\theta}d\\theta$。再令 $u=\\tan\\theta$，得 $=\\frac{\\pi}{4}-\\int_0^1\\frac{1}{2+u^2}\\cdot\\frac{1}{1+u^2}du=\\frac{\\pi}{4}-\\int_0^1\\left(\\frac{1}{1+u^2}-\\frac{1}{2+u^2}\\right)du=\\frac{\\pi}{4}-\\left(\\frac{\\pi}{4}-\\frac{1}{\\sqrt{2}}\\arctan\\frac{1}{\\sqrt{2}}\\right)=\\frac{1}{\\sqrt{2}}\\arctan\\frac{1}{\\sqrt{2}}$。",
+      "summary": "31届考题：极坐标算正方形上二重积分",
+      "clarity": "good"
+    },
+    {
+      "id": 133,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "例29",
+          "statement": "计算 $$\\iiint_V(x^2+y^2)\\,dxdydz,$$ 其中 $V: x^2+y^2+(z-2)^2\\ge 4$，$x^2+y^2+(z-1)^2\\le 9$，$z\\ge 0$ 所围成的空心体。（第10届预赛4T）",
+          "answer": "",
+          "note": "两处标注「球坐标」；球缺记为 $V_3: x^2+y^2+(z-1)^2\\le 3^2,\\ z\\le 0$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：设球体 $V_1: x^2+y^2+(z-1)^2\\le 3^2$，球体 $V_2: x^2+y^2+(z-2)^2\\le 2^2$，球缺 $V_3: x^2+y^2+(z-1)^2\\le 3^2,\\ z\\le 0$。(1) $V_1$ 用球坐标 $x=\\rho\\sin\\varphi\\cos\\theta,\\ y=\\rho\\sin\\varphi\\sin\\theta,\\ z-1=\\rho\\cos\\varphi$，其中 $0\\le\\theta\\le 2\\pi,\\ 0\\le\\varphi\\le\\pi,\\ 0\\le\\rho\\le 3$，得 $\\iiint_{V_1}(x^2+y^2)dxdydz=\\int_0^{2\\pi}d\\theta\\int_0^{\\pi}d\\varphi\\int_0^3\\rho^2\\sin^2\\varphi\\cdot\\rho^2\\sin\\varphi\\,d\\rho=\\frac{8\\cdot 3^5}{15}\\pi$。(2) $V_2$ 用球坐标 $z-2=\\rho\\cos\\varphi$，$0\\le\\rho\\le 2$，得 $\\iiint_{V_2}(x^2+y^2)dxdydz=\\int_0^{2\\pi}d\\theta\\int_0^{\\pi}d\\varphi\\int_0^2\\rho^2\\sin^2\\varphi\\cdot\\rho^2\\sin\\varphi\\,d\\rho=\\frac{8\\cdot 2^5}{15}\\pi$（后续由空心体与球缺的处理见后页）。",
+      "summary": "例29：球坐标算空心体上的三重积分",
+      "clarity": "good"
+    }
+  ]
+}

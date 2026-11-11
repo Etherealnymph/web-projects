@@ -1,0 +1,85 @@
+{
+ "chunk": 7,
+ "items": [
+  {
+   "pid": 97,
+   "commentary": "考格林公式与二次型的仿射标准化：被积式与分母都是零次齐次，积分只取决于闭曲线绕原点的圈数，于是可换成椭圆 $C:ax^2+2bxy+cy^2=1$。配方后令 $x+\\frac ba y=\\frac{\\cos t}{\\sqrt a},\\ y=\\frac{\\sqrt a\\sin t}{\\sqrt{ac-b^2}}$，分母化为 1，$x\\,\\mathrm{d}y-y\\,\\mathrm{d}x$ 化为 $\\frac{\\mathrm{d}t}{\\sqrt{ac-b^2}}$。易错：$ac-b^2>0$ 才保证分母在 $L$ 上恒正、曲线绕原点，且换曲线时方向必须同为逆时针。",
+   "solution_clean": "$P=\\frac{-y}{ax^2+2bxy+cy^2},\\ Q=\\frac{x}{ax^2+2bxy+cy^2}$ 在 $(x,y)\\ne(0,0)$ 处满足 $P_y=Q_x$，且被积式与分母均零次齐次，故积分沿任一逆时针绕原点的闭曲线相同，取 $C:ax^2+2bxy+cy^2=1$。\n配方 $ax^2+2bxy+cy^2=a\\left(x+\\frac ba y\\right)^2+\\left(c-\\frac{b^2}{a}\\right)y^2$，令 $x+\\frac ba y=\\frac1{\\sqrt a}\\cos t,\\ y=\\frac{\\sqrt a}{\\sqrt{ac-b^2}}\\sin t$。\n此时分母 $=1$，且 $x\\,\\mathrm{d}y-y\\,\\mathrm{d}x=\\frac{\\mathrm{d}t}{\\sqrt{ac-b^2}}$。\n故 $I=\\int_0^{2\\pi}\\frac{\\mathrm{d}t}{\\sqrt{ac-b^2}}=\\frac{2\\pi}{\\sqrt{ac-b^2}}$。"
+  },
+  {
+   "pid": 98,
+   "commentary": "第一类曲面积分的“向量化”：由切平面 $\\frac{xX}{a^2}+\\frac{yY}{b^2}+\\frac{zZ}{c^2}=1$ 得 $\\frac1p=\\sqrt{\\frac{x^2}{a^4}+\\frac{y^2}{b^4}+\\frac{z^2}{c^4}}$，它恰是常向量场 $\\vec F=\\left(\\frac x{a^2},\\frac y{b^2},\\frac z{c^2}\\right)$ 在单位外法向上的投影，这一步是破题关键。于是用 Gauss 公式化为 $\\operatorname{div}\\vec F=\\frac1{a^2}+\\frac1{b^2}+\\frac1{c^2}$ 乘椭球体积。易错：$\\vec n_0$ 必须取单位法向，不要真去算椭圆积分；球情形 $a=b=c=R$ 结果退化为 $4\\pi R$，可作检验。",
+   "solution_clean": "切平面 $\\frac{xX}{a^2}+\\frac{yY}{b^2}+\\frac{zZ}{c^2}=1$ 到原点的距离 $p=\\left(\\frac{x^2}{a^4}+\\frac{y^2}{b^4}+\\frac{z^2}{c^4}\\right)^{-1/2}$，故 $\\frac1p=\\left|\\left(\\frac x{a^2},\\frac y{b^2},\\frac z{c^2}\\right)\\right|$。\n取单位外法向 $\\vec n_0$，记 $\\vec F=\\left(\\frac x{a^2},\\frac y{b^2},\\frac z{c^2}\\right)$，则 $\\frac1p=\\vec F\\cdot\\vec n_0$。\n于是 $\\iint_S\\frac1p\\,\\mathrm{d}S=\\iint_S\\vec F\\cdot\\vec n_0\\,\\mathrm{d}S=\\iiint_\\Omega\\operatorname{div}\\vec F\\,\\mathrm{d}V$。\n$\\operatorname{div}\\vec F=\\frac1{a^2}+\\frac1{b^2}+\\frac1{c^2}$，$V_\\Omega=\\frac{4\\pi abc}{3}$。\n故原式 $=\\frac{4\\pi abc}{3}\\left(\\frac1{a^2}+\\frac1{b^2}+\\frac1{c^2}\\right)$。"
+  },
+  {
+   "pid": 99,
+   "commentary": "Gauss 公式加变量代换定体积：散度 $1+2+3=6$ 为常数，难点只剩区域体积，令 $u=x-y+z,\\ v=x+y-z,\\ w=-x+y+z$ 后区域变成八面体 $|u|+|v|+|w|\\le1$。最易错的是雅可比：$\\frac{\\partial(u,v,w)}{\\partial(x,y,z)}=4$，故 $\\mathrm{d}x\\mathrm{d}y\\mathrm{d}z=\\frac14\\mathrm{d}u\\mathrm{d}v\\mathrm{d}w$，写成 4 倍就整题错。八面体体积 $\\frac43$，原区域体积 $\\frac13$，$I=6\\cdot\\frac13=2$；$\\cos(y-z)$、$e^{-z}$、$\\sin(x-y)$ 求导为 0，不必展开。",
+   "solution_clean": "由 Gauss 公式 $I=\\iiint_\\Omega(1+2+3)\\,\\mathrm{d}V=6V_\\Omega$，其中 $\\cos(y-z),e^{-z},\\sin(x-y)$ 对相应变量求导为 0。\n令 $u=x-y+z,\\ v=x+y-z,\\ w=-x+y+z$，则 $\\frac{\\partial(u,v,w)}{\\partial(x,y,z)}=4$，即 $\\mathrm{d}x\\mathrm{d}y\\mathrm{d}z=\\frac14\\mathrm{d}u\\mathrm{d}v\\mathrm{d}w$，区域化为 $|u|+|v|+|w|\\le1$。\n$|u|+|v|+|w|\\le1$ 是八面体，体积 $8\\cdot\\frac1{3!}=\\frac43$，故 $V_\\Omega=\\frac14\\cdot\\frac43=\\frac13$。\n于是 $I=6\\cdot\\frac13=2$。"
+  },
+  {
+   "pid": 100,
+   "commentary": "先用 $0\\le f\\le1$ 把三个积分压成 $\\sqrt x+\\sqrt{x+27}+\\sqrt{13-x}$，再用配权柯西不等式：$\\sqrt x+\\sqrt2\\sqrt{\\frac{x+27}{2}}+\\sqrt{\\frac23}\\sqrt{\\frac{3(13-x)}{2}}\\le\\sqrt{\\frac{11}{3}}\\sqrt{33}=11$。等号要求三项成比例，解得 $x=9$，此时区间长 $3,6,2$ 全为整数，由周期性与 $\\int_0^1f=1$ 三段积分自动等于 $3,6,2$，故取等与 $f$ 的形状无关。易错：只估值不验证等号可达，或忘记 $x\\in[0,13]$ 的范围。",
+   "solution_clean": "$0\\le f\\le1$ 给出三段积分之和 $\\le\\sqrt x+\\sqrt{x+27}+\\sqrt{13-x}$。\n配权柯西：$\\sqrt x+\\sqrt2\\sqrt{\\frac{x+27}{2}}+\\sqrt{\\frac23}\\sqrt{\\frac{3(13-x)}{2}}\\le\\sqrt{1+2+\\frac23}\\,\\sqrt{x+\\frac{x+27}{2}+\\frac{3(13-x)}{2}}=\\sqrt{\\frac{11}{3}}\\sqrt{33}=11$。\n等号需三组成比例，解得 $x=9$（此时 $\\sqrt x,\\sqrt{x+27},\\sqrt{13-x}=3,6,2$ 均为整数）。\n由周期性及 $\\int_0^1f=1$，$\\int_0^3f=3,\\ \\int_0^6f=6,\\ \\int_0^2f=2$，和为 11，故仅当 $x=9$ 时取等号。"
+  },
+  {
+   "pid": 101,
+   "commentary": "用 Stokes 公式：$\\operatorname{rot}\\vec F=2(y+z,x+z,x+y)$，而平面 $x+y+z=\\frac32$ 上 $\\operatorname{rot}\\vec F\\cdot\\vec n=\\frac{4(x+y+z)}{\\sqrt3}=2\\sqrt3$ 是常数，这是破题关键。于是积分 $=2\\sqrt3\\times$ 截口六边形面积，其投影为 $\\{(x,y)\\in[0,1]^2:\\frac12\\le x+y\\le\\frac32\\}$，面积 $\\frac34$，而 $\\mathrm{d}S=\\sqrt3\\,\\mathrm{d}x\\mathrm{d}y$，故得 $\\frac92$。易错：平面面积要乘 $\\sqrt3$；曲线方向由右手法则定，答案相差一个符号。",
+   "solution_clean": ""
+  },
+  {
+   "pid": 102,
+   "commentary": "裂项加中值定理定阶：认出 $u_n=\\left(\\frac1{\\sqrt[p]n}\\right)^p-\\left(\\frac1{\\sqrt[p]{n+1}}\\right)^p$，对 $x^p$ 用拉格朗日中值定理提出 $p\\xi^{p-1}$，再由 $\\xi<\\frac1{\\sqrt[p]n}$ 把系数压到 $<1$。剩下 $\\sum\\left(\\frac1{\\sqrt[p]n}-\\frac1{\\sqrt[p]{n+1}}\\right)=1$，恰好给出 $<p$。易错：直接放缩成 $\\frac1{n^{1+1/p}}$ 只得 $\\frac{p}{p-1}$，常数不达标——中值定理正是把常数精确压到 $p$ 的手段。",
+   "solution_clean": "$u_n=\\frac{n^{\\frac{p-1}{p}}}{n(n+1)}=n^{\\frac{p-1}{p}}\\left[\\left(\\frac1{\\sqrt[p]n}\\right)^p-\\left(\\frac1{\\sqrt[p]{n+1}}\\right)^p\\right]$。\n对 $x^p$ 用拉格朗日中值定理：$u_n=p\\,n^{\\frac{p-1}{p}}\\xi^{p-1}\\left(\\frac1{\\sqrt[p]n}-\\frac1{\\sqrt[p]{n+1}}\\right)$，其中 $\\frac1{\\sqrt[p]{n+1}}<\\xi<\\frac1{\\sqrt[p]n}$。\n写 $\\xi=\\frac1{\\sqrt[p]{n+\\theta}}\\ (0<\\theta<1)$，得 $u_n=p\\left(\\frac{n}{n+\\theta}\\right)^{\\frac{p-1}{p}}\\left(\\frac1{\\sqrt[p]n}-\\frac1{\\sqrt[p]{n+1}}\\right)<p\\left(\\frac1{\\sqrt[p]n}-\\frac1{\\sqrt[p]{n+1}}\\right)$。\n求和：$\\sum_{n=1}^{N}u_n<p\\left(1-\\frac1{\\sqrt[p]{N+1}}\\right)<p$，令 $N\\to\\infty$ 即得 $\\sum\\frac1{(n+1)\\sqrt[p]n}<p$。"
+  },
+  {
+   "pid": 103,
+   "commentary": "$\\alpha>1$ 时对 $x^{1-\\alpha}$ 在 $[S_{n-1},S_n]$ 上用中值定理，得 $\\frac{u_n}{S_n^\\alpha}<\\frac1{\\alpha-1}\\left(\\frac1{S_{n-1}^{\\alpha-1}}-\\frac1{S_n^{\\alpha-1}}\\right)$，望远镜即收敛。$\\alpha\\le1$ 要换思路：$\\alpha=1$ 取 $n_k$ 使 $S_{n_k}\\ge2S_{n_{k-1}}$，每段 $\\sum\\frac{u_n}{S_n}\\ge\\frac12$ 故发散；$0<\\alpha<1$ 时 $S_n$ 充分大后 $S_n^\\alpha\\le S_n$，通项比 $\\frac{u_n}{S_n}$ 还大。易错：$\\alpha=1$ 望远镜只余 $\\ln S_n$，此路不通。",
+   "solution_clean": ""
+  },
+  {
+   "pid": 104,
+   "commentary": "柯西收敛准则加分块阶梯：$r_n\\to0$ 保证能取递增的 $N_k$ 使 $\\sum_{n=N_k}^{N_{k+1}}a_n<\\frac1{k^3}$，再令 $c_n=k\\ (N_k\\le n<N_{k+1})$，自然有 $c_n\\to\\infty$。控制量是 $\\sum c_na_n\\le\\sum_{n<N_1}a_n+\\sum_k k\\cdot\\frac1{k^3}$，后项化成 $\\sum\\frac1{k^2}$ 收敛。易错：块和必须小于 $\\frac1{k^3}$ 而非 $\\frac1{k^2}$，否则乘 $k$ 后不收敛；$c_n$ 也要单调趋于无穷。",
+   "solution_clean": "由 $\\sum a_n$ 收敛及柯西准则，可取递增的 $N_k$ 使 $\\sum_{n=N_k}^{N_{k+1}}a_n<\\frac1{k^3}$。\n令 $c_n=1\\ (n<N_1)$，$c_n=k\\ (N_k\\le n<N_{k+1})$，则 $c_n>0$ 且 $c_n\\to\\infty$。\n$\\sum c_na_n=\\sum_{n<N_1}a_n+\\sum_{k\\ge1}k\\sum_{n=N_k}^{N_{k+1}}a_n<\\sum_{n<N_1}a_n+\\sum_{k\\ge1}\\frac1{k^2}$。\n右端收敛，故 $\\sum c_na_n$ 收敛，所找数列即 $\\{c_n\\}$。"
+  },
+  {
+   "pid": 105,
+   "commentary": "令 $t_n=\\frac1{p_n}$（递减），通项化为 $(t_{n-1}-t_n)t_{n-1}^{\\alpha-1}$，这是本题枢纽。$\\alpha=1$ 望远镜得 $\\le\\frac1{p_0}$；$\\alpha>1$ 放大成 $\\frac1{p_0^{\\alpha-1}}\\left(\\frac1{p_{n-1}}-\\frac1{p_n}\\right)$；$0<\\alpha<1$ 用 $t^\\alpha$ 的中值定理把通项控成 $\\frac1\\alpha\\left(t_{n-1}^\\alpha-t_n^\\alpha\\right)$。易错：$0<\\alpha<1$ 时 $t_{n-1}^{\\alpha-1}>1$ 是放大因子，不能照搬 $\\alpha>1$ 的放缩方向。",
+   "solution_clean": ""
+  },
+  {
+   "pid": 106,
+   "commentary": "幂指函数先取对数定阶：$\\ln a_n=n\\ln\\left(1-\\frac{p\\ln n}{n}\\right)=-p\\ln n+O\\left(\\frac{\\ln^2n}{n}\\right)$，故 $n^pa_n\\to1$，$a_n\\sim n^{-p}$。要说明 $O$ 项确实趋于 0（用 $\\ln(1-u)=-u-O(u^2)$），才能归结为 $p$ 级数：$p>1$ 收敛。易错：$p\\le1$ 发散，其中 $p\\le0$ 时通项根本不趋于 0；另外先要有 $\\frac{p\\ln n}{n}<1$ 保证底数为正。",
+   "solution_clean": "$a_n=e^{n\\ln\\left(1-\\frac{p\\ln n}{n}\\right)}$，记 $x=\\frac1n$，则 $\\ln(n^pa_n)=p\\ln n+n\\ln\\left(1-\\frac{p\\ln n}{n}\\right)=-p\\ln x+\\frac1x\\ln(1+px\\ln x)$。\n由 $\\ln(1+u)=u-\\frac{u^2}{2}+O(u^3)$ 得 $\\frac1x\\ln(1+px\\ln x)=p\\ln x-\\frac{p^2}{2}x\\ln^2x+O(x^2\\ln^3x)$。\n故 $\\ln(n^pa_n)=-\\frac{p^2}{2}x\\ln^2x+O(x^2\\ln^3x)\\to0$，即 $n^pa_n\\to1$，$a_n\\sim\\frac1{n^p}$。\n于是 $p>1$ 时 $\\sum a_n$ 收敛；$p\\le1$ 时发散（$p\\le0$ 时 $a_n\\not\\to0$）。"
+  },
+  {
+   "pid": 107,
+   "commentary": "把 $n^{-1/n}$ 写成 $e^{-\\frac{\\ln n}{n}}\\to1$，于是 $\\frac{1/n^{1+1/n}}{1/n}\\to1$，与调和级数同敛散。带 $n^{\\pm1/n}$ 因子的题都走这条路：先化指数、再取对数看阶。易错：只说 $n^{1/n}\\to1$ 而不写与基准级数的比值极限，比较判别法就用不上；这里分母 $n^{1+1/n}>n$，通项略小于调和项，仍发散。",
+   "solution_clean": "记 $a_n=\\frac1{n^{1+1/n}}=\\frac1n\\cdot n^{-1/n}$。\n$n^{-1/n}=e^{-\\frac{\\ln n}{n}}\\to e^0=1$，因 $\\frac{\\ln n}{n}\\to0$，故 $\\frac{a_n}{1/n}\\to1$。\n又 $\\sum_{n\\ge1}\\frac1n$ 发散。\n由极限比较法知 $\\sum_{n=1}^{\\infty}\\frac1{n^{1+1/n}}$ 发散。"
+  },
+  {
+   "pid": 108,
+   "commentary": "关键是标准阶 $\\sqrt[n]n-1=\\frac{\\ln n}{n}+o\\left(\\frac{\\ln n}{n}\\right)$，通项相当于 $\\frac{\\ln n}{n^{1+\\alpha}}$，对数因子不影响敛散。$\\alpha>0$ 时 $\\ln n=o\\left(n^{\\alpha/2}\\right)$，压成 $\\frac{C}{n^{1+\\alpha/2}}$ 即收敛；$\\alpha\\le0$ 时 $\\frac{\\ln n}{n^\\alpha}\\ge1$，通项 $\\ge\\frac1n$ 发散。易错：$\\alpha=0$ 属发散一侧，$\\sum\\frac{\\ln n}{n}$ 是发散的。",
+   "solution_clean": "$\\sqrt[n]n-1=e^{\\frac{\\ln n}{n}}-1\\sim\\frac{\\ln n}{n}$，故通项与 $\\frac{\\ln n}{n^{1+\\alpha}}$ 同阶。\n$\\alpha>0$ 时取 $\\beta=\\frac{\\alpha}{2}>0$，$\\frac{\\ln n}{n^\\beta}\\to0$，故 $\\frac{\\ln n}{n^{1+\\alpha}}\\le\\frac{C}{n^{1+\\alpha/2}}$，而 $1+\\frac{\\alpha}{2}>1$，级数收敛。\n$\\alpha\\le0$ 时 $\\frac{\\ln n}{n^{1+\\alpha}}=\\frac{\\ln n}{n^{\\alpha}}\\cdot\\frac1n\\ge\\frac1n$（$n$ 充分大），与调和级数比较知发散。\n综上：$\\alpha>0$ 收敛，$\\alpha\\le0$ 发散。"
+  },
+  {
+   "pid": 109,
+   "commentary": "用 $a^u-1\\sim u\\ln a$：$n^{\\frac1{n^2+1}}-1=e^{\\frac{\\ln n}{n^2+1}}-1\\sim\\frac{\\ln n}{n^2}$，与 $\\sum\\frac1{n^{3/2}}$ 比较即知收敛。破题点是把幂 $\\frac1{n^2+1}$ 看成 $\\frac{\\ln n}{n^2}$ 的指数，量级由 $\\ln n$ 而非 $n$ 控制。易错：本题与第 7 题形似而阶完全不同（$\\frac{\\ln n}{n^2}$ 可和），不要套用“$n$ 在指数上就发散”的印象。",
+   "solution_clean": ""
+  },
+  {
+   "pid": 110,
+   "commentary": "双向夹：上界 $p_1+\\cdots+p_n<np_n$ 给出 $\\frac1{p_n}<\\frac n{S_n}$，故 $\\sum\\frac n{S_n}$ 收敛可推 $\\sum\\frac1{p_n}$ 收敛。反向靠分块 $p_1+\\cdots+p_{2n}\\ge np_n$ 与 $p_1+\\cdots+p_{2n-1}\\ge np_n$，得 $\\frac{2n}{S_{2n}},\\frac{2n-1}{S_{2n-1}}\\le\\frac2{p_n}$，按奇偶配对求和即得。易错：这里不可能有逐项同阶估计，必须接受常数因子并用 $2n$、$2n-1$ 配对，这是此类“等价收敛”题的标准手法。",
+   "solution_clean": "上界：由 $p_1<\\cdots<p_n$ 得 $p_1+\\cdots+p_n<np_n$，故 $\\frac1{p_n}<\\frac{n}{p_1+\\cdots+p_n}$，后者收敛则 $\\sum\\frac1{p_n}$ 收敛。\n反向：$p_1+\\cdots+p_{2n}\\ge p_{n+1}+\\cdots+p_{2n}\\ge np_n$，同理 $p_1+\\cdots+p_{2n-1}\\ge np_n$。\n于是 $\\frac{2n}{S_{2n}}\\le\\frac{2n}{np_n}=\\frac2{p_n}$，$\\frac{2n-1}{S_{2n-1}}\\le\\frac{2n}{np_n}=\\frac2{p_n}$（$S_m=p_1+\\cdots+p_m$）。\n奇偶配对得 $\\sum_{m=1}^{\\infty}\\frac{m}{S_m}\\le4\\sum_{n=1}^{\\infty}\\frac1{p_n}<\\infty$，故 $\\sum\\frac1{p_n}$ 收敛时 $\\sum\\frac{n}{S_n}$ 也收敛。"
+  },
+  {
+   "pid": 111,
+   "commentary": "枢纽是把 $a_k$ 写成 $A_k-A_{k-1}$ 后分部求和：由 $\\frac1{A_k^2}\\le\\frac1{A_kA_{k-1}}$ 得 $\\frac{a_k}{A_k^2}\\le\\frac1{A_{k-1}}-\\frac1{A_k}$，乘 $k^2$ 裂项后部分和化为 $\\frac5{a_1}+2\\sum_{k\\le n-1}\\frac k{A_k}+\\sum_{k\\le n-1}\\frac1{A_k}-\\frac{n^2}{A_n}$，末项为负不能丢。再用 $\\sum\\frac1{a_n}<\\infty$ 控制余项即得收敛。易错：直接由 $A_n\\ge a_n$ 放缩会浪费掉 $\\frac1{a_n}$ 的可和性，必须保留裂项结构。",
+   "solution_clean": ""
+  },
+  {
+   "pid": 112,
+   "commentary": "先定阶再比较：$\\frac1n\\sum_{i=1}^n\\left(\\frac in\\right)^\\alpha\\to\\int_0^1x^\\alpha\\,\\mathrm{d}x=\\frac1{\\alpha+1}$ 给出 $1^\\alpha+\\cdots+n^\\alpha\\sim\\frac{n^{\\alpha+1}}{\\alpha+1}$，故 $a_n\\sim\\frac{\\alpha+1}{n^\\alpha}$，$\\alpha>1$ 时收敛。破题点是把“和”写成“$n^{\\alpha+1}\\times$ 黎曼和”，指数一次到位。易错：$\\frac n{S_n}$ 的极限其实是 $\\frac{\\alpha+1}{n^\\alpha}\\to0$，误算成 $\\alpha+1$ 会得出“通项不趋于 0、级数发散”的相反结论。",
+   "solution_clean": ""
+  }
+ ]
+}

@@ -1,0 +1,38 @@
+{
+  "batch": 1,
+  "date": "2026-03-29",
+  "pages": [
+    {
+      "id": 1,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "6",
+          "statement": "设 $f(x)>0$，且 $f(x)\\in C[0,1]$，证明 $$\\lim_{n\\to\\infty}\\sqrt[n]{\\sum_{i=1}^{n}\\left[f\\left(\\frac{i}{n}\\right)\\right]^n\\frac{1}{n}}=\\max_{x\\in[0,1]}f(x).$$",
+          "answer": "",
+          "note": "投影屏幕拍摄，画面中只有这一题，其余版面空白"
+        }
+      ],
+      "has_solution": false,
+      "solution": "",
+      "summary": "第6题：证积分平均的 $n$ 次根的极限等于最大值",
+      "clarity": "good"
+    },
+    {
+      "id": 2,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "6",
+          "statement": "设 $f(x)>0$，且 $f(x)\\in C[0,1]$，证明 $$\\lim_{n\\to\\infty}\\sqrt[n]{\\sum_{i=1}^{n}\\left[f\\left(\\frac{i}{n}\\right)\\right]^n\\frac{1}{n}}=\\max_{x\\in[0,1]}f(x).$$",
+          "answer": "",
+          "note": "第6题的板书解答页，下方被裁切，只有前半段推导"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：记 $M=\\max\\limits_{x\\in[0,1]}f(x)$，则 $x_n=\\sqrt[n]{\\sum_{i=1}^{n}\\left[f\\left(\\frac{i}{n}\\right)\\right]^n\\frac{1}{n}}\\le M$，记为 (1)。因 $f(x)\\in C[0,1]$，$\\exists x_0\\in[0,1]$ 使 $f(x_0)=M$；故 $\\forall\\varepsilon>0,\\ \\exists\\delta>0$，当 $|x-x_0|<\\delta$ 且 $x\\in[0,1]$ 时，有 $M-\\varepsilon<f(x)<M+\\varepsilon$。当 $n$ 充分大时有 $\\frac{1}{n}<\\delta$，$\\exists i_0$ 使 $\\left|\\frac{i_0}{n}-x_0\\right|<\\delta$，$f\\left(\\frac{i_0}{n}\\right)>M-\\varepsilon$。故 $x_n=\\sqrt[n]{\\sum_{i=1}^{n}\\left[f\\left(\\frac{i}{n}\\right)\\right]^n\\frac{1}{n}}\\ge\\sqrt[n]{\\left[f\\left(\\frac{i_0}{n}\\right)\\right]^n\\frac{1}{n}}>(M-\\varepsilon)\\frac{1}{\\sqrt[n]{n}}$，记为 (2)。",
+      "summary": "第6题解答：用最大值点给出 $x_n$ 的上界 (1) 与下界 (2)",
+      "clarity": "good"
+    }
+  ]
+}

@@ -1,0 +1,273 @@
+{
+  "batch": 22,
+  "date": "2026-10-31",
+  "pages": [
+    {
+      "id": 278,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "7",
+          "statement": "设正项级数 $\\sum_{n=1}^{\\infty} a_n$ 收敛。\n(1) 证明：对 $a_n=\\frac{1}{n^2},\\ n\\neq k^2$；$a_n=\\frac{1}{k^2},\\ n=k^2,\\ k=1,2,\\cdots$，$\\lim_{n\\to\\infty} n a_n\\neq 0$。\n(2) 证明：对任意的 $a_n$，$$\\lim_{n\\to\\infty}\\frac{n^2}{\\sum_{k=1}^{n}\\frac{1}{a_k}}=0$$",
+          "answer": "",
+          "note": "本页上半部是上一题（三重积分）的解答，与第7题无关"
+        }
+      ],
+      "has_solution": true,
+      "solution": "上半部为三重积分题的收尾计算：$\\iiint_{\\Omega} xyz\\,dxdydz=\\frac{1}{2}\\iiint_{\\Omega'}\\frac{v^3}{w^3}\\left(w+\\frac{2}{w}+\\frac{1}{w^3}\\right)dudvdw$，再拆成对 $u,v,w$ 的三次累次积分，得 $=\\frac{1}{32}\\left(\\frac{1}{m^2}-\\frac{1}{n^2}\\right)(b^8-a^8)\\left[(\\beta^2-\\alpha^2)\\left(1+\\frac{1}{\\alpha^2\\beta^2}\\right)+4\\ln\\frac{\\beta}{\\alpha}\\right]$。第7题只出现题干，未写证明。",
+      "summary": "三重积分解答收尾＋第7题正项级数的两问证明题",
+      "clarity": "good"
+    },
+    {
+      "id": 279,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "证(1)：显然 $a_{k^2}=\\frac{1}{k^2}$ 是 $\\{a_n\\}$ 的一个子列，当 $n\\to\\infty$ 时 $k^2\\to\\infty$，$\\lim_{n\\to\\infty} k^2 a_{k^2}=1\\neq 0$。证(2)：因 $0<\\frac{n^2}{\\sum_{k=1}^{n}\\frac{1}{a_k}}\\le n\\cdot\\sqrt[n]{\\prod_{k=1}^{n}a_k}=n\\cdot\\sqrt[n]{\\frac{1}{n!}\\prod_{k=1}^{n}k a_k}=\\frac{n}{\\sqrt[n]{n!}}\\sqrt[n]{\\prod_{k=1}^{n}k a_k}\\le\\frac{n}{\\sqrt[n]{n!}}\\cdot\\frac{\\sum_{k=1}^{n}k a_k}{n}$；设 $\\sum_{k=1}^{n}a_k=S_n$，$S_0=0$，$a_k=S_k-S_{k-1}$，由 $\\sum_{n=1}^{\\infty}a_n$ 收敛得 $S_n$ 有界，且 $\\lim_{n\\to\\infty}\\frac{1}{n}\\sum_{k=1}^{n}k a_k=\\lim_{n\\to\\infty}\\frac{1}{n}(nS_n-\\sum_{k=1}^{n-1}S_k)=\\lim S_n-\\lim\\frac{1}{n}\\sum_{k=1}^{n}S_k+\\lim\\frac{1}{n}S_n=0$。",
+      "summary": "第7题(1)(2)的证明过程，用均值不等式与 $S_n$ 有界",
+      "clarity": "good"
+    },
+    {
+      "id": 280,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "继续算 $\\lim_{n\\to\\infty}\\frac{n}{\\sqrt[n]{n!}}=\\frac{1}{\\lim_{n\\to\\infty}\\sqrt[n]{\\frac{n!}{n^n}}}=\\frac{1}{e^{\\lim_{n\\to\\infty}\\frac{1}{n}\\sum_{k=1}^{n}\\ln\\frac{k}{n}}}=\\frac{1}{e^{\\int_0^1\\ln x\\,dx}}=\\frac{1}{e^{-1}}=e$。从而 $\\frac{n}{\\sqrt[n]{n!}}\\cdot\\frac{\\sum_{k=1}^{n}k a_k}{n}\\to 0\\ (n\\to\\infty)$，故 $\\lim_{n\\to\\infty}\\frac{n^2}{\\sum_{k=1}^{n}\\frac{1}{a_k}}=0$。",
+      "summary": "用定积分定义求 $\\lim n/\\sqrt[n]{n!}=e$ 并收尾第7(2)",
+      "clarity": "partial"
+    },
+    {
+      "id": 281,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "1",
+          "statement": "求极限 $$I=\\lim_{x\\to+\\infty}\\left[(x+a)^{1+\\frac{1}{x}}-x^{1+\\frac{1}{x+a}}\\right]$$ 的值。",
+          "answer": "$I=a$",
+          "note": "试卷标题：数学竞赛模拟题四（第1题）"
+        }
+      ],
+      "has_solution": true,
+      "solution": "令 $t=\\frac{1}{x}$，$x\\to+\\infty$ 时 $t\\to0^+$，则 $I=\\lim_{t\\to0^+}\\left[\\left(\\frac{1}{t}+a\\right)^{1+t}-\\left(\\frac{1}{t}\\right)^{1+\\frac{t}{1+at}}\\right]=\\lim_{t\\to0^+}\\left[e^{(1+t)\\ln\\frac{1+at}{t}}-e^{-\\left(1+\\frac{t}{1+at}\\right)\\ln t}\\right]$。提出公因子后 $=\\lim_{t\\to0^+}\\frac{1}{t}e^{\\frac{t\\ln t}{1+at}}\\left[e^{(1+t)\\ln(1+at)-t\\ln t+\\frac{t\\ln t}{1+at}}-1\\right]=\\lim_{t\\to0^+}\\frac{1}{t}\\left[(1+t)\\ln(1+at)-t\\ln t+\\frac{t\\ln t}{1+at}\\right]$。拆项得 $=\\lim_{t\\to0^+}\\frac{(1+t)at}{t}+\\lim_{t\\to0^+}\\left[\\frac{-a}{1+at}\\cdot t\\ln t\\right]=a+0=a$。",
+      "summary": "求 $x\\to+\\infty$ 的双指数型极限，答案 $a$",
+      "clarity": "good"
+    },
+    {
+      "id": 282,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "求积分 $$\\int_0^1 \\frac{\\arctan x}{x\\sqrt{1-x^2}}dx$$",
+          "answer": "$\\frac{\\pi}{2}\\ln(1+\\sqrt{2})$",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "注意到 $\\frac{\\arctan x}{x}=\\int_0^1\\frac{1}{1+x^2y^2}dy$，将原积分写成累次积分并交换次序：$\\int_0^1\\frac{\\arctan x}{x\\sqrt{1-x^2}}dx=\\int_0^1 dy\\int_0^1\\frac{dx}{(1+x^2y^2)\\sqrt{1-x^2}}$。令 $x=\\sin t$ 得 $=\\int_0^1 dy\\int_0^{\\frac{\\pi}{2}}\\frac{dt}{1+y^2\\sin^2t}=\\int_0^1 dy\\int_0^{\\frac{\\pi}{2}}\\frac{d\\tan t}{1+(1+y^2)\\tan^2 t}=\\frac{\\pi}{2}\\int_0^1\\frac{dy}{\\sqrt{1+y^2}}$。最后 $=\\frac{\\pi}{2}\\ln(1+\\sqrt{2})$。",
+      "summary": "用含参积分与累次积分求定积分，得 $\\frac{\\pi}{2}\\ln(1+\\sqrt{2})$",
+      "clarity": "good"
+    },
+    {
+      "id": 283,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "3",
+          "statement": "设 $f(x)=\\int_x^{x+1}\\sin(e^t)dt$，证明：$e^x|f(x)|\\le 2$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "令 $u=e^t$，则 $|f(x)|=\\left|\\int_x^{x+1}\\sin(e^t)dt\\right|=\\left|\\int_{e^x}^{e^{x+1}}\\frac{1}{u}d\\cos u\\right|$，分部积分得 $=\\left|\\frac{\\cos u}{u}\\Big|_{e^x}^{e^{x+1}}+\\int_{e^x}^{e^{x+1}}\\frac{\\cos u}{u^2}du\\right|$，即 $=\\left|\\frac{\\cos e^{x+1}}{e^{x+1}}-\\frac{\\cos e^x}{e^x}+\\int_{e^x}^{e^{x+1}}\\frac{\\cos u}{u^2}du\\right|$。放缩 $\\le\\left|\\frac{\\cos e^{x+1}}{e^{x+1}}\\right|+\\left|\\frac{\\cos e^x}{e^x}\\right|+\\int_{e^x}^{e^{x+1}}\\frac{1}{u^2}du\\le\\frac{1}{e^{x+1}}+\\frac{1}{e^x}-\\frac{1}{u}\\Big|_{e^x}^{e^{x+1}}=\\frac{2}{e^x}$，故 $e^x|f(x)|\\le 2$。",
+      "summary": "换元＋分部积分估计积分，证 $e^x|f(x)|\\le2$",
+      "clarity": "good"
+    },
+    {
+      "id": 284,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "3",
+          "statement": "设 $f(x)=\\int_x^{x+1}\\sin(e^t)dt$，证明：$e^x|f(x)|\\le 2$。",
+          "answer": "",
+          "note": "与上一张（283）为同一页内容的重拍"
+        }
+      ],
+      "has_solution": true,
+      "solution": "同上：令 $u=e^t$，$|f(x)|=\\left|\\int_{e^x}^{e^{x+1}}\\frac{1}{u}d\\cos u\\right|=\\left|\\frac{\\cos e^{x+1}}{e^{x+1}}-\\frac{\\cos e^x}{e^x}+\\int_{e^x}^{e^{x+1}}\\frac{\\cos u}{u^2}du\\right|\\le\\frac{1}{e^{x+1}}+\\frac{1}{e^x}-\\frac{1}{u}\\Big|_{e^x}^{e^{x+1}}=\\frac{2}{e^x}$，从而 $e^x|f(x)|\\le 2$。",
+      "summary": "第3题的重拍页，积分估计证明 $e^x|f(x)|\\le2$",
+      "clarity": "good"
+    },
+    {
+      "id": 285,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "4",
+          "statement": "设 $f(x)$ 是首项系数为 1 的 $n$ 次多项式且无重根，若以方程 $f(x)=0$ 的每一个根减去方程 $f'(x)=0$ 的每一个根，求这些差的倒数之和。",
+          "answer": "$0$",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "设 $f(x)=(x-x_1)(x-x_2)\\cdots(x-x_n)$，则 $f'(x)=n(x-y_1)(x-y_2)\\cdots(x-y_{n-1})$，且 $f'(x)=f(x)\\sum_{i=1}^{n}(x-x_i)^{-1}$。因 $f(x)$ 无重根，$f(y_j)\\neq0$，故 $f'(y_j)=f(y_j)\\sum_{i=1}^{n}(y_j-x_i)^{-1}=0$，得 $\\sum_{i=1}^{n}(y_j-x_i)^{-1}=0$。对 $j$ 求和得 $\\sum_{j=1}^{n-1}\\sum_{i=1}^{n}(y_j-x_i)^{-1}=0$，即所求倒数之和为 0。",
+      "summary": "多项式根与导数根之差倒数和，答案为 0",
+      "clarity": "good"
+    },
+    {
+      "id": 286,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "5",
+          "statement": "解二阶偏微分方程 $$\\frac{\\partial^2 z}{\\partial x\\partial y}=\\frac{1}{2x}\\cdot\\frac{\\partial z}{\\partial y}$$ 其中 $z=z(x,y)$ 有连续的二阶偏导数。",
+          "answer": "通解 $z=\\psi(x)+\\sqrt{x}\\varphi(y)$",
+          "note": "原文写作「,其中 $z=z(x,y)$ 有连续的二阶偏导数」（逗号后接其中）"
+        }
+      ],
+      "has_solution": true,
+      "solution": "原方程可变为 $\\frac{\\partial}{\\partial y}\\left(\\frac{\\partial z}{\\partial x}-\\frac{1}{2x}z\\right)=0$，即 $\\frac{\\partial z}{\\partial x}-\\frac{1}{2x}z=f(x)$，其中 $f(x)$ 是任意的连续函数。解得 $z=\\sqrt{x}\\int f(x)\\frac{1}{\\sqrt{x}}dx+\\sqrt{x}\\varphi(y)$，其中 $\\varphi(y)$ 有连续的二阶导数。由 $f(x)$ 的任意性可设 $\\psi(x)=\\sqrt{x}\\int f(x)\\frac{1}{\\sqrt{x}}dx$，所以通解为 $z=\\psi(x)+\\sqrt{x}\\varphi(y)$。",
+      "summary": "降阶法解二阶偏微分方程，写出通解",
+      "clarity": "good"
+    },
+    {
+      "id": 287,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "二",
+          "statement": "设 $f(x)$ 在 $[a,b]$ 上有二阶连续导数，证明 $$f(x)=f(a)+f'(a)(x-a)+\\int_a^x (x-t)f''(t)dt,\\quad x\\in[a,b].$$",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：因 $\\int_a^x(x-t)f''(t)dt=(x-t)f'(t)\\Big|_a^x+\\int_a^x f'(t)dt=f(x)-f(a)-f'(a)(x-a)$。于是右端 $=f(a)+f'(a)(x-a)+\\int_a^x(x-t)f''(t)dt=f(a)+f'(a)(x-a)+f(x)-f(a)-f'(a)(x-a)=f(x)=$ 左端，命题得证。",
+      "summary": "分部积分证明带二阶导的泰勒型恒等式",
+      "clarity": "good"
+    },
+    {
+      "id": 288,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "三",
+          "statement": "计算积分 $$I=\\iint_S\\frac{x\\,dy\\,dz}{x-x_0}+\\frac{y\\,dz\\,dx}{y-y_0}+\\frac{z\\,dx\\,dy}{z-z_0},$$ 其中 $S:\\frac{(x-x_0)^2}{a^2}+\\frac{(y-y_0)^2}{b^2}+\\frac{(z-z_0)^2}{c^2}=1$，方向向外。",
+          "answer": "",
+          "note": "题面为「计算积分」，但正文以「证：」开头；本页只算出 $I_1$ 的积分表达式，最终结果见下一页"
+        }
+      ],
+      "has_solution": true,
+      "solution": "以 $I_1=\\iint_S\\frac{z\\,dx\\,dy}{z-z_0}=\\iint_S\\left(1+\\frac{z_0}{z-z_0}\\right)dxdy=z_0\\iint_S\\frac{1}{z-z_0}dxdy$ 为例（第一项 $\\iint_S dxdy=0$）。记 $D:\\frac{(x-x_0)^2}{a^2}+\\frac{(y-y_0)^2}{b^2}\\le1$，则 $I_1=\\frac{2z_0}{c}\\iint_D\\frac{dxdy}{\\sqrt{1-\\frac{(x-x_0)^2}{a^2}-\\frac{(y-y_0)^2}{b^2}}}$。作广义极坐标 $x-x_0=ar\\cos\\theta,\\ y-y_0=br\\sin\\theta$，得 $=\\frac{2z_0}{c}\\int_0^{2\\pi}d\\theta\\int_0^1\\frac{abr}{\\sqrt{1-r^2}}dr=\\frac{2abz_0}{c}\\cdot2\\pi\\cdot\\int_0^1\\frac{r}{\\sqrt{1-r^2}}dr$。",
+      "summary": "第二类曲面积分，逐项化重积分并作广义极坐标",
+      "clarity": "good"
+    },
+    {
+      "id": 289,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "三",
+          "statement": "计算积分 $$I=\\iint_S\\frac{x\\,dy\\,dz}{x-x_0}+\\frac{y\\,dz\\,dx}{y-y_0}+\\frac{z\\,dx\\,dy}{z-z_0},$$ 其中 $S:\\frac{(x-x_0)^2}{a^2}+\\frac{(y-y_0)^2}{b^2}+\\frac{(z-z_0)^2}{c^2}=1$，方向向外。",
+          "answer": "",
+          "note": "与 288 为同一页的重拍（画面略放大、边缘裁切）"
+        }
+      ],
+      "has_solution": true,
+      "solution": "$I_1=\\iint_S\\frac{z\\,dxdy}{z-z_0}=z_0\\iint_S\\frac{1}{z-z_0}dxdy=\\frac{2z_0}{c}\\iint_D\\frac{dxdy}{\\sqrt{1-\\frac{(x-x_0)^2}{a^2}-\\frac{(y-y_0)^2}{b^2}}}$，其中 $D:\\frac{(x-x_0)^2}{a^2}+\\frac{(y-y_0)^2}{b^2}\\le1$。令 $x-x_0=ar\\cos\\theta,\\ y-y_0=br\\sin\\theta$（广义极坐标），$=\\frac{2z_0}{c}\\int_0^{2\\pi}d\\theta\\int_0^1\\frac{abr}{\\sqrt{1-r^2}}dr=\\frac{2abz_0}{c}\\cdot2\\pi\\cdot\\int_0^1\\frac{r}{\\sqrt{1-r^2}}dr$。",
+      "summary": "第「三」题重拍，化 $I_1$ 为二重积分并换元",
+      "clarity": "good"
+    },
+    {
+      "id": 290,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "三",
+          "statement": "计算积分 $$I=\\iint_S\\frac{x\\,dy\\,dz}{x-x_0}+\\frac{y\\,dz\\,dx}{y-y_0}+\\frac{z\\,dx\\,dy}{z-z_0},$$ 其中 $S:\\frac{(x-x_0)^2}{a^2}+\\frac{(y-y_0)^2}{b^2}+\\frac{(z-z_0)^2}{c^2}=1$，方向向外。",
+          "answer": "",
+          "note": "与 288、289 为同一页的重拍"
+        }
+      ],
+      "has_solution": true,
+      "solution": "$I_1=\\iint_S\\frac{z\\,dxdy}{z-z_0}=\\iint_S\\left(1+\\frac{z_0}{z-z_0}\\right)dxdy=z_0\\iint_S\\frac{1}{z-z_0}dxdy$；记 $D$ 为椭圆盘，得 $I_1=\\frac{2z_0}{c}\\iint_D\\frac{dxdy}{\\sqrt{1-\\frac{(x-x_0)^2}{a^2}-\\frac{(y-y_0)^2}{b^2}}}$，再用广义极坐标化为 $\\frac{2abz_0}{c}\\cdot2\\pi\\int_0^1\\frac{r}{\\sqrt{1-r^2}}dr$。",
+      "summary": "第「三」题第二次重拍，步骤同前两页",
+      "clarity": "good"
+    },
+    {
+      "id": 291,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "接上页：$I_1=\\frac{2z_0}{c}\\int_0^{2\\pi}d\\theta\\int_0^1\\frac{abr}{\\sqrt{1-r^2}}dr=\\frac{2abz_0}{c}\\cdot2\\pi\\cdot\\int_0^1\\frac{r}{\\sqrt{1-r^2}}dr=\\frac{4\\pi abcz_0}{c^2}$。同理 $I_2=\\frac{4\\pi abcy_0}{b^2}$，$I_3=\\frac{4\\pi abcx_0}{a^2}$。故 $I=4\\pi abc\\left(\\frac{x_0}{a^2}+\\frac{y_0}{b^2}+\\frac{z_0}{c^2}\\right)$。",
+      "summary": "完成 $I_1,I_2,I_3$ 并得 $I=4\\pi abc(\\frac{x_0}{a^2}+\\frac{y_0}{b^2}+\\frac{z_0}{c^2})$",
+      "clarity": "good"
+    },
+    {
+      "id": 292,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "四",
+          "statement": "设 $a_n=\\int_0^{\\frac{\\pi}{2}}t\\left|\\frac{\\sin nt}{\\sin t}\\right|^3 dt$，证明：级数 $\\sum_{n=1}^{\\infty}\\frac{1}{a_n}$ 发散。",
+          "answer": "",
+          "note": "页面左下注明引用不等式 $\\frac{2x}{\\pi}<\\sin x<x$（P197 上册）"
+        }
+      ],
+      "has_solution": true,
+      "solution": "把 $a_n$ 拆成 $\\int_0^{\\frac{\\pi}{n}}+\\int_{\\frac{\\pi}{n}}^{\\frac{\\pi}{2}}$ 两段。第一段用 $\\sin nt\\le n\\sin t$ 得 $\\int_0^{\\frac{\\pi}{n}}t\\left|\\frac{\\sin nt}{\\sin t}\\right|^3dt\\le n^3\\int_0^{\\frac{\\pi}{n}}t\\,dt=\\frac{1}{2}n\\pi^2$；第二段 $\\int_{\\frac{\\pi}{n}}^{\\frac{\\pi}{2}}t\\left|\\frac{\\sin nt}{\\sin t}\\right|^3dt<\\int_{\\frac{\\pi}{n}}^{\\frac{\\pi}{2}}t\\left(\\frac{\\pi}{2t}\\right)^3dt<\\frac{n\\pi^2}{8}$。故 $a_n<n\\pi^2$，从而 $\\frac{1}{a_n}>\\frac{1}{n\\pi^2}$，而 $\\sum\\frac{1}{n\\pi^2}$ 发散，所以 $\\sum\\frac{1}{a_n}$ 发散。",
+      "summary": "分两段估计 $a_n<n\\pi^2$，比较判别得级数发散",
+      "clarity": "good"
+    },
+    {
+      "id": 293,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "五",
+          "statement": "设 $0<f(x)<1$，无穷积分 $\\int_0^{+\\infty}f(x)dx$ 与 $\\int_0^{+\\infty}xf(x)dx$ 均收敛，证明：$$\\int_0^{+\\infty}xf(x)dx>\\frac{1}{2}\\left[\\int_0^{+\\infty}f(x)dx\\right]^2$$ 成立。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "设 $\\int_0^{+\\infty}f(x)dx=a,\\ a\\in(0,+\\infty)$。把 $\\int_0^{+\\infty}xf(x)dx$ 拆为 $\\int_0^a+\\int_a^{+\\infty}$，后者用 $x>a$ 放缩得 $>\\int_0^a xf(x)dx+a\\int_a^{+\\infty}f(x)dx=\\int_0^a xf(x)dx+a\\left[a-\\int_0^a f(x)dx\\right]=\\int_0^a xf(x)dx+a\\int_0^a[1-f(x)]dx$。再由 $x\\le a$ 得 $>\\int_0^a xf(x)dx+\\int_0^a x[1-f(x)]dx=\\int_0^a x\\,dx=\\frac{a^2}{2}$，即所证不等式成立。",
+      "summary": "分区间放缩证明 $\\int xf>\\frac12(\\int f)^2$",
+      "clarity": "good"
+    },
+    {
+      "id": 294,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "六",
+          "statement": "设 $1<x_i<e,\\ i=1,2,\\cdots,n$，记 $\\bar{x}=\\frac{1}{n}\\sum_{i=1}^{n}x_i$，证明：$$\\prod_{i=1}^{n}\\frac{\\ln x_i}{x_i}\\le\\left(\\frac{\\ln\\bar{x}}{\\bar{x}}\\right)^n.$$",
+          "answer": "",
+          "note": "原图 $g''(x)$ 首项的分母与符号较淡，按等号右侧合并结果应为 $-\\frac{1+\\ln x}{(x\\ln x)^2}$"
+        }
+      ],
+      "has_solution": true,
+      "solution": "取对数并令 $g(x)=\\ln\\frac{\\ln x}{x}=\\ln\\ln x-\\ln x$。因 $x>0$ 时 $x>\\ln x$，故对 $1<x<e$ 有 $g'(x)=\\frac{1}{x\\ln x}-\\frac{1}{x}$，且 $-\\frac{1+\\ln x}{(x\\ln x)^2}+\\frac{1}{x^2}=\\frac{(\\ln x-\\frac{1}{2})^2-\\frac{5}{4}}{(x\\ln x)^2}<\\frac{(\\ln e-\\frac{1}{2})^2-\\frac{5}{4}}{(x\\ln x)^2}<0$。故 $g$ 上凸，由 Jensen 不等式 $\\sum_{i=1}^{n}g(x_i)\\le ng\\left(\\frac{1}{n}\\sum_{i=1}^{n}x_i\\right)$，即 $\\prod_{i=1}^{n}\\frac{\\ln x_i}{x_i}\\le\\left(\\frac{\\ln\\bar{x}}{\\bar{x}}\\right)^n$。",
+      "summary": "用 $g=\\ln(\\ln x/x)$ 上凸与 Jensen 证乘积不等式",
+      "clarity": "good"
+    },
+    {
+      "id": 295,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "七",
+          "statement": "设 $f(x)\\in D[0,1]$ 且 $f(0)=f(1)=0$，证明：\n(1) $\\left[\\int_0^1 xf(x)dx\\right]^2\\le\\int_0^1[f'(x)]^2dx$；\n(2) $\\left[\\int_0^1 xf(x)dx\\right]^2\\le\\frac{1}{45}\\int_0^1[f'(x)]^2dx$。",
+          "answer": "",
+          "note": "证明中右端积分写作 $\\int_0^1 f'^2(x)dx$，与题干 $\\int_0^1[f'(x)]^2dx$ 同义"
+        }
+      ],
+      "has_solution": true,
+      "solution": "(1) 由 $f(0)=f(1)=0$，$\\int_0^1 xf(x)dx=\\frac{x^2}{2}f(x)\\Big|_0^1-\\frac{1}{2}\\int_0^1x^2f'(x)dx=-\\frac{1}{2}\\int_0^1x^2f'(x)dx$，再用 Cauchy–Schwarz：$\\left[\\int_0^1xf(x)dx\\right]^2\\le\\frac{1}{4}\\int_0^1x^4dx\\int_0^1f'^2(x)dx=\\frac{1}{20}\\int_0^1f'^2dx\\le\\int_0^1f'^2dx$。(2) 同样由分部积分 $\\int_0^1xf(x)dx=-\\frac{1}{2}\\int_0^1x^2f'(x)dx$，由牛顿-莱布尼兹公式得 $6\\int_0^1xf(x)dx=\\int_0^1(1-3x^2)f'(x)dx$，故 $36\\left[\\int_0^1xf(x)dx\\right]^2\\le\\int_0^1(1-3x^2)^2dx\\int_0^1f'^2(x)dx=\\frac{4}{5}\\int_0^1f'^2(x)dx$，即得 $\\le\\frac{1}{45}\\int_0^1f'^2(x)dx$。",
+      "summary": "分部积分＋柯西不等式证两个积分估计，常数 1 与 1/45",
+      "clarity": "good"
+    }
+  ]
+}

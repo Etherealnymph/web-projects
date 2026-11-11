@@ -1,0 +1,117 @@
+{
+"chunk": 4,
+"items": [
+{
+"pid": 49,
+"label": "3",
+"statement": "3.计算 $\\iint_D x^2y^2\\,\\mathrm{d}x\\mathrm{d}y$，其中 $D$ 由直线 $y=0$，$y=2$，$x=-2$ 及曲线 $x=-\\sqrt{2y-y^2}$ 所围成。",
+"answer": "$\\frac{64}{9}-\\frac{7}{48}\\pi$",
+"notebook_candidate": "把 $D$ 与曲线 $x=-\\sqrt{2y-y^2}$ 围出的圆缺块 $D_1$ 合并成矩形区域，$\\iint_D=\\iint_{D+D_1}-\\iint_{D_1}$。第一项化为累次积分得 $\\frac{8}{3}\\cdot\\frac{8}{3}=\\frac{64}{9}$；第二项用极坐标 $x=r\\cos\\theta,\\ y=r\\sin\\theta$ 得 $\\frac{64}{6}\\int_0^{\\frac{\\pi}{2}}\\cos^2\\theta\\sin^8\\theta\\,\\mathrm{d}\\theta$。最后用 Wallis 公式算得 $\\frac{64}{9}-\\frac{64}{6}\\left(\\frac{7!!}{8!!}\\cdot\\frac{\\pi}{2}-\\frac{9!!}{10!!}\\cdot\\frac{\\pi}{2}\\right)=\\frac{64}{9}-\\frac{7}{48}\\pi$。"
+},
+{
+"pid": 50,
+"label": "4",
+"statement": "4.计算 $\\iint_{x^2+y^2\\le1}\\left|\\frac{x+y}{\\sqrt{2}}-x^2-y^2\\right|\\mathrm{d}x\\mathrm{d}y$",
+"answer": "$\\frac{9\\pi}{16}$",
+"notebook_candidate": "用极坐标 $x=r\\cos\\theta,\\ y=r\\sin\\theta$，得 $I=\\int_0^{2\\pi}\\mathrm{d}\\theta\\int_0^1\\left|\\frac{\\cos\\theta+\\sin\\theta}{\\sqrt2}-r\\right|r^2\\mathrm{d}r=\\int_0^{2\\pi}\\mathrm{d}\\theta\\int_0^1\\left|\\sin\\left(\\theta+\\frac{\\pi}{4}\\right)-r\\right|r^2\\mathrm{d}r$。令 $I=I_1+I_2$：$I_2$ 在 $\\theta\\in[\\pi,2\\pi]$ 上把绝对值化为 $r-\\sin\\theta$；$I_1$ 在 $\\theta\\in[0,\\pi]$ 上按 $r=\\sin\\theta$ 分两段去绝对值。两段积分求出后相加得 $I=I_1+I_2=\\frac{9\\pi}{16}$。"
+},
+{
+"pid": 51,
+"label": "5",
+"statement": "5.计算 $I=\\iint_{x^2+y^2\\le1}|x^2+y^2-x-y|\\mathrm{d}x\\mathrm{d}y$（第四届决赛题）",
+"answer": "",
+"notebook_candidate": "把积分区域分成 $D_1,D_2$ 两部分：在 $D_1$ 上 $|x^2+y^2-x-y|=x+y-x^2-y^2$，在 $D_2$ 上 $|x^2+y^2-x-y|=x^2+y^2-x-y$。于是 $I=\\iint_{D_2}(x^2+y^2-x-y)\\mathrm{d}x\\mathrm{d}y+\\iint_{D_1}(x+y-x^2-y^2)\\mathrm{d}x\\mathrm{d}y=\\iint_{D_1+D_2}(x^2+y^2-x-y)\\mathrm{d}x\\mathrm{d}y-2\\iint_{D_1}(x^2+y^2-x-y)\\mathrm{d}x\\mathrm{d}y$，即 $I=I_1-2I_2$。"
+},
+{
+"pid": 52,
+"label": "6",
+"statement": "6.计算 $\\iint_D\\frac{\\mathrm{d}x\\mathrm{d}y}{xy}$，其中 $D:2\\le\\frac{x}{x^2+y^2}\\le4,\\ 2\\le\\frac{y}{x^2+y^2}\\le4$。",
+"answer": "$\\ln^2 2$",
+"notebook_candidate": "分析：$2\\le\\frac{x}{x^2+y^2}\\le4\\Leftrightarrow x^2+y^2\\le\\frac{x}{2},\\ x^2+y^2\\ge\\frac{x}{4}$，即 $\\left(x-\\frac14\\right)^2+y^2\\le\\left(\\frac14\\right)^2$，$\\left(x-\\frac18\\right)^2+y^2\\ge\\left(\\frac18\\right)^2$，对 $y$ 同理，区域为两圆环的公共部分。解：利用 $D$ 关于 $y=x$ 的对称性，$\\iint_D\\frac{\\mathrm{d}x\\mathrm{d}y}{xy}=2\\int_{\\arctan\\frac12}^{\\frac{\\pi}{4}}\\mathrm{d}\\theta\\int_{\\frac{1}{2\\cos\\theta}}^{\\frac{1}{\\cos\\theta}}\\frac{1}{r\\cos\\theta\\sin\\theta}r\\,\\mathrm{d}r=2\\int_{\\arctan\\frac12}^{\\frac{\\pi}{4}}\\frac{1}{\\cos\\theta\\sin\\theta}\\ln(2\\tan\\theta)\\mathrm{d}\\theta=\\ln^2 2$。"
+},
+{
+"pid": 53,
+"label": "7",
+"statement": "7.计算 $\\iint_D\\sqrt[3]{\\sqrt{x}+\\sqrt{y}}\\,\\mathrm{d}x\\mathrm{d}y$，其中 $D=\\{(x,y)\\mid\\sqrt{x}+\\sqrt{y}\\le1\\}$。",
+"answer": "$\\frac{2}{13}$",
+"notebook_candidate": "原式 $=\\int_0^1\\mathrm{d}x\\int_0^{(1-\\sqrt{x})^2}\\sqrt[3]{\\sqrt{x}+\\sqrt{y}}\\,\\mathrm{d}y$（令 $t=\\sqrt{y}$）$=2\\int_0^1\\mathrm{d}x\\int_0^{1-\\sqrt{x}}\\sqrt[3]{\\sqrt{x}+t}\\cdot t\\,\\mathrm{d}t$（令 $u=\\sqrt{x}+t$）$=2\\int_0^1\\mathrm{d}x\\int_{\\sqrt{x}}^1\\sqrt[3]{u}\\,(u-\\sqrt{x})\\,\\mathrm{d}u=\\frac{2}{13}$。"
+},
+{
+"pid": 54,
+"label": "8",
+"statement": "8.设函数 $f(x,y)$ 在 $0\\le x,y\\le1$ 内连续，$f(0,0)=0$ 且在 $(0,0)$ 处可微，$f_y'(0,0)=1$，证明 $$\\lim_{x\\to0^+}\\frac{\\int_0^{x^2}\\mathrm{d}t\\int_x^{\\sqrt{t}}f(t,u)\\mathrm{d}u}{1-e^{-\\frac{x^4}{4}}}=-1.$$",
+"answer": "",
+"notebook_candidate": "分析：$x\\to0^+$ 时 $x>x^2$，便于画出积分区域。由 $\\int_0^{x^2}\\mathrm{d}t\\int_x^{\\sqrt{t}}f(t,u)\\mathrm{d}u=-\\int_0^{x^2}\\mathrm{d}t\\int_{\\sqrt{t}}^{x}f(t,u)\\mathrm{d}u=-\\int_0^{x}\\mathrm{d}u\\int_0^{u^2}f(t,u)\\mathrm{d}t$ 交换积分次序；记 $F(u)=\\int_0^{u^2}f(t,u)\\mathrm{d}t$，由 $\\left(\\int_0^xF(u)\\mathrm{d}u\\right)'=F(x)$ 与积分中值定理，原极限 $=-\\lim_{x\\to0^+}\\frac{\\int_0^{x^2}f(t,x)\\mathrm{d}t}{\\frac{x^4}{4}}=-\\lim_{x\\to0^+}\\frac{f(\\xi,x)}{x}$（其中 $\\xi\\in(0,x^2)$）。"
+},
+{
+"pid": 55,
+"label": "9",
+"statement": "9.设 $f(x,y)$ 在单位圆上有连续的偏导数，且在边界上取值为 $0$，求极限 $\\lim_{\\varepsilon\\to0}\\iint_D\\frac{xf_x+yf_y}{x^2+y^2}\\mathrm{d}x\\mathrm{d}y$ 的值，其中 $D$ 为圆环域：$\\varepsilon^2\\le x^2+y^2\\le1$。",
+"answer": "",
+"notebook_candidate": "令 $x=r\\cos\\theta,y=r\\sin\\theta$，则 $\\frac{xf_x+yf_y}{\\sqrt{x^2+y^2}}=f_x\\frac{x}{r}+f_y\\frac{y}{r}=f_x\\cos\\theta+f_y\\sin\\theta=\\frac{\\partial f}{\\partial r}$。于是 $\\iint_D\\frac{xf_x+yf_y}{x^2+y^2}\\mathrm{d}x\\mathrm{d}y=\\int_0^{2\\pi}\\mathrm{d}\\theta\\int_\\varepsilon^1\\frac{\\partial f}{\\partial r}\\mathrm{d}r=\\int_0^{2\\pi}f(\\cos\\theta,\\sin\\theta)\\mathrm{d}\\theta-\\int_0^{2\\pi}f(\\varepsilon\\cos\\theta,\\varepsilon\\sin\\theta)\\mathrm{d}\\theta$。由题意 $f(\\cos\\theta,\\sin\\theta)=0$，故 $=0-2\\pi f(\\varepsilon\\cos\\theta_0,\\varepsilon\\sin\\theta_0)$，$\\theta_0\\in[0,2\\pi]$。"
+},
+{
+"pid": 56,
+"label": "10",
+"statement": "10.设 $f(x,y)$ 在区域 $D: x^2+y^2\\le1$ 上有二阶连续偏导数，且 $\\frac{\\partial^2 f}{\\partial x^2}+\\frac{\\partial^2 f}{\\partial y^2}=e^{-(x^2+y^2)}$，计算 $\\iint_D(xf_x+yf_y)\\mathrm{d}x\\mathrm{d}y$ 的值。",
+"answer": "",
+"notebook_candidate": "开头收尾第9题：$\\lim_{\\varepsilon\\to0^+}\\iint_D\\frac{xf_x+yf_y}{x^2+y^2}\\mathrm{d}x\\mathrm{d}y=\\lim_{\\varepsilon\\to0^+}(-2\\pi f(\\varepsilon\\cos\\theta_0,\\varepsilon\\sin\\theta_0))=-2\\pi f(0,0)$。第10题：令 $x=r\\cos\\theta,y=r\\sin\\theta$，则 $xf_x+yf_y=f_xr\\cos\\theta+f_yr\\sin\\theta$，故 $\\iint_D(xf_x+yf_y)\\mathrm{d}x\\mathrm{d}y=\\int_0^{2\\pi}\\mathrm{d}\\theta\\int_0^1(f_xr\\cos\\theta+f_yr\\sin\\theta)r\\,\\mathrm{d}r$。"
+},
+{
+"pid": 57,
+"label": "练习",
+"statement": "练习.设 $f(x,y)$ 在区域 $D: x^2+y^2\\le1$ 上有二阶连续偏导数，且 $\\frac{\\partial^2 f}{\\partial x^2}+\\frac{\\partial^2 f}{\\partial y^2}=x^2y^2$，计算 $\\iint_D\\left(\\frac{x}{\\sqrt{x^2+y^2}}f_x+\\frac{y}{\\sqrt{x^2+y^2}}f_y\\right)\\mathrm{d}x\\mathrm{d}y$ 的值。",
+"answer": "",
+"notebook_candidate": ""
+},
+{
+"pid": 58,
+"label": "例11",
+"statement": "例11.计算 $I=\\iint_D r^2\\sin\\theta\\sqrt{1-r^2\\cos2\\theta}\\,\\mathrm{d}r\\mathrm{d}\\theta$，其中 $D=\\{(r,\\theta)\\mid 0\\le r\\le\\frac{1}{\\cos\\theta},\\ 0\\le\\theta\\le\\frac{\\pi}{4}\\}$。",
+"answer": "$I=\\frac{1}{3}-\\frac{\\pi}{16}$",
+"notebook_candidate": "改用直角坐标：由 $\\cos2\\theta=\\cos^2\\theta-\\sin^2\\theta$ 及 $r=\\frac{1}{\\cos\\theta}$ 得 $D=\\{(x,y)\\mid 0\\le x\\le1,\\ 0\\le y\\le x\\}$。于是 $I=\\int_0^1\\mathrm{d}x\\int_0^xy\\sqrt{1-x^2+y^2}\\,\\mathrm{d}y=\\frac{1}{2}\\int_0^1\\mathrm{d}x\\int_0^x\\sqrt{1-x^2+y^2}\\,\\mathrm{d}(1-x^2+y^2)=\\frac{1}{3}\\int_0^1\\left[1-(1-x^2)^{\\frac{3}{2}}\\right]\\mathrm{d}x=\\frac{1}{3}-\\frac{1}{3}\\int_0^{\\frac{\\pi}{2}}\\cos^4t\\,\\mathrm{d}t$，再由 Wallis 公式得结果。"
+},
+{
+"pid": 59,
+"label": "例12",
+"statement": "例12.计算积分 $I=\\int_0^{2\\pi}\\mathrm{d}\\varphi\\int_0^{\\pi}e^{\\sin\\theta(\\cos\\varphi-\\sin\\varphi)}\\sin\\theta\\,\\mathrm{d}\\theta$。",
+"answer": "$I=\\sqrt{2}\\pi\\left(e^{\\sqrt{2}}-e^{-\\sqrt{2}}\\right)$",
+"notebook_candidate": "设球面 $\\Sigma:x^2+y^2+z^2=1$，由球面参数方程 $x=\\sin\\theta\\cos\\varphi,\\ y=\\sin\\theta\\sin\\varphi,\\ z=\\cos\\theta$，$\\mathrm{d}S=\\sin\\theta\\,\\mathrm{d}\\theta\\mathrm{d}\\varphi$，故 $I=\\iint_\\Sigma e^{x-y}\\mathrm{d}S$。设平面 $P_t:\\frac{x-y}{\\sqrt2}=t,\\ -1\\le t\\le1$，原点到此平面距离 $d=|t|$；它截 $\\Sigma$ 所得球带面积 $\\mathrm{d}S(t)=2\\pi\\sqrt{1-t^2}\\cdot\\frac{1}{\\sqrt{1-t^2}}\\mathrm{d}t=2\\pi\\,\\mathrm{d}t$。于是 $I=\\int_{-1}^{1}e^{\\sqrt2 t}2\\pi\\,\\mathrm{d}t=\\sqrt2\\pi\\left(e^{\\sqrt2}-e^{-\\sqrt2}\\right)$。"
+},
+{
+"pid": 60,
+"label": "13",
+"statement": "13.设 $\\Sigma$ 是曲面 $z=\\frac{1}{2}(x^2+y^2)$ 在椭球面 $x^2+y^2+4z^2=2$ 内的部分,证明: $$\\frac{2\\pi\\left(2-\\frac{\\sqrt{2}}{2}\\right)}{3}\\le\\iint_{\\Sigma}\\sqrt{x+y+2z+1}\\,\\mathrm{d}S\\le\\frac{3\\pi}{2}.$$",
+"answer": "",
+"notebook_candidate": "设 $f(x,y,z)=\\sqrt{x+y+2z+1}$,用估值定理 $m\\le f\\le M\\Rightarrow m\\iint_{\\Sigma}\\mathrm{d}S\\le\\iint_{\\Sigma}f\\,\\mathrm{d}S\\le M\\iint_{\\Sigma}\\mathrm{d}S$. 在 $\\Sigma$ 上 $x+y+2z+1=x+y+x^2+y^2+1=(x+\\frac{1}{2})^2+(y+\\frac{1}{2})^2+\\frac{1}{2}$,故 $f(-\\frac{1}{2},-\\frac{1}{2},\\frac{1}{4})=\\frac{\\sqrt{2}}{2}$ 是 $f$ 的最小值,得 $\\iint_{\\Sigma}\\sqrt{x+y+2z+1}\\,\\mathrm{d}S\\ge\\frac{\\sqrt{2}}{2}\\iint_{\\Sigma}\\mathrm{d}S$. 再由 $\\{z=\\frac{1}{2}(x^2+y^2),\\ x^2+y^2+4z^2=2\\}$ 消去 $z$,得 $\\Sigma$ 在 $xoy$ 平面的投影区域 $D_{xy}:x^2+y^2\\le 1$."
+},
+{
+"pid": 61,
+"label": "14",
+"statement": "14.设 $P$ 是椭球面 $S:x^2+y^2+z^2-yz=1$ 上的动点,若 $S$ 在点 $P$ 处的切平面与 $xoy$ 面垂直,求 $P$ 的轨迹 $C$,并计算 $$I=\\iint_{\\Sigma}\\frac{(x+\\sqrt{3})|y-2z|}{\\sqrt{4+y^2+z^2-4yz}}\\,\\mathrm{d}S$$ 其中 $\\Sigma$ 是椭球面 $S$ 位于曲线 $C$ 上方的部分.",
+"answer": "",
+"notebook_candidate": "令 $P$ 的坐标为 $(x,y,z)$,则 $S$ 在点 $P$ 处切平面的法向量 $\\vec{n}=(2x,2y-z,2z-y)$;因切平面与 $xoy$ 面垂直,即 $\\vec{n}\\perp(0,0,1)$,故 $y=2z$. 所以 $P$ 的轨迹 $C:\\{y=2z,\\ x^2+y^2+z^2-yz=1\\}$. 将 $\\Sigma$ 向 $xoy$ 面投影得 $x^2+\\frac{y^2}{4/3}\\le 1$;又 $\\frac{\\partial z}{\\partial x}=\\frac{2x}{y-2z},\\ \\frac{\\partial z}{\\partial y}=\\frac{2y-z}{y-2z}$,故 $\\mathrm{d}S=\\sqrt{1+\\left(\\frac{\\partial z}{\\partial x}\\right)^2+\\left(\\frac{\\partial z}{\\partial y}\\right)^2}\\mathrm{d}x\\mathrm{d}y=\\frac{\\sqrt{4+y^2+z^2-4yz}}{|y-2z|}\\mathrm{d}x\\mathrm{d}y$."
+},
+{
+"pid": 62,
+"label": "17",
+"statement": "17.设 $f(x),g(x)$ 连续,$g(x)$ 以 $1$ 为周期. 证明: $$\\lim_{n\\to\\infty}\\int_0^1 f(x)g(nx)\\,\\mathrm{d}x=\\int_0^1 f(x)\\,\\mathrm{d}x\\int_0^1 g(x)\\,\\mathrm{d}x.$$",
+"answer": "",
+"notebook_candidate": "(1)先设 $g(x)\\ge0$,将 $[0,1]$ 等分为 $n$ 份,由积分中值定理存在 $\\xi_k\\in[\\frac{k}{n},\\frac{k+1}{n}]$$(k=0,1,\\dots,n-1)$,使 $I_n=\\int_0^1 f(x)g(nx)\\mathrm{d}x=\\sum_{k=0}^{n-1}\\int_{k/n}^{(k+1)/n}f(x)g(nx)\\mathrm{d}x=\\sum_{k=0}^{n-1}f(\\xi_k)\\int_{k/n}^{(k+1)/n}g(nx)\\mathrm{d}x$(用 $f,g\\in C[a,b]$ 且 $g\\ge0$ 时的积分中值公式). 令 $nx=u$,得 $I_n=\\frac{1}{n}\\sum_{k=0}^{n-1}f(\\xi_k)\\int_k^{k+1}g(u)\\mathrm{d}u=\\frac{1}{n}\\int_0^1 g(u)\\mathrm{d}u\\sum_{k=0}^{n-1}f(\\xi_k)$,故 $\\lim_{n\\to\\infty}I_n=\\int_0^1 g(x)\\mathrm{d}x\\int_0^1 f(x)\\mathrm{d}x$. (2)对一般 $g(x)$,设 $m$ 是 $[0,1]$ 上的最小值,令 $\\tilde g(x)=g(x)-m\\ge0$,它在 $[0,1]$ 上连续且以 $1$ 为周期."
+},
+{
+"pid": 63,
+"label": "19",
+"statement": "19.设函数 $u(x)$ 在 $[0,1]$ 上连续,且 $$u(x)=1+\\lambda\\int_x^1 u(y)u(y-x)\\,\\mathrm{d}y$$ 证明: $\\lambda\\le\\frac{1}{2}$.",
+"answer": "",
+"notebook_candidate": ""
+},
+{
+"pid": 64,
+"label": "例12",
+"statement": "例12.计算积分 $$I=\\int_0^{2\\pi}\\mathrm{d}\\varphi\\int_0^{\\pi}e^{\\sin\\theta(\\cos\\varphi-\\sin\\varphi)}\\sin\\theta\\,\\mathrm{d}\\theta.$$",
+"answer": "$\\sqrt{2}\\pi\\left(e^{\\sqrt{2}}-e^{-\\sqrt{2}}\\right)$",
+"notebook_candidate": "把 $e^{\\sin\\theta(\\cos\\varphi-\\sin\\varphi)}$ 展成幂级数并逐项积分;$n$ 为奇数时 $\\int_0^{2\\pi}(\\cos\\varphi-\\sin\\varphi)^n\\mathrm{d}\\varphi=0$,又 $\\cos\\varphi-\\sin\\varphi=\\sqrt{2}\\cos(\\varphi+\\frac{\\pi}{4})$,得 $I=\\sum_{n=0}^{\\infty}\\frac{2^{n+\\frac{3}{2}}}{(2n)!}\\cdot\\frac{(2n-1)!!}{(2n)!!}\\pi\\cdot\\frac{(2n)!!}{2(2n+1)!!}=2\\sqrt{2}\\pi\\sum_{n=0}^{\\infty}\\frac{(\\sqrt{2})^{2n+1}}{(2n+1)!}$. 令 $f(x)=\\sum_{n=0}^{\\infty}\\frac{x^{2n+1}}{(2n+1)!}$,则 $f'(x)+f(x)=e^x$、$f(0)=0$,得 $f(x)=\\frac{1}{2}(e^x-e^{-x})$. 故 $I=2\\sqrt{2}\\pi f(\\sqrt{2})=\\sqrt{2}\\pi(e^{\\sqrt{2}}-e^{-\\sqrt{2}})$."
+}
+]
+}

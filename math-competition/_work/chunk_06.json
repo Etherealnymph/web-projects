@@ -1,0 +1,117 @@
+{
+"chunk": 6,
+"items": [
+{
+"pid": 81,
+"label": "26",
+"statement": "设 $f(x)$ 在 $[0,1]$ 上连续可导，且 $f(1)=1+f(0)$，求：$$\\int_0^1 dx\\int_0^x\\frac{f'(y)}{\\sqrt{(1-x)(x-y)}}\\,dy$$",
+"answer": "$\\pi$",
+"notebook_candidate": "解：$\\int_0^1dx\\int_0^x\\frac{f'(y)}{\\sqrt{(1-x)(x-y)}}dy=\\int_0^1 dy\\int_y^1\\frac{f'(y)}{\\sqrt{\\left(\\frac{1-y}{2}\\right)^2-\\left(\\frac{1+y}{2}-x\\right)^2}}dx$（交换积分次序）。令 $\\frac{1+y}{2}-x=\\frac{1-y}{2}\\sin t$，即 $x=\\frac{1+y}{2}-\\frac{1-y}{2}\\sin t$，化为 $\\int_0^1 f'(y)dy\\int_{-\\frac{\\pi}{2}}^{\\frac{\\pi}{2}}dt=\\pi[f(1)-f(0)]=\\pi$（用 $f(1)=1+f(0)$）。"
+},
+{
+"pid": 82,
+"label": "练习",
+"statement": "设 $P(x,y)$，$Q(x,y)$ 在全平面上有连续的一阶偏导数，沿平面上任意半圆周 $L: y=y_0+\\sqrt{R^2-(x-x_0)^2}$，曲线积分 $\\int_L P\\,dx+Q\\,dy=0$，其中 $x_0,y_0$ 为任意实数，$R$ 为任意正实数，证明：(1) $P(x,y)=0$；(2) $\\dfrac{\\partial Q}{\\partial x}=0$。",
+"answer": "",
+"notebook_candidate": "证：(1) $\\forall(x_0,y_0)\\in R^2$，$\\forall R>0$，以 $(x_0,y_0)$ 为圆心、$R$ 为半径作上半圆周（逆时针方向），起点为 $A(x_0-R,y_0)$、终点为 $B(x_0+R,y_0)$，则由 Green 公式 $$\\int_{x_0-R}^{x_0+R}P(x,y_0)dx=\\int_{L+AB}P\\,dx+Q\\,dy=\\iint_D(Q_x-P_y)\\,dxdy.$$ 由积分中值定理 $P(c,y_0)\\cdot 2R=(Q_x-P_y)|_{(\\xi,\\eta)}\\frac{\\pi}{2}R^2$，$c\\in(x_0-R,x_0+R)$，即 $P(c,y_0)=(Q_x-P_y)|_{(\\xi,\\eta)}\\frac{\\pi}{4}R$。令 $R\\to 0$，则 $c\\to x_0$，$(\\xi,\\eta)\\to(x_0,y_0)$，故 $P(x_0,y_0)=0$，由 $(x_0,y_0)$ 的任意性可得 $P(x,y)=0$。"
+},
+{
+"pid": 83,
+"label": "例28",
+"statement": "计算 $$\\iiint_V\\frac{1}{(1+x^2+y^2+z^2)^2}\\,dxdydz$$ 其中 $V: 0\\le x\\le 1,\\ 0\\le y\\le 1,\\ 0\\le z\\le 1$。",
+"answer": "$\\dfrac{\\pi^2}{32}$",
+"notebook_candidate": "解：由对称性 $$\\iiint_V\\frac{dxdydz}{(1+x^2+y^2+z^2)^2}=2\\int_0^1 dz\\iint_D\\frac{dxdy}{(1+x^2+y^2+z^2)^2},\\quad D:\\begin{cases}0\\le x\\le 1\\\\ 0\\le y\\le x\\end{cases}$$ 令 $x=r\\cos\\theta,\\ y=r\\sin\\theta$，则 $0\\le\\theta\\le\\frac{\\pi}{4}$，$0\\le r\\le\\sec\\theta$。用 $2r\\,dr=d(1+r^2+z^2)$ 得原式 $=2\\int_0^1dz\\int_0^{\\pi/4}d\\theta\\int_0^{\\sec\\theta}\\frac{r\\,dr}{(1+r^2+z^2)^2}=\\int_0^1dz\\int_0^{\\pi/4}\\left(\\frac{1}{1+z^2}-\\frac{1}{1+\\sec^2\\theta+z^2}\\right)d\\theta$，随后交换积分次序。"
+},
+{
+"pid": 84,
+"label": "31届考题",
+"statement": "(31届考题) 计算 $$I=\\iint_D\\frac{dxdy}{(1+x^2+y^2)^2}$$ 的值，其中 $D=\\{(x,y)\\mid 0\\le x\\le 1,\\ 0\\le y\\le 1\\}$。",
+"answer": "$\\dfrac{1}{\\sqrt{2}}\\arctan\\dfrac{1}{\\sqrt{2}}$",
+"notebook_candidate": "解：由对称性 $I=2\\iint_{D_1}\\frac{dxdy}{(1+x^2+y^2)^2}=2\\int_0^{\\pi/4}d\\theta\\int_0^{\\sec\\theta}\\frac{r\\,dr}{(1+r^2)^2}=\\int_0^{\\pi/4}\\left(1-\\frac{1}{1+\\sec^2\\theta}\\right)d\\theta=\\frac{\\pi}{4}-\\int_0^{\\pi/4}\\frac{1}{2+\\tan^2\\theta}d\\theta$。再令 $u=\\tan\\theta$，得 $=\\frac{\\pi}{4}-\\int_0^1\\frac{1}{2+u^2}\\cdot\\frac{1}{1+u^2}du=\\frac{\\pi}{4}-\\int_0^1\\left(\\frac{1}{1+u^2}-\\frac{1}{2+u^2}\\right)du=\\frac{\\pi}{4}-\\left(\\frac{\\pi}{4}-\\frac{1}{\\sqrt{2}}\\arctan\\frac{1}{\\sqrt{2}}\\right)=\\frac{1}{\\sqrt{2}}\\arctan\\frac{1}{\\sqrt{2}}$。"
+},
+{
+"pid": 85,
+"label": "例29",
+"statement": "计算 $$\\iiint_V(x^2+y^2)\\,dxdydz,$$ 其中 $V: x^2+y^2+(z-2)^2\\ge 4$，$x^2+y^2+(z-1)^2\\le 9$，$z\\ge 0$ 所围成的空心体。（第10届预赛4T）",
+"answer": "",
+"notebook_candidate": "解：设球体 $V_1: x^2+y^2+(z-1)^2\\le 3^2$，球体 $V_2: x^2+y^2+(z-2)^2\\le 2^2$，球缺 $V_3: x^2+y^2+(z-1)^2\\le 3^2,\\ z\\le 0$。(1) $V_1$ 用球坐标 $x=\\rho\\sin\\varphi\\cos\\theta,\\ y=\\rho\\sin\\varphi\\sin\\theta,\\ z-1=\\rho\\cos\\varphi$，其中 $0\\le\\theta\\le 2\\pi,\\ 0\\le\\varphi\\le\\pi,\\ 0\\le\\rho\\le 3$，得 $\\iiint_{V_1}(x^2+y^2)dxdydz=\\int_0^{2\\pi}d\\theta\\int_0^{\\pi}d\\varphi\\int_0^3\\rho^2\\sin^2\\varphi\\cdot\\rho^2\\sin\\varphi\\,d\\rho=\\frac{8\\cdot 3^5}{15}\\pi$。(2) $V_2$ 用球坐标 $z-2=\\rho\\cos\\varphi$，$0\\le\\rho\\le 2$，得 $\\iiint_{V_2}(x^2+y^2)dxdydz=\\int_0^{2\\pi}d\\theta\\int_0^{\\pi}d\\varphi\\int_0^2\\rho^2\\sin^2\\varphi\\cdot\\rho^2\\sin\\varphi\\,d\\rho=\\frac{8\\cdot 2^5}{15}\\pi$（后续由空心体与球缺的处理见后页）。"
+},
+{
+"pid": 86,
+"label": "30",
+"statement": "设 $\\Sigma$ 是一个光滑封闭曲面，方向朝外。\\n$$I=\\iint_\\Sigma (x^3-x)dydz+(2y^3-y)dzdx+(3z^3-z)dxdy.$$\\n试确定曲面 $\\Sigma$，使得积分 $I$ 的值最小并求该值。",
+"answer": "$-\\frac{4\\sqrt6}{15}\\pi$",
+"notebook_candidate": "记 $\\Sigma$ 围成的区域为 $\\Omega$，由 Gauss 公式得 $I=\\iiint_\\Omega(3x^2+6y^2+9z^2-3)dV=3\\iiint_\\Omega(x^2+2y^2+3z^2-1)dxdydz$。故 $I$ 达到最小 $\\Leftrightarrow \\Omega:x^2+2y^2+3z^2-1\\le0$，即 $\\Omega$ 是一椭球、$\\Sigma$ 是 $\\Omega$ 的表面时积分最小。再令 $u=x[?],\\ v=y[?],\\ w=z[?]$（伸缩换元，系数被反光遮挡，$|J|=\\frac{1}{\\sqrt6}$）把椭球化为单位球，用球坐标得 $I=3\\iiint_\\Omega(u^2+v^2+w^2-1)\\frac{1}{\\sqrt6}dudvdw=\\frac{3}{\\sqrt6}\\int_0^{2\\pi}d\\theta\\int_0^{\\pi}d\\varphi\\int_0^1(r^2-1)r^2\\sin\\varphi dr=-\\frac{4\\sqrt6}{15}\\pi$。"
+},
+{
+"pid": 87,
+"label": "31",
+"statement": "计算三重积分 $I=\\iiint_\\Omega\\frac{xyz}{x^2+y^2}dxdydz$，其中 $\\Omega$ 是由曲面 $(x^2+y^2+z^2)^2=2xy$ 围成的区域在第一卦限的部分。",
+"answer": "$\\frac{1}{72}$",
+"notebook_candidate": "被积函数满足 $f(x,y,z)=\\frac{xyz}{x^2+y^2}=f(y,x,z)$，关于 $y\\to x$ 对称，$I=2\\iiint_{\\Omega'}\\frac{xyz}{x^2+y^2}dxdydz$，$\\Omega':(x^2+y^2+z^2)^2=2xy\\ (x>y)$。令 $x=\\rho\\sin\\varphi\\cos\\theta,\\ y=\\rho\\sin\\varphi\\sin\\theta,\\ z=\\rho\\cos\\varphi$，则 $\\Omega':0\\le\\theta\\le\\frac{\\pi}{4},0\\le\\varphi\\le\\frac{\\pi}{2},0\\le\\rho\\le\\sqrt{2\\sin\\varphi\\sqrt{\\sin\\theta\\cos\\theta}}$。代入并分离变量：$I=2\\int_0^{\\pi/4}\\cos\\theta\\sin\\theta d\\theta\\int_0^{\\pi/2}\\cos\\varphi\\sin\\varphi d\\varphi\\int_0^{\\sqrt{2\\sin\\varphi\\sqrt{\\sin\\theta\\cos\\theta}}}\\rho^3d\\rho$，用 Wallis 公式化为 $=2\\int_0^{\\pi/4}\\cos^3\\theta\\sin^3\\theta d\\theta\\int_0^{\\pi/2}\\cos\\varphi\\sin^5\\varphi d\\varphi=\\frac{1}{4}\\int_0^{\\pi/2}\\sin^22\\theta d\\theta\\int_0^{\\pi/2}\\sin^5\\varphi\\,d(\\sin\\varphi)=\\frac{1}{72}$。"
+},
+{
+"pid": 88,
+"label": "32",
+"statement": "设区间 $(0,+\\infty)$ 上的函数 $u(x)$ 定义为 $u(x)=\\int_0^{+\\infty}e^{-xt^2}dt$，写出 $u(x)$ 的初等函数表达式。",
+"answer": "$u(x)=\\frac{\\sqrt{\\pi}}{2\\sqrt{x}}$",
+"notebook_candidate": "第一题：$u^2(x)=\\int_0^{+\\infty}e^{-xt^2}dt\\int_0^{+\\infty}e^{-xs^2}ds=\\iint_{s,t\\ge0}e^{-x(t^2+s^2)}dsdt=\\int_0^{\\pi/2}d\\theta\\int_0^{+\\infty}e^{-xr^2}rdr=\\frac{\\pi}{4x}\\int_0^{+\\infty}e^{-xr^2}d(xr^2)=\\frac{\\pi}{4x}$，故 $u(x)=\\frac{\\sqrt\\pi}{2\\sqrt x}$。第二题：交换积分次序得 $\\int_0^{+\\infty}xf(x)dx=\\int_0^{+\\infty}e^{-t^2}dt\\int_0^t xdx=\\frac{1}{2}\\int_0^{+\\infty}e^{-t^2}t^2dt=-\\frac{1}{4}\\int_0^{+\\infty}t\\,d(e^{-t^2})=\\frac{1}{4}\\int_0^{+\\infty}e^{-t^2}dt=\\frac{1}{4}u(1)=\\frac{1}{4}\\cdot\\frac{\\sqrt\\pi}{2}=\\frac{\\sqrt\\pi}{8}$。"
+},
+{
+"pid": 89,
+"label": "32",
+"statement": "设 $f(x)=\\int_x^{+\\infty}e^{-t^2}dt$，计算 $\\int_0^{+\\infty}xf(x)dx$ 的值。",
+"answer": "$\\frac{\\sqrt{\\pi}}{8}$",
+"notebook_candidate": "第一题：$u^2(x)=\\int_0^{+\\infty}e^{-xt^2}dt\\int_0^{+\\infty}e^{-xs^2}ds=\\iint_{s,t\\ge0}e^{-x(t^2+s^2)}dsdt=\\int_0^{\\pi/2}d\\theta\\int_0^{+\\infty}e^{-xr^2}rdr=\\frac{\\pi}{4x}\\int_0^{+\\infty}e^{-xr^2}d(xr^2)=\\frac{\\pi}{4x}$，故 $u(x)=\\frac{\\sqrt\\pi}{2\\sqrt x}$。第二题：交换积分次序得 $\\int_0^{+\\infty}xf(x)dx=\\int_0^{+\\infty}e^{-t^2}dt\\int_0^t xdx=\\frac{1}{2}\\int_0^{+\\infty}e^{-t^2}t^2dt=-\\frac{1}{4}\\int_0^{+\\infty}t\\,d(e^{-t^2})=\\frac{1}{4}\\int_0^{+\\infty}e^{-t^2}dt=\\frac{1}{4}u(1)=\\frac{1}{4}\\cdot\\frac{\\sqrt\\pi}{2}=\\frac{\\sqrt\\pi}{8}$。"
+},
+{
+"pid": 90,
+"label": "33",
+"statement": "设 $H(x)=\\sum_{i,j=1}^{3}a_{ij}x_ix_j$，$A=(a_{ij})$ 是 3 阶对称正定阵，求 $I=\\iiint_{H(x)\\le1}e^{H(x)}dx_1dx_2dx_3$。",
+"answer": "$\\frac{4\\pi}{\\sqrt{\\det A}}(e-2)$",
+"notebook_candidate": "存在三阶正交矩阵 $P$ 使 $P^TAP=\\mathrm{diag}(\\lambda_1,\\lambda_2,\\lambda_3)$，$\\lambda_i>0$。作正交变换 $x=Py$，则 $H(x)=\\lambda_1y_1^2+\\lambda_2y_2^2+\\lambda_3y_3^2$，且 $|\\det P|=1$ 给出 $\\left|\\frac{\\partial(x_1,x_2,x_3)}{\\partial(y_1,y_2,y_3)}\\right|=1$，故 $I=\\iiint_{\\lambda_1y_1^2+\\lambda_2y_2^2+\\lambda_3y_3^2\\le1}e^{\\lambda_1y_1^2+\\lambda_2y_2^2+\\lambda_3y_3^2}dy_1dy_2dy_3$。再令 $y_1=\\frac{1}{\\sqrt{\\lambda_1}}\\rho\\sin\\varphi\\cos\\theta,\\ y_2=\\frac{1}{\\sqrt{\\lambda_2}}\\rho\\sin\\varphi\\sin\\theta,\\ y_3=\\frac{1}{\\sqrt{\\lambda_3}}\\rho\\cos\\varphi$，得 $I=\\frac{1}{\\sqrt{\\lambda_1\\lambda_2\\lambda_3}}\\int_0^{2\\pi}d\\theta\\int_0^{\\pi}d\\varphi\\int_0^1\\rho^2e^{\\rho^2}\\sin\\varphi d\\rho=\\frac{4\\pi}{\\sqrt{\\lambda_1\\lambda_2\\lambda_3}}\\int_0^1\\rho^2e^{\\rho^2}d\\rho=\\frac{4\\pi}{\\sqrt{\\lambda_1\\lambda_2\\lambda_3}}(e-2)=\\frac{4\\pi}{\\sqrt{\\det A}}(e-2)$。"
+},
+{
+"pid": 91,
+"label": "未编号",
+"statement": "(1) 若函数 $f(x)$ 连续可导（一阶导函数连续），求 $\\lim_{t\\to 0^+}\\frac{I_t}{t^4}$；(2) 若 $f(x)$ 仅在 $x=0$ 可导，在其余点连续，求 (1) 中的极限。",
+"answer": "$\\frac{\\pi f'(0)}{2}$",
+"notebook_candidate": "先交换积分次序得 $I_t=2\\pi\\int_0^1\\int_0^t f'(r^2z)r^3\\,\\mathrm{d}r\\,\\mathrm{d}z$；对 $t$ 求导并用洛必达法则，$\\lim_{t\\to 0^+}\\frac{I_t}{t^4}=\\lim_{t\\to 0^+}\\frac{2\\pi\\int_0^1\\int_0^t f'(r^2z)r^3\\mathrm{d}r\\mathrm{d}z}{t^4}=\\lim_{t\\to 0^+}\\frac{2\\pi\\int_0^1 f'(t^2z)t^3\\mathrm{d}z}{4t^3}$；约去 $t^3$ 后得 $=\\lim_{t\\to 0^+}\\frac{\\pi\\int_0^1 f'(t^2z)\\mathrm{d}z}{2}=\\frac{\\pi f'(0)}{2}$。"
+},
+{
+"pid": 92,
+"label": "11",
+"statement": "计算 $I=\\mathop{\\iint}\\limits_{S}\\frac{x\\,\\mathrm{d}y\\mathrm{d}z+y\\,\\mathrm{d}z\\mathrm{d}x+z\\,\\mathrm{d}x\\mathrm{d}y}{(x^2+y^2+z^2)^2}$，其中 $S$ 是 $\\frac{z}{7}=\\frac{(x-2)^2}{25}+\\frac{(y-1)^2}{16}$，$z\\ge 0$。",
+"answer": "$2\\pi$",
+"notebook_candidate": "取 $\\varepsilon$ 为充分小的正数，作上半球面 $x^2+y^2+z^2=\\varepsilon^2\\ (z\\ge0)$，将其下侧记为 $S_\\varepsilon^l$；把 $S$ 在 $xoy$ 平面上的投影区域去掉 $\\{(x,y)\\mid x^2+y^2\\le\\varepsilon^2\\}$（其上侧记为 $S_\\varepsilon^u$）后剩下的部分记为 $S_3$，令 $S_1=S_\\varepsilon^l+S_3$。于是 $I=\\left(\\iint_{S+S_1}-\\iint_{S_\\varepsilon^l}-\\iint_{S_3}\\right)=\\iiint_\\Omega\\left(\\frac{\\partial P}{\\partial x}+\\frac{\\partial Q}{\\partial y}+\\frac{\\partial R}{\\partial z}\\right)\\mathrm{d}V-\\iint_{S_\\varepsilon^l}-\\iint_{S_3}=-\\iint_{S_\\varepsilon^l}-\\iint_{S_3}$。又 $\\iint_{S_\\varepsilon^l}=\\frac{1}{\\varepsilon^3}\\iint_{S_\\varepsilon^l}x\\,\\mathrm{d}y\\mathrm{d}z+y\\,\\mathrm{d}z\\mathrm{d}x+z\\,\\mathrm{d}x\\mathrm{d}y=\\frac{1}{\\varepsilon^3}\\left(\\iint_{S_\\varepsilon^l+S_\\varepsilon^u}x\\,\\mathrm{d}y\\mathrm{d}z+y\\,\\mathrm{d}z\\mathrm{d}x+z\\,\\mathrm{d}x\\mathrm{d}y-\\iint_{S_\\varepsilon^u}x\\,\\mathrm{d}y\\mathrm{d}z+y\\,\\mathrm{d}z\\mathrm{d}x+z\\,\\mathrm{d}x\\mathrm{d}y\\right)$。"
+},
+{
+"pid": 93,
+"label": "12",
+"statement": "设函数 $P(x,y),Q(x,y)$ 具有一阶连续偏导数，且对任意实数 $x_0,y_0$ 和任意正实数 $R$ 均有 $\\oint_L P(x,y)\\,\\mathrm{d}x+Q(x,y)\\,\\mathrm{d}y=0$，其中 $L$ 是半圆 $y=y_0+\\sqrt{R^2-(x-x_0)^2}$，证明 $P(x,y)=0$，$\\frac{\\partial Q(x,y)}{\\partial x}=0$。",
+"answer": "",
+"notebook_candidate": "承接上页第11题：$\\iint_{S_\\varepsilon^l}=\\frac{1}{\\varepsilon^3}\\left(\\iint_{S_\\varepsilon^l+S_\\varepsilon^u}-\\iint_{S_\\varepsilon^u}\\right)=\\frac{1}{\\varepsilon^3}\\left(-3\\iiint_{\\Omega_\\varepsilon}\\mathrm{d}V-0\\right)=-\\frac{3}{\\varepsilon^3}\\cdot\\frac{2}{3}\\pi\\varepsilon^3=-2\\pi$；又 $\\iint_{S_3}=0$，故 $I=0-(-2\\pi)-0=2\\pi$。"
+},
+{
+"pid": 94,
+"label": "13",
+"statement": "证明：$\\lim_{r\\to+\\infty}\\oint_{C_r}\\frac{y\\,\\mathrm{d}x-x\\,\\mathrm{d}y}{(x^2+xy+y^2)^2}=0$，其中 $C_r$ 是圆周 $x^2+y^2=r^2$，方向为逆时针方向。",
+"answer": "",
+"notebook_candidate": "用积分估计：$\\left|\\oint_{C_r}P\\,\\mathrm{d}x+Q\\,\\mathrm{d}y\\right|=\\left|\\oint_{C_r}(P\\cos\\alpha+Q\\sin\\alpha)\\,\\mathrm{d}s\\right|\\le\\oint_{C_r}\\sqrt{P^2+Q^2}\\,\\mathrm{d}s\\le Ml$，其中 $l=2\\pi r$ 是弧长、$M=\\max_{(x,y)\\in C_r}\\sqrt{P^2+Q^2}$。由 $x^2+xy+y^2\\ge\\frac12(x^2+y^2)$ 得 $\\sqrt{P^2+Q^2}\\le\\left[\\frac{8}{(x^2+y^2)^2}\\right]^{1/2}$，故 $M\\le\\frac{2\\sqrt2}{r^2}$。于是 $\\left|\\oint_{C_r}P\\,\\mathrm{d}x+Q\\,\\mathrm{d}y\\right|\\le 2\\pi r\\cdot\\frac{2\\sqrt2}{r^2}=\\frac{4\\pi\\sqrt2}{r}\\to0\\ (r\\to+\\infty)$。"
+},
+{
+"pid": 95,
+"label": "14",
+"statement": "设 $f(r,t)=\\oint_{C_r}\\frac{y\\,\\mathrm{d}x-x\\,\\mathrm{d}y}{(x^2+y^2)^t}$，其中 $C_r$ 为：$x^2+y^2+xy=r^2$ 的正方向，求 $\\lim_{r\\to\\infty}f(r,t)$。",
+"answer": "$\\lim_{r\\to+\\infty}f(r,t)=\\begin{cases}-\\infty, & t<1\\\\ -2\\pi, & t=1\\\\ 0, & t>1\\end{cases}$",
+"notebook_candidate": "作变换 $x=u+v,\\ y=u-v$ 得 $x^2+y^2+xy=3u^2+v^2$；再令 $u=\\frac{r}{\\sqrt3}\\cos\\theta,\\ v=r\\sin\\theta$，则 $x=\\frac{r}{\\sqrt3}(\\cos\\theta+\\sqrt3\\sin\\theta)$，$y=\\frac{r}{\\sqrt3}(\\cos\\theta-\\sqrt3\\sin\\theta)$。代入得 $f(r,t)=\\oint_{C_r}\\frac{y\\mathrm{d}x-x\\mathrm{d}y}{(x^2+y^2)^t}=-\\int_0^{2\\pi}\\frac{\\frac{\\sqrt3}{3}2r^2}{\\left(\\frac{2r^2}{3}\\right)^t(\\cos^2\\theta+3\\sin^2\\theta)^t}\\,\\mathrm{d}\\theta$。"
+},
+{
+"pid": 96,
+"label": "15",
+"statement": "设函数在有界闭区域上有二阶连续偏导数，且满足 $\\frac{\\partial^2u}{\\partial x^2}+\\frac{\\partial^2u}{\\partial y^2}=0,\\ (x,y)\\in D$。记 $D$ 的正向边界曲线为 $\\partial D$，$\\partial D$ 的外法线向量为 $\\vec n$。当 $(x,y)\\in\\partial D$ 时，$u(x,y)=A$。(1) 求曲线积分 $\\oint_{\\partial D}u\\frac{\\partial u}{\\partial n}\\,\\mathrm{d}s$ 的值；(2) 证明：$u(x,y)=A,\\ (x,y)\\in D$。",
+"answer": "",
+"notebook_candidate": "(2) $\\oint_{\\partial D}u\\frac{\\partial u}{\\partial n}\\mathrm{d}s=\\int_{\\partial D}u\\left(\\frac{\\partial u}{\\partial x}\\cos\\alpha+\\frac{\\partial u}{\\partial y}\\cos\\beta\\right)\\mathrm{d}s=\\int_{\\partial D}u\\frac{\\partial u}{\\partial x}\\mathrm{d}y-u\\frac{\\partial u}{\\partial y}\\mathrm{d}x=\\iint_D\\left[u\\left(\\frac{\\partial^2u}{\\partial x^2}+\\frac{\\partial^2u}{\\partial y^2}\\right)+\\left(\\frac{\\partial u}{\\partial x}\\right)^2+\\left(\\frac{\\partial u}{\\partial y}\\right)^2\\right]\\mathrm{d}x\\mathrm{d}y=\\iint_D\\left[\\left(\\frac{\\partial u}{\\partial x}\\right)^2+\\left(\\frac{\\partial u}{\\partial y}\\right)^2\\right]\\mathrm{d}x\\mathrm{d}y$。因该积分为 $0$ 且被积函数非负，得 $\\left(\\frac{\\partial u}{\\partial x}\\right)^2+\\left(\\frac{\\partial u}{\\partial y}\\right)^2=0$，即 $\\frac{\\partial u}{\\partial x}=\\frac{\\partial u}{\\partial y}=0$，故 $u(x,y)=$ 常数；又 $(x,y)\\in\\partial D$ 时 $u(x,y)=A$，所以 $u(x,y)=A,\\ (x,y)\\in D$。"
+}
+]
+}

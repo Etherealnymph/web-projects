@@ -1,0 +1,246 @@
+{
+  "batch": 4,
+  "date": "2026-05-31",
+  "pages": [
+    {
+      "id": 36,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "1",
+          "statement": "讨论积分 $\\int_0^{\\frac{\\pi}{2}}\\frac{dx}{\\sin^p x\\cos^q x}(p>0,q>0)$。",
+          "answer": "",
+          "note": "页面顶部另有反常积分比较判别法的引理：若 $\\lim_{x\\to0^+}x^pf(x)=l$：当 $0<p<1$ 时，且 $0\\le l<+\\infty$ 时，$\\Rightarrow\\int_0^1 f(x)dx$ 收敛；当 $p\\ge1$ 时，且 $0<l\\le+\\infty$ 时，$\\Rightarrow\\int_0^1 f(x)dx$ 发散。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "指出 $x=0,\\frac{\\pi}{2}$ 都是被积函数的奇点，把积分拆成 $\\int_0^{\\pi/4}+\\int_{\\pi/4}^{\\pi/2}$ 两个积分。对 $x=0$ 端，由 $\\lim_{x\\to0^+}x^p\\frac{1}{\\sin^p x\\cos^q x}=1$ 及 $\\int_0^{\\pi/4}\\frac{dx}{x^p}$ 当 $0<p<1$ 时收敛、当 $p\\ge1$ 时发散，得 $\\int_0^{\\pi/4}\\frac{dx}{\\sin^p x\\cos^q x}$ 当 $0<p<1$ 时收敛，当 $p\\ge1$ 时发散。",
+      "summary": "第1题：讨论含 $\\sin^px\\cos^qx$ 的反常积分敛散性",
+      "clarity": "partial"
+    },
+    {
+      "id": 37,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "5",
+          "statement": "计算 $I=\\iint_D e^{\\frac{y}{x+y}}dxdy$，其中 $D=\\{(x,y)|x+y\\le1,x\\ge0,y\\ge0\\}$。",
+          "answer": "$\\frac{1}{2}(e-1)$",
+          "note": "配图：$D$ 为第一象限内的直角三角形，斜边上标出点 $(1-t,t)$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "设 $\\frac{y}{x+y}=t$ 为等值线，则 $0\\le t\\le1$，$y=\\frac{t}{1-t}x$；该直线与 $x+y=1$ 的交点坐标为 $(1-t,t)$。$\\sigma(t)$ 的面积为 $\\sigma(t)=\\frac{1}{2}t$，故 $d\\sigma(t)=\\frac{1}{2}dt$。于是 $I=\\int_0^1 e^t d\\sigma(t)=\\int_0^1 e^t\\frac{1}{2}dt=\\frac{1}{2}\\int_0^1 e^t dt=\\frac{1}{2}(e-1)$。",
+      "summary": "第5题：等值线法算二重积分，得 $(e-1)/2$",
+      "clarity": "good"
+    },
+    {
+      "id": 38,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "补",
+          "statement": "已知曲面 $17x^2+17y^2+8z^2+30xy+34x+30y-16z-7=0$ 所围得区域被曲面 $S_2:17x^2+17y^2+30xy+34x+30y-32z-57=0$ 分成上下两部分，计算上下两部分区域的体积之比。",
+          "answer": "$V_1:V_2=\\frac{67}{189}$",
+          "note": "题号标为“补”（补充题）；解答跨本页及后两页，答案在第 40 页图上给出。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "写出二次型矩阵 $A=\\begin{pmatrix}17&15&0\\\\15&17&0\\\\0&0&8\\end{pmatrix}$，其特征值为 $\\lambda_1=32,\\lambda_2=2,\\lambda_3=8$，对应单位特征向量 $p_1=\\begin{pmatrix}\\frac{\\sqrt2}{2}\\\\\\frac{\\sqrt2}{2}\\\\0\\end{pmatrix},p_2=\\begin{pmatrix}\\frac{\\sqrt2}{2}\\\\-\\frac{\\sqrt2}{2}\\\\0\\end{pmatrix},p_3=\\begin{pmatrix}0\\\\0\\\\1\\end{pmatrix}$。取正交矩阵 $P=(p_1,p_2,p_3)$，令 $\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}=P\\begin{pmatrix}x'\\\\y'\\\\z'\\end{pmatrix}$ 作正交变换。",
+      "summary": "补充题：正交变换化二次曲面，求上下体积比",
+      "clarity": "good"
+    },
+    {
+      "id": 39,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "曲面 $S_1$ 转化为 $32(x'-\\frac{\\sqrt2}{2})^2+2(y'-\\frac{\\sqrt2}{2})^2+8(z'-1)^2=32$，令 $u=x'-\\frac{\\sqrt2}{2},v=y'-\\frac{\\sqrt2}{2},w=z'-1$，得 $S_1$ 的标准方程 $u^2+\\frac{v^2}{16}+\\frac{w^2}{4}=1$；同理 $S_2$ 的标准方程为 $w=u^2+\\frac{v^2}{16}+\\frac{1}{4}$。联立两曲面方程得交线 $u^2+\\frac{v^2}{16}=\\frac{3}{4}$，即在 $xoy$ 面上的投影区域为 $u^2+\\frac{v^2}{16}\\le\\frac{3}{4}$。",
+      "summary": "续补充题：化两曲面为标准形并求出投影区域",
+      "clarity": "good"
+    },
+    {
+      "id": 40,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "上侧体积 $V_1=\\iint_D(w_2-w_1)dudv=\\iint_D\\left[\\sqrt{4(1-u^2-\\frac{v^2}{16})}-(u^2+\\frac{v^2}{16}+\\frac{1}{4})\\right]dudv$，令 $u=\\frac{\\sqrt3}{2}r\\cos\\theta,v=\\sqrt{12}r\\sin\\theta$，得 $V_1=3\\iint_D\\left[2\\sqrt{1-\\frac{3}{4}r^2}-(\\frac{3}{4}r^2+\\frac{1}{4})\\right]rdrd\\theta=\\frac{67}{24}\\pi$。又 $V_2=\\frac{4}{3}\\pi\\cdot1\\cdot4\\cdot2-\\frac{67}{24}\\pi=\\frac{189}{24}\\pi$，故 $V_1:V_2=\\frac{67}{189}$。",
+      "summary": "续补充题：极坐标算上侧体积，得比 67:189",
+      "clarity": "good"
+    },
+    {
+      "id": 41,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": false,
+      "solution": "本页为知识点提纲（非题目）：微分方程的基本类型——1.可分离变量的微分方程；2.齐次微分方程；3.一阶线性非齐次微分方程 $y'+p(x)y=q(x)$（※常数变易法）；4.伯努利微分方程 $y'+p(x)y=q(x)y^k\\ (k\\ne0,1)$；5.全微分方程；6.可降阶的高阶微分方程(3种)；7.二(高)阶常系数线性(非)齐次微分方程；8.欧拉方程（变系数）。页末写有“常微分方程 非常1+9！！”",
+      "summary": "微分方程8种基本类型提纲（无题目）",
+      "clarity": "good"
+    },
+    {
+      "id": 42,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "6",
+          "statement": "找出所有可微函数 $f:(0,+\\infty)\\to(0,+\\infty)$，对于这样一个函数存在 $a>0$，使得对于 $\\forall x>0$，有 $f'(\\frac{a}{x})=\\frac{x}{f(x)}$。",
+          "answer": "$f(x)=cx^{\\frac{a}{b}}(c>0)$",
+          "note": "最后一行左侧被授课教师的头部遮挡，$\\ln f(x)$ 依前后文补出；式中 $b$ 为前面所得的常数。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "分析：由 $f'(\\frac{a}{x})f(x)=x$ 得 $f'(x)f(\\frac{a}{x})=\\frac{a}{x}$，从而 $[f(\\frac{a}{x})f(x)]'=f'(x)f(\\frac{a}{x})+f'(\\frac{a}{x})f(x)(-\\frac{a}{x^2})=\\frac{a}{x}+x(-\\frac{a}{x^2})=0$。设 $g(x)=f(\\frac{a}{x})f(x)$，则 $g(x)=b$（常数），即 $\\frac{f'(x)}{f(x)}=\\frac{a}{bx}$，积分得 $\\ln f(x)=\\frac{a}{b}\\ln x+\\ln c$，故 $f(x)=cx^{\\frac{a}{b}}(c>0)$。",
+      "summary": "第6题：由函数方程解得 $f(x)=cx^{a/b}$",
+      "clarity": "partial"
+    },
+    {
+      "id": 43,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "12",
+          "statement": "设方程 $y''-\\frac{1}{x}y'+q(x)y=0$ 有两个特解 $y_1(x)$ 和 $y_2(x)$，且 $y_1\\cdot y_2=1$，求 $q(x)$，并求方程的通解。",
+          "answer": "$q(x)=0$",
+          "note": "本页只给出求 $q(x)$ 的部分，通解未在此页出现。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "(1) 设 $y_1=a$，由 $y_1\\cdot y_2=1$ 知 $a\\ne0$；又 $y_1(x)=a$ 是方程 $y''-\\frac{1}{x}y'+q(x)y=0$ 的特解，代入得 $aq(x)=0$，故 $q(x)=0$。于是方程化为 $y''-\\frac{1}{x}y'=0$，得特解 $x^2$，它与 $y_1(x)=a$ 无关，可用来写通解。",
+      "summary": "第12题：由两特解互倒推出 $q(x)=0$",
+      "clarity": "good"
+    },
+    {
+      "id": 44,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": false,
+      "solution": "本页为知识点提纲（非题目）：微分方程的学习方法——1.熟记微分方程的类型和解法；2.如果不是学习过的熟悉类型，则考虑变量代换方法转化：a 自变量代换（如：欧拉方程 $x=e^t$）；b 函数代换（如：伯努利方程 $z=y^{1-k}$）；c 自变量与函数相结合的代换（如：齐次方程 $u=\\frac{y}{x}$）。",
+      "summary": "微分方程学习方法提纲：三类变量代换",
+      "clarity": "good"
+    },
+    {
+      "id": 45,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "(1)",
+          "statement": "$y'=e^{x}-\\frac{2}{x}$",
+          "answer": "",
+          "note": "属“典型例题分析 1 求下列微分方程的通解”的第(1)小题。排版上 $e^x$ 与 $-\\frac{2}{x}$ 并列，疑为 $y'=e^{x-\\frac{2}{x}}$。"
+        },
+        {
+          "label": "(2)",
+          "statement": "$y'=\\frac{y^2}{4}+\\frac{1}{x^2}$",
+          "answer": "",
+          "note": "属“典型例题分析 1 求下列微分方程的通解”的第(2)小题。"
+        },
+        {
+          "label": "(3)",
+          "statement": "$y'\\cos y=(1+\\cos x\\sin y)\\sin y$",
+          "answer": "",
+          "note": "属“典型例题分析 1 求下列微分方程的通解”的第(3)小题。"
+        },
+        {
+          "label": "(4)",
+          "statement": "$y'+x=\\sqrt{x^2+y}$",
+          "answer": "",
+          "note": "属第(4)小题；题后提示：$y=x^2u$。"
+        },
+        {
+          "label": "(5)",
+          "statement": "$y''-y=\\sin^2 x$",
+          "answer": "",
+          "note": "属第(5)小题；题后提示：$\\sin^2x=\\frac{1}{2}(1-\\cos2x)$。"
+        },
+        {
+          "label": "(6)",
+          "statement": "$\\frac{dy}{dx}=\\frac{1}{x\\sin^2(xy)}-\\frac{y}{x}$",
+          "answer": "",
+          "note": "属第(6)小题。"
+        },
+        {
+          "label": "(7)",
+          "statement": "$\\frac{dy}{dx}+x\\sin2y=xe^{-x^2}\\cos^2 y$",
+          "answer": "",
+          "note": "属第(7)小题。"
+        },
+        {
+          "label": "(8)",
+          "statement": "$y''+y'-2y=\\frac{e^x}{1+e^x}$",
+          "answer": "",
+          "note": "属第(8)小题，其解答见后续页。"
+        }
+      ],
+      "has_solution": false,
+      "solution": "",
+      "summary": "典型例题：求8个微分方程通解（(1)—(8)）",
+      "clarity": "good"
+    },
+    {
+      "id": 46,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "(8)",
+          "statement": "$y''+y'-2y=\\frac{e^x}{1+e^x}$",
+          "answer": "",
+          "note": "与第45页第(8)小题相同，本页给出其解法开头。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "分解左端：$y''+y'-2y=(y''+2y')-(y'+2y)=(y'+2y)'-(y'+2y)$。令 $u=y'+2y$，原方程化为一阶线性非齐次方程 $u'-u=\\frac{e^x}{1+e^x}$，其通解为 $u=e^{-\\int(-1)dx}\\left[C_1+\\int\\frac{e^x}{1+e^x}\\cdot e^{\\int(-1)dx}dx\\right]$。",
+      "summary": "第(8)题：因式分解降阶为一阶线性方程",
+      "clarity": "good"
+    },
+    {
+      "id": 47,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "继续化简第(8)题的解：$u=e^x\\left[C_1+\\int\\frac{e^x}{1+e^x}\\cdot e^{-x}dx\\right]=e^x\\left[C_1+\\int\\frac{1}{1+e^x}dx\\right]=e^x\\left[C_1-\\int\\frac{1}{1+e^{-x}}de^{-x}\\right]=e^x\\left[C_1-\\ln(1+e^{-x})\\right]$。于是 $\\frac{dy}{dx}+2y=e^x[C_1-\\ln(1+e^{-x})]$，其通解为 $y=e^{-\\int2dx}\\left[C_2+\\int e^x[C_1-\\ln(1+e^{-x})]e^{\\int2dx}dx\\right]$。",
+      "summary": "续第(8)题：算出 $u$ 并写出 $y$ 的通解式",
+      "clarity": "good"
+    },
+    {
+      "id": 48,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "求微分方程 $x^3y''=(y-xy')^2$ 满足初始条件 $y(1)=0,y'(1)=3$ 的解。",
+          "answer": "",
+          "note": "解答跨本页与下一页，本页未写出最终解。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "令 $u=y-xy'$，则原方程化为 $-x^2u'=u^2$，分离变量得 $-\\frac{du}{u^2}=\\frac{dx}{x^2}$，积分得 $\\frac{1}{u}=c-\\frac{1}{x}$。由 $y(1)=0,y'(1)=3$ 知 $c=\\frac{2}{3}$，即 $\\frac{1}{y-xy'}=\\frac{2}{3}-\\frac{1}{x}=\\frac{2x-3}{3x}$，从而 $y'=\\frac{y}{x}-\\frac{3}{2x-3}$。",
+      "summary": "第2题：代换 $u=y-xy'$ 化为可分离方程",
+      "clarity": "good"
+    },
+    {
+      "id": 49,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "对 $y'-\\frac{1}{x}y=-\\frac{3}{2x-3}$ 用一阶线性方程通解公式：$u=e^{-\\int\\frac{2}{x}dx}\\left(\\int\\frac{1}{x^2}e^{\\int\\frac{2}{x}dx}dx+C_1\\right)=\\frac{1}{x^2}\\left(\\int\\frac{1}{x^2}e^{\\int\\frac{2}{x}dx}dx+C_1\\right)=\\frac{C_1}{x^2}+\\frac{1}{x}$。于是 $\\frac{y'}{y}=\\frac{C_1}{x^2}+\\frac{1}{x}$，即 $\\ln y=\\int(\\frac{C_1}{x^2}+\\frac{1}{x})dx=-\\frac{C_1}{x}+\\ln x+\\ln C_2$，原方程通解为 $y=e^{\\frac{C_1}{x}+\\ln x+\\ln C_2}=C_2xe^{\\frac{C_1}{x}}$。",
+      "summary": "续第2题：积分得通解 $y=C_2xe^{C_1/x}$",
+      "clarity": "good"
+    },
+    {
+      "id": 50,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "4",
+          "statement": "设有微分方程 $y'+y=f(x)$，其中 $f(x)=\\begin{cases}2,&0\\le x\\le1,\\\\0,&x>1,\\end{cases}$ 试求一连续函数 $y=y(x)$，使适合条件 $y(0)=0$，且在 $(0,1),(1,+\\infty)$ 内满足上述微分方程。",
+          "answer": "$y=\\begin{cases}2(1-e^{-x}),&0\\le x\\le1,\\\\2(e-1)e^{-x},&x>1.\\end{cases}$",
+          "note": "分段函数写法按原文；解在 $x=1$ 处用连续性定常数。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "当 $0\\le x\\le1$ 时 $y'+y=2$，由通解公式 $y=e^{-\\int dx}\\left(\\int2e^{\\int dx}dx+C_1\\right)=2+C_1e^{-x}$，配合 $y(0)=0$ 得 $C_1=-2$，故 $y=2-2e^{-x}$。当 $x>1$ 时 $y'+y=0$，得 $y=C_2e^{-x}$；由 $y$ 的连续性，$\\lim_{x\\to1^-}y=\\lim_{x\\to1^+}y$，即 $2-2e^{-x}=C_2e^{-x}$，得 $C_2=2(e-1)$，故 $y=2(e-1)e^{-x}$。",
+      "summary": "第4题：分段右端函数求连续解",
+      "clarity": "good"
+    }
+  ]
+}

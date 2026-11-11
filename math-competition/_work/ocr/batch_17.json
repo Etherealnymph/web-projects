@@ -1,0 +1,251 @@
+{
+  "batch": 17,
+  "date": "2026-10-17",
+  "pages": [
+    {
+      "id": 210,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "15.1)1)",
+          "statement": "$1+\\frac{1}{2}-\\frac{1}{3}-\\frac{1}{4}+\\frac{1}{5}+\\frac{1}{6}-\\frac{1}{7}-\\frac{1}{8}+\\cdots$",
+          "answer": "级数收敛",
+          "note": "题号原样为「15.1) 1)」，判明敛散性"
+        },
+        {
+          "label": "15.1)2)",
+          "statement": "$1+\\frac{1}{2}-\\frac{1}{3}+\\frac{1}{4}+\\frac{1}{5}-\\frac{1}{6}+\\frac{1}{7}+\\frac{1}{8}-\\frac{1}{9}+\\cdots+\\frac{1}{3n+1}+\\frac{1}{3n+2}-\\frac{1}{3n+3}+\\cdots$",
+          "answer": "级数发散",
+          "note": "前几项符号按照片辨认，应为「+,+,−」三阶循环"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：1) 记 $\\alpha_n=\\frac{1}{n}$，取 $\\beta_1=1,\\beta_2=1,\\beta_3=-1,\\beta_4=-1,\\cdots$，显然 $B_n=\\beta_1+\\beta_2+\\cdots+\\beta_n$ 满足 $0\\le B_n\\le 2$，$\\alpha_n$ 单调而 $\\lim\\limits_{n\\to\\infty}\\alpha_n=0$，满足狄利克雷判别法的条件，知级数收敛。2) 三阶一组记为 $v_n=\\frac{1}{3n+1}+\\frac{1}{3n+2}-\\frac{1}{3n+3}=\\frac{9n^2+18n+7}{(3n+1)(3n+2)(3n+3)}$，当 $n\\to\\infty$ 时 $v_n\\sim\\frac{1}{3n}$，故 $\\sum\\limits_{n=1}^{\\infty}v_n$ 发散，从而原级数发散。页末附「狄利克雷判别法」：若级数 $\\sum\\limits_{n=1}^{\\infty}\\alpha_n\\beta_n$ 满足 1) $\\{\\alpha_n\\}$ 单调趋于 0；2) 设 $B_n=\\beta_1+\\beta_2+\\cdots+\\beta_n$ 有界 $(\\forall n)$，则级数 $\\sum\\limits_{n=1}^{\\infty}\\alpha_n\\beta_n$ 收敛。",
+      "summary": "15.1 两小问：交错级数敛散性的判别及其解答",
+      "clarity": "good"
+    },
+    {
+      "id": 211,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "16",
+          "statement": "设 $u_n=\\int_0^1\\frac{dt}{(1+t^4)^n}$（$n\\ge1$）。1) 证明数列 $\\{u_n\\}$ 收敛，并求极限 $\\lim\\limits_{n\\to\\infty}u_n$；2) 证明级数 $\\sum\\limits_{n=1}^{\\infty}(-1)^nu_n$ 条件收敛。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：1) $\\forall\\varepsilon>0$，取 $0<\\alpha<\\frac{\\varepsilon}{2}$，把积分区间分成两段：$u_n=\\int_0^{\\alpha}\\frac{dt}{(1+t^4)^n}+\\int_{\\alpha}^{1}\\frac{dt}{(1+t^4)^n}$，其中 $\\int_{\\alpha}^{1}\\frac{dt}{(1+t^4)^n}\\le\\frac{1-\\alpha}{(1+\\alpha^4)^n}\\to0\\ (n\\to\\infty)$，故 $\\exists N>0$，当 $n>N$ 时 $\\int_{\\alpha}^{1}\\frac{dt}{(1+t^4)^n}<\\frac{\\varepsilon}{2}$，于是 $0\\le u_n<\\alpha+\\frac{\\varepsilon}{2}<\\varepsilon$，即 $\\lim\\limits_{n\\to\\infty}u_n=0$。2) 因 $u_{n+1}=\\int_0^1\\frac{dt}{(1+t^4)^{n+1}}\\le\\int_0^1\\frac{dt}{(1+t^4)^n}=u_n$，$\\{u_n\\}$ 单调递减且 $\\lim\\limits_{n\\to\\infty}u_n=0$，由莱布尼兹判别法知 $\\sum\\limits_{n=1}^{\\infty}(-1)^nu_n$ 收敛；又 $n\\ge2$ 时 $u_n\\ge\\int_0^1\\frac{dt}{(1+t)^n}=\\frac{1}{n-1}\\left(1-\\frac{1}{2^{n-1}}\\right)$，而 $\\sum\\frac{1}{n-1}$ 发散、$\\sum\\frac{1}{n-1}\\cdot\\frac{1}{2^{n-1}}$ 收敛，故 $\\sum\\limits_{n=2}^{\\infty}\\frac{1}{n-1}\\left(1-\\frac{1}{2^{n-1}}\\right)$ 发散，即原级数条件收敛。",
+      "summary": "第16题(1)(2)：积分数列的极限与交错级数条件收敛",
+      "clarity": "good"
+    },
+    {
+      "id": 212,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "16",
+          "statement": "3) 证明当 $p\\ge1$ 时级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{u_n}{n^p}$ 收敛，并求级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{u_n}{n}$ 的和。",
+          "answer": "$\\sum\\limits_{n=1}^{\\infty}\\frac{u_n}{n}=\\ln 2+\\frac{\\sqrt{2}}{2}\\left[\\pi+2\\ln(1+\\sqrt{2})\\right]$",
+          "note": "承接第16题的(1)(2)问，其中 $u_n=\\int_0^1\\frac{dt}{(1+t^4)^n}$（$n\\ge1$）"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：先求 $\\sum\\limits_{n=1}^{\\infty}\\frac{u_n}{n}$ 的和。由分部积分 $u_n=\\int_0^1\\frac{dt}{(1+t^4)^n}=\\frac{t}{(1+t^4)^n}\\Big|_0^1+n\\int_0^1\\frac{4t^4}{(1+t^4)^{n+1}}dt=\\frac{1}{2^n}+4n(u_n-u_{n+1})$，得 $\\frac{u_n}{n}=\\frac{1}{n2^n}+4(u_n-u_{n+1})$，故 $\\sum\\limits_{n=1}^{\\infty}\\frac{u_n}{n}=\\sum\\limits_{n=1}^{\\infty}\\frac{1}{n2^n}+4u_1$。令 $S(x)=\\sum\\limits_{n=1}^{\\infty}\\frac{x^n}{n}$，$x\\in[-1,1)$，则 $S'(x)=\\sum\\limits_{n=1}^{\\infty}x^{n-1}=\\frac{1}{1-x}$，$S(x)=-\\ln(1-x)$，取 $x=\\frac{1}{2}$ 得 $\\sum\\limits_{n=1}^{\\infty}\\frac{1}{n2^n}=\\ln 2$；又 $u_1=\\int_0^1\\frac{dt}{1+t^4}=\\frac{\\sqrt{2}}{8}\\left[\\pi+2\\ln(1+\\sqrt{2})\\right]$，故和为 $\\ln2+\\frac{\\sqrt{2}}{2}\\left[\\pi+2\\ln(1+\\sqrt{2})\\right]$。当 $p\\ge1$ 时，$\\frac{u_n}{n^p}\\le\\frac{u_n}{n}$，且 $\\sum\\frac{u_n}{n}$ 收敛，故 $\\sum\\frac{u_n}{n^p}$ 收敛。",
+      "summary": "第16题(3)：用递推式求 $u_n/n$ 之和并证 $p\\ge1$ 收敛",
+      "clarity": "good"
+    },
+    {
+      "id": 213,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "17",
+          "statement": "设 $a_n=\\frac{4n+\\sqrt{4n^2-1}}{\\sqrt{2n+1}+\\sqrt{2n-1}}$（$n\\ge1$），$S_n=\\sum\\limits_{k=1}^{n}a_k$，讨论级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{(-1)^n}{\\sqrt{n+1}\\,S_n^{p}}$ 的绝对收敛和条件收敛性。",
+          "answer": "",
+          "note": "本页为两页投影叠影（重影严重），题号 17；题干中「讨论」前后的若干字被叠影遮盖，$S_n$ 的记法按解中 $S_n=\\sum_{k=1}^n a_k$ 辨认"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：令 $b_n=\\sqrt{2n-1}$，则 $b_{n+1}^2+b_n^2=4n$，$a_n=\\frac{b_{n+1}^3-b_n^3}{b_{n+1}^2-b_n^2}=\\frac{1}{2}(b_{n+1}^3-b_n^3)$，故 $S_n=\\frac{1}{2}\\left(b_{n+1}^3-1\\right)=\\frac{1}{2}\\left(\\sqrt{(2n+1)^3}-1\\right)>0$；由比较判别法（极限形式）得 $\\frac{3p+1}{2}>1$ 即 $p>\\frac{1}{6}$ 时收敛，$0<\\frac{3p+1}{2}\\le1$ 即 $0<p\\le\\frac{1}{6}$ 时发散；又 $0<p\\le\\frac{1}{6}$ 时由莱布尼兹定理知 $\\sum\\frac{(-1)^n}{\\sqrt{n+1}S_n^p}$ 收敛。结论：$p>\\frac{1}{6}$ 时绝对收敛，$0<p\\le\\frac{1}{6}$ 时条件收敛。",
+      "summary": "第17题叠影页：带参数 p 的交错级数敛散性讨论",
+      "clarity": "partial"
+    },
+    {
+      "id": 214,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "18",
+          "statement": "设 $a>0$，$b>0$，$c>0$，试研究级数 $\\sum\\limits_{n=1}^{\\infty}\\left(\\sqrt[n]{a}-\\frac{\\sqrt[n]{b}+\\sqrt[n]{c}}{2}\\right)$ 的敛散性。",
+          "answer": "当 $\\frac{a^2}{bc}=1$ 时级数收敛，当 $\\frac{a^2}{bc}\\neq1$ 时级数发散",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：设 $u_n=\\sqrt[n]{a}-\\frac{\\sqrt[n]{b}+\\sqrt[n]{c}}{2}=\\frac{1}{2}\\left[2(\\sqrt[n]{a}-1)-(\\sqrt[n]{b}-1)-(\\sqrt[n]{c}-1)\\right]$，则 $\\lim\\limits_{n\\to\\infty}nu_n=\\frac{1}{2}(2\\ln a-\\ln b-\\ln c)=\\frac{1}{2}\\ln\\frac{a^2}{bc}$。当 $\\frac{a^2}{bc}>1$ 时 $\\sum u_n$ 为正项级数，当 $\\frac{a^2}{bc}<1$ 时为负项级数，由比较判别法的极限形式知级数发散；当 $\\frac{a^2}{bc}=1$ 时 $u_n=-\\frac{1}{2}\\sqrt[2n]{c}\\left[\\left(\\frac{b}{c}\\right)^{\\frac{1}{2n}}-1\\right]^2\\le0$，$\\sum(-u_n)$ 为正项级数且 $\\lim\\limits_{n\\to\\infty}\\left[(2n)^2(-u_n)\\right]=\\frac{1}{2}\\left(\\ln\\frac{b}{c}\\right)^2$，由 $\\sum\\frac{1}{4n^2}$ 收敛得 $\\sum u_n$ 收敛。故 $\\frac{a^2}{bc}=1$ 时收敛，$\\frac{a^2}{bc}\\neq1$ 时发散。",
+      "summary": "第18题：比较判别法讨论含 a,b,c 级数的敛散性",
+      "clarity": "good"
+    },
+    {
+      "id": 215,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "17",
+          "statement": "设 $a_n=\\frac{4n+\\sqrt{4n^2-1}}{\\sqrt{2n+1}+\\sqrt{2n-1}}$，$n\\ge1$，$S_n=\\sum\\limits_{k=1}^{n}a_k$，判断级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{(-1)^n}{\\sqrt{n+1}\\,S_n^{p}}$ 的绝对收敛和条件收敛性。",
+          "answer": "$p>\\frac{1}{6}$ 时绝对收敛；$0<p\\le\\frac{1}{6}$ 时条件收敛",
+          "note": "照片中写作「即 $p>\\frac{1}{6}$」，与 $\\frac{3p+1}{2}>1$ 不吻合，疑为 $p>\\frac{1}{3}$（照原文转写）"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：令 $b_n=\\sqrt{2n-1}$，则 $b_{n+1}^2+b_n^2=4n$，$a_n=\\frac{b_{n+1}^2+b_n^2+b_{n+1}b_n}{b_{n+1}+b_n}=\\frac{b_{n+1}^3-b_n^3}{b_{n+1}^2-b_n^2}=\\frac{1}{2}\\left(b_{n+1}^3-b_n^3\\right)$，故 $S_n=\\sum\\limits_{k=1}^{n}a_k=\\frac{1}{2}\\left(b_{n+1}^3-1\\right)=\\frac{1}{2}\\left(\\sqrt{(2n+1)^3}-1\\right)>0$。再由 $\\lim\\limits_{n\\to\\infty}\\frac{n^{\\frac{3p+1}{2}}}{\\sqrt{n+1}\\,S_n^{p}}=\\lim\\limits_{n\\to\\infty}\\left|\\frac{2}{\\sqrt{(2+\\frac{1}{n})^3}-\\frac{1}{\\sqrt{n^3}}}\\right|^{p}=\\frac{1}{\\sqrt{2^p}}$，得 $\\frac{3p+1}{2}>1$ 即 $p>\\frac{1}{6}$ 时收敛，$0<\\frac{3p+1}{2}\\le1$ 即 $0<p\\le\\frac{1}{6}$ 时发散；又 $0<p\\le\\frac{1}{6}$ 时由莱布尼兹定理知 $\\sum\\frac{(-1)^n}{\\sqrt{n+1}S_n^p}$ 收敛。故 $p>\\frac{1}{6}$ 时绝对收敛，$0<p\\le\\frac{1}{6}$ 时条件收敛。",
+      "summary": "第17题完整版：p 判别法加莱布尼兹定敛散性",
+      "clarity": "good"
+    },
+    {
+      "id": 216,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "18",
+          "statement": "设 $a>0$，$b>0$，$c>0$，试研究级数 $\\sum\\limits_{n=1}^{\\infty}\\left(\\sqrt[n]{a}-\\frac{\\sqrt[n]{b}+\\sqrt[n]{c}}{2}\\right)$ 的敛散性。",
+          "answer": "当 $\\frac{a^2}{bc}=1$ 时级数收敛，当 $\\frac{a^2}{bc}\\neq1$ 时级数发散",
+          "note": "与第214页同一题，本页更清晰"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：设 $u_n=\\sqrt[n]{a}-\\frac{\\sqrt[n]{b}+\\sqrt[n]{c}}{2}=\\frac{1}{2}\\left[2(\\sqrt[n]{a}-1)-(\\sqrt[n]{b}-1)-(\\sqrt[n]{c}-1)\\right]$，得 $\\lim\\limits_{n\\to\\infty}nu_n=\\frac{1}{2}(2\\ln a-\\ln b-\\ln c)=\\frac{1}{2}\\ln\\frac{a^2}{bc}$。当 $\\frac{a^2}{bc}>1$ 时 $\\sum u_n$ 为正项级数，当 $\\frac{a^2}{bc}<1$ 时为负项级数，由比较判别法的极限形式知级数发散；当 $\\frac{a^2}{bc}=1$ 时 $u_n=(bc)^{\\frac{1}{2n}}-\\frac{1}{2}\\left(b^{\\frac{1}{n}}+c^{\\frac{1}{n}}\\right)=-\\frac{1}{2}\\sqrt[2n]{c}\\left[\\left(\\frac{b}{c}\\right)^{\\frac{1}{2n}}-1\\right]^2\\le0$，$\\sum(-u_n)$ 为正项级数，$\\lim\\limits_{n\\to\\infty}\\left[(2n)^2(-u_n)\\right]=\\frac{1}{2}\\left(\\ln\\frac{b}{c}\\right)^2$，由 $\\sum\\limits_{n=1}^{\\infty}\\frac{1}{4n^2}$ 收敛得 $\\sum(-u_n)$ 收敛，从而 $\\sum u_n$ 收敛。故 $\\frac{a^2}{bc}=1$ 时收敛，$\\frac{a^2}{bc}\\neq1$ 时发散。",
+      "summary": "第18题清晰版：正负项分类与 $a^2=bc$ 情形的估计",
+      "clarity": "good"
+    },
+    {
+      "id": 217,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "1",
+          "statement": "求幂级数 $\\sum\\limits_{n=1}^{\\infty}\\frac{x^n}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}$ 的收敛域。",
+          "answer": "收敛域为 $x\\in[-1,1)$",
+          "note": "页首标题「三、函数项级数」"
+        },
+        {
+          "label": "1'",
+          "statement": "求 $\\sum\\limits_{n=1}^{\\infty}\\left(1+\\frac{1}{2}+\\cdots+\\frac{1}{n}\\right)x^n$ 的收敛域及和函数。",
+          "answer": "",
+          "note": "页面右上角的附加题（题号写作 1'），拍摄时右缘略有裁切，未见解答"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：记 $a_n=\\frac{1}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}$，由 $\\lim\\limits_{n\\to\\infty}\\left(1+\\frac{1}{2}+\\cdots+\\frac{1}{n}\\right)=+\\infty$，得 $\\lim\\limits_{n\\to\\infty}\\left|\\frac{a_{n+1}}{a_n}\\right|=\\lim\\frac{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n+1}}=1-\\lim\\frac{\\frac{1}{n+1}}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}+\\frac{1}{n+1}}=1$，故收敛半径 $R=1$。当 $x=-1$ 时由莱布尼兹准则知级数收敛；当 $x=1$ 时，由 $1+\\frac{1}{2}+\\cdots+\\frac{1}{n}=C+\\ln n+\\varepsilon_n$（$C$ 为欧拉常数，$\\varepsilon_n$ 为无穷小量）得 $\\lim\\limits_{n\\to\\infty}\\frac{a_n}{1/\\ln n}=1$，故 $\\sum\\limits_{n=1}^{\\infty}\\frac{1}{1+\\frac{1}{2}+\\cdots+\\frac{1}{n}}$ 发散，收敛域为 $x\\in[-1,1)$。",
+      "summary": "函数项级数：以调和和式为分母的幂级数收敛域",
+      "clarity": "good"
+    },
+    {
+      "id": 218,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "2",
+          "statement": "设正项级数 $\\sum\\limits_{n=1}^{\\infty}a_n$ 的部分和为 $s_n$，求级数 $\\sum\\limits_{n=1}^{\\infty}a_ne^{-s_nx}$ 的收敛域。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：a) 若 $\\sum a_n$ 收敛，则 $\\{s_n\\}$ 有界，即 $\\exists M>0$，$\\forall n$ 有 $s_n\\le M$，由 $0\\le a_ne^{-s_nx}\\le a_ne^{s_n|x|}\\le a_ne^{M|x|}$ 及 $\\sum a_n$ 收敛，比较判别法得 $\\sum a_ne^{-s_nx}$ 收敛，即 $x\\in(-\\infty,+\\infty)$ 都收敛。b) 若 $\\sum a_n$ 发散，则 $\\lim\\limits_{n\\to\\infty}s_n=+\\infty$：当 $x\\le0$ 时 $a_ne^{-s_nx}\\ge a_n$，故 $\\sum a_ne^{-s_nx}$ 发散；当 $x>0$ 时 $0\\le a_ne^{-s_nx}=e^{-s_nx}(s_n-s_{n-1})\\le\\int_{s_{n-1}}^{s_n}e^{-tx}dt$，于是 $\\sum\\limits_{n=1}^{\\infty}\\int_{s_{n-1}}^{s_n}e^{-tx}dt=\\int_0^{+\\infty}e^{-tx}dt=\\frac{1}{x}$，故 $\\sum a_ne^{-s_nx}$ 收敛。结论：$\\sum a_n$ 收敛时收敛域为 $(-\\infty,+\\infty)$，$\\sum a_n$ 发散时收敛域为 $(0,+\\infty)$。",
+      "summary": "第2题：由部分和估计求 $\\sum a_ne^{-s_nx}$ 的收敛域",
+      "clarity": "good"
+    },
+    {
+      "id": 219,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "3",
+          "statement": "定义 $S_0=1$，$S_n$ 为某一类 $n\\times n$ 对称矩阵的总数（$n\\ge1$），这类矩阵的元素为非负整数，且 $\\sum\\limits_{i=1}^{n}a_{ij}=1$（$j=1,2,\\cdots,n$），求级数 $\\sum\\limits_{n=0}^{\\infty}S_n\\frac{x^n}{n!}$ 的和函数。",
+          "answer": "",
+          "note": "解答的后半部分见第220页"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：设 $(a_{ij})_{n\\times n}$ 中 $a_{1k}=1$，若 $k=1$ 则有 $S_{n-1}$ 个方法构成这 $n$ 阶矩阵；若 $k\\neq1$，则 $a_{1k}=a_{k1}=1$，删去第一行第 $k$ 行及第一列第 $k$ 列后剩下 $(n-2)\\times(n-2)$ 对称矩阵，得递推 $S_n=S_{n-1}+(n-1)S_{n-2}$。令 $F(x)=\\sum\\limits_{n=0}^{\\infty}S_n\\frac{x^n}{n!}$，$a_n=\\frac{S_n}{n!}$，分 $\\frac{S_{n+1}}{S_n}$ 有界与 $\\lim\\frac{S_{n+1}}{S_n}=\\infty$ 两种情形证明 $\\lim\\limits_{n\\to\\infty}\\frac{a_{n+1}}{a_n}=0$，故级数收敛区间为 $(-\\infty,+\\infty)$。",
+      "summary": "第3题：对称矩阵计数递推与指数型级数的和函数",
+      "clarity": "good"
+    },
+    {
+      "id": 220,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "承接第219页第3题：由 $\\lim\\limits_{n\\to\\infty}\\frac{a_{n+1}}{a_n}=0$ 得级数的收敛区间为 $(-\\infty,+\\infty)$。由 $F'(x)=\\sum\\limits_{n=1}^{\\infty}S_n\\frac{x^{n-1}}{(n-1)!}=\\sum\\limits_{n=1}^{\\infty}\\left[S_{n-1}\\frac{x^{n-1}}{(n-1)!}+(n-1)S_{n-2}\\frac{x^{n-1}}{(n-1)!}\\right]=\\sum\\limits_{n=0}^{\\infty}S_n\\frac{x^n}{n!}+\\sum\\limits_{n=0}^{\\infty}S_n\\frac{x^{n+1}}{n!}=F(x)+xF(x)$，且 $F(0)=S_0=1$，解得 $F(x)=e^{x+\\frac{x^2}{2}}$，$x\\in R$。",
+      "summary": "第3题解的后半：列微分方程得 F(x)=e^(x+x²/2)",
+      "clarity": "good"
+    },
+    {
+      "id": 221,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "4",
+          "statement": "设 $f(x)=\\sum\\limits_{n=1}^{\\infty}\\frac{\\cos nx}{\\sqrt{n^3+n}}$，$F(x)$ 是 $f(x)$ 的一个原函数，$F(0)=0$。证明：$\\frac{\\sqrt{2}}{2}-\\frac{1}{15}<F\\left(\\frac{\\pi}{2}\\right)<\\frac{\\sqrt{2}}{2}$。",
+          "answer": "",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：因 $\\left|\\frac{\\cos nx}{\\sqrt{n^3+n}}\\right|\\le\\frac{1}{\\sqrt{n^3+n}}$，而 $\\sum\\limits_{n=1}^{\\infty}\\frac{1}{\\sqrt{n^3+n}}$ 收敛，故 $\\sum\\limits_{n=1}^{\\infty}\\frac{\\cos nx}{\\sqrt{n^3+n}}$ 在 $R$ 上一致收敛，可逐项积分：$F(x)=\\int_0^xf(t)dt=\\sum\\limits_{n=1}^{\\infty}\\frac{\\sin nx}{n\\sqrt{n^3+n}}$，$F\\left(\\frac{\\pi}{2}\\right)=\\sum\\limits_{k=1}^{\\infty}\\frac{(-1)^{k-1}}{(2k-1)\\sqrt{(2k-1)^3+(2k-1)}}$。由莱布尼兹定理 $F\\left(\\frac{\\pi}{2}\\right)<a_1=\\frac{\\sqrt{2}}{2}$，$|R_2|<a_2=\\frac{1}{3\\sqrt{30}}$，即 $\\left|F\\left(\\frac{\\pi}{2}\\right)-\\frac{\\sqrt{2}}{2}\\right|<\\frac{1}{3\\sqrt{30}}$，故 $\\frac{\\sqrt{2}}{2}>F\\left(\\frac{\\pi}{2}\\right)>\\frac{\\sqrt{2}}{2}-\\frac{1}{3\\sqrt{30}}>\\frac{\\sqrt{2}}{2}-\\frac{1}{15}$。",
+      "summary": "第4题：一致收敛逐项积分，用莱布尼兹余项夹逼估计",
+      "clarity": "good"
+    },
+    {
+      "id": 222,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "5",
+          "statement": "设 $f(x)=\\sum\\limits_{n=0}^{\\infty}a_nx^n$（$|x|<+\\infty$，$a_n>0$），$\\sum\\limits_{n=0}^{\\infty}a_nn!$ 收敛，证明：$\\int_0^{+\\infty}e^{-x}f(x)dx=\\sum\\limits_{n=0}^{\\infty}a_nn!$。",
+          "answer": "",
+          "note": "证明中用到 $\u0393$ 函数"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：由 $e^x=1+x+\\frac{x^2}{2!}+\\cdots+\\frac{x^n}{n!}+\\cdots$ 得当 $x>0$ 时 $e^x>\\frac{x^n}{n!}$，即 $e^{-x}x^n<n!$，从而 $a_ne^{-x}x^n<a_nn!$；因 $\\sum\\limits_{n=0}^{\\infty}a_nn!$ 收敛，由优级数判别法知 $\\sum\\limits_{n=0}^{\\infty}a_ne^{-x}x^n$ 在 $(0,+\\infty)$ 上一致收敛，故 $\\forall A>0$ 有 $\\int_0^A\\sum\\limits_{n=0}^{\\infty}a_ne^{-x}x^ndx=\\sum\\limits_{n=0}^{\\infty}a_n\\int_0^Ae^{-x}x^ndx$；令 $A\\to+\\infty$，得 $\\int_0^{+\\infty}\\sum\\limits_{n=0}^{\\infty}a_ne^{-x}x^ndx=\\sum\\limits_{n=0}^{\\infty}a_n\\int_0^{+\\infty}e^{-x}x^ndx=\\sum\\limits_{n=0}^{\\infty}a_n\\Gamma(n+1)=\\sum\\limits_{n=0}^{\\infty}a_nn!$。",
+      "summary": "第5题：优级数一致收敛，逐项积分化为 Γ(n+1)=n!",
+      "clarity": "good"
+    },
+    {
+      "id": 223,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "6",
+          "statement": "求级数 $\\left(\\sum\\limits_{n=1}^{\\infty}x^n\\right)^3$ 中 $x^{21}$ 的系数。",
+          "answer": "系数 $a_{21}=\\frac{19\\times20}{2}=190$",
+          "note": ""
+        }
+      ],
+      "has_solution": true,
+      "solution": "证（解）：$\\left(\\sum\\limits_{n=1}^{\\infty}x^n\\right)^3=\\left(\\frac{x}{1-x}\\right)^3=\\left(\\frac{1}{1-x}\\right)^3x^3$，$|x|<1$。由 $\\frac{1}{1-x}=\\sum\\limits_{n=0}^{\\infty}x^n$ 及 $\\frac{1}{(1-x)^3}=\\frac{1}{2}\\left(\\frac{1}{1-x}\\right)''=\\sum\\limits_{n=0}^{\\infty}\\frac{(n+1)(n+2)}{2}x^n$，得 $\\left(\\sum\\limits_{n=1}^{\\infty}x^n\\right)^3=\\sum\\limits_{n=0}^{\\infty}\\frac{(n+1)(n+2)}{2}x^{n+3}$，令 $n+3=21$ 即 $n=18$，得 $a_{21}=\\frac{19\\times20}{2}=190$。",
+      "summary": "第6题：用三次方展开式求 x²¹ 的系数为 190",
+      "clarity": "good"
+    },
+    {
+      "id": 224,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "7",
+          "statement": "设 $f(x)=\\frac{1}{1-x-x^2}$，$a_n=\\frac{1}{n!}f^{(n)}(0)$，求证：级数 $\\sum\\limits_{n=0}^{\\infty}\\frac{a_{n+1}}{a_na_{n+2}}$ 收敛，并求其和。",
+          "answer": "",
+          "note": "本页只拍到证明的前半，求和部分被截断"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：由 $f(x)=\\frac{1}{1-x-x^2}$ 得 $1=(1-x-x^2)f(x)$。设 $f(x)=\\sum\\limits_{k=0}^{\\infty}a_kx^k$，其中 $a_k=\\frac{f^{(k)}(0)}{k!}$，代入比较系数：$1=a_0+(a_1-a_0)x+\\sum\\limits_{n=0}^{\\infty}(a_{n+2}-a_{n+1}-a_n)x^{n+2}$，故 $a_0=a_1=1$，$a_{n+2}-a_{n+1}-a_n=0$，即 $a_{n+1}=a_{n+2}-a_n$。（后续求和部分本页未拍到）",
+      "summary": "第7题：由母函数比较系数得 aₙ 递推关系",
+      "clarity": "partial"
+    }
+  ]
+}

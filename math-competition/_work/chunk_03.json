@@ -1,0 +1,117 @@
+{
+"chunk": 3,
+"items": [
+{
+"pid": 33,
+"label": "(5)",
+"statement": "$y''-y=\\sin^2 x$",
+"answer": "",
+"notebook_candidate": ""
+},
+{
+"pid": 34,
+"label": "(6)",
+"statement": "$\\frac{dy}{dx}=\\frac{1}{x\\sin^2(xy)}-\\frac{y}{x}$",
+"answer": "",
+"notebook_candidate": ""
+},
+{
+"pid": 35,
+"label": "(7)",
+"statement": "$\\frac{dy}{dx}+x\\sin2y=xe^{-x^2}\\cos^2 y$",
+"answer": "",
+"notebook_candidate": ""
+},
+{
+"pid": 36,
+"label": "(8)",
+"statement": "$y''+y'-2y=\\frac{e^x}{1+e^x}$",
+"answer": "",
+"notebook_candidate": "分解左端：$y''+y'-2y=(y''+2y')-(y'+2y)=(y'+2y)'-(y'+2y)$。令 $u=y'+2y$，原方程化为一阶线性非齐次方程 $u'-u=\\frac{e^x}{1+e^x}$，其通解为 $u=e^{-\\int(-1)dx}\\left[C_1+\\int\\frac{e^x}{1+e^x}\\cdot e^{\\int(-1)dx}dx\\right]$。"
+},
+{
+"pid": 37,
+"label": "2",
+"statement": "求微分方程 $x^3y''=(y-xy')^2$ 满足初始条件 $y(1)=0,y'(1)=3$ 的解。",
+"answer": "",
+"notebook_candidate": "令 $u=y-xy'$，则原方程化为 $-x^2u'=u^2$，分离变量得 $-\\frac{du}{u^2}=\\frac{dx}{x^2}$，积分得 $\\frac{1}{u}=c-\\frac{1}{x}$。由 $y(1)=0,y'(1)=3$ 知 $c=\\frac{2}{3}$，即 $\\frac{1}{y-xy'}=\\frac{2}{3}-\\frac{1}{x}=\\frac{2x-3}{3x}$，从而 $y'=\\frac{y}{x}-\\frac{3}{2x-3}$。"
+},
+{
+"pid": 38,
+"label": "4",
+"statement": "设有微分方程 $y'+y=f(x)$，其中 $f(x)=\\begin{cases}2,&0\\le x\\le1,\\\\0,&x>1,\\end{cases}$ 试求一连续函数 $y=y(x)$，使适合条件 $y(0)=0$，且在 $(0,1),(1,+\\infty)$ 内满足上述微分方程。",
+"answer": "$y=\\begin{cases}2(1-e^{-x}),&0\\le x\\le1,\\\\2(e-1)e^{-x},&x>1.\\end{cases}$",
+"notebook_candidate": "当 $0\\le x\\le1$ 时 $y'+y=2$，由通解公式 $y=e^{-\\int dx}\\left(\\int2e^{\\int dx}dx+C_1\\right)=2+C_1e^{-x}$，配合 $y(0)=0$ 得 $C_1=-2$，故 $y=2-2e^{-x}$。当 $x>1$ 时 $y'+y=0$，得 $y=C_2e^{-x}$；由 $y$ 的连续性，$\\lim_{x\\to1^-}y=\\lim_{x\\to1^+}y$，即 $2-2e^{-x}=C_2e^{-x}$，得 $C_2=2(e-1)$，故 $y=2(e-1)e^{-x}$。"
+},
+{
+"pid": 39,
+"label": "6",
+"statement": "找出所有可微函数 $f:(0,+\\infty)\\to(0,+\\infty)$，对于这样一个函数，存在 $a>0$，使得对于 $\\forall x>0$，有 $f'\\left(\\frac{a}{x}\\right)=\\frac{x}{f(x)}$。",
+"answer": "$f(x)=\\sqrt{b}\\left(\\frac{x}{\\sqrt{a}}\\right)^{\\frac{a}{b}}$，$b>0$",
+"notebook_candidate": "分析：由 $f'\\left(\\frac{a}{x}\\right)=\\frac{x}{f(x)}$ 得 $f'\\left(\\frac{a}{x}\\right)f(x)=x$，换元得 $f'(x)f\\left(\\frac{a}{x}\\right)=\\frac{a}{x}$。于是构造 $g(x)=f\\left(\\frac{a}{x}\\right)f(x)$，则 $g'(x)=f'(x)f\\left(\\frac{a}{x}\\right)+f'\\left(\\frac{a}{x}\\right)f(x)\\left(-\\frac{a}{x^2}\\right)=\\frac{a}{x}+x\\left(-\\frac{a}{x^2}\\right)=0$，故 $g(x)=b$（$b$ 为常数）。即 $f(x)\\left[\\frac{1}{x}\\cdot\\frac{a}{f'(x)}\\right]=b$，得 $\\frac{f'(x)}{f(x)}=\\frac{a}{bx}$，积分得 $\\ln f(x)=\\frac{a}{b}\\ln x+\\ln c$，即 $f(x)=cx^{\\frac{a}{b}}\\ (c>0)$。再令 $x=a$ 代入 $c^2a^{\\frac{a}{b}}=b$，得 $f(x)=\\sqrt{b}\\left(\\frac{x}{\\sqrt{a}}\\right)^{\\frac{a}{b}}$，$b>0$。"
+},
+{
+"pid": 40,
+"label": "7",
+"statement": "求方程 $y''+4y'+5y=8\\cos x$ 在 $(-\\infty,0)$ 内有界的特解。",
+"answer": "$y^{*}=\\cos x+\\sin x$",
+"notebook_candidate": "此方程属 $f(x)=e^{\\lambda x}\\left[P_l(x)\\cos\\omega x+P_n(x)\\sin\\omega x\\right]$ 型，其中 $\\lambda=0,\\ \\omega=1,\\ P_l(x)=8,\\ P_n(x)=0$。特征方程 $r^2+4r+5=0$，得 $r_{1,2}=-2\\pm i$，对应齐次方程通解为 $Y=e^{-2x}(C_1\\cos x+C_2\\sin x)$。由于 $\\lambda+i\\omega=i$ 不是特征根，故 $k=0$，设 $y^{*}=A\\cos x+B\\sin x$，代入原方程比较系数即得其特解 $y^{*}=\\cos x+\\sin x$。"
+},
+{
+"pid": 41,
+"label": "8",
+"statement": "设 $f(x)$ 在 $[0,+\\infty)$ 上是有界连续函数，证明：方程 $y''+14y'+13y=f(x)$ 的每一个解在 $[0,+\\infty)$ 上都是有界函数。",
+"answer": "",
+"notebook_candidate": "对应齐次方程 $y''+14y'+13y=0$ 的通解为 $y=C_1e^{-x}+C_2e^{-13x}$。又 $y''+14y'+13y=y''+y'+13(y'+y)=f(x)$，令 $y_1=y'+y$，则 $y_1'+13y_1=f(x)$，解得 $y_1=e^{-13x}\\left[\\int_0^x f(t)e^{13t}dt+C_3\\right]$。同理 $y''+14y'+13y=y''+13y'+(y'+13y)=f(x)$，令 $y_2=y'+13y$，则 $y_2'+y_2=f(x)$，解得 $y_2=e^{-x}\\left[\\int_0^x f(t)e^t dt+C_4\\right]$。"
+},
+{
+"pid": 42,
+"label": "11",
+"statement": "设方程 $(2x+1)y''+(4x-2)y'-8y=0$ 有多项式型的特解和形如 $y=e^{mx}$（$m$ 为常数）之特解，求方程的通解。",
+"answer": "",
+"notebook_candidate": "设 $y_1=e^{mx}$，代入原方程得 $(2m^2+4m)x+(m^2-2m-8)=0$，令 $\\begin{cases}2m^2+4m=0,\\\\ m^2-2m-8=0,\\end{cases}$ 解得 $m=-2$，故 $y_1=e^{-2x}$。再设 $y_2=a_nx^n+a_{n-1}x^{n-1}+\\cdots+a_1x+a_0$，代入原方程得 $(4n-8)a_nx^n+\\cdots=0$，从而 $(4n-8)a_n=0$。"
+},
+{
+"pid": 43,
+"label": "13",
+"statement": "解方程 $(x^2+y^2+3)\\frac{dy}{dx}=2x\\left(2y-\\frac{x^2}{y}\\right)$。",
+"answer": "$C(y^2-x^2-1)^2=(y^2-2x^2-3)^3$",
+"notebook_candidate": "原方程变形为 $\\frac{y\\,dy}{x\\,dx}=\\frac{4y^2-2x^2}{x^2+y^2+3}$。令 $U=x^2,\\ V=y^2$，则方程化为 $\\frac{dV}{dU}=\\frac{4V-2U}{U+V+3}$。再令 $U=u+h,\\ V=v+k$，则 $\\frac{dV}{dU}=\\frac{4(v+k)-2(u+h)}{u+v+k+h+3}$，取 $4k-2h=0,\\ k+h=-3$，解得 $k=-1,\\ h=-2$，方程化为齐次方程 $\\frac{dv}{du}=\\frac{4v-2u}{u+v}=\\frac{4\\frac{v}{u}-2}{1+\\frac{v}{u}}$，令 $z=\\frac{v}{u}$。"
+},
+{
+"pid": 44,
+"label": "2",
+"statement": "2.设函数 $f$ 在区域 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$ 上四[?]连续可微，且在区域 $D$ 的边界上为 $0$，如果 $\\left|\\frac{\\partial^4 f}{\\partial x^2\\partial y^2}\\right|\\le 1$，证明 $\\left|\\iint_D f(x,y)[?]\\right|[?]$",
+"answer": "",
+"notebook_candidate": "分析：设 $\\varphi(x)$ 在区间 $[0,1]$ 上具有二阶连续导数，则由分部积分可得 $\\int_0^1\\varphi(x)\\,dx=-\\frac{1}{2}\\int_0^1(x-x^2)\\varphi''(x)\\,dx$。证明：由题设条件，在 $D$ 的边界上 $f(x,y)=0$，于是 $f(0,y)=f(1,y)=f(x,0)=f(x,1)=0$。把 $\\iint_D f(x,y)\\,dxdy$ 写成 $\\int_0^1dy\\left[\\int_0^1f(x,y)\\,dx\\right]$ 后对 $x$ 用上述分部积分公式，得 $-\\frac{1}{2}\\int_0^1\\!\\!\\int_0^1(x-x^2)f_{xx}^{(2)}(x,y)\\,dxdy$，再化为 $-\\frac{1}{2}\\int_0^1(x-x^2)\\,dx\\int_0^1f_{xx}^{(2)}(x,y)\\,dy$。"
+},
+{
+"pid": 45,
+"label": "2",
+"statement": "2.设函数 $f$ 在区域 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$ 上四次连续可微，且在区域 $D$ 的边界上为 $0$，如果 $\\left|\\frac{\\partial^4 f}{\\partial x^2\\partial y^2}\\right|\\le 1$，证明 $\\left|\\iint_D f(x,y)\\,dxdy\\right|\\le\\frac{1}{144}$。",
+"answer": "",
+"notebook_candidate": "证明：设 $g(x,y)=x(1-x)y(1-y)$，$\\frac{\\partial^4 g}{\\partial x^2\\partial y^2}=4$，且 $\\iint_Dx(1-x)y(1-y)\\,dxdy=\\frac{1}{36}$。故 $4\\iint_D f(x,y)\\,dxdy=\\iint_D\\frac{\\partial^4 g}{\\partial x^2\\partial y^2}f\\,dxdy=\\int_0^1\\!\\!\\int_0^1\\frac{\\partial^4 g}{\\partial x^2\\partial y^2}f\\,dxdy=\\int_0^1\\left(\\int_0^1f(x,y)\\,d\\frac{\\partial^3 g}{\\partial x\\partial y^2}\\right)dy$。再对 $x$ 分部积分：$=\\int_0^1f(x,y)\\frac{\\partial^3 g}{\\partial x\\partial y^2}\\Big|_0^1dy-\\int_0^1\\!\\!\\int_0^1\\frac{\\partial^3 g}{\\partial x\\partial y^2}\\frac{\\partial f}{\\partial x}\\,dxdy$，由方框 $f(0,y)=f(1,y)=0$ 得 $=-\\int_0^1\\left(\\int_0^1\\frac{\\partial^3 g}{\\partial x\\partial y^2}\\frac{\\partial f}{\\partial x}\\,dx\\right)dy=-\\int_0^1\\left(\\int_0^1\\frac{\\partial f}{\\partial x}d\\frac{\\partial^2 g}{\\partial y^2}\\right)dy$。"
+},
+{
+"pid": 46,
+"label": "练习",
+"statement": "练习：设 $D=\\{(x,y)\\mid 0\\le x\\le 1,0\\le y\\le 1\\}$，$I=\\iint_D f(x,y)\\,dxdy$，其中函数 $f(x,y)$ 在 $D$ 上有连续的偏导数，对任何 $x,y$ 有 $f(0,y)=f(x,0)=0$，且 $\\left|\\frac{\\partial^2 f}{\\partial x\\partial y}\\right|\\le 1$，证明：$I\\le\\frac{1}{4}$。",
+"answer": "",
+"notebook_candidate": "接上题：$\\iint_D f\\,dxdy=-\\frac{1}{2}\\int_0^1(x-x^2)\\,dx\\left[-\\frac{1}{2}\\int_0^1(y-y^2)f_{xxyy}^{(4)}(x,y)\\,dy\\right]$。这一步对 $y$ 再用一次分部积分，依据方框中 $f(x,0)=f(x,1)=0\\Rightarrow f_{xx}^{(2)}(x,0)=f_{xx}^{(2)}(x,1)=0$、$G(y)=f_{xx}^{(2)}(x,y)\\Rightarrow G(0)=G(1)$。于是 $\\iint_D f\\,dxdy=\\frac{1}{4}\\int_0^1(x-x^2)\\,dx\\int_0^1(y-y^2)f_{xxyy}^{(4)}(x,y)\\,dy$，取绝对值并用 $\\left|f_{xxyy}^{(4)}\\right|\\le 1$，得 $\\le\\frac{1}{4}\\int_0^1(x-x^2)\\,dx\\int_0^1(y-y^2)\\,dy=\\frac{1}{4}\\left[\\int_0^1(x-x^2)\\,dx\\right]^2=\\frac{1}{144}$。"
+},
+{
+"pid": 47,
+"label": "例12",
+"statement": "例12.计算积分 $$I=\\int_0^{2\\pi}d\\varphi\\int_0^{\\pi}e^{\\sin\\theta(\\cos\\varphi-\\sin\\varphi)}\\sin\\theta\\,d\\theta.$$",
+"answer": "$$I=\\sqrt{2}\\pi\\left(e^{\\sqrt{2}}-e^{-\\sqrt{2}}\\right)$$",
+"notebook_candidate": "解：设球面 $\\Sigma:x^2+y^2+z^2=1$，由球面参数方程 $x=\\sin\\theta\\cos\\varphi,\\ y=\\sin\\theta\\sin\\varphi,\\ z=\\cos\\theta$，$dS=\\sin\\theta\\,d\\theta\\,d\\varphi$，故 $I=\\iint_\\Sigma e^{x-y}\\,dS$。设平面 $P_t:\\frac{x-y}{\\sqrt{2}}=t,-1\\le t\\le 1$，原点到该平面距离为 $|t|$，它截 $\\Sigma$ 所得球带面积 $dS(t)=2\\pi\\sqrt{1-t^2}\\cdot\\frac{1}{\\sqrt{1-t^2}}dt=2\\pi\\,dt$（方框：$r(t)=\\sqrt{1-t^2}\\Rightarrow dl=\\sqrt{1+r'^2(t)}\\,dt=\\sqrt{1+\\left(\\frac{1}{2}\\cdot\\frac{-2t}{\\sqrt{1-t^2}}\\right)^2}dt=\\frac{1}{\\sqrt{1-t^2}}dt$）。于是 $I=\\int_{-1}^{1}e^{\\sqrt{2}t}2\\pi\\,dt=\\sqrt{2}\\pi\\left(e^{\\sqrt{2}}-e^{-\\sqrt{2}}\\right)$。"
+},
+{
+"pid": 48,
+"label": "1",
+"statement": "1.计算 $$\\lim_{n\\to\\infty}\\sum_{i=1}^{n}\\sum_{j=1}^{2n}\\frac{2}{n^2}\\left[\\frac{2i+j}{n}\\right],$$ 此处 $[x]$ 是不超过 $x$ 的最大整数。",
+"answer": "$$6$$",
+"notebook_candidate": "解：和式是 $f(x,y)=[x+y]$ 在方形区域 $D:0\\le x\\le 2,0\\le y\\le 2$ 上的一个积分和。将 $x$ 轴上的区间 $n$ 等分、$y$ 轴上的区间 $2n$ 等分，则各小矩形面积 $\\Delta\\sigma_i=\\frac{2}{n^2}$，取 $\\Delta\\sigma_i$ 的右上顶点 $\\left(\\frac{2i}{n},\\frac{j}{n}\\right)$ 的函数值；由于 $f(x,y)$ 在 $D$ 上分片连续，二重积分存在。故极限 $=\\iint_D[x+y]\\,dxdy=\\iint_{D_1}0\\,dxdy+\\iint_{D_2}1\\,dxdy+\\iint_{D_3}2\\,dxdy+\\iint_{D_4}3\\,dxdy=6$（右侧配区域分块示意图）。"
+}
+]
+}

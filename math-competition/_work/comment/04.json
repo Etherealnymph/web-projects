@@ -1,0 +1,85 @@
+{
+"chunk": 4,
+"items": [
+{
+"pid": 49,
+"commentary": "考点是区域可加性加极坐标换元。$D$ 不易直积，补上圆缺块 $D_1$ 凑成矩形 $[-2,0]\\times[0,2]$，矩形上 $\\int_{-2}^0x^2\\mathrm{d}x\\int_0^2y^2\\mathrm{d}y=\\frac{64}{9}$，再减去 $\\iint_{D_1}x^2y^2$。$D_1$ 是 $x^2+(y-1)^2\\le1$ 的左半块，极坐标须把极点挪到 $(0,1)$，取 $x=r\\cos\\theta,\\ y=1+r\\sin\\theta$，极点取错就凑不出 $\\frac{7\\pi}{48}$。",
+"solution_clean": ""
+},
+{
+"pid": 50,
+"commentary": "考点是绝对值二重积分：极坐标下按 $r$ 与分界线拆块。因 $\\frac{x+y}{\\sqrt2}=r\\sin(\\theta+\\frac{\\pi}{4})$，被积函数化为 $|\\sin(\\theta+\\frac{\\pi}{4})-r|\\,r^2$，只有 $\\sin(\\theta+\\frac{\\pi}{4})>0$ 的 $\\theta$ 段才需按 $r=\\sin(\\theta+\\frac{\\pi}{4})$ 再分一段。易错：照搬成 $r=\\sin\\theta$、或按 $\\theta\\in[0,\\pi]$ 分段，段数就错了；结果 $\\frac{9\\pi}{16}$。",
+"solution_clean": ""
+},
+{
+"pid": 51,
+"commentary": "考点是绝对值二重积分与对称性拆分。$x^2+y^2-x-y$ 在 $D_1=D\\cap\\{(x-\\frac12)^2+(y-\\frac12)^2\\le\\frac12\\}$ 上为负、其余为正，故 $I=I_1-2I_2$，其中 $I_1=\\iint_D(x^2+y^2-x-y)=\\frac{\\pi}{2}$。易错：$D_1$ 半径 $\\frac{\\sqrt2}{2}$、圆心 $(\\frac12,\\frac12)$，平移 $u=x-\\frac12,\\ v=y-\\frac12$ 后 $I_2$ 才好算；结果 $I=1+\\frac{3\\pi}{8}$。",
+"solution_clean": ""
+},
+{
+"pid": 52,
+"commentary": "考点是极坐标处理两圆环的公共部分。条件即 $r\\le\\frac{\\cos\\theta}{2}$ 且 $r\\ge\\frac{\\sin\\theta}{4}$，被积函数乘 $r$ 后 $\\int\\frac{\\mathrm{d}r}{r}$ 只给出 $\\ln2$。再用 $y=x$ 对称把 $\\theta$ 限在 $[\\frac{\\pi}{4},\\arctan2]$，令 $t=\\cot\\theta$ 即得 $\\ln^22$。易错：极坐标上下限含 $\\cos\\theta,\\sin\\theta$，写成倒数就与后面 $\\ln(2\\tan\\theta)$ 自相矛盾。",
+"solution_clean": ""
+},
+{
+"pid": 53,
+"commentary": "考点是累次积分加两次换元。含 $\\sqrt x,\\sqrt y$ 先令 $t=\\sqrt y$（$\\mathrm{d}y=2t\\,\\mathrm{d}t$）去根号，再令 $u=\\sqrt x+t$，内层化为 $\\int_{\\sqrt x}^1u^{1/3}(u-\\sqrt x)\\mathrm{d}u$。易错：换元后下限仍是 $\\sqrt x$，别当常数丢掉；末步 $(\\frac9{28})(\\frac6{13})$ 手算易错，结果 $\\frac{2}{13}$。",
+"solution_clean": "令 $t=\\sqrt y$（$\\mathrm{d}y=2t\\,\\mathrm{d}t$），再令 $u=\\sqrt x+t$：\n$I=\\int_0^1\\mathrm{d}x\\int_0^{(1-\\sqrt x)^2}\\sqrt[3]{\\sqrt x+\\sqrt y}\\,\\mathrm{d}y=2\\int_0^1\\mathrm{d}x\\int_{\\sqrt x}^1u^{1/3}(u-\\sqrt x)\\,\\mathrm{d}u$\n$=2\\int_0^1\\Big[\\frac37-\\frac34\\sqrt x+\\frac9{28}x^{7/6}\\Big]\\mathrm{d}x$\n$=2\\Big(\\frac37-\\frac12+\\frac9{28}\\cdot\\frac6{13}\\Big)=\\frac2{13}$。"
+},
+{
+"pid": 54,
+"commentary": "考点是变限积分、交换次序与可微展开。$x\\in(0,1)$ 时 $\\sqrt t\\le x$，$\\int_x^{\\sqrt t}=-\\int_{\\sqrt t}^{x}$，区域化为 $0\\le t\\le u^2,\\ 0\\le u\\le x$，交换次序后用 L'Hôpital 与中值定理得 $-\\lim\\frac{f(\\xi,x)}{x}$。坑：展开 $f\\approx f_x\\xi+f_yx$ 后 $\\xi\\le x^2$ 使 $f_x$ 项消失，只剩 $f_y=1$ 给出 $-1$，漏掉这步容易误以为结果含 $f_x$。",
+"solution_clean": "$x\\in(0,1)$ 时 $\\sqrt t\\le x$，故\n$\\int_0^{x^2}\\!\\mathrm{d}t\\int_x^{\\sqrt t}\\!f(t,u)\\mathrm{d}u=-\\int_0^{x^2}\\!\\mathrm{d}t\\int_{\\sqrt t}^{x}\\!f(t,u)\\mathrm{d}u=-\\int_0^x\\!\\mathrm{d}u\\int_0^{u^2}\\!f(t,u)\\mathrm{d}t$。\n记 $F(u)=\\int_0^{u^2}f(t,u)\\mathrm{d}t$，分母 $1-e^{-x^4/4}\\sim\\frac{x^4}{4}$，由 L'Hôpital 与积分中值定理\n$-\\lim_{x\\to0^+}\\frac{F(x)}{x^3}=-\\lim_{x\\to0^+}\\frac{x^2f(\\xi,x)}{x^3}=-\\lim_{x\\to0^+}\\frac{f(\\xi,x)}{x},\\quad \\xi\\in(0,x^2)$。\n又 $f(\\xi,x)=f_x(0,0)\\xi+f_y(0,0)x+o(\\sqrt{\\xi^2+x^2})$，而 $\\xi\\le x^2$，故极限 $=-f_y(0,0)=-1$。"
+},
+{
+"pid": 55,
+"commentary": "考点是把方向导数型被积函数化成径向导数。$x=r\\cos\\theta,y=r\\sin\\theta$ 时 $\\frac{xf_x+yf_y}{x^2+y^2}=\\frac1r\\frac{\\partial f}{\\partial r}$，再把 $r$ 与面积元中的 $r$ 相消，得 $I_\\varepsilon=\\int_0^{2\\pi}[f(1,\\theta)-f(\\varepsilon,\\theta)]\\mathrm{d}\\theta$。易错：只算到 $-2\\pi f(\\varepsilon\\cos\\theta_0,\\varepsilon\\sin\\theta_0)$ 就停笔，忘了还要令 $\\varepsilon\\to0$ 用连续性，答案应为 $-2\\pi f(0,0)$。",
+"solution_clean": "$x=r\\cos\\theta,\\ y=r\\sin\\theta$ 时 $\\frac{xf_x+yf_y}{x^2+y^2}=\\frac1r\\frac{\\partial f}{\\partial r}$，且 $\\mathrm{d}x\\mathrm{d}y=r\\,\\mathrm{d}r\\mathrm{d}\\theta$，故\n$I_\\varepsilon=\\int_0^{2\\pi}\\!\\mathrm{d}\\theta\\int_\\varepsilon^1\\frac{\\partial f}{\\partial r}\\mathrm{d}r=\\int_0^{2\\pi}\\big[f(1,\\theta)-f(\\varepsilon,\\theta)\\big]\\mathrm{d}\\theta$。\n由边界条件 $f(1,\\theta)=0$，对 $\\int_0^{2\\pi}f(\\varepsilon\\cos\\theta,\\varepsilon\\sin\\theta)\\mathrm{d}\\theta$ 用积分中值定理得\n$I_\\varepsilon=-2\\pi f(\\varepsilon\\cos\\theta_0,\\varepsilon\\sin\\theta_0)$。\n令 $\\varepsilon\\to0^+$，由连续性得 $\\lim_{\\varepsilon\\to0}I_\\varepsilon=-2\\pi f(0,0)$。"
+},
+{
+"pid": 56,
+"commentary": "考点是 Laplace 算子与 Green 第一公式的配合。$xf_x+yf_y=\\nabla f\\cdot\\nabla\\frac{r^2}{2}$，于是 $I=\\frac12\\oint_{r=1}\\frac{\\partial f}{\\partial n}\\mathrm{d}s-\\frac12\\iint_Dr^2e^{-r^2}\\mathrm{d}x\\mathrm{d}y$，其中 $\\oint f_n\\mathrm{d}s=\\iint\\Delta f=\\pi(1-e^{-1})$。易错：极坐标下直接硬积 $f_r$ 走不通（$f$ 未知），必须把 $f$ 的积分换成 $\\Delta f$；结果 $\\frac{\\pi}{2e}$。",
+"solution_clean": ""
+},
+{
+"pid": 57,
+"commentary": "套路同前一题：$\\frac{xf_x+yf_y}{r}=\\frac{\\partial f}{\\partial r}=\\nabla f\\cdot\\nabla r$，用 Green 第一公式得 $\\iint=\\oint_{r=1}\\frac{\\partial f}{\\partial n}\\mathrm{d}s-\\iint r\\Delta f=\\frac{\\pi}{24}-\\frac{\\pi}{28}=\\frac{\\pi}{168}$。易错：$\\nabla r$ 在原点无定义，须挖去 $r=\\varepsilon$ 的小圆，其边界项为 $O(\\varepsilon)$ 会消失；$\\iint_Dx^2y^2=\\frac{\\pi}{24}$ 值得记住。",
+"solution_clean": ""
+},
+{
+"pid": 58,
+"commentary": "考点是极坐标与直角坐标互化。由 $r=\\frac{1}{\\cos\\theta}$ 得 $x=1$，$\\theta\\in[0,\\frac{\\pi}{4}]$ 得 $0\\le y\\le x$，又 $r^2\\cos2\\theta=x^2-y^2$，被积式正好化为 $y\\sqrt{1-x^2+y^2}\\,\\mathrm{d}x\\mathrm{d}y$，对 $y$ 凑微分即可。易错：末步 $\\int_0^1(1-x^2)^{3/2}\\mathrm{d}x=\\int_0^{\\pi/2}\\cos^4t\\,\\mathrm{d}t=\\frac{3\\pi}{16}$，结果 $\\frac13-\\frac{\\pi}{16}$。",
+"solution_clean": "由 $r=\\frac1{\\cos\\theta}$ 得 $x=1$，$\\theta\\in[0,\\frac\\pi4]$ 得 $0\\le y\\le x$，又 $r^2\\cos2\\theta=x^2-y^2$，故\n$I=\\int_0^1\\mathrm{d}x\\int_0^xy\\sqrt{1-x^2+y^2}\\,\\mathrm{d}y=\\frac12\\int_0^1\\mathrm{d}x\\int_0^x\\sqrt{1-x^2+y^2}\\,\\mathrm{d}(1-x^2+y^2)$\n$=\\frac13\\int_0^1\\Big[1-(1-x^2)^{3/2}\\Big]\\mathrm{d}x$。\n其中 $\\int_0^1(1-x^2)^{3/2}\\mathrm{d}x\\overset{x=\\sin t}{=}\\int_0^{\\pi/2}\\cos^4t\\,\\mathrm{d}t=\\frac{3\\pi}{16}$，故 $I=\\frac13-\\frac{\\pi}{16}$。"
+},
+{
+"pid": 59,
+"commentary": "考点是第一型曲面积分与球面面积元素。认出 $I=\\iint_\\Sigma e^{x-y}\\mathrm{d}S$（$\\Sigma$ 为单位球面），再用平面族 $\\frac{x-y}{\\sqrt2}=t$ 截出的球带：其面积恒为 $2\\pi\\,\\mathrm{d}t$，于是化成一元积分。易错：球带面积只与两截面间距有关，与位置无关，不必硬算 $\\iint\\mathrm{d}S$；结果 $\\sqrt2\\pi(e^{\\sqrt2}-e^{-\\sqrt2})$。",
+"solution_clean": "由球面参数式 $x=\\sin\\theta\\cos\\varphi,\\ y=\\sin\\theta\\sin\\varphi,\\ \\mathrm{d}S=\\sin\\theta\\,\\mathrm{d}\\theta\\mathrm{d}\\varphi$ 知 $I=\\iint_\\Sigma e^{x-y}\\,\\mathrm{d}S$，$\\Sigma:x^2+y^2+z^2=1$。\n令平面 $P_t:\\frac{x-y}{\\sqrt2}=t\\ (-1\\le t\\le1)$，它截 $\\Sigma$ 所得球带面积为 $2\\pi\\,\\mathrm{d}t$（Archimedes 定理），故\n$I=\\int_{-1}^1e^{\\sqrt2t}\\cdot2\\pi\\,\\mathrm{d}t=\\frac{2\\pi}{\\sqrt2}\\big(e^{\\sqrt2}-e^{-\\sqrt2}\\big)=\\sqrt2\\pi\\big(e^{\\sqrt2}-e^{-\\sqrt2}\\big)$。"
+},
+{
+"pid": 60,
+"commentary": "考点是曲面积分估值定理。在 $\\Sigma$ 上 $z=\\frac{x^2+y^2}{2}$，故 $x+y+2z+1=(x+\\frac12)^2+(y+\\frac12)^2+\\frac12\\ge\\frac12$，由投影 $x^2+y^2\\le1$ 得 $\\iint_\\Sigma\\mathrm{d}S=\\frac{2\\pi}{3}(2\\sqrt2-1)$，下界即得。上界别用最大值 $\\sqrt{2+\\sqrt2}$ 乘面积（太大），要写 $\\sqrt{1+u+x+y}\\le\\sqrt{1+u}+\\frac{x+y}{2\\sqrt{1+u}}$（$u=x^2+y^2$），乘 $\\mathrm{d}S=\\sqrt{1+u}\\,\\mathrm{d}x\\mathrm{d}y$ 后一次项被对称性消掉，才恰得 $\\frac{3\\pi}{2}$。",
+"solution_clean": ""
+},
+{
+"pid": 61,
+"commentary": "考点是切平面法向量与第一型曲面积分的投影。法向量 $(2x,2y-z,2z-y)\\perp(0,0,1)$ 给出 $y=2z$，与 $S$ 联立即得 $C$；解出上侧 $z=\\frac{y+\\sqrt{4-4x^2-3y^2}}{2}$，投影为椭圆 $x^2+\\frac{3y^2}{4}\\le1$。易错：$\\mathrm{d}S$ 分子 $\\sqrt{4+y^2+z^2-4yz}$ 与被积函数分母恰好抵消，$|y-2z|$ 不能提前丢，最后只剩 $\\iint_D(x+\\sqrt3)\\mathrm{d}x\\mathrm{d}y=2\\pi$。",
+"solution_clean": "法向量 $\\vec n=(2x,2y-z,2z-y)$，切平面 $\\perp xoy$ 面 $\\iff\\vec n\\perp(0,0,1)\\iff y=2z$，故 $C:\\{y=2z,\\ x^2+3z^2=1\\}$。\n从 $S$ 解出 $C$ 上方的部分 $z=\\frac{y+\\sqrt{4-4x^2-3y^2}}{2}$，投影 $D:x^2+\\frac{3y^2}{4}\\le1$；\n由 $z_x=\\frac{2x}{y-2z},\\ z_y=\\frac{2y-z}{y-2z}$ 并结合 $x^2+y^2+z^2-yz=1$ 得\n$\\mathrm{d}S=\\frac{\\sqrt{4+y^2+z^2-4yz}}{|y-2z|}\\,\\mathrm{d}x\\mathrm{d}y$。\n代入后 $|y-2z|$ 与分母相消，$I=\\iint_D(x+\\sqrt3)\\,\\mathrm{d}x\\mathrm{d}y=\\sqrt3\\cdot\\pi\\cdot1\\cdot\\frac{2}{\\sqrt3}=2\\pi$。"
+},
+{
+"pid": 62,
+"commentary": "考点是振荡积分（Riemann 引理）加第一积分中值定理。按 $\\frac1n$ 分小区间，靠 $g$ 的 $1$-周期性把每段积分都换成 $\\frac1n\\int_0^1g$，剩下的 $\\frac1n\\sum f(\\xi_k)$ 正是 Riemann 和。易错：中值公式要求 $g\\ge0$，一般情形须先减去最小值 $m$ 平移，再用线性补回 $m\\int f$；结论对分段连续 $g$ 依旧成立。",
+"solution_clean": "先设 $g\\ge0$，取 $\\xi_k\\in[\\frac{k}{n},\\frac{k+1}{n}]$，由第一积分中值定理与 $g$ 的 $1$-周期性\n$I_n=\\sum_{k=0}^{n-1}f(\\xi_k)\\int_{k/n}^{(k+1)/n}g(nx)\\mathrm{d}x=\\frac1n\\Big(\\int_0^1g(u)\\mathrm{d}u\\Big)\\sum_{k=0}^{n-1}f(\\xi_k)$。\n右端 $\\frac1n\\sum f(\\xi_k)\\to\\int_0^1f$ 是 Riemann 和，故 $\\lim_{n\\to\\infty}I_n=\\int_0^1f\\cdot\\int_0^1g$。\n一般情形取 $m=\\min_{[0,1]}g$，令 $\\tilde g=g-m\\ge0$，则 $\\int f\\tilde g\\to\\int f\\int\\tilde g$，再由 $\\int fg=\\int f\\tilde g+m\\int f$ 即得结论。"
+},
+{
+"pid": 63,
+"commentary": "考点是积分方程与交换积分次序。两边在 $[0,1]$ 上积分，记 $A=\\int_0^1u$，右端二重积分区域为 $0\\le x\\le y\\le1$，交换后是 $\\int_0^1u(y)\\int_0^yu(t)\\mathrm{d}t\\,\\mathrm{d}y=\\frac{A^2}{2}$，故 $A=1+\\frac{\\lambda A^2}{2}$。易错：$A=0$ 会推出 $0=1$，故 $A\\ne0$，于是 $\\lambda=\\frac{2(A-1)}{A^2}$，$\\lambda\\le\\frac12\\iff(A-2)^2\\ge0$。",
+"solution_clean": ""
+},
+{
+"pid": 64,
+"commentary": "考点是幂级数逐项积分加 Wallis 公式。展开后奇次项对 $\\varphi$ 积分为零，偶次项用 $\\cos\\varphi-\\sin\\varphi=\\sqrt2\\cos(\\varphi+\\frac{\\pi}{4})$ 合并，得 $I=4\\pi\\sum\\frac{2^n}{(2n+1)!}$。易错：这个和不是 $e^{\\sqrt2}$ 而是 $\\sinh\\sqrt2$（只剩奇次项），要解 $f'+f=e^x,\\ f(0)=0$ 得 $f=\\frac12(e^x-e^{-x})$，结果 $\\sqrt2\\pi(e^{\\sqrt2}-e^{-\\sqrt2})$。",
+"solution_clean": "展开并逐项积分，奇次项对 $\\varphi$ 的积分为 $0$；令 $n=2m$，用 $\\cos\\varphi-\\sin\\varphi=\\sqrt2\\cos(\\varphi+\\frac{\\pi}{4})$、$\\int_0^{2\\pi}\\cos^{2m}\\varphi\\,\\mathrm{d}\\varphi=\\frac{2\\pi(2m-1)!!}{(2m)!!}$、$\\int_0^{\\pi}\\sin^{2m+1}\\theta\\,\\mathrm{d}\\theta=\\frac{2(2m)!!}{(2m+1)!!}$ 得\n$I=\\sum_{m=0}^{\\infty}\\frac{4\\pi\\,2^m}{(2m+1)!}=2\\sqrt2\\pi\\sum_{m=0}^{\\infty}\\frac{(\\sqrt2)^{2m+1}}{(2m+1)!}$。\n令 $f(x)=\\sum_{m=0}^{\\infty}\\frac{x^{2m+1}}{(2m+1)!}$，由 $f'(x)+f(x)=e^x,\\ f(0)=0$ 得 $f(x)=\\frac12(e^x-e^{-x})$，\n故 $I=2\\sqrt2\\pi f(\\sqrt2)=\\sqrt2\\pi\\big(e^{\\sqrt2}-e^{-\\sqrt2}\\big)$。"
+}
+]
+}

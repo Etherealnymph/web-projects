@@ -1,0 +1,85 @@
+{
+"chunk": 10,
+"items": [
+{
+"pid": 145,
+"commentary": "考点是正项级数比较判别法与莱布尼茨判别法的配合；关键是把 $a_n$ 看成差分：令 $b_n=\\sqrt{2n-1}$，得 $a_n=\\frac{b_{n+1}^3-b_n^3}{2}$，$S_n=\\frac{(2n+1)^{3/2}-1}{2}\\sim\\sqrt2\\,n^{3/2}$，通项阶为 $n^{-\\frac{3p+1}{2}}$，故 $p>\\frac16$ 时绝对收敛。$0<p\\le\\frac16$ 时 $S_n^{-p}$ 单调趋于 0，由莱布尼茨判别法条件收敛；易错处是先估 $S_n$ 的阶再求和，以及忘掉 $p\\le0$ 的边界（$p=0$ 时仍条件收敛）。",
+"solution_clean": "令 $b_n=\\sqrt{2n-1}$，则 $b_{n+1}^2-b_n^2=2$，$b_{n+1}^2+b_n^2=4n$，故\n$a_n=\\frac{b_{n+1}^2+b_{n+1}b_n+b_n^2}{b_{n+1}+b_n}=\\frac{b_{n+1}^3-b_n^3}{b_{n+1}^2-b_n^2}=\\frac{b_{n+1}^3-b_n^3}{2}$。\n求和得 $S_n=\\frac{b_{n+1}^3-1}{2}=\\frac{(2n+1)^{3/2}-1}{2}\\sim\\sqrt2\\,n^{3/2}>0$。\n于是 $\\frac{1}{\\sqrt{n+1}\\,S_n^{p}}\\sim 2^{-p/2}\\,n^{-\\frac{3p+1}{2}}$，由比较判别法，$\\frac{3p+1}{2}>1$ 即 $p>\\frac16$ 时绝对收敛，$0<p\\le\\frac16$ 时绝对值级数发散，$p<0$ 时通项不趋于 0。\n$0<p\\le\\frac16$ 时 $\\{S_n^{-p}\\}$ 单调递减趋于 0，由莱布尼茨定理原级数收敛，故为条件收敛。"
+},
+{
+"pid": 146,
+"commentary": "考点是等价无穷小（泰勒展开）定阶加比较判别法的极限形式；把 $u_n$ 拆成 $u_n=\\frac12\\left[2(\\sqrt[n]{a}-1)-(\\sqrt[n]{b}-1)-(\\sqrt[n]{c}-1)\\right]$，由 $\\sqrt[n]{a}-1\\sim\\frac{\\ln a}{n}$ 得 $nu_n\\to\\frac12\\ln\\frac{a^2}{bc}$，故 $\\frac{a^2}{bc}\\ne1$ 时 $u_n$ 与 $\\frac1n$ 同阶，必发散。临界情形一阶项抵消，必须展开到二阶：$u_n\\sim-\\frac18\\left(\\ln\\frac bc\\right)^2\\frac1{n^2}$，收敛；漏掉这步二阶展开是最常见的失分点。",
+"solution_clean": "记 $u_n=\\sqrt[n]{a}-\\frac{\\sqrt[n]{b}+\\sqrt[n]{c}}{2}=\\frac12\\left[2(\\sqrt[n]{a}-1)-(\\sqrt[n]{b}-1)-(\\sqrt[n]{c}-1)\\right]$，由 $\\sqrt[n]{a}-1\\sim\\frac{\\ln a}{n}$ 得\n$\\lim\\limits_{n\\to\\infty}nu_n=\\frac12(2\\ln a-\\ln b-\\ln c)=\\frac12\\ln\\frac{a^2}{bc}$。\n当 $\\frac{a^2}{bc}\\ne1$ 时 $u_n$ 与 $\\frac1n$ 同阶同号，级数发散。\n当 $\\frac{a^2}{bc}=1$ 时 $u_n=(bc)^{\\frac1{2n}}-\\frac12\\left(b^{\\frac1n}+c^{\\frac1n}\\right)=-\\frac18\\left(\\ln\\frac bc\\right)^2\\frac1{n^2}+o\\left(\\frac1{n^2}\\right)\\le0$，故 $\\sum(-u_n)$ 收敛，原级数收敛。\n结论：$\\frac{a^2}{bc}=1$ 时收敛，$\\frac{a^2}{bc}\\ne1$ 时发散。"
+},
+{
+"pid": 147,
+"commentary": "考点仍是通项阶的估计：先求和再定阶，而不是直接对 $a_n$ 做等价；由 $b_n=\\sqrt{2n-1}$ 得 $S_n=\\frac{(2n+1)^{3/2}-1}{2}\\sim\\sqrt2\\,n^{3/2}$，于是 $\\frac{1}{\\sqrt{n+1}S_n^p}\\sim 2^{-p/2}n^{-\\frac{3p+1}{2}}$，绝对收敛当且仅当 $p>\\frac16$。$0<p\\le\\frac16$ 时用莱布尼茨判别法得条件收敛。易错处：$p=\\frac16$ 是临界值不算绝对收敛，$p<0$ 时通项不趋于 0，$p=0$ 则退化为 $\\sum\\frac{(-1)^n}{\\sqrt{n+1}}$，仍是条件收敛。",
+"solution_clean": "令 $b_n=\\sqrt{2n-1}$，则 $a_n=\\frac{b_{n+1}^3-b_n^3}{b_{n+1}^2-b_n^2}=\\frac12(b_{n+1}^3-b_n^3)$，故 $S_n=\\frac12\\left((2n+1)^{3/2}-1\\right)>0$。\n由 $S_n\\sim\\sqrt2\\,n^{3/2}$ 得 $\\lim\\limits_{n\\to\\infty}n^{\\frac{3p+1}{2}}\\left|\\frac{(-1)^n}{\\sqrt{n+1}\\,S_n^p}\\right|=2^{-p/2}\\ne0$，故绝对收敛 $\\iff\\frac{3p+1}{2}>1\\iff p>\\frac16$。\n$0<p\\le\\frac16$ 时 $\\left\\{\\frac{1}{\\sqrt{n+1}\\,S_n^p}\\right\\}$ 单调递减趋于 0，由莱布尼茨定理级数收敛，而绝对值级数发散，故条件收敛。\n结论：$p>\\frac16$ 时绝对收敛，$0<p\\le\\frac16$ 时条件收敛（$p<0$ 发散）。"
+},
+{
+"pid": 148,
+"commentary": "考点是幂级数收敛半径与端点判别，系数含调和数 $H_n$ 时要用 $H_n=C+\\ln n+o(1)$ 定阶；比值 $\\frac{H_n}{H_{n+1}}\\to1$ 给出 $R=1$，$x=1$ 处 $a_n\\sim\\frac1{\\ln n}$ 而 $\\sum\\frac1{\\ln n}$ 发散。$x=-1$ 处 $\\frac1{H_n}$ 单调递减趋于 0，用莱布尼茨判别法收敛，故收敛域为 $[-1,1)$。易错点是见 $a_n\\to0$ 就断言 $x=1$ 收敛，或只写 $R=1$ 不讨论端点。",
+"solution_clean": "记 $a_n=\\frac{1}{H_n}$，$H_n=1+\\frac12+\\cdots+\\frac1n$。\n由 $\\frac{a_{n+1}}{a_n}=\\frac{H_n}{H_{n+1}}\\to1$ 得收敛半径 $R=1$。\n$x=1$ 时由 $H_n=C+\\ln n+o(1)$ 得 $a_n\\sim\\frac1{\\ln n}$，而 $\\frac1{\\ln n}\\ge\\frac1n$，故 $\\sum a_n$ 发散。\n$x=-1$ 时 $\\frac{1}{H_n}$ 单调递减趋于 0，由莱布尼茨判别法收敛。\n故收敛域为 $[-1,1)$。"
+},
+{
+"pid": 149,
+"commentary": "考点是幂级数求和（先积后导）与收敛域；$H_n\\sim\\ln n$ 只给出 $R=1$，而 $H_n\\to\\infty$ 使 $x=\\pm1$ 处通项都不趋于 0，收敛域只有 $(-1,1)$，不能照搬上一题的 $[-1,1)$。求和的关键是把 $H_n=\\sum_{k\\le n}\\frac1k$ 代入并交换求和次序：$\\sum H_nx^n=\\frac{1}{1-x}\\sum_{k\\ge1}\\frac{x^k}{k}=-\\frac{\\ln(1-x)}{1-x}$。易错处：$x=-1$ 处误用莱布尼茨（$H_n$ 不趋于 0），以及交换次序后漏掉 $\\frac{1}{1-x}$ 因子。",
+"solution_clean": ""
+},
+{
+"pid": 150,
+"commentary": "考点是正项级数部分和、比较判别法与积分估计，核心是用 $s_n$ 的单调性把离散和压成积分；$\\sum a_n$ 收敛时 $s_n\\le M$，$e^{-s_nx}\\le e^{M|x|}$ 比较即得收敛域为 $\\mathbb R$。发散时 $s_n\\to+\\infty$，$x\\le0$ 有 $a_ne^{-s_nx}\\ge a_n$，$x>0$ 时 $a_ne^{-s_nx}\\le\\int_{s_{n-1}}^{s_n}e^{-tx}dt$，求和得控制函数 $\\frac1x$。易错点：忘记 $x=0$ 时通项为 $a_n$ 不趋于 0，或只讨论 $x>0$。",
+"solution_clean": "若 $\\sum a_n$ 收敛，则 $s_n\\le M$，由 $0\\le a_ne^{-s_nx}\\le a_ne^{M|x|}$ 及比较判别法，级数对一切 $x$ 收敛。\n若 $\\sum a_n$ 发散，则 $s_n\\to+\\infty$：$x\\le0$ 时 $a_ne^{-s_nx}\\ge a_n$，级数发散；\n$x>0$ 时 $0\\le a_ne^{-s_nx}=e^{-s_nx}(s_n-s_{n-1})\\le\\int_{s_{n-1}}^{s_n}e^{-tx}\\,dt$，求和得 $\\sum a_ne^{-s_nx}\\le\\int_0^{+\\infty}e^{-tx}dt=\\frac1x$，级数收敛。\n故 $\\sum a_n$ 收敛时收敛域为 $(-\\infty,+\\infty)$，发散时为 $(0,+\\infty)$。"
+},
+{
+"pid": 151,
+"commentary": "考点是对合（对称置换矩阵）的计数与指数型生成函数；列和全为 1 的非负整数对称矩阵即对称置换矩阵，按 $a_{11}=1$ 与 $a_{1k}=a_{k1}=1$ 两类拆出 $S_n=S_{n-1}+(n-1)S_{n-2}$，$S_0=S_1=1$。设 $F(x)=\\sum\\frac{S_n}{n!}x^n$，递推等价于 $F'=(1+x)F$，$F(0)=1$，故和为 $e^{x+\\frac{x^2}{2}}$。易错处：把矩阵当成一般 $0$-$1$ 矩阵硬数，或只在递推上打转，忘记用 EGF 吸收 $n-1$ 因子。",
+"solution_clean": ""
+},
+{
+"pid": 152,
+"commentary": "考点是函数项级数的一致收敛、逐项积分与交错级数余项估计；由 $\\left|\\frac{\\cos nx}{\\sqrt{n^3+n}}\\right|\\le n^{-3/2}$ 及 Weierstrass 判别法可逐项积分，$F\\left(\\frac\\pi2\\right)$ 只剩奇数项，成为交错级数，首项为 $\\frac{\\sqrt2}{2}$、$a_2=\\frac{1}{3\\sqrt{30}}$。由莱布尼茨余项 $|R_1|\\le a_2<\\frac1{15}$ 即得双边夹逼。易错处：不先证一致收敛就换序，以及把 $a_2$ 的分母算成 $3\\sqrt{30}$ 之外的值，导致常数配不上。",
+"solution_clean": "由 $\\left|\\frac{\\cos nx}{\\sqrt{n^3+n}}\\right|\\le\\frac{1}{n^{3/2}}$ 及 Weierstrass 判别法，$f$ 在 $\\mathbb R$ 上一致收敛，可逐项积分：\n$F(x)=\\sum\\limits_{n=1}^{\\infty}\\frac{\\sin nx}{n\\sqrt{n^3+n}}$，故 $F\\left(\\frac\\pi2\\right)=\\sum\\limits_{k=1}^{\\infty}\\frac{(-1)^{k-1}}{(2k-1)\\sqrt{(2k-1)^3+(2k-1)}}$。\n这是交错级数，$a_1=\\frac{1}{\\sqrt2}=\\frac{\\sqrt2}{2}$，$a_2=\\frac{1}{3\\sqrt{30}}$，由莱布尼茨余项估计\n$\\left|F\\left(\\frac\\pi2\\right)-\\frac{\\sqrt2}{2}\\right|\\le a_2=\\frac{1}{3\\sqrt{30}}<\\frac{1}{15}$。\n故 $\\frac{\\sqrt2}{2}-\\frac{1}{15}<F\\left(\\frac\\pi2\\right)<\\frac{\\sqrt2}{2}$（严格不等号由余项符号给出）。"
+},
+{
+"pid": 153,
+"commentary": "考点是非负函数项级数的逐项积分与 $\\Gamma$ 函数；由 $e^x>\\frac{x^n}{n!}$ 得 $e^{-x}x^n<n!$，以 $\\sum a_nn!$ 为优级数即可在 $(0,+\\infty)$ 上一致收敛，逐项积分后用 $\\int_0^{+\\infty}e^{-x}x^ndx=n!$ 收尾。易错处：不验证一致收敛（或单调收敛）就直接交换积分与求和，而 $a_n>0$ 与 $\\sum a_nn!$ 收敛正是换序的关键；也别忘了 $\\Gamma(n+1)=n!$ 这一步。",
+"solution_clean": "由 $e^x>\\frac{x^n}{n!}$（$x>0$）得 $e^{-x}x^n<n!$，故 $0\\le a_ne^{-x}x^n\\le a_nn!$。\n因 $\\sum a_nn!$ 收敛，由优级数判别法 $\\sum\\limits_{n=0}^{\\infty}a_ne^{-x}x^n$ 在 $(0,+\\infty)$ 上一致收敛，从而对任意 $A>0$\n$\\int_0^A\\sum\\limits_{n=0}^{\\infty}a_ne^{-x}x^n\\,dx=\\sum\\limits_{n=0}^{\\infty}a_n\\int_0^Ae^{-x}x^n\\,dx$。\n令 $A\\to+\\infty$，由 $\\int_0^{+\\infty}e^{-x}x^n\\,dx=\\Gamma(n+1)=n!$ 得\n$\\int_0^{+\\infty}e^{-x}f(x)\\,dx=\\sum\\limits_{n=0}^{\\infty}a_nn!$。"
+},
+{
+"pid": 154,
+"commentary": "考点是幂级数乘法与组合计数（隔板法）；$\\left(\\sum_{n\\ge1}x^n\\right)^3=\\frac{x^3}{(1-x)^3}=x^3\\sum\\frac{(n+1)(n+2)}{2}x^n$，令 $n+3=21$ 即 $n=18$，系数为 $\\frac{19\\cdot20}{2}=190$。易错处：忘掉开头的 $x^3$ 造成整体错位（易误算成 $\\frac{21\\cdot22}{2}$），或把 $\\frac{1}{(1-x)^3}$ 的系数记错；记住 $\\frac{x^k}{(1-x)^m}$ 中 $x^N$ 的系数是 $\\frac{(N-k+m-1)!}{(N-k)!(m-1)!}$。",
+"solution_clean": "$\\left(\\sum\\limits_{n=1}^{\\infty}x^n\\right)^3=\\left(\\frac{x}{1-x}\\right)^3=\\frac{x^3}{(1-x)^3}$。\n由 $\\frac{1}{(1-x)^3}=\\frac12\\left(\\frac{1}{1-x}\\right)''=\\sum\\limits_{n=0}^{\\infty}\\frac{(n+1)(n+2)}{2}x^n$ 得\n$\\left(\\sum\\limits_{n=1}^{\\infty}x^n\\right)^3=\\sum\\limits_{n=0}^{\\infty}\\frac{(n+1)(n+2)}{2}x^{n+3}$。\n令 $n+3=21$，即 $n=18$，得 $a_{21}=\\frac{19\\cdot20}{2}=190$。"
+},
+{
+"pid": 155,
+"commentary": "考点是生成函数（Fibonacci 型递推）与裂项相消；由 $1=(1-x-x^2)\\sum a_nx^n$ 比较系数得 $a_0=a_1=1$、$a_{n+2}=a_{n+1}+a_n$，随后注意 $\\frac{a_{n+1}}{a_na_{n+2}}=\\frac1{a_n}-\\frac1{a_{n+2}}$，部分和 $=\\frac1{a_0}+\\frac1{a_1}-\\frac1{a_N}-\\frac1{a_{N+1}}\\to2$。易错处：先写 Binet 通项再放缩，越算越乱；另外必须说明 $a_n\\to\\infty$ 才能让两个余项消失。",
+"solution_clean": ""
+},
+{
+"pid": 156,
+"commentary": "考点是柯西收敛准则与 Abel 分部求和；把通项看成 $\\frac{u_n-u_{n+1}}{n}$（$u_n=\\cos nx$），分部求和后除首项外只剩 $\\frac{\\cos(n+1)x}{n(n+1)}$ 型与端点项，用 $\\sum\\frac{1}{n(n+1)}$ 收敛完成估计，得 $|S_{n+p}-S_n|\\le\\frac{2}{n+1}\\to0$。易错处：直接对 $\\sum\\frac{\\cos nx}{n}$ 用 Dirichlet 而忽略题目的差分结构，或放缩时把 $\\frac{1}{n(n+1)}$ 误当发散级数。",
+"solution_clean": "记 $u_n=\\cos nx$，则部分和 $S_N=\\sum\\limits_{n=1}^{N}\\frac{u_n-u_{n+1}}{n}$，分部求和得\n$S_N=u_1-\\sum\\limits_{n=2}^{N}\\frac{u_n}{n(n-1)}-\\frac{u_{N+1}}{N}$。\n对 $p>0$，$|S_{N+p}-S_N|\\le\\frac{1}{N+1}+\\frac{1}{N+p}+\\sum\\limits_{n=N+1}^{N+p-1}\\frac{1}{n(n+1)}=\\frac{2}{N+1}\\to0$。\n由柯西收敛准则，原级数对一切 $x$ 收敛。"
+},
+{
+"pid": 157,
+"commentary": "考点是傅里叶系数与两个不可公度周期的配合；在 $[-1,1]$ 上取 $f$ 的傅里叶系数，用 $\\sqrt3$ 是周期作代换并把 $\\cos n\\pi(t-\\sqrt3)$ 展开，得 $a_n=\\cos(n\\pi\\sqrt3)a_n+\\sin(n\\pi\\sqrt3)b_n$ 及类似式，系数矩阵行列式 $2(1-\\cos n\\pi\\sqrt3)\\ne0$（$\\sqrt3$ 无理），故所有系数为零。$f$ 可导保证傅里叶级数收敛于 $f$，于是 $f$ 为常数。易错处：只说存在任意小周期而不交代连续性，或漏证 $n\\pi\\sqrt3\\ne2k\\pi$。",
+"solution_clean": ""
+},
+{
+"pid": 158,
+"commentary": "考点是递推数列的生成函数解法（一阶线性方程加柯西乘积）；设 $f(x)=\\sum a_{n+1}x^n$，把 $(n+1)a_{n+2}=na_{n+1}+a_n$ 乘 $x^n$ 求和，得 $f'=x(f'+f)$，即 $f=\\frac{e^{-x}}{1-x}$，再展开得 $a_n=\\sum_{k=0}^{n-1}\\frac{(-1)^k}{k!}\\to e^{-1}$。易错处：$f(0)=a_1=1$ 用来定常数不能丢；另外注意 $a_n$ 只加到 $n-1$ 项，下标容易错位成 $\\sum_{k=0}^{n}$。",
+"solution_clean": "设 $f(x)=\\sum\\limits_{n=0}^{\\infty}a_{n+1}x^n$。由 $(n+1)a_{n+2}=na_{n+1}+a_n$，两边乘 $x^n$ 求和：\n$f'(x)=\\sum\\limits_{n=0}^{\\infty}(n+1)a_{n+2}x^n=\\sum\\limits_{n=0}^{\\infty}na_{n+1}x^n+\\sum\\limits_{n=0}^{\\infty}a_nx^n=xf'(x)+xf(x)$。\n于是 $(1-x)f'=xf$，即 $\\frac{f'}{f}=\\frac{x}{1-x}$，由 $f(0)=a_1=1$ 解得 $f(x)=\\frac{e^{-x}}{1-x}$。\n柯西乘积：$f(x)=\\left(\\sum\\limits_{n=0}^{\\infty}x^n\\right)\\left(\\sum\\limits_{k=0}^{\\infty}\\frac{(-1)^k}{k!}x^k\\right)=\\sum\\limits_{n=0}^{\\infty}\\left(\\sum\\limits_{k=0}^{n}\\frac{(-1)^k}{k!}\\right)x^n$，\n故 $a_n=\\sum\\limits_{k=0}^{n-1}\\frac{(-1)^k}{k!}$，$\\lim\\limits_{n\\to\\infty}a_n=\\sum\\limits_{k=0}^{\\infty}\\frac{(-1)^k}{k!}=e^{-1}$。"
+},
+{
+"pid": 159,
+"commentary": "考点是构造幂级数把分母中的 $k$ 消掉，再逐次积分；注意 $x$ 的幂次要与分母配平——用 $x^{4k+4}$ 求四阶导，$(4k+4)(4k+3)(4k+2)(4k+1)=8(k+1)(2k+1)(4k+1)(4k+3)$ 恰好约去分母，得 $F^{(4)}=\\frac{8}{1-x^4}$，$I=F(1)$。再把四重积分化为 $\\frac43\\int_0^1\\frac{(1-x)^2}{(1+x)(1+x^2)}dx$ 并拆项。易错处：幂次取成 $x^{4k+1}$ 导致求导后出现负幂，以及有理分式拆项系数算错。",
+"solution_clean": "作幂级数 $F(x)=\\sum\\limits_{k=0}^{\\infty}\\frac{x^{4k+4}}{(k+1)(2k+1)(4k+1)(4k+3)}$，则 $F(1)=I$。\n因 $(4k+4)(4k+3)(4k+2)(4k+1)=8(k+1)(2k+1)(4k+1)(4k+3)$，四阶求导得 $F^{(4)}(x)=8\\sum\\limits_{k=0}^{\\infty}x^{4k}=\\frac{8}{1-x^4}$，且 $F(0)=F'(0)=F''(0)=F'''(0)=0$。\n故 $I=F(1)=8\\int_0^1\\frac{(1-x)^3}{6(1-x^4)}\\,dx=\\frac43\\int_0^1\\frac{(1-x)^2}{(1+x)(1+x^2)}\\,dx$。\n由 $\\frac{(1-x)^2}{(1+x)(1+x^2)}=\\frac{2}{1+x}-\\frac{x}{1+x^2}-\\frac{1}{1+x^2}$ 得\n$I=\\frac43\\left[2\\ln2-\\frac12\\ln2-\\frac\\pi4\\right]=2\\ln2-\\frac\\pi3$。"
+},
+{
+"pid": 160,
+"commentary": "考点是收敛半径的定阶估计；系数 $c_n=\\frac1{2^n}-\\sin\\frac1{2^n}\\sim\\frac16\\left(\\frac1{2^n}\\right)^3=\\frac1{6\\cdot8^n}$，故 $R=8$。也可用比值：令 $t=2^{-n}$，$\\frac{c_{n+1}}{c_n}=\\frac{\\frac t2-\\sin\\frac t2}{t-\\sin t}\\to\\frac18$。易错处：只用 $\\sin$ 的一阶展开会看不出 $c_n$ 的阶（甚至误判 $R=+\\infty$），以及忘查 $x=\\pm8$ 处通项不趋于 0——收敛域实为 $(-8,8)$。",
+"solution_clean": "记 $c_n=\\frac1{2^n}-\\sin\\frac1{2^n}>0$，令 $t=\\frac1{2^n}$，则 $c_n=t-\\sin t\\sim\\frac{t^3}{6}=\\frac1{6\\cdot8^n}$。\n由 $\\frac{c_{n+1}}{c_n}=\\frac{\\frac t2-\\sin\\frac t2}{t-\\sin t}\\to\\frac18$（等价无穷小 $t-\\sin t\\sim\\frac{t^3}{6}$），得收敛半径 $R=8$。\n当 $x=\\pm8$ 时 $|c_nx^n|\\sim\\frac16\\ne0$，通项不趋于 0，级数发散。\n故 $R=8$，收敛域为 $(-8,8)$。"
+}
+]
+}

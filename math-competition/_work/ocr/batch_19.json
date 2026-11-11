@@ -1,0 +1,219 @@
+{
+  "batch": 19,
+  "date": "2026-10-17",
+  "pages": [
+    {
+      "id": 240,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "1",
+          "statement": "求曲面 $z=xy$，$x+y+z=1$，$x=0$，$y=0$，$z=0$ 所围区域的体积。",
+          "answer": "$V=\\frac{17}{12}-2\\ln 2$",
+          "note": ""
+        },
+        {
+          "label": "2",
+          "statement": "当 $(x,y)\\to(0,0)$ 时，$f(\\pi\\sqrt[3]{xy}+\\cos x,\\,e^{xy}+\\cos y)=1+x^{2}+y^{2}+o(x^{2}+y^{2})$，$f(x,y)$ 在 $(1,1)$ 处可微，计算 $f_x(1,1)$，$f_y(1,1)$ 的值。",
+          "answer": "",
+          "note": "原图第二个分量写作 $e^{xy}+\\cos y$，但解答中令 $y=0$ 得 $f(\\cos x,1)$，疑为 $e^{xy}\\cos y$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "第1题取 $\\Omega=\\{(x,y,z)\\mid (x,y)\\in D,\\ 0\\le z\\le\\min\\{xy,1-x-y\\}\\}$，$D=\\{(x,y)\\mid x\\ge0,y\\ge0,x+y\\le1\\}$，分两段累次积分得 $V=(4\\ln2-\\frac{11}{4})+(\\frac{25}{6}-6\\ln2)=\\frac{17}{12}-2\\ln2$。第2题用偏导数定义 $f_x(1,1)=\\lim_{\\Delta x\\to0}\\frac{f(1+\\Delta x,1)-f(1,1)}{\\Delta x}$，并由可微得连续、$f(1,1)=1$，令 $y=0$ 得 $f(\\cos x,1)=1+x^{2}+o(x^{2})$。",
+      "summary": "第1、2题：二重积分求体积与偏导数定义",
+      "clarity": "good"
+    },
+    {
+      "id": 241,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "1",
+          "statement": "求曲面 $z=xy$，$x+y+z=1$，$x=0$，$y=0$，$z=0$ 所围区域的体积。",
+          "answer": "$V=\\frac{17}{12}-2\\ln 2$",
+          "note": "本页与编号 240 的页面为同一张幻灯片，仅取景略有差异。"
+        },
+        {
+          "label": "2",
+          "statement": "当 $(x,y)\\to(0,0)$ 时，$f(\\pi\\sqrt[3]{xy}+\\cos x,\\,e^{xy}+\\cos y)=1+x^{2}+y^{2}+o(x^{2}+y^{2})$，$f(x,y)$ 在 $(1,1)$ 处可微，计算 $f_x(1,1)$，$f_y(1,1)$ 的值。",
+          "answer": "",
+          "note": "原图第二个分量写作 $e^{xy}+\\cos y$，疑为 $e^{xy}\\cos y$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "第1题用切片法，立体 $\\Omega$ 满足 $0\\le z\\le\\min\\{xy,1-x-y\\}$，在 $D:\\ x\\ge0,y\\ge0,x+y\\le1$ 上分两段积分得 $V=\\frac{17}{12}-2\\ln2$。第2题按偏导数定义写出 $f_x(1,1)$、$f_y(1,1)$ 的极限式，由 $f$ 在 $(1,1)$ 可微得连续、$f(1,1)=1$，令 $y=0$ 得 $f(\\cos x,1)=1+x^{2}+o(x^{2})$。",
+      "summary": "第1、2题（同 240 幻灯片）：体积与偏导数",
+      "clarity": "good"
+    },
+    {
+      "id": 242,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "3",
+          "statement": "计算广义积分 $\\displaystyle\\int_0^{+\\infty}\\frac{1}{\\sqrt{t}}e^{-\\left(t+\\frac{1}{t}\\right)}dt$。",
+          "answer": "$e^{-2}\\sqrt{\\pi}$",
+          "note": "本页开头为第2题收尾：由 $f(\\cos x,1)=1+x^{2}+o(x^{2})$，取 $\\Delta x=\\cos x-1$，得 $f_x(1,1)=-2$，同理 $f_y(1,1)=-2$；该行分母负号在原图中不清晰。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "第3题令 $\\sqrt{t}=x$，原式 $=2\\int_0^{+\\infty}e^{-(x^{2}+\\frac{1}{x^{2}})}dx=2e^{2}\\int_0^{+\\infty}e^{-(x+\\frac{1}{x})^{2}}dx$。再令 $u=x+\\frac{1}{x}$，$u\\ge2$，反解得 $x=\\frac{u\\pm\\sqrt{u^{2}-4}}{2}$，并分 $x\\in(0,1]$ 取 $\\frac{u-\\sqrt{u^{2}-4}}{2}$、$x\\in[1,+\\infty)$ 取 $\\frac{u+\\sqrt{u^{2}-4}}{2}$ 讨论。",
+      "summary": "第2题收尾与第3题：换元计算广义积分",
+      "clarity": "good"
+    },
+    {
+      "id": 243,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "4",
+          "statement": "设 $f$ 在 $[0,1]$ 上有二阶导数，并且 $f(0)=f'(0)=0$，求证：$\\exists\\xi\\in(0,1)$，$f''(\\xi)=\\frac{2f(\\xi)}{(1-\\xi)^{2}}$。",
+          "answer": "",
+          "note": "本页开头为第3题收尾：$2e^{2}\\int_0^{+\\infty}e^{-(x+\\frac{1}{x})^{2}}dx=2e^{2}\\int_2^{+\\infty}e^{-u^{2}}d\\left(\\frac{u+\\sqrt{u^{2}-4}}{2}-\\frac{u-\\sqrt{u^{2}-4}}{2}\\right)=2e^{2}\\int_2^{+\\infty}e^{-u^{2}}d(\\sqrt{u^{2}-4})=2e^{-2}\\int_0^{+\\infty}e^{-v^{2}}dv=e^{-2}\\sqrt{\\pi}$；旁注 $\\int_0^{+\\infty}e^{-x^{2}}dx=\\frac{\\sqrt{\\pi}}{2}$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：构造辅助函数 $g(x)=(x-1)^{2}f'(x)-2f(x)(x-1)$，则 $g(0)=g(1)=0$，满足罗尔定理，故 $\\exists\\xi\\in(0,1)$，使得 $f''(\\xi)=\\frac{2f(\\xi)}{(1-\\xi)^{2}}$。",
+      "summary": "第3题收尾与第4题：罗尔定理证等式",
+      "clarity": "good"
+    },
+    {
+      "id": 244,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "4",
+          "statement": "设 $f$ 在 $[0,1]$ 上有二阶导数，并且 $f(0)=f'(0)=0$，求证：$\\exists\\xi\\in(0,1)$，$f''(\\xi)=\\frac{2f(\\xi)}{(1-\\xi)^{2}}$。",
+          "answer": "",
+          "note": "本页与编号 243 的页面为同一张幻灯片；开头仍是第3题收尾 $2e^{2}\\int_2^{+\\infty}e^{-u^{2}}d(\\sqrt{u^{2}-4})=2e^{-2}\\int_0^{+\\infty}e^{-v^{2}}dv=e^{-2}\\sqrt{\\pi}$，旁注 $\\int_0^{+\\infty}e^{-x^{2}}dx=\\frac{\\sqrt{\\pi}}{2}$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：构造辅助函数 $g(x)=(x-1)^{2}f'(x)-2f(x)(x-1)$，由 $g(0)=g(1)=0$ 用罗尔定理，即得 $\\exists\\xi\\in(0,1)$，$f''(\\xi)=\\frac{2f(\\xi)}{(1-\\xi)^{2}}$。",
+      "summary": "第3题收尾与第4题（同 243 幻灯片）",
+      "clarity": "good"
+    },
+    {
+      "id": 245,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "5",
+          "statement": "求 $\\iint_{\\Sigma}(ax^{2}+by^{2}+cz^{2})dS$，其中 $\\Sigma:\\ x^{2}+y^{2}+z^{2}=2z$。",
+          "answer": "$\\frac{4}{3}\\pi(a+b+c)+4\\pi c$",
+          "note": "图中右下附注：$cz^{2}=cz(z-1)+c(z-1)+c$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "令 $F=x^{2}+y^{2}+z^{2}-2z=0$，则 $\\Sigma$ 外侧法向量 $\\mathbf{n}=(2x,2y,2z-2)$，方向余弦 $\\mathbf{n}^{0}=(x,y,z-1)$。用 $cz^{2}=cz(z-1)+c(z-1)+c$ 拆项后化为第二型曲面积分：$\\iint_{\\Sigma}ax\\,dydz+by\\,dzdx+cz\\,dxdy+\\iint_{\\Sigma}c\\,dxdy+4\\pi c$，再用高斯公式得 $\\iiint_V(a+b+c)dV+\\iiint_V0\\,dV+4\\pi c=\\frac{4}{3}\\pi(a+b+c)+4\\pi c$。",
+      "summary": "第5题：化为第二型曲面积分并用高斯公式",
+      "clarity": "good"
+    },
+    {
+      "id": 246,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "二",
+          "statement": "证明：当 $x\\ge0$，$y\\ge0$ 时，$1+x+y+xy\\le(x+1)\\ln(x+1)+e^{y}$。",
+          "answer": "",
+          "note": "题号写作「二、」"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：对于固定的 $y$，考虑函数 $f(x)=(x+1)\\ln(x+1)-xy-x$，$f'(x)=\\ln(x+1)-y$，知 $f(x)$ 在 $[0,e^{y}-1]$ 中递减、在 $[e^{y}-1,+\\infty)$ 上递增，因而 $f(x)\\ge f(e^{y}-1)=1+y-e^{y}$，即 $(x+1)\\ln(x+1)-xy-x\\ge1+y-e^{y}$，移项即 $1+x+y+xy\\le(x+1)\\ln(x+1)+e^{y}$。",
+      "summary": "二：固定 $y$ 讨论 $f(x)$ 单调性证不等式",
+      "clarity": "good"
+    },
+    {
+      "id": 247,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "三",
+          "statement": "计算 $\\oint_{\\Gamma}|\\sqrt{3}y-x|dx-5z\\,dz$，曲线 $\\Gamma:\\begin{cases}x^{2}+y^{2}+z^{2}=8\\\\ x^{2}+y^{2}=2z\\end{cases}$ 从 $z$ 轴正向往坐标原点看去取逆时针方向。",
+          "answer": "$0$",
+          "note": "题号写作「三、」"
+        }
+      ],
+      "has_solution": true,
+      "solution": "曲线 $\\Gamma$ 可表示为 $\\begin{cases}z=2\\\\ x^{2}+y^{2}=4\\end{cases}$，参数方程为 $x=2\\cos\\theta$，$y=2\\sin\\theta$，$z=2$，$0\\le\\theta\\le2\\pi$。因 $z$ 为常数，$dz=0$，原式 $=\\oint_{\\Gamma}|\\sqrt{3}y-x|dx=-\\int_0^{2\\pi}|2\\sqrt{3}\\sin\\theta-2\\cos\\theta|2\\sin\\theta\\,d\\theta=-8\\int_0^{2\\pi}|\\frac{\\sqrt{3}}{2}\\sin\\theta-\\frac{1}{2}\\cos\\theta|\\sin\\theta\\,d\\theta=-8\\int_0^{2\\pi}|\\cos(\\theta+\\frac{\\pi}{3})|\\sin\\theta\\,d\\theta=-8\\int_0^{2\\pi}|\\cos\\theta|\\sin\\theta\\,d\\theta=-8\\int_{-\\pi}^{\\pi}|\\cos\\theta|\\sin\\theta\\,d\\theta=0$。",
+      "summary": "三：曲线积分的参数化与对称性求值",
+      "clarity": "good"
+    },
+    {
+      "id": 248,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "四",
+          "statement": "设函数 $f(x)$ 有连续导数，且存在常数 $a_1,a_2,b_1,b_2$ 使得 $\\lim_{x\\to-\\infty}[f(x)-(a_1x+b_1)]=0$，$\\lim_{x\\to+\\infty}[f(x)-(a_2x+b_2)]=0$，其中 $a_1<a_2$，证明：对 $\\forall c\\in(a_1,a_2)$，$\\exists\\xi$，使得 $f'(\\xi)=c$。",
+          "answer": "",
+          "note": "题号写作「四、」；原图上、下极限处标为 $x\\to-\\infty$ 与 $x\\to+\\infty$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：由题意知 $\\lim_{x\\to-\\infty}\\frac{f(x)-f(0)}{x}=a_1<c$，$\\lim_{x\\to+\\infty}\\frac{f(x)-f(0)}{x}=a_2>c$，于是 $\\exists x_1<0,x_2>0$ 使 $\\frac{f(x_1)-f(0)}{x_1}<c$，$\\frac{f(x_2)-f(0)}{x_2}>c$。$f(x)$ 在 $[x_1,0]$、$[0,x_2]$ 上分别满足拉氏定理，得 $\\xi_1\\in(x_1,0)$、$\\xi_2\\in(0,x_2)$ 使 $f'(\\xi_1)<c<f'(\\xi_2)$；又 $f'(x)\\in C[x_1,x_2]$，由连续函数的介值定理得 $\\exists\\xi\\in(x_1,x_2)$，$f'(\\xi)=c$。",
+      "summary": "四：中值定理与介值定理证明导数值可达",
+      "clarity": "good"
+    },
+    {
+      "id": 249,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "五",
+          "statement": "设函数 $f(x)$ 在 $[0,1]$ 上单调递减，证明：对 $\\forall\\alpha\\in(0,1)$，$\\int_0^{\\alpha}f(x)dx\\ge\\alpha\\int_0^{1}f(x)dx$。",
+          "answer": "",
+          "note": "题号写作「五、」"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：对 $\\forall\\alpha\\in(0,1)$，$\\int_0^{\\alpha}f(x)dx\\ge\\int_0^{\\alpha}f(\\alpha)dx=\\alpha f(\\alpha)$，即 $\\frac{\\int_0^{\\alpha}f(x)dx}{\\alpha}\\ge f(\\alpha)$；又 $\\int_{\\alpha}^{1}f(x)dx\\le\\int_{\\alpha}^{1}f(\\alpha)dx=(1-\\alpha)f(\\alpha)$，即 $\\frac{\\int_{\\alpha}^{1}f(x)dx}{1-\\alpha}\\le f(\\alpha)$。两式比较得 $\\frac{\\int_{\\alpha}^{1}f}{1-\\alpha}\\le\\frac{\\int_0^{\\alpha}f}{\\alpha}$，即 $\\alpha\\int_{\\alpha}^{1}f(x)dx\\le(1-\\alpha)\\int_0^{\\alpha}f(x)dx$，整理得 $\\int_0^{\\alpha}f(x)dx\\ge\\alpha\\int_0^{1}f(x)dx$。",
+      "summary": "五：用单调性估计积分并比较得不等式",
+      "clarity": "good"
+    },
+    {
+      "id": 250,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "六",
+          "statement": "设曲面 $\\Sigma$ 是由一段空间曲线 $C:\\ x=t,\\ y=2t,\\ z=t^{2}\\ (0\\le t\\le1)$ 绕 $z$ 轴旋转一周所成，其法向量指向与 $z$ 轴正向成钝角。已知连续函数 $f(x,y,z)$ 满足 $f(x,y,z)=(x+y+z)^{2}+\\iint_{\\Sigma}f(x,y,z)dydz+x^{2}dxdy$，求 $f(1,1,1)$ 的值。",
+          "answer": "",
+          "note": "题号写作「六、」；答案在下一张（编号 251）：$f(1,1,1)=9-\\frac{35\\pi}{12}$。"
+        }
+      ],
+      "has_solution": true,
+      "solution": "解：曲面 $\\Sigma$ 的方程为 $x^{2}+y^{2}=5z$，$0\\le z\\le1$。令 $a=\\iint_{\\Sigma}f(x,y,z)dydz+x^{2}dxdy$，则 $f(x,y,z)=(x+y+z)^{2}+a$；添加平面 $\\Sigma_1:\\ z=1$ 上侧，与 $\\Sigma$ 构成封闭曲面的外侧。于是 $a=I_1-I_2$，其中 $I_1=\\iint_{\\Sigma+\\Sigma_1}[(x+y+z)^{2}+a]dydz+x^{2}dxdy=\\iiint_{\\Omega}2(x+y+z)dV=\\iiint_{\\Omega}2z\\,dV=2\\int_0^{1}z\\,dz\\iint_{D_z}d\\sigma=\\frac{10\\pi}{3}$。",
+      "summary": "六：旋转曲面与高斯公式，先求常数 a",
+      "clarity": "good"
+    },
+    {
+      "id": 251,
+      "has_problem": false,
+      "problems": [],
+      "has_solution": true,
+      "solution": "承接第6题：$I_2=\\iint_{\\Sigma_1}[(x+y+z)^{2}+a]dydz+x^{2}dxdy=\\iint_{\\Sigma_1}x^{2}dxdy=\\iint_{D_{xy}}x^{2}dxdy=\\frac{1}{2}\\iint_{D_{xy}}(x^{2}+y^{2})dxdy=\\frac{1}{2}\\int_0^{2\\pi}d\\theta\\int_0^{\\sqrt{5}}r^{3}dr=\\frac{25}{4}\\pi$。故 $a=\\frac{10\\pi}{3}-\\frac{25\\pi}{4}=-\\frac{35\\pi}{12}$，从而 $f(x,y,z)=(x+y+z)^{2}-\\frac{35\\pi}{12}$，$f(1,1,1)=9-\\frac{35\\pi}{12}$。",
+      "summary": "第6题续：算得 $a=-\\frac{35\\pi}{12}$ 及 $f(1,1,1)$",
+      "clarity": "good"
+    },
+    {
+      "id": 252,
+      "has_problem": true,
+      "problems": [
+        {
+          "label": "七",
+          "statement": "设 $a_n>0$，$b_{n+1}=b_n+\\frac{a_n}{b_n}$，$(n=1,2,\\cdots)$，证明：若 $b_1=1$，则级数 $\\sum_{n=1}^{\\infty}a_n$ 收敛的充分必要条件是数列 $\\{b_n\\}$ 收敛。",
+          "answer": "",
+          "note": "题号写作「七、」，并标注「(10分)」"
+        }
+      ],
+      "has_solution": true,
+      "solution": "证：由 $b_n(b_{n+1}-b_n)=a_n$，$b_1=1$，$a_n>0$ 得 $b_n>1$ 且 $b_n$ 单调增加，且 $0<b_{n+1}-b_n<a_n<(b_{n+1}+b_n)(b_{n+1}-b_n)=b_{n+1}^{2}-b_n^{2}$。若 $\\sum_{n=1}^{\\infty}a_n$ 收敛，则 $\\sum_{n=1}^{\\infty}(b_{n+1}-b_n)$ 收敛，设其和为 $S$，则 $S=\\lim_{n\\to\\infty}(b_{n+1}-b_1)$，故 $\\lim_{n\\to\\infty}b_n=S+1$，$\\{b_n\\}$ 收敛。反之若 $\\lim_{n\\to\\infty}b_n=b$，则 $\\lim_{n\\to\\infty}b_n^{2}=b^{2}$，级数 $\\sum_{n=1}^{\\infty}(b_{n+1}^{2}-b_n^{2})$ 收敛（部分和趋于 $b^{2}-1$），由比较判别法得 $\\sum_{n=1}^{\\infty}a_n$ 收敛。",
+      "summary": "七：级数收敛与数列收敛等价的证明",
+      "clarity": "good"
+    }
+  ]
+}
