@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GM/ID Studio · 0.18µm CMOS 模拟设计工作台</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="boot" class="boot">
+  <div class="boot-inner">
+    <div class="boot-logo">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="none" stroke="currentColor" stroke-width="2"/><path d="M18 22h6l5 20 5-20h6M44 22v20M40 22h8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="22" r="2.5" fill="currentColor"/><circle cx="46" cy="42" r="2.5" fill="currentColor"/></svg>
+    </div>
+    <div class="boot-title">GM/ID <span>STUDIO</span></div>
+    <div class="boot-sub">TSMC 0.18 µm RF · BSIM3v3 · 解析模型卡</div>
+    <div class="boot-bar"><i id="bootBar"></i></div>
+    <div class="boot-step" id="bootStep">正在读取 rf018.scs …</div>
+  </div>
+</div>
+
+<div class="app" id="app" hidden>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="3" y="3" width="42" height="42" rx="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 17h5l4 15 4-15h5M32 17v15M29 17h6" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="17" r="2" fill="currentColor"/><circle cx="35" cy="32" r="2" fill="currentColor"/></svg>
+      </div>
+      <div class="brand-text">
+        <h1>GM/ID <span>STUDIO</span></h1>
+        <p>0.18 µm CMOS · 交互式模拟设计工作台</p>
+      </div>
+    </div>
+    <div class="top-status">
+      <div class="status-pill"><span class="pulse"></span><span class="k">MODEL</span><b title="TSMC RF SPICE MODEL">rf018.scs</b></div>
+      <div class="status-pill"><span class="k">CORNER</span><b id="topCorner">TT</b></div>
+      <div class="status-pill"><span class="k">DEVICE</span><b id="topDevice">NMOS</b></div>
+      <div class="status-pill"><span class="k">VDD</span><b id="topVdd">1.8 V</b></div>
+      <div class="status-pill temp"><span class="k">TEMP</span><b>27 °C</b></div>
+    </div>
+    <div class="top-actions">
+      <button class="btn ghost" id="btnModel" title="查看解析的 BSIM3 模型卡">
+        <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5v-13Z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h5"/></svg>
+        模型卡
+      </button>
+      <button class="btn ghost" id="btnExport" title="导出图像、CSV 或 Spectre 测试台">
+        <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3"/></svg>
+        导出
+      </button>
+      <button class="icon-btn" id="btnHelp" title="使用说明与方法">?</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <div class="panel-head"><span class="num">01</span><h2>模型与器件</h2><span class="tag live">LIVE</span></div>
+        <div class="model-file" id="modelFile" title="点击查看模型卡">
+          <div class="file-ico">SCS</div>
+          <div class="file-meta"><b>rf018.scs</b><small>TSMC RF · BSIM3v3.24</small></div>
+          <span class="file-check" title="模型卡已解析">✓</span>
+        </div>
+        <label class="field-label">工艺角 <span>CORNER</span></label>
+        <div class="segmented five" id="cornerSeg" role="group" aria-label="工艺角">
+          <button data-value="TT" class="active">TT</button>
+          <button data-value="FF">FF</button>
+          <button data-value="SS">SS</button>
+          <button data-value="SF">SF</button>
+          <button data-value="FS">FS</button>
+        </div>
+        <div class="two-col">
+          <div>
+            <label class="field-label">器件 <span>DEVICE</span></label>
+            <div class="segmented" id="deviceSeg">
+              <button data-value="n" class="active">NMOS</button>
+              <button data-value="p">PMOS</button>
+            </div>
+          </div>
+          <div>
+            <label class="field-label">电压域 <span>VDD</span></label>
+            <div class="segmented" id="domainSeg">
+              <button data-value="1.8" class="active">1.8 V</button>
+              <button data-value="3.3">3.3 V</button>
+            </div>
+          </div>
+        </div>
+        <div class="corner-note" id="cornerNote">Typical NMOS · 1.8 V core</div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><span class="num">02</span><h2>几何与偏置</h2><span class="tag" id="binTag">BIN 4</span></div>
+
+        <div class="control-row">
+          <label for="LInput">沟道长度 <em>L</em></label>
+          <div class="input-unit"><input id="LInput" type="number" step="0.01" min="0.18" max="20" value="0.18"><span>µm</span></div>
+        </div>
+        <input class="range" id="LRange" type="range" min="0.18" max="2" step="0.01" value="0.18">
+        <div class="range-hint"><span id="LminHint">0.18 µm</span><span id="LmaxHint">2.0 µm</span></div>
+
+        <div class="control-row">
+          <label for="WInput">沟道宽度 <em>W</em></label>
+          <div class="input-unit"><input id="WInput" type="number" step="0.1" min="0.24" max="900" value="10"><span>µm</span></div>
+        </div>
+        <input class="range" id="WRange" type="range" min="0" max="100" step="0.5" value="62">
+        <div class="range-hint"><span>0.24 µm</span><span>100 µm</span></div>
+
+        <div class="control-row">
+          <label for="VgsInput"><span id="vgsLabel">栅源电压</span> <em id="vgsSym">V<sub>GS</sub></em></label>
+          <div class="input-unit"><input id="VgsInput" type="number" step="0.005" min="0" max="1.8" value="0.70"><span>V</span></div>
+        </div>
+        <input class="range" id="VgsRange" type="range" min="0" max="1.8" step="0.005" value="0.70">
+
+        <div class="two-col tight">
+          <div>
+            <div class="control-row mini">
+              <label for="VdsInput"><span>漏源</span> <em>V<sub>DS</sub></em></label>
+              <div class="input-unit small"><input id="VdsInput" type="number" step="0.01" min="0" max="1.8" value="0.90"><span>V</span></div>
+            </div>
+            <input class="range" id="VdsRange" type="range" min="0" max="1.8" step="0.01" value="0.90">
+          </div>
+          <div>
+            <div class="control-row mini">
+              <label for="VbsInput"><span>体偏</span> <em>V<sub>SB</sub></em></label>
+              <div class="input-unit small"><input id="VbsInput" type="number" step="0.01" min="0" max="0.9" value="0"><span>V</span></div>
+            </div>
+            <input class="range" id="VbsRange" type="range" min="0" max="0.9" step="0.01" value="0">
+          </div>
+        </div>
+        <div class="tiny-note">PMOS 以 |V<sub>GS</sub>|、|V<sub>DS</sub>|、V<sub>SB</sub> 正值显示；体偏为源-体反偏。</div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><span class="num">03</span><h2>扫描设置</h2></div>
+        <div class="two-col tight">
+          <div class="control-row mini">
+            <label for="VgsMin">V<sub>GS</sub> 起点</label>
+            <div class="input-unit small"><input id="VgsMin" type="number" step="0.05" min="0" max="1.8" value="0"><span>V</span></div>
+          </div>
+          <div class="control-row mini">
+            <label for="VgsMax">终点</label>
+            <div class="input-unit small"><input id="VgsMax" type="number" step="0.05" min="0" max="1.8" value="1.8"><span>V</span></div>
+          </div>
+        </div>
+        <div class="control-row">
+          <label for="pointsSelect">采样点数</label>
+          <select id="pointsSelect" class="select">
+            <option value="201">201</option>
+            <option value="401" selected>401</option>
+            <option value="801">801</option>
+          </select>
+        </div>
+        <button class="btn primary wide" id="btnRun">
+          <svg viewBox="0 0 24 24"><path d="M5 4l14 8-14 8V4Z"/></svg>
+          重新扫描并绘制
+        </button>
+      </section>
+
+      <div class="sidebar-foot">
+        <span><i class="dot"></i> BSIM3v3.24 · 16 bins / device</span>
+        <span id="parseFoot">解析 — ms</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="stats" id="stats">
+        <article class="stat" data-stat="vth">
+          <div class="stat-top"><span>阈值电压</span><b>V<sub>TH</sub></b></div>
+          <div class="stat-value"><span id="statVth">—</span><small>V</small></div>
+          <div class="stat-sub" id="statVthSub">模型卡 + 体效应 + DIBL</div>
+        </article>
+        <article class="stat" data-stat="gmid">
+          <div class="stat-top"><span>跨导效率</span><b>gm/ID</b></div>
+          <div class="stat-value"><span id="statGmid">—</span><small>1/V</small></div>
+          <div class="stat-sub" id="statGmidSub">弱反型上限 ≈ 1/(nV<sub>T</sub>)</div>
+        </article>
+        <article class="stat" data-stat="gmro">
+          <div class="stat-top"><span>本征增益</span><b>gm·ro</b></div>
+          <div class="stat-value"><span id="statGmro">—</span><small>V/V</small></div>
+          <div class="stat-sub" id="statGmroSub">固定 L 下的 gm/gds</div>
+        </article>
+        <article class="stat" data-stat="idw">
+          <div class="stat-top"><span>电流密度</span><b>ID/W</b></div>
+          <div class="stat-value"><span id="statIdw">—</span><small>µA/µm</small></div>
+          <div class="stat-sub" id="statIdwSub">按有效沟道宽度</div>
+        </article>
+        <article class="stat" data-stat="ft">
+          <div class="stat-top"><span>特征频率</span><b>f<sub>T</sub></b></div>
+          <div class="stat-value"><span id="statFt">—</span><small>GHz</small></div>
+          <div class="stat-sub" id="statFtSub">gm / 2πC<sub>gg</sub></div>
+        </article>
+      </div>
+
+      <section class="chart-panel">
+        <div class="chart-head">
+          <div class="chart-title-wrap">
+            <h2 id="chartTitle">V<sub>GS</sub> → GM/ID</h2>
+            <p id="chartSubtitle">固定 V<sub>DS</sub> 扫描栅压，着色区域为管子工作区</p>
+          </div>
+          <div class="chart-actions">
+            <button class="tool" id="btnLogX" title="X 轴对数坐标">LOG X</button>
+            <button class="tool" id="btnLogY" title="Y 轴对数坐标">LOG Y</button>
+            <button class="tool active" id="btnGrid" title="网格">GRID</button>
+            <button class="tool" id="btnReset" title="复位缩放">RESET</button>
+            <button class="tool icon" id="btnPng" title="导出 PNG">
+              <svg viewBox="0 0 24 24"><path d="M4 16l4.5-5 4 4 3-3L20 16M4 20h16M4 4h16v16H4z"/><circle cx="8.5" cy="8.5" r="1.3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="view-tabs" id="viewTabs">
+          <button data-view="vgs-gmid" class="active"><span class="tab-ico">∿</span>VGS · GM/ID</button>
+          <button data-view="gmid-gmro"><span class="tab-ico">◇</span>GM/ID · GM·RO</button>
+          <button data-view="lsweep"><span class="tab-ico">≡</span>L 扫描</button>
+          <button data-view="gmid-idw"><span class="tab-ico">▤</span>GM/ID · ID/W</button>
+          <button data-view="library"><span class="tab-ico">▦</span>曲线库</button>
+          <button data-view="custom"><span class="tab-ico">✎</span>自定义</button>
+        </div>
+
+        <div class="view-controls" id="lsweepBar" hidden>
+          <label>L 扫描列表 <span>µm</span></label>
+          <input id="lsweepInput" class="text-input" value="0.18, 0.24, 0.36, 0.5, 0.8, 1.2, 2.0">
+          <button class="btn small" id="btnApplyLsweep">应用</button>
+          <span class="control-note">固定 W，观察本征增益随沟道长度的变化</span>
+        </div>
+
+        <div class="view-controls custom-controls" id="customBar" hidden>
+          <div class="cc-item"><label>X 轴</label><select id="customX" class="select small-select"></select></div>
+          <div class="cc-item"><label>Y 轴</label><select id="customY" class="select small-select"></select></div>
+          <div class="cc-item"><label>曲线族</label><select id="customFamily" class="select small-select"><option value="single">单条曲线</option><option value="L">扫描 L</option><option value="Vds">扫描 V<sub>DS</sub></option></select></div>
+          <div class="cc-item" id="customListWrap" hidden><label>列表 <span>µm / V</span></label><input id="customList" class="text-input short" value="0.18, 0.24, 0.36, 0.5, 0.8"></div>
+          <div class="cc-item grow"><label>Y 表达式 <span>可选</span></label><input id="customExpr" class="text-input" placeholder="例如 gm/Id*1e3 或 gm*ro"></div>
+          <button class="btn small primary-outline" id="btnCustomDraw">绘制</button>
+        </div>
+
+        <div class="plot-wrap">
+          <div id="plot" class="plot"></div>
+          <div id="hoverReadout" class="hover-readout" hidden></div>
+          <div id="plotEmpty" class="plot-empty" hidden></div>
+          <div id="libraryGrid" class="library-grid" hidden></div>
+        </div>
+
+        <div class="plot-foot">
+          <div class="region-legend">
+            <span><i style="background:#64748b"></i>截止</span>
+            <span><i style="background:#38bdf8"></i>亚阈值</span>
+            <span><i style="background:#f59e0b"></i>线性/三极管</span>
+            <span><i style="background:#34d399"></i>饱和</span>
+          </div>
+          <div class="hint">点击曲线锁定工作点 · 悬停查看坐标 · 滚轮缩放 · 双击复位</div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="inspector">
+      <section class="panel probe-panel">
+        <div class="panel-head"><span class="num">PROBE</span><h2>工作点探针</h2><button class="lock-badge" id="lockBadge">实时偏置</button></div>
+        <div class="probe-coords">
+          <div><span id="probeXLabel">V<sub>GS</sub></span><b id="probeX">0.700</b><small>V</small></div>
+          <div><span id="probeYLabel">gm/ID</span><b id="probeY">—</b><small>1/V</small></div>
+        </div>
+        <div class="region-badge" id="regionBadge"><i></i><span>饱和区</span><em>SATURATION</em></div>
+        <div class="region-map-wrap">
+          <svg id="regionMap" viewBox="0 0 260 150" preserveAspectRatio="none" aria-label="工作区地图"></svg>
+          <div class="map-caption"><span>V<sub>GS</sub> →</span><span>V<sub>DS</sub> ↑</span></div>
+        </div>
+        <div class="probe-grid">
+          <div><span>ID</span><b id="pId">—</b><small>µA</small></div>
+          <div><span>gm</span><b id="pGm">—</b><small>µS</small></div>
+          <div><span>gds</span><b id="pGds">—</b><small>µS</small></div>
+          <div><span>ID/W</span><b id="pIdw">—</b><small>µA/µm</small></div>
+          <div><span>V<sub>OV</sub></span><b id="pVov">—</b><small>V</small></div>
+          <div><span>V<sub>DSAT</sub></span><b id="pVdsat">—</b><small>V</small></div>
+          <div><span>SS</span><b id="pSs">—</b><small>mV/dec</small></div>
+          <div><span>f<sub>T</sub></span><b id="pFt">—</b><small>GHz</small></div>
+        </div>
+        <div class="probe-actions">
+          <button class="btn tiny" id="btnUnlock">解除锁定</button>
+          <button class="btn tiny ghost" id="btnProbeModel">查看 BIN 参数</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><span class="num">BIN</span><h2>当前模型卡</h2><span class="tag" id="binTag2">—</span></div>
+        <div class="bin-card" id="binCard">
+          <div class="bin-row"><span>器件</span><b id="binDevice">nch</b></div>
+          <div class="bin-row"><span>L 范围</span><b id="binL">—</b></div>
+          <div class="bin-row"><span>W 范围</span><b id="binW">—</b></div>
+          <div class="bin-row"><span>V<sub>TH0</sub></span><b id="binVth">—</b></div>
+          <div class="bin-row"><span>µ<sub>0</sub></span><b id="binU0">—</b></div>
+          <div class="bin-row"><span>T<sub>OX</sub></span><b id="binTox">—</b></div>
+          <div class="bin-row"><span>V<sub>SAT</sub></span><b id="binVsat">—</b></div>
+        </div>
+        <button class="btn ghost wide" id="btnModel2">打开完整模型卡</button>
+      </section>
+
+      <section class="panel note-panel">
+        <div class="panel-head"><span class="num">NOTE</span><h2>判据说明</h2></div>
+        <p>阈值电压由 <b>VTH0</b> 叠加体效应与 DIBL 得到；亚阈值区以 <b>V<sub>OV</sub> &lt; 50 mV</b> 判定，线性区以 <b>V<sub>DS</sub> &lt; V<sub>DSAT</sub></b> 判定。</p>
+        <p class="muted">曲线用于设计空间探索；最终签核请使用导出的 Spectre 测试台复核。</p>
+      </section>
+    </aside>
+  </div>
+
+  <footer class="statusbar">
+    <div class="status-left"><span class="led"></span><span id="statusMsg">模型已就绪</span></div>
+    <div class="status-right">
+      <span id="statusBin">BIN —</span>
+      <span>L <b id="statusL">0.18</b> µm</span>
+      <span>W <b id="statusW">10</b> µm</span>
+      <span>V<sub>DS</sub> <b id="statusVds">0.90</b> V</span>
+      <span class="mono" id="statusPoints">401 pts</span>
+    </div>
+  </footer>
+</div>
+
+<div class="modal-backdrop" id="modalModel" hidden>
+  <div class="modal wide-modal" role="dialog" aria-modal="true" aria-labelledby="modelModalTitle">
+    <div class="modal-head">
+      <div><span class="eyebrow">MODEL INSPECTOR</span><h2 id="modelModalTitle">rf018.scs 模型卡</h2></div>
+      <div class="modal-head-actions">
+        <button class="btn small" id="btnReloadModel">载入 / 校验 .scs</button>
+        <button class="modal-close" data-close>×</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="model-summary" id="modelSummary"></div>
+      <div class="modal-tabs">
+        <button data-mtab="params" class="active">选中 BIN 参数</button>
+        <button data-mtab="bins">全部 BIN</button>
+        <button data-mtab="method">解析说明</button>
+      </div>
+      <div id="modelTabBody" class="model-tab-body"></div>
+      <input type="file" id="fileInput" accept=".scs,.txt" hidden>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalExport" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+    <div class="modal-head">
+      <div><span class="eyebrow">EXPORT</span><h2 id="exportTitle">导出与复核</h2></div>
+      <button class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-body export-grid">
+      <button class="export-tile" id="expPng"><span class="export-ico">PNG</span><b>当前图表</b><small>2× 分辨率，适合报告 / 论文</small></button>
+      <button class="export-tile" id="expCsv"><span class="export-ico">CSV</span><b>曲线数据</b><small>包含 VGS、ID、gm/ID、gm·ro 等</small></button>
+      <button class="export-tile" id="expNetlist"><span class="export-ico">SCS</span><b>Spectre 测试台</b><small>同源模型卡，可在 Cadence 中复核</small></button>
+      <button class="export-tile" id="expJson"><span class="export-ico">{ }</span><b>工作点 JSON</b><small>模型 BIN + 全部小信号指标</small></button>
+    </div>
+    <div class="export-note">导出的测试台默认引用同目录下的 <code>rf018.scs</code>；请按需修改 section 与器件名。</div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalHelp" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="modal-head">
+      <div><span class="eyebrow">QUICK GUIDE</span><h2 id="helpTitle">使用说明</h2></div>
+      <button class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-body help-body">
+      <h3>30 秒上手</h3>
+      <ol>
+        <li>左侧选择 <b>工艺角 / NMOS-PMOS / 电压域</b>，设定 L、W、V<sub>DS</sub> 与体偏。</li>
+        <li>在 <b>VGS · GM/ID</b> 图上点击任意曲线点，右侧探针会锁定坐标并显示工作区、V<sub>TH</sub>、gm·ro、ID/W、f<sub>T</sub>。</li>
+        <li>切换 <b>L 扫描</b> 查看不同沟道长度的本征增益族；切换 <b>自定义</b> 组合任意 X/Y 指标。</li>
+        <li>用 <b>导出 → Spectre 测试台</b> 在真实 BSIM3 仿真器中复核曲线。</li>
+      </ol>
+      <h3>工作区判据</h3>
+      <div class="help-regions">
+        <div><i style="background:#64748b"></i><b>截止区</b><span>V<sub>OV</sub> &lt; −120 mV，沟道未形成</span></div>
+        <div><i style="background:#38bdf8"></i><b>亚阈值区</b><span>−120 mV ≤ V<sub>OV</sub> &lt; 50 mV，指数型电流</span></div>
+        <div><i style="background:#f59e0b"></i><b>线性/三极管区</b><span>V<sub>OV</sub> ≥ 50 mV 且 V<sub>DS</sub> &lt; V<sub>DSAT</sub></span></div>
+        <div><i style="background:#34d399"></i><b>饱和区</b><span>V<sub>OV</sub> ≥ 50 mV 且 V<sub>DS</sub> ≥ V<sub>DSAT</sub></span></div>
+      </div>
+      <h3>模型与方法</h3>
+      <p>页面内嵌原始 <code>rf018.scs</code>（gzip），启动时由浏览器解析 Spectre section、parameters 与 BSIM3 binned model card，并用 VTH0 / K1 / K2 / TOX / U0 / VSAT / RDSW / PCLM 等参数驱动 EKV 型电荷模型与 α-power 饱和模型。gm、gds 由数值微分得到。</p>
+      <p class="muted">这是面向 gm/Id 设计空间探索的快速参数化引擎，不等同于完整 BSIM3 直流求解。版图寄生、温度、噪声与高阶短沟道效应未包含；最终签核请以 Spectre 为准。</p>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="../vendor/plotly.min.js"></script>
+<script src="model-parser.js"></script>
+<script src="engine.js"></script>
+<script src="model-b64.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
