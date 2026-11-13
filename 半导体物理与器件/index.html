@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>半导体物理 · 期末总复习（题目汇总 · 全解 · 评析 · 知识点）</title>
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<style>
+:root{
+  --bg:#f6f7f9; --fg:#16181d; --muted:#69707d; --line:#dfe3ea; --card:#ffffff;
+  --accent:#1a4f8a; --accent2:#0f766e; --chip:#eef2f7; --warn:#a8451f;
+  --shadow:0 10px 34px rgba(16,28,52,.09);
+  --fs:20px;
+}
+html[data-theme="dark"]{
+  --bg:#0f1216; --fg:#e8eaee; --muted:#98a1ad; --line:#272d35; --card:#161a20;
+  --accent:#6fa8e0; --accent2:#5ec8b8; --chip:#1d232b; --warn:#e08a63;
+  --shadow:0 10px 34px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg); color:var(--fg);
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+
+/* ---------- 顶栏 ---------- */
+#hdr{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
+     padding:12px 30px 9px;border-bottom:1px solid var(--line);gap:16px}
+#secname{font-size:13.5px;letter-spacing:.05em;color:var(--muted);white-space:nowrap;
+         overflow:hidden;text-overflow:ellipsis}
+#pidwrap{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+#pid{font-size:14px;font-weight:700;color:#fff;background:var(--accent);
+     padding:3px 10px;border-radius:999px;letter-spacing:.03em}
+html[data-theme="dark"] #pid{color:#0e1116}
+#plabel{font-size:13.5px;color:var(--muted);max-width:44vw;overflow:hidden;
+        text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- 舞台 ---------- */
+#stage{flex:1 1 auto;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;padding:1.8vh 5.2vw .6vh;opacity:0;visibility:hidden;
+       transition:opacity .15s ease;display:flex}
+.slide.on{opacity:1;visibility:visible}
+.slide>.content{width:100%;max-width:1180px;margin:0 auto;font-size:var(--fs);
+                overflow-y:auto;overflow-x:hidden;padding-bottom:1.6vh;scrollbar-width:thin}
+.slide.over>.content{scrollbar-color:var(--line) transparent;
+  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 26px),transparent);
+          mask-image:linear-gradient(to bottom,#000 calc(100% - 26px),transparent)}
+
+h2.ph{font-size:1.02em;font-weight:700;color:var(--accent);margin:0 0 .5em;line-height:1.35}
+h2.ph .tag{display:inline-block;font-size:.68em;font-weight:700;letter-spacing:.1em;
+  background:var(--accent);color:#fff;border-radius:6px;padding:2px 8px;margin-right:.6em;
+  vertical-align:.14em;transform:translateY(-.08em)}
+html[data-theme="dark"] h2.ph .tag{color:#0e1116}
+h2.ph .sub{font-weight:500;color:var(--muted);font-size:.82em}
+
+.stmt{font-size:1.02em;line-height:1.62;border-left:4px solid var(--accent);
+      padding:2px 0 2px 16px;margin:0 0 12px}
+.ans{display:flex;align-items:baseline;gap:10px;background:var(--chip);border-radius:10px;
+     padding:9px 15px;margin:0 0 14px;font-size:.96em;line-height:1.5}
+.ans .tag{flex:0 0 auto;font-size:.76em;font-weight:700;color:var(--accent);
+          border:1px solid var(--accent);border-radius:6px;padding:1px 7px;letter-spacing:.08em}
+.solh{font-size:.72em;letter-spacing:.22em;color:var(--muted);font-weight:600;
+      margin:0 0 6px;border-bottom:1px dashed var(--line);padding-bottom:5px}
+.sol{line-height:1.64}
+.sol p{margin:.42em 0}
+.sol b{color:var(--accent2)}
+p.lead{margin:.8em 0 .25em}
+p.lead>b:first-child{display:block;color:var(--accent);font-size:.9em;letter-spacing:.02em;margin-bottom:.1em}
+p.lead:first-child{margin-top:0}
+.sol ul,.sol ol{margin:.35em 0 .35em 1.15em;padding:0}
+.sol li{margin:.18em 0}
+.mathblock{margin:.3em 0;overflow-x:auto;overflow-y:hidden;text-align:center;line-height:1.15}
+.katex{font-size:1.02em}
+code{background:var(--chip);padding:.08em .32em;border-radius:4px;font-size:.9em}
+a{color:var(--accent2)}
+
+/* 知识点 / 评析 */
+.kp{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:14px 0 0;
+    padding-top:10px;border-top:1px solid var(--line)}
+.kp .kplab{font-size:.72em;font-weight:700;letter-spacing:.14em;color:var(--accent2);margin-right:4px}
+.kp .chip{font-size:.76em;background:var(--chip);border:1px solid var(--line);
+  border-radius:999px;padding:2px 10px;color:var(--fg);white-space:nowrap}
+.cmt{margin:10px 0 0;padding:9px 14px 9px 15px;border-left:3px solid var(--warn);
+     background:color-mix(in srgb,var(--warn) 6%,transparent);border-radius:0 8px 8px 0;
+     font-size:.9em;line-height:1.6}
+.cmt .cmtlab{font-weight:700;color:var(--warn);letter-spacing:.06em;margin-right:.5em;font-size:.94em}
+html[data-theme="dark"] .cmt{background:rgba(224,138,99,.08)}
+
+/* 题组表格 */
+table.qa{width:100%;border-collapse:collapse;font-size:.82em;line-height:1.5;margin:6px 0 4px}
+table.qa th{text-align:left;font-weight:700;color:var(--accent);font-size:.94em;
+  border-bottom:2px solid var(--accent);padding:5px 8px;white-space:nowrap}
+table.qa td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.qa td.n{color:var(--muted);font-variant-numeric:tabular-nums;width:2.2em;text-align:right}
+table.qa td.ansv{color:var(--accent2);font-weight:600}
+table.qa td.kpc{color:var(--muted);font-size:.94em}
+table.qa tr.imp td{background:color-mix(in srgb,var(--warn) 5%,transparent)}
+table.qa tr.imp td.n:after{content:"★";color:var(--warn);margin-left:3px;font-size:.9em}
+table.qa .fig{font-size:.92em;color:var(--muted);font-style:normal}
+.ok{color:#0f766e;font-weight:700}
+.no{color:#b3261e;font-weight:700}
+
+/* ---------- 底栏 ---------- */
+#ftr{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:8px 30px 11px;border-top:1px solid var(--line)}
+#bar{flex:1 1 auto;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+#bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .18s}
+#cnt{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--muted);white-space:nowrap}
+#ovh{display:none;font-size:12px;color:var(--muted);border:1px dashed var(--line);
+     border-radius:999px;padding:1px 9px}
+body.hasov #ovh{display:inline-block}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:9px;
+     padding:5px 11px;font-size:12.5px;cursor:pointer;line-height:1.5;white-space:nowrap}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.on{border-color:var(--accent);color:var(--accent);background:var(--chip)}
+
+/* ---------- 浮层 ---------- */
+.overlay{position:fixed;inset:0;background:rgba(8,10,14,.55);backdrop-filter:blur(2px);
+         z-index:60;display:none;align-items:center;justify-content:center;padding:4vh 4vw}
+.overlay.on{display:flex}
+.panel{background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+       width:min(1100px,96vw);max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.phead{display:flex;align-items:center;justify-content:space-between;gap:16px;
+       padding:14px 20px;border-bottom:1px solid var(--line)}
+.phead b{font-size:15.5px}
+.pbody{overflow-y:auto;padding:14px 20px 22px}
+
+#toclist .trow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:9px 14px;margin:0 0 7px;cursor:pointer;font-size:14px;color:var(--fg)}
+#toclist .trow:hover{border-color:var(--accent)}
+#toclist .trow.cur{border-color:var(--accent);background:var(--chip)}
+#toclist .tno{flex:0 0 auto;min-width:26px;text-align:center;font-weight:700;color:#fff;
+  background:var(--accent);border-radius:7px;font-size:12.5px;padding:1px 5px}
+html[data-theme="dark"] #toclist .tno{color:#0e1116}
+#toclist .ttl{flex:1 1 auto;font-weight:600}
+#toclist .tcnt,#toclist .trng{flex:0 0 auto;font-size:12px;color:var(--muted);
+  font-variant-numeric:tabular-nums}
+
+#gridlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:9px}
+.gitem{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;cursor:pointer;color:var(--fg);font-size:12.5px;line-height:1.45;
+  display:flex;flex-direction:column;gap:3px;min-height:74px}
+.gitem:hover{border-color:var(--accent)}
+.gitem.cur{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.gpid{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.glab{font-weight:700;font-size:13px}
+.gtex{color:var(--muted);overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+#filter{width:100%;padding:9px 13px;border:1px solid var(--line);border-radius:9px;
+  background:var(--card);color:var(--fg);font-size:14px;margin:0 0 12px;outline:none}
+#filter:focus{border-color:var(--accent)}
+
+#helplist{font-size:14px;line-height:1.9}
+#helplist kbd{background:var(--chip);border:1px solid var(--line);border-bottom-width:2px;
+  border-radius:5px;padding:1px 7px;font-size:12.5px;font-family:inherit}
+
+#toast{position:fixed;left:50%;bottom:64px;transform:translate(-50%,12px);z-index:90;
+  background:var(--fg);color:var(--bg);padding:8px 18px;border-radius:999px;font-size:13px;
+  opacity:0;pointer-events:none;transition:.2s}
+#toast.on{opacity:.95;transform:translate(-50%,0)}
+
+/* ---------- 自测模式 ---------- */
+body.quiz .ans,body.quiz .sol,body.quiz .solh,body.quiz .cmt{filter:blur(5.2px);cursor:pointer;
+  transition:filter .12s}
+body.quiz .ans:hover,body.quiz .sol:hover,body.quiz .cmt:hover,
+body.quiz .revealed{filter:none !important}
+body.quiz table.qa td.ansv{filter:blur(5.2px);cursor:pointer}
+body.quiz table.qa td.ansv:hover{filter:none}
+body.quiz #quizbtn.on{border-color:var(--accent);color:var(--accent);background:var(--chip)}
+
+/* ---------- 打印 ---------- */
+body.printing #app{position:static;display:block;height:auto;overflow:visible}
+body.printing #stage{position:static;overflow:visible}
+body.printing .slide{position:static;opacity:1;visibility:visible;display:block;
+  page-break-after:always;padding:0 0 10mm}
+body.printing .slide>.content{max-width:none;overflow:visible;font-size:12.5px;height:auto}
+body.printing #hdr,body.printing #ftr,body.printing .overlay{display:none}
+body.printing{overflow:visible;height:auto}
+@page{margin:14mm}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hdr">
+    <div id="secname"></div>
+    <div id="pidwrap">
+      <span id="plabel"></span>
+      <span id="pid">P000</span>
+    </div>
+  </div>
+
+  <div id="stage"></div>
+
+  <div id="ftr">
+    <div id="bar"><i></i></div>
+    <span id="ovh">↕ 可滚动</span>
+    <span id="cnt"></span>
+    <button class="btn" data-act="prev">← 上一页</button>
+    <button class="btn" data-act="next">下一页 →</button>
+    <button class="btn" id="quizbtn" data-act="quiz">自测</button>
+    <button class="btn" data-act="toc">目录 M</button>
+    <button class="btn" data-act="grid">总览 O</button>
+    <button class="btn" data-act="theme">主题 D</button>
+    <button class="btn" data-act="help">?</button>
+  </div>
+</div>
+
+<div class="overlay" id="toc"><div class="panel">
+  <div class="phead"><b id="toctitle">目录</b><button class="btn" data-act="close" data-target="toc">关闭 Esc</button></div>
+  <div class="pbody"><div id="toclist"></div></div>
+</div></div>
+
+<div class="overlay" id="grid"><div class="panel">
+  <div class="phead"><b>总览 · 按题号或关键字筛选</b><button class="btn" data-act="close" data-target="grid">关闭 Esc</button></div>
+  <div class="pbody"><input id="filter" placeholder="输入关键字，如 肖特基 / 有效质量 / 迁移率 / 复合 …（回车跳到第一个）"><div id="gridlist"></div></div>
+</div></div>
+
+<div class="overlay" id="help"><div class="panel">
+  <div class="phead"><b>快捷键</b><button class="btn" data-act="close" data-target="help">关闭 Esc</button></div>
+  <div class="pbody"><div id="helplist">
+    <div><kbd>→</kbd> <kbd>Space</kbd> 下一页　<kbd>←</kbd> 上一页</div>
+    <div><kbd>↓</kbd><kbd>↑</kbd><kbd>PgDn</kbd><kbd>PgUp</kbd> 内容较长时先滚动，滚到底再翻页</div>
+    <div><kbd>Home</kbd> / <kbd>End</kbd> 第一页 / 最后一页</div>
+    <div><kbd>M</kbd> 目录　<kbd>O</kbd> 总览（可筛选）　<kbd>G</kbd> 跳页</div>
+    <div><kbd>A</kbd> 自测模式：把答案与解答模糊掉，鼠标移上去才显示（复习时先自己想）</div>
+    <div><kbd>D</kbd> 深色 / 浅色　<kbd>F</kbd> 全屏　<kbd>+</kbd> <kbd>-</kbd> <kbd>0</kbd> 字号</div>
+    <div><kbd>P</kbd> 排版全部并打印（可另存为 PDF，当讲义用）　<kbd>!</kbd> 全文公式自检</div>
+    <div><kbd>?</kbd> 本页　<kbd>Esc</kbd> 关闭浮层</div>
+    <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
+    <div style="color:var(--muted);font-size:13px">
+      同目录下的 <code>vendor/katex/</code> 是公式字体，<b>请保持 index.html 与 vendor 文件夹在一起</b>，可完全离线使用。
+    </div>
+  </div></div>
+</div></div>
+
+<div id="toast"></div>
+
+<script src="vendor/katex/katex.min.js"></script>
+<script src="data/00.js"></script>
+<script src="data/01.js"></script>
+<script src="data/02.js"></script>
+<script src="data/03.js"></script>
+<script src="data/04.js"></script>
+<script src="data/05.js"></script>
+<script src="data/06.js"></script>
+<script src="data/07.js"></script>
+<script src="data/08.js"></script>
+<script src="data/10.js"></script>
+<script>
+const DATA = window.__DATA__;
+const N = DATA.length;
+const $ = s => document.querySelector(s);
+const stage = $('#stage');
+
+let cur = 0, typeset = new Set(), errs = [], slides = [], zoom = 1;
+
+/* ---------- 数学：把 $...$ / $$...$$ 渲染成 KaTeX ---------- */
+function deent(s){
+  return s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&nbsp;/g,' ');
+}
+function tex(html){
+  html = String(html).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>');
+  html = html.replace(/\$\$([\s\S]+?)\$\$/g, (m,t)=>
+    '<div class="mathblock">'+katex.renderToString(deent(t).trim(),{displayMode:true,throwOnError:false,strict:false,trust:true})+'</div>');
+  html = html.replace(/\$([^$\n]+?)\$/g, (m,t)=>{
+    try{ return katex.renderToString(deent(t).trim(),{displayMode:false,throwOnError:false,strict:false,trust:true}); }
+    catch(e){ errs.push(t.slice(0,60)); return '<span style="color:#c0392b">'+t+'</span>'; }
+  });
+  return html;
+}
+function renderMathIn(el){
+  el.querySelectorAll('[data-tex]:not([data-done])').forEach(n=>{
+    n.innerHTML = tex(n.innerHTML);
+    n.dataset.done = '1';
+  });
+}
+
+/* ---------- 幻灯片 ---------- */
+function slideEl(it){
+  const s = document.createElement('div');
+  s.className = 'slide';
+  s.id = 'p' + String(it.pid).padStart(3,'0');
+  let h = '<div class="content">';
+  h += '<h2 class="ph" data-tex><span class="tag">'+it.label+'</span>'+it.title+'</h2>';
+  h += '<div class="stmt" data-tex>'+it.statement+'</div>';
+  if(it.answer) h += '<div class="ans" data-tex><span class="tag">答案</span><div>'+it.answer+'</div></div>';
+  if(it.solution){ h += '<div class="solh">'+(it.solh||'解答')+'</div><div class="sol" data-tex>'+it.solution+'</div>'; }
+  if(it.kp && it.kp.length){
+    h += '<div class="kp"><span class="kplab">关联知识点</span>' +
+         it.kp.map(k=>'<span class="chip" data-tex>'+k+'</span>').join('') + '</div>';
+  }
+  if(it.comment) h += '<div class="cmt" data-tex><span class="cmtlab">评析</span>'+it.comment+'</div>';
+  h += '</div>';
+  s.innerHTML = h;
+  return s;
+}
+
+function build(){
+  DATA.forEach(it=>{ const el = slideEl(it); stage.appendChild(el); slides.push(el); });
+}
+
+/* ---------- 自适应字号 ---------- */
+function fit(i){
+  const s = slides[i]; if(!s) return;
+  const c = s.querySelector('.content');
+  const avail = (c.clientHeight || s.clientHeight);
+  const hiMax = Math.min(46, Math.max(24, avail * 0.062));
+  const lo = 13;
+  /* 先看最小字号是否还装不下：装不下就固定用舒适字号 + 滚动 */
+  c.style.fontSize = lo + 'px';
+  if(c.scrollHeight > avail * 1.02){
+    c.style.fontSize = (Math.max(14, lo * zoom)).toFixed(2) + 'px';
+    s.classList.add('over');
+    return;
+  }
+  c.style.fontSize = hiMax + 'px';
+  let a = lo, b = hiMax, best = lo;
+  for(let k=0;k<13;k++){ const m=(a+b)/2; c.style.fontSize=m+'px';
+    if(c.scrollHeight<=avail){best=m;a=m;} else b=m; }
+  const fs = Math.min(hiMax * 1.5, Math.max(9.5, best * zoom));
+  c.style.fontSize = fs.toFixed(2) + 'px';
+  s.classList.toggle('over', c.scrollHeight > avail + 2);
+  if(!s.classList.contains('over')) c.scrollTop = 0;
+}
+
+function setZoom(z){
+  zoom = Math.min(3, Math.max(.7, z));
+  fit(cur);
+  document.body.classList.toggle('hasov', slides[cur].classList.contains('over'));
+  toast('字号 ' + Math.round(zoom*100) + '%');
+}
+
+/* ---------- 显示 ---------- */
+function show(i, push=true){
+  i = Math.max(0, Math.min(N-1, i));
+  cur = i;
+  const it = DATA[i];
+  slides.forEach((s,k)=>s.classList.toggle('on', k===i));
+  const s = slides[i];
+  if(!typeset.has(i)){ renderMathIn(s); typeset.add(i); }
+  fit(i);
+  document.body.classList.toggle('hasov', s.classList.contains('over'));
+  $('#secname').textContent = it.secTitle ? (it.sec + ' · ' + it.secTitle) : '';
+  $('#pid').textContent = 'P' + String(it.pid).padStart(3,'0');
+  $('#plabel').innerHTML = tex(it.title || '');
+  $('#cnt').textContent = (i+1) + ' / ' + N;
+  $('#bar>i').style.width = ((i+1)/N*100).toFixed(2) + '%';
+  if(push) history.replaceState(null,'','#p'+String(it.pid).padStart(3,'0'));
+  try{ localStorage.setItem('semi-pos', String(i)); }catch(e){}
+  if($('#toc').classList.contains('on')) markToc();
+  [i+1, i-1].forEach(k=>{ const n=slides[k]; if(n && !typeset.has(k)){ renderMathIn(n); typeset.add(k);} });
+}
+
+/* ---------- 目录 ---------- */
+function buildToc(){
+  const box = $('#toclist');
+  const secs = [];
+  DATA.forEach((it,i)=>{
+    let s = secs.find(x=>x.no===it.sec);
+    if(!s){ s = {no:it.sec, title:it.secTitle, first:i, last:i, n:0}; secs.push(s); }
+    s.last=i; s.n++;
+  });
+  $('#toctitle').textContent = '目录 · ' + secs.length + ' 个分区 / ' + N + ' 页';
+  box.innerHTML = secs.map(s=>{
+    const p1 = String(DATA[s.first].pid).padStart(3,'0');
+    const p2 = String(DATA[s.last].pid).padStart(3,'0');
+    return `<button class="trow" data-i="${s.first}">
+      <span class="tno">${s.no}</span><span class="ttl">${s.title}</span>
+      <span class="tcnt">${s.n} 页</span><span class="trng">P${p1}–P${p2}</span></button>`;
+  }).join('');
+  box.addEventListener('click', e=>{
+    const b = e.target.closest('.trow'); if(!b) return;
+    toggle('#toc', false); show(+b.dataset.i);
+  });
+}
+function markToc(){
+  [...$('#toclist').children].forEach(b=>{
+    const i = +b.dataset.i;
+    const sec = DATA[i].sec;
+    b.classList.toggle('cur', DATA[cur].sec === sec && cur >= i);
+  });
+}
+
+/* ---------- 总览 ---------- */
+function buildGrid(){
+  const box = $('#gridlist');
+  box.innerHTML = DATA.map((it,i)=>{
+    const plain = (it.statement+ (it.answer||'')).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').slice(0,120);
+    return `<button class="gitem" data-i="${i}">
+      <span class="gpid">P${String(it.pid).padStart(3,'0')}</span>
+      <span class="glab">${it.label} ${it.title}</span>
+      <span class="gtex">${plain}</span></button>`;
+  }).join('');
+  box.addEventListener('click', e=>{
+    const b = e.target.closest('.gitem'); if(!b) return;
+    toggle('#grid', false); show(+b.dataset.i);
+  });
+}
+
+function toggle(sel, on){
+  const el = $(sel);
+  const v = (on===undefined) ? !el.classList.contains('on') : on;
+  el.classList.toggle('on', v);
+  if(sel==='#toc' && v) markToc();
+  if(sel==='#grid' && v){
+    const b = $('#gridlist').children[cur];
+    if(b) b.scrollIntoView({block:'center'});
+    $('#filter').value=''; filterGrid('');
+    setTimeout(()=>$('#filter').focus(), 30);
+  }
+}
+$('#filter').addEventListener('input', e=>filterGrid(e.target.value));
+function filterGrid(q){
+  q = q.trim().toLowerCase();
+  [...$('#gridlist').children].forEach(b=>{
+    const ok = !q || b.textContent.toLowerCase().includes(q);
+    b.style.display = ok ? '' : 'none';
+    b.classList.toggle('cur', +b.dataset.i === cur);
+  });
+}
+
+/* ---------- 滚动或翻页 ---------- */
+function scrollOrPage(dir){
+  const s = slides[cur], c = s && s.querySelector('.content');
+  if(c && s.classList.contains('over')){
+    const atEnd = c.scrollTop + c.clientHeight >= c.scrollHeight - 3;
+    const atTop = c.scrollTop <= 3;
+    if(dir > 0 && !atEnd){ c.scrollBy({top: c.clientHeight*0.82, behavior:'smooth'}); return; }
+    if(dir < 0 && !atTop){ c.scrollBy({top: -c.clientHeight*0.82, behavior:'smooth'}); return; }
+  }
+  show(cur + dir);
+}
+
+/* ---------- 提示 / 全屏 ---------- */
+let toastT;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('on'), 1500);
+}
+function fullscreen(){
+  if(document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen().catch(()=>toast('浏览器拒绝了全屏请求'));
+}
+function quizMode(){
+  const on = !document.body.classList.contains('quiz');
+  document.body.classList.toggle('quiz', on);
+  $('#quizbtn').classList.toggle('on', on);
+  toast(on ? '自测模式：答案已模糊（鼠标移上去看）' : '已退出自测模式');
+}
+
+/* ---------- 事件 ---------- */
+document.addEventListener('keydown', e=>{
+  const k = e.key;
+  if(k==='Escape'){
+    for(const id of ['#toc','#grid','#help']) if($(id).classList.contains('on')) return toggle(id,false);
+    return;
+  }
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  if(document.activeElement === $('#filter')){
+    if(k==='Enter'){ const f=[...$('#gridlist').children].find(b=>b.style.display!=='none');
+      if(f){ toggle('#grid',false); show(+f.dataset.i); } }
+    return;
+  }
+  switch(k){
+    case 'ArrowRight': case ' ': e.preventDefault(); show(cur+1); break;
+    case 'ArrowLeft': e.preventDefault(); show(cur-1); break;
+    case 'ArrowDown': case 'PageDown': e.preventDefault(); scrollOrPage(1); break;
+    case 'ArrowUp': case 'PageUp': e.preventDefault(); scrollOrPage(-1); break;
+    case 'Home': e.preventDefault(); show(0); break;
+    case 'End': e.preventDefault(); show(N-1); break;
+    case 'f': case 'F': e.preventDefault(); fullscreen(); break;
+    case 'm': case 'M': e.preventDefault(); toggle('#toc'); break;
+    case 'o': case 'O': e.preventDefault(); toggle('#grid'); break;
+    case 'a': case 'A': e.preventDefault(); quizMode(); break;
+    case 'd': case 'D': { e.preventDefault();
+      const t = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      try{ localStorage.setItem('semi-theme', t); }catch(e){}
+      break;
+    }
+    case '?': case 'h': case 'H': e.preventDefault(); toggle('#help'); break;
+    case 'g': case 'G': { e.preventDefault();
+      const v = prompt('跳到第几页？（1–' + N + ' 或 P028）');
+      if(v){ const m=/(\d+)/.exec(v); if(m){ const n=+m[1];
+        show(/p/i.test(v) ? DATA.findIndex(d=>d.pid===n) : n-1); } }
+      break;
+    }
+    case 'p': case 'P': e.preventDefault(); printAll(); break;
+    case '!': checkAll(); break;
+    case '+': case '=': setZoom(zoom*1.12); break;
+    case '-': case '_': setZoom(zoom/1.12); break;
+    case '0': setZoom(1); break;
+  }
+});
+
+let wheelLock = false;
+stage.addEventListener('wheel', e=>{
+  const c = slides[cur]?.querySelector('.content'); if(!c) return;
+  if(c.scrollHeight > c.clientHeight + 4) return;
+  if(wheelLock) return;
+  if(Math.abs(e.deltaY) < 24) return;
+  wheelLock = true; setTimeout(()=>wheelLock=false, 380);
+  show(cur + (e.deltaY>0 ? 1 : -1));
+}, {passive:true});
+
+let tx=0, ty=0;
+stage.addEventListener('touchstart', e=>{ tx=e.touches[0].clientX; ty=e.touches[0].clientY; }, {passive:true});
+stage.addEventListener('touchend', e=>{
+  const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.6) show(cur + (dx<0?1:-1));
+}, {passive:true});
+
+document.addEventListener('click', e=>{
+  const b = e.target.closest('[data-act]'); if(!b) return;
+  const a = b.dataset.act;
+  if(a==='prev') show(cur-1);
+  else if(a==='next') show(cur+1);
+  else if(a==='toc') toggle('#toc');
+  else if(a==='grid') toggle('#grid');
+  else if(a==='help') toggle('#help');
+  else if(a==='quiz') quizMode();
+  else if(a==='theme'){ const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',t); try{localStorage.setItem('semi-theme',t)}catch(e){} }
+  else if(a==='print') printAll();
+  else if(a==='close') toggle('#'+b.dataset.target, false);
+});
+
+window.addEventListener('hashchange', ()=>{
+  const m = /^#p(\d+)$/.exec(location.hash);
+  if(m){ const i = DATA.findIndex(d=>d.pid===+m[1]); if(i>=0 && i!==cur) show(i, false); }
+});
+window.addEventListener('resize', ()=>{ fit(cur); });
+
+/* ---------- 打印 ---------- */
+function printAll(){
+  document.body.classList.add('printing');
+  let i = 0;
+  const step = ()=>{
+    const t0 = performance.now();
+    while(i < N && performance.now() - t0 < 120){
+      const s = slides[i];
+      if(!typeset.has(i)){ renderMathIn(s); typeset.add(i); }
+      i++;
+    }
+    if(i < N) requestAnimationFrame(step);
+    else { toast('已全部排版，准备打印…'); setTimeout(()=>{ window.print(); document.body.classList.remove('printing'); }, 300); }
+  };
+  step();
+}
+
+/* ---------- 公式自检 ---------- */
+function checkAll(){
+  let i = 0;
+  const step = ()=>{
+    const t0 = performance.now();
+    while(i < N && performance.now() - t0 < 100){
+      const s = slides[i];
+      if(!typeset.has(i)){ renderMathIn(s); typeset.add(i); }
+      i++;
+    }
+    if(i < N) requestAnimationFrame(step);
+    else {
+      let n = 0; slides.forEach((s,i)=>{ n += s.querySelectorAll('.katex-error').length; });
+      const seen = [];
+      slides.forEach((s,i)=> s.querySelectorAll('.katex-error').forEach(e=>{
+        if(seen.length<60) seen.push('P'+(i+1)+' :: '+e.textContent.slice(0,90));
+      }));
+      console.log('KATEX ERRORS:\n' + seen.join('\n'));
+      $('#secname').textContent = '公式自检：' + N + ' 页，未识别 ' + n + ' 处';
+      toast(n ? ('有 ' + n + ' 处公式未识别') : '全部公式渲染正常 ✓');
+    }
+  };
+  step();
+}
+
+/* ---------- 启动 ---------- */
+build(); buildToc(); buildGrid();
+let start = 0;
+const m = /^#p(\d+)$/.exec(location.hash);
+if(m){ const i = DATA.findIndex(d=>d.pid===+m[1]); if(i>=0) start = i; }
+else { const v = parseInt(localStorage.getItem('semi-pos')||'-1',10); if(v>=0 && v<N) start = v; }
+const th = localStorage.getItem('semi-theme'); if(th) document.documentElement.setAttribute('data-theme', th);
+show(start, false);
+setTimeout(()=>{ fit(cur); }, 60);
+if(/[?&]check=1/.test(location.search)) setTimeout(checkAll, 400);
+</script>
+</body>
+</html>
