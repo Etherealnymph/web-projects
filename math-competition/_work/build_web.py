@@ -101,9 +101,11 @@ def cut(lines):
             continue
         if s.startswith('*备注'):
             mode = 'note'
-            buf['note'].append(s.strip('*').strip())
+            note = s.strip('*').strip()
+            note = re.sub(r'^备注[:：]\s*', '', note)
+            buf['note'].append(note)
             continue
-        if s.startswith('<sub>照片'):
+        if s.startswith('<sub>照片') or s.startswith('<sub>来源'):
             mode = 'photos'
             txt = re.sub(r'\[([^\]]+)\]\([^)]*\)', r'\1', s)
             txt = re.sub(r'<[^>]+>', '', txt)
@@ -415,6 +417,21 @@ a{color:var(--accent2)}
 .phead b{font-size:16px}
 .pbody{overflow-y:auto;padding:16px 22px 24px}
 
+/* 目录 */
+#toclist{display:flex;flex-direction:column;gap:2px}
+.trow{display:grid;grid-template-columns:38px 1fr 54px 92px 74px;align-items:center;gap:10px;
+      padding:7px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;background:none;
+      color:var(--fg);font:inherit;text-align:left}
+.trow:hover{background:var(--chip);border-color:var(--line)}
+.trow.cur{border-color:var(--accent);background:var(--chip)}
+.trow .tno{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.trow .ttl{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow .tcnt,.trow .trng{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.trow .ttag{font-size:11px;color:var(--muted);text-align:right;white-space:nowrap}
+.trow.is-mock{border-left:3px solid var(--accent)}
+.trow.is-mock .ttl{font-weight:600}
+.trow.is-mock .ttag{color:var(--accent);font-weight:700}
+
 /* 总览网格 */
 #gridlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px}
 .gitem{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 11px;
@@ -551,6 +568,7 @@ function show(i, push=true){
   if(push) history.replaceState(null,'','#p'+String(it.pid).padStart(3,'0'));
   try{ localStorage.setItem('mc-pos', String(i)); }catch(e){}
   if(drawer.classList.contains('on')) fillDrawer(it);
+  if($('#toc').classList.contains('on')) markToc();
   // 预热相邻两页
   [i+1, i-1].forEach(k=>{ const n=slides[k]; if(n && !typeset.has(k)){ renderMathIn(n); typeset.add(k);} });
 }
@@ -569,6 +587,40 @@ function fillDrawer(it){
   dbody.scrollTop = 0;
 }
 
+/* ---------- 目录 ---------- */
+function buildToc(){
+  const box = $('#toclist');
+  const secs = [];
+  DATA.forEach((it,i)=>{
+    let s = secs.find(x=>x.no===it.sec);
+    if(!s){ s = {no:it.sec, title:it.secTitle, first:i, last:i, n:0}; secs.push(s); }
+    s.last = i; s.n++;
+  });
+  $('#toctitle').textContent = '目录 · ' + secs.length + ' 个分区 / ' + N + ' 题';
+  box.innerHTML = secs.map(s=>{
+    const p1 = String(DATA[s.first].pid).padStart(3,'0');
+    const p2 = String(DATA[s.last].pid).padStart(3,'0');
+    const mock = /模拟/.test(s.title) ? ' is-mock' : '';
+    const tag = /模拟/.test(s.title) ? '模拟卷' : '';
+    return `<button class="trow${mock}" data-i="${s.first}">
+        <span class="tno">${s.no}</span>
+        <span class="ttl">${s.title}</span>
+        <span class="tcnt">${s.n} 题</span>
+        <span class="trng">P${p1}–P${p2}</span>
+        <span class="ttag">${tag}</span></button>`;
+  }).join('');
+  box.addEventListener('click', e=>{
+    const b = e.target.closest('.trow'); if(!b) return;
+    toggle('#toc', false); show(+b.dataset.i);
+  });
+}
+function markToc(){
+  [...$('#toclist').children].forEach(b=>{
+    const i = +b.dataset.i;
+    b.classList.toggle('cur', i === cur || (DATA[cur].sec === DATA[i].sec && cur >= i));
+  });
+}
+
 /* ---------- 总览 ---------- */
 function buildGrid(){
   const box = $('#gridlist');
@@ -585,6 +637,7 @@ function toggle(sel, on){
   const el = $(sel);
   const v = (on===undefined) ? !el.classList.contains('on') : on;
   el.classList.toggle('on', v);
+  if(sel==='#toc' && v) markToc();
   if(sel==='#grid' && v){
     const b = $('#gridlist').children[cur];
     if(b) b.scrollIntoView({block:'center'});
@@ -634,6 +687,7 @@ function fullscreen(){
 document.addEventListener('keydown', e=>{
   const k = e.key;
   if(k==='Escape'){
+    if($('#toc').classList.contains('on')) return toggle('#toc', false);
     if($('#grid').classList.contains('on')) return toggle('#grid', false);
     if($('#help').classList.contains('on')) return toggle('#help', false);
     if(drawer.classList.contains('on')) return toggle('#drawer', false);
@@ -657,6 +711,7 @@ document.addEventListener('keydown', e=>{
     case 'Home': e.preventDefault(); show(0); break;
     case 'End': e.preventDefault(); show(N-1); break;
     case 'f': case 'F': e.preventDefault(); fullscreen(); break;
+    case 'm': case 'M': e.preventDefault(); toggle('#toc'); break;
     case 'o': case 'O': e.preventDefault(); toggle('#grid'); break;
     case 't': case 'T': e.preventDefault(); toggle('#drawer'); break;
     case 'd': case 'D': { e.preventDefault();
@@ -707,6 +762,7 @@ document.addEventListener('click', e=>{
   if(a==='prev') show(cur-1);
   else if(a==='next') show(cur+1);
   else if(a==='fs') fullscreen();
+  else if(a==='toc') toggle('#toc');
   else if(a==='grid') toggle('#grid');
   else if(a==='drawer') toggle('#drawer');
   else if(a==='help') toggle('#help');
@@ -767,6 +823,7 @@ function checkAll(){
 
 /* ---------- 启动 ---------- */
 build();
+buildToc();
 buildGrid();
 let start = 0;
 const m = /^#p(\d+)$/.exec(location.hash);
@@ -806,6 +863,7 @@ HTML = """<!doctype html>
     <button class="btn" data-act="next" title="下一题 →">下一题 ›</button>
     <div id="bar"><i></i></div>
     <span id="cnt">1 / __N__</span>
+    <button class="btn" data-act="toc" title="目录（M）">☰ 目录</button>
     <button class="btn" data-act="grid" title="总览（O）">▦ 总览</button>
     <button class="btn" data-act="drawer" title="评注 / 板书（T）">ⓘ 附加</button>
     <button class="btn" data-act="fs" title="全屏（F）">⤢ 全屏</button>
@@ -818,6 +876,14 @@ HTML = """<!doctype html>
   <div id="dhead"><span>附加内容：评注 · 课堂板书 · 备注 · 照片</span>
     <button class="btn" data-act="close" data-target="drawer">关闭 (T)</button></div>
   <div id="dbody"></div>
+</div>
+
+<div class="overlay" id="toc">
+  <div class="panel">
+    <div class="phead"><b id="toctitle">目录</b>
+      <button class="btn" data-act="close" data-target="toc">关闭 (M)</button></div>
+    <div class="pbody"><div id="toclist"></div></div>
+  </div>
 </div>
 
 <div class="overlay" id="grid">
@@ -837,6 +903,7 @@ HTML = """<!doctype html>
       <div><kbd>←</kbd><kbd>↑</kbd><kbd>PgUp</kbd> 上一题</div>
       <div><kbd>Home</kbd><kbd>End</kbd> 第一题 / 最后一题</div>
       <div><kbd>F</kbd> 全屏 / 退出全屏（也可用浏览器 F11）</div>
+      <div><kbd>M</kbd> 目录：24 个分区（模拟卷一 / 三 / 四 / 五 / 六、模拟检测卷·第三套均有标识）</div>
       <div><kbd>O</kbd> 题目总览（可筛选题号、关键字）</div>
       <div><kbd>T</kbd> 查看本题的评注、课堂板书、备注、原始照片</div>
       <div><kbd>G</kbd> 输入题号跳转（如 28 或 P028）</div>
