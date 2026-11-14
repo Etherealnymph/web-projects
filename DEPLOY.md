@@ -280,19 +280,19 @@ git add -f .venv
 - Token 只在需要时临时使用，完成后建议在平台设置中撤销或重新生成。
 - 如果 Token 曾经发到聊天、截图、代码或公开仓库中，应立即撤销并重新生成。
 - 公共 GitHub Pages 适合部署静态网页，不适合部署需要保密的后端服务。
-- GitHub Pages 不能运行 FastAPI。`股票训练场/backend/` 只能在本地或单独的服务器上运行。
+- GitHub Pages 不能运行 FastAPI。`stock-trading-simulator/backend/` 只能在本地或单独的服务器上运行。
 
-### Blog2.0 的隐私边界（必须阅读）
+### blog-platform 的隐私边界（必须阅读）
 
-`Blog2.0` 是 Express + MongoDB 应用，不是静态网页。GitHub Pages 只会把仓库文件原样公开，不会运行
-`server.js`、Express session、MongoDB、邀请码校验或权限中间件。因此，不能把 `Blog2.0/` 放入当前
+`blog-platform` 是 Express + MongoDB 应用，不是静态网页。GitHub Pages 只会把仓库文件原样公开，不会运行
+`server.js`、Express session、MongoDB、邀请码校验或权限中间件。因此，不能把 `blog-platform/` 放入当前
 GitHub Pages 的发布目录来实现“只有本人或邀请码用户可访问”；任何放进去的 HTML、JavaScript、EJS、
 上传文件和源码都可能通过 URL 直接下载，前端登录框也不能提供真正的保密性。
 
 正确部署方式是：
 
-1. GitHub Pages 只发布不含 Blog2.0 数据和后端源码的公开静态内容。
-2. 把 `Blog2.0` 部署到支持 Node.js、HTTPS、环境变量和持久化 MongoDB 的服务。
+1. GitHub Pages 只发布不含 blog-platform 数据和后端源码的公开静态内容。
+2. 把 `blog-platform` 部署到支持 Node.js、HTTPS、环境变量和持久化 MongoDB 的服务。
 3. 在服务端设置 `MONGODB_URI` 和至少 32 位随机 `SESSION_SECRET`，绝不提交 `.env`。
 4. 只通过已登录的 superadmin 会话调用 `POST /admin/invites` 生成邀请码；不要把邀请码写入
    `uploads/`、日志或 Git 仓库。
@@ -300,9 +300,9 @@ GitHub Pages 的发布目录来实现“只有本人或邀请码用户可访问�
    并确认网关在请求到达应用前拒绝未授权用户。仅设置仓库为 private 不能推断出公开 Pages URL
    一定受保护。
 
-### Blog2.0 傻瓜式部署方案
+### blog-platform 傻瓜式部署方案
 
-如果目标是“让 Blog2.0 真正在线并能登录”，不要把它部署到 GitHub Pages。最简单的组合是：
+如果目标是“让 blog-platform 真正在线并能登录”，不要把它部署到 GitHub Pages。最简单的组合是：
 
 - GitHub：保存源码；
 - Render Web Service：运行 Node.js/Express；
@@ -314,7 +314,7 @@ GitHub Pages 的发布目录来实现“只有本人或邀请码用户可访问�
 2. 注册并登录 <https://www.mongodb.com/atlas>，创建一个免费的数据库集群，创建数据库用户，并把网络访问设置为允许 Render 连接。复制 MongoDB 连接字符串。
 3. 注册并登录 <https://render.com>，选择 **New > Web Service**，连接上面的 GitHub 仓库。
 4. 在 Render 中填写：
-   - **Root Directory**：`Blog2.0`
+   - **Root Directory**：`blog-platform`
    - **Runtime**：`Node`
    - **Build Command**：`npm ci`
    - **Start Command**：`npm start`
@@ -327,7 +327,7 @@ GitHub Pages 的发布目录来实现“只有本人或邀请码用户可访问�
    - `PORT`：不要填写，Render 会自动提供。
 6. 点击 **Create Web Service**，等待部署完成。Render 会给出一个 `https://你的服务名.onrender.com` 地址；打开它应先看到登录页。
 7. 第一个管理员账号和邀请码必须按项目的管理员脚本/数据库流程创建，不能把邀请码写进 GitHub。部署成功后再根据
-   `Blog2.0/README.md` 中的说明创建 `superadmin`，登录后通过管理接口生成邀请码。
+   `blog-platform/README.md` 中的说明创建 `superadmin`，登录后通过管理接口生成邀请码。
 
 注意：Render 免费服务可能会休眠，第一次打开需要等待几十秒；MongoDB Atlas 的数据库用户密码不能提交到仓库。
 如果只想发布本项目中的普通静态 HTML 页面，仍然使用本文件前面的 GitHub Pages 地址即可。

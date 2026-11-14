@@ -100,12 +100,12 @@ const paths = [
   {
     name: '从直觉到电路',
     about: '观察 → 建模 → 测量 → 留下证据',
-    steps: ['field-drift/', 'PN.html', 'circuit-lab/', 'silicon-notes/'],
+    steps: ['field-drift/', 'pn-junction-lab.html', 'circuit-lab/', 'silicon-notes/'],
   },
   {
     name: '做一块自己的 CPU',
     about: '从逻辑门、复用模块，到程序执行',
-    steps: ['logic-loom/', 'WaveScope.html', 'silicon-notes/'],
+    steps: ['logic-loom/', 'wave-scope.html', 'silicon-notes/'],
   },
   {
     name: '模拟芯片设计台',

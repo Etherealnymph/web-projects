@@ -1,40 +1,39 @@
-# 观澜电路 · Circuit Lab
+<div align="center">
 
-纯静态电路仿真工作台，在浏览器 Worker 内运行真实 **ngspice 46 WebAssembly**。模型与文件在本机处理，运行时没有第三方 CDN 依赖。用 HTTP 服务打开 `circuit-lab/index.html`，GitHub Pages 可直接托管。
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Open-2f6feb?style=flat-square)](https://etherealnymph.github.io/web-projects/circuit-lab/) [![Portal](https://img.shields.io/badge/Portal-All_Projects-6e7781?style=flat-square)](https://etherealnymph.github.io/web-projects/index.html#projects) ![Stack](https://img.shields.io/badge/Stack-WebAssembly%20%7C%20JavaScript-654ff0?style=flat-square)
 
-## 使用
+# Circuit Lab · 观澜电路
 
-从 30 个内置案例开始，或导入自己的工程。可拖动器件布局、点选引脚连接网络、修改节点与参数、添加/删除器件、编辑原始网表、撤销/重做。右侧选择 OP、TRAN、AC 或 DC，点击运行。支持波形取样、AC 幅度/相位、前一次结果虚线对照和完整复数 CSV 导出。
+**A browser SPICE workbench running real ngspice 46 WebAssembly locally — no CDN, no upload.**
 
-涵盖分压、电桥、分流、RC/RL/RLC、低通/高通/谐振/陷波、二极管、整流/保持、BJT/MOS 放大、电流镜、反相器、差分对、运放、积分器、环振、LC 振荡、PLL 滤波、PTAT、子电路和变压器。通用器件模型用于教学。
+在浏览器里运行真实 ngspice 46 WebAssembly 的 SPICE 工作台：无 CDN、不上传。
 
-## 文件支持
+[![English](https://img.shields.io/badge/English-README__EN-2f6feb?style=flat-square)](README_EN.md) [![中文](https://img.shields.io/badge/%E4%B8%AD%E6%96%87-README__CN-d1492f?style=flat-square)](README_CN.md) [![README](https://img.shields.io/badge/README-index-6e7781?style=flat-square)](README.md)
 
-| 输入 | 行为 |
+**English** · [简体中文](README_CN.md) · [README index](README.md) · [All projects](../README.md)
+
+<a href="docs/screenshot.png"><img src="docs/screenshot.png" alt="Circuit Lab screenshot" width="880"></a>
+
+</div>
+
+## Quick links · 快速入口
+
+| | |
 | --- | --- |
-| `.cir .sp .spice .net` | ngspice 网表，可选为运行入口 |
-| `.lib .mod .inc` | 作为工程文件导入，由 `.include/.lib` 引用 |
-| `.asy` | LTspice 文本符号的线段、矩形、圆、引脚、SpiceOrder 与属性解析，可查看并放置编号端口实例 |
-| `.asc` | 与全部引用 `.asy` 一起导入，转换导线、FLAG、R/M 方向、器件属性与 SPICE TEXT 为网表 |
-| `.theme.json` | 七种可替换界面颜色，格式见 examples/paper.theme.json |
-| 工程 `.json` | 完整文件、设置、符号与布局的导出/恢复 |
+| Project portal · 项目总入口 | [etherealnymph.github.io/web-projects/index.html#projects](https://etherealnymph.github.io/web-projects/index.html#projects) |
+| Live page · 在线页面 | [https://etherealnymph.github.io/web-projects/circuit-lab/](https://etherealnymph.github.io/web-projects/circuit-lab/) |
+| English | [README_EN.md](README_EN.md) |
+| 简体中文 | [README_CN.md](README_CN.md) |
+| Original detailed notes / 原详细说明 | [README_ORIGINAL.md](README_ORIGINAL.md) |
 
-标准 SPICE 文件的首行默认按标题处理；无标题器件片段需取消右侧相应选项，避免第一只器件被视为标题。导入时读取最后一条 `.op/.tran/.ac/.dc` 作为当前分析，多个分析可在面板中分别运行。
+### English
 
-文件夹导入保留目录结构。ASC 导线在端点或引脚处连接，纯交叉线不自动相连。转换后应核查节点与引脚顺序。examples/ 提供可复现的 ASC+ASY 分压器及样式样本。
+Circuit Lab packs a schematic editor, a netlist editor and a waveform viewer around a genuine ngspice 46 WebAssembly engine. Models and files stay on your machine: everything runs in a Web Worker and no third-party CDN is contacted at runtime.
 
-原始 `.control/.endc` 需要移除，分析通过右侧面板设置。加密厂商模型、动态库/OSDI、Spectre 原生语法、KiCad 原生原理图、LTspice 专有行为器件、任意 CSS 样式文件尚未提供兼容转换。支持范围内的图形仍是顶层连接表示，复杂模型以完整网表为仿真依据。符号图形本身不会替代器件模型。
+### 简体中文
 
-## 保存与互通
+观澜电路把原理图编辑器、网表编辑器和波形观察窗接到真实的 ngspice 46 WebAssembly 引擎上。模型与文件都留在本机：计算在 Web Worker 内完成，运行时不访问任何第三方 CDN。
 
-当前工程自动保存至本机 IndexedDB。存储失败会显示错误，导出工程仍可备份。浏览器清理会丢失本机保存，建议定期导出。最多 100 个文件，单文件 5 MB、工程 15 MB，结果 48 MB，最多读取 100000 点/1000 变量，单次运行 45 秒。
+---
 
-“记入札记”把当前网表、分析类型与运行状态交给 `../silicon-notes/`，由用户确认保存。`../analog-atlas/` 可发送设计网表，本页会展示待接收提示。交接不包含工艺库，私有模型仍需本机显式导入。
-
-## 验证与引擎
-
-`node --test circuit-lab/tests/*.test.mjs` 会真实运行全部内置案例，并检查分压、带负载分压、RC 解析解、AC 复数幅相、嵌套模型引用和 ASC 引脚转换。输入边界、路径、主题、符号和截断结果有独立检查。
-
-参考引擎使用固定 npm 包。可重复的封装修改与许可证见 vendor/README.md。初次加载引擎约 7.2 MB，后续运行复用浏览器资源缓存，每次仿真的运行状态彼此隔离。
-
-[ngspice 官方文档](https://ngspice.sourceforge.io/docs.html) · [交互参考 CircuitJS](https://github.com/sharpie7/circuitjs1)
+**Contact · 联系方式:** Etherealnymph · [2115487769@qq.com](mailto:2115487769@qq.com)

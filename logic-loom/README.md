@@ -1,56 +1,39 @@
-# 逻辑织机 / Logic Loom
+<div align="center">
 
-独立静态数字电路工坊。从第一根导线到实际执行汇编程序的 8 位 CPU，20 个渐进关卡，另有自由实验台。视觉、关卡、代码与素材均为原创；没有使用 Turing Complete 的资产或关卡文本。
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Open-2f6feb?style=flat-square)](https://etherealnymph.github.io/web-projects/logic-loom/) [![Portal](https://img.shields.io/badge/Portal-All_Projects-6e7781?style=flat-square)](https://etherealnymph.github.io/web-projects/index.html#projects) ![Stack](https://img.shields.io/badge/Stack-SVG%20%7C%20JavaScript-f1e05a?style=flat-square)
 
-## 启动
+# Logic Loom · 逻辑织机
 
-入口：`index.html`。在仓库根目录运行 `python3 -m http.server 8000` 后访问 `http://localhost:8000/logic-loom/`；GitHub Pages 可直接使用同一路径。使用 ES modules，应通过 HTTP(S) 打开，不使用 `file://`。无构建步骤、外部运行时依赖、网络 API 或 CDN。
+**Build a working 8-bit CPU out of NAND gates, one progressive level at a time.**
 
-## 能做什么
+从 NAND 门开始，一关一关搭出能执行汇编程序的 8 位 CPU。
 
-- SVG 网表编辑器：放置、拖动、平移缩放、按端口连线、删除、撤销/重做。输入端单驱动，输出可扇出；自动检查位宽与组合环路。
-- 输入开关与总线数值、实时信号、二进制输出、真值表与失败反例。线上的虚线动画是信号状态的视觉提示，不是模拟的物理传播延迟。
-- 20 关：连线 → NAND 合成 NOT/AND/OR/XOR → 半加/全加 → MUX/DEMUX/奇偶 → 8 位反相/涟波加法/MUX → DFF/寄存器/计数器 → 8 运算 ALU → PC → 指令译码 → LL-8 CPU。
-- 同步时钟：所有寄存器和 RAM 同时按边沿前的信号更新；清零优先于使能。组合反馈被拒绝，经过寄存器的反馈有效。
-- 芯片库：保存自定义组合子电路，可嵌套，检查递归、缺失依赖与规模。内部器件仍受关卡解锁规则约束。
-- 每关本机自动保存、工程 JSON 导出/导入、存储失败提示。导入在校验与确认后替换，失败保留旧工程。示范、探索和导入均标记为练习，不导入通关成绩；练习通过与独立完成分别显示。
-- 键盘：Tab 遍历组件和端口，Enter/空格选择或连接，方向键移动选中元件（Shift 为大步），Delete 删除，Esc 取消连线，Ctrl/⌘ Z 撤销，Ctrl/⌘ Shift Z 重做。支持窄屏和减少动态效果设置。
+[![English](https://img.shields.io/badge/English-README__EN-2f6feb?style=flat-square)](README_EN.md) [![中文](https://img.shields.io/badge/%E4%B8%AD%E6%96%87-README__CN-d1492f?style=flat-square)](README_CN.md) [![README](https://img.shields.io/badge/README-index-6e7781?style=flat-square)](README.md)
 
-## LL-8 是真实连接的电路
+**English** · [简体中文](README_CN.md) · [README index](README.md) · [All projects](../README.md)
 
-最终关只有一个 `PC8 / ROM / DECODE / ALU8 / REG8 / RAM8`，搭配 MUX、ZERO 与导线。PC 的输出对 ROM 寻址，译码器输出控制线，ALU 结果经寄存器写回，RAM 在时钟边沿写入。没有独立于画布网表运行的 CPU 模拟器。改错 ALU 输入、跳转条件、LOAD 选择、写使能或 PC 输出，会使回归失败。
+<a href="docs/screenshot.png"><img src="docs/screenshot.png" alt="Logic Loom screenshot" width="880"></a>
 
-16 位指令，高 4 位为操作码，低 8 位为立即数，中间 4 位保留。8 位无符号数据，算术模 256；256 字节 RAM，初始全零；无流水线，每个边沿执行一条指令。
+</div>
 
-| 指令 | 操作码 | 行为 |
-|---|---:|---|
-| `MOVI n` | 1 | A ← n |
-| `ADDI n` / `SUBI n` | 2 / 3 | A ← A ± n |
-| `ANDI n` / `XORI n` | 4 / 5 | A ← A & n / A ⊕ n |
-| `JMP addr` | 6 | PC ← addr |
-| `JZ addr` | 7 | A=0 时 PC ← addr |
-| `STORE addr` / `LOAD addr` | 8 / 9 | RAM[addr] ← A / A ← RAM[addr] |
-| `HALT` | 15 | PC 保持 |
+## Quick links · 快速入口
 
-支持标签、十进制、`0x`、`0b` 与 `;` 注释。最多 256 条指令；未使用 ROM 地址读作 HALT；未定义操作码不写入状态，PC 前进。程序面板支持编辑、汇编校验、装载复位、单步/连续运行、当前指令、寄存器与 RAM 地址检查。验证电路运行四段固定回归程序，覆盖加法存储、条件循环、LOAD/XOR、回绕减法和 AND；自写程序的运行不自动计为通关。
+| | |
+| --- | --- |
+| Project portal · 项目总入口 | [etherealnymph.github.io/web-projects/index.html#projects](https://etherealnymph.github.io/web-projects/index.html#projects) |
+| Live page · 在线页面 | [https://etherealnymph.github.io/web-projects/logic-loom/](https://etherealnymph.github.io/web-projects/logic-loom/) |
+| English | [README_EN.md](README_EN.md) |
+| 简体中文 | [README_CN.md](README_CN.md) |
+| Original detailed notes / 原详细说明 | [README_ORIGINAL.md](README_ORIGINAL.md) |
 
-## 验证
+### English
 
-```sh
-npm test --prefix logic-loom
-```
+Twenty levels take you from your first wire to the LL-8 CPU, with a free-play bench alongside. The editor checks widths, drivers and combinational loops, so a circuit that passes really behaves like the hardware it models.
 
-从仓库根目录运行；或在本目录执行 `npm test`。测试使用 Node.js 内置测试框架，无需安装依赖。覆盖全部关卡的正确解与空白/断线反例、端口和环路、同步边沿、RAM、汇编错误、CPU 断线以外的错误接线、子电路嵌套/递归/解锁、导入失败和存储异常。另有 8 位算术每对输入穷举，以及全部 16 位拆线/合线可逆检查。
+### 简体中文
 
-关卡 1–10、11 和 19 穷举其输入；8 位双输入运算采用公开说明的边界与确定性回归样本，不能视为形式证明。运行结果不等于晶体管级时序或电气验证。
+二十个关卡从第一根导线一路搭到 LL-8 CPU，另有自由实验台。编辑器会检查位宽、驱动与组合环路，因此通过验证的电路确实具备它所模拟的硬件行为。
 
-## 边界与数据
+---
 
-- 自定义封装目前仅支持组合电路；有状态芯片使用已解锁的原生 DFF/REG/RAM/PC。没有模拟电路、三态总线、传播延时、亚稳态、晶体管级电路或 HDL 导出。
-- 单图最多 250 元件、1400 连线，展开后 2500 元件；32 个自定义芯片，嵌套最多 8 层，工程上限 1.5 MB。连续运行每 256 拍自动暂停。
-- 数据只保存在当前浏览器的 `logicloom.workspace.v1`；无账号、遥测或服务器保存。清除网站数据会清除进度，建议导出备份。内存/寄存器的运行状态不跨刷新保存；电路、程序、芯片和学习记录保存。改动电路会复位运行状态。
-- 独立/练习记录用于本机学习反馈，不提供防篡改成绩认证。工程导入始终去掉成绩并标记为练习。
-
-## 文件
-
-`engine.js`：纯模拟器、校验和汇编器；`levels.js`：关卡、示范与测试目标；`storage.js`：工程校验与保存；`app.js`：编辑器与交互；`style.css` / `index.html`：界面；`tests/engine.test.mjs`：自动测试。
+**Contact · 联系方式:** Etherealnymph · [2115487769@qq.com](mailto:2115487769@qq.com)

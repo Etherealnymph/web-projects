@@ -1,262 +1,95 @@
-# 个人网页项目集合
+<div align="center">
 
-这是一个本地网页项目集合，包含学习训练、交互实验、模拟工具、小游戏和应用页面。
+[![Portal](https://img.shields.io/badge/Portal-All_Projects-6e7781?style=flat-square)](https://etherealnymph.github.io/web-projects/index.html#projects) ![Stack](https://img.shields.io/badge/Stack-HTML%20%7C%20CSS%20%7C%20JavaScript-e34c26?style=flat-square)
 
-## 2026-11-05 芯片工作台与体验升级
+# Web Projects · 实验与造物
 
-- [观澜电路](./circuit-lab/) 使用 ngspice 46 WebAssembly，提供 30 个案例、网表与模型文件工程、符号/ASC 转换、波形观察与结果导出。
-- [硅海图谱](./analog-atlas/) 提供 OSC、基准源、PLL 的九种拓扑、参数反算、设计对照和可替换工艺配置。当前为明确标注的教学模型，授权 TSMC PDK 待用户接入。
-- [硅间札记](./silicon-notes/) 提供实验/论文/失效复盘、来源与结果关联、双链、比较提纲、复习和公开目录导出。个人草稿默认在本机。
-- [逻辑织机](./logic-loom/) 通过 20 个关卡从基本逻辑门搭到能执行汇编程序的 8 位 CPU，支持组合子电路保存复用。
-- [MiniWorld](./MiniWorld/) 新增 0.25/0.5/1 m 精细建造与微型构件，城市路灯和长椅采用更小尺度。
-- 总入口新增收藏、最近访问、快速前往与串联学习路线。
+**Etherealnymph's collection of browser labs, learning tools and games.**
 
-新项目均为 GitHub Pages 静态页面，通过本地 HTTP 或 HTTPS 打开。根目录运行 `python3 -m http.server 8123` 后访问 `http://127.0.0.1:8123/`。各项目的 README 列出使用方式、格式支持、模型范围与测试命令。
+Etherealnymph 的浏览器实验、学习工具与游戏集合。
 
-## 总入口
+[![English](https://img.shields.io/badge/English-README__EN-2f6feb?style=flat-square)](README_EN.md) [![中文](https://img.shields.io/badge/%E4%B8%AD%E6%96%87-README__CN-d1492f?style=flat-square)](README_CN.md) [![README](https://img.shields.io/badge/README-index-6e7781?style=flat-square)](README.md)
 
-推荐先打开项目目录页：
+**English** · [简体中文](README_CN.md) · [README index](README.md)
 
-```text
-D:\Project\html\index.html
+<a href="docs/portal.png"><img src="docs/portal.png" alt="Project portal" width="880"></a>
+
+</div>
+
+## Quick start · 快速开始
+
+| | |
+| --- | --- |
+| Portal · 总入口 | [etherealnymph.github.io/web-projects/index.html#projects](https://etherealnymph.github.io/web-projects/index.html#projects) |
+| English | [README_EN.md](README_EN.md) |
+| 简体中文 | [README_CN.md](README_CN.md) |
+| Original notes · 原说明 | [README_ORIGINAL.md](README_ORIGINAL.md) |
+
+### English
+
+A collection of self-contained browser projects: circuit and device labs, study tools, physics and math playgrounds, games, and a few server-backed applications. Most are static pages that need no build step and no account; data stays in the browser unless a project explicitly documents a backend.
+
+### 简体中文
+
+一组自包含的浏览器项目：电路与器件实验室、学习工具、物理与数学沙盒、游戏，以及少数需要服务端的应用。绝大多数是无需构建、无需账号的静态页面；除项目明确说明的后端外，数据都留在浏览器里。
+
+## Projects
+
+| Project | README | Live page | Description |
+| --- | --- | --- | --- |
+| **Analog Atlas** / 硅海图谱 | [EN](analog-atlas/README_EN.md) · [中文](analog-atlas/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/analog-atlas/) | Analog design-space explorer for oscillators, references and PLLs. |
+| **Bilingual Dictionary** / 中英双语词典 | [EN](bilingual-dictionary/README_EN.md) · [中文](bilingual-dictionary/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/bilingual-dictionary/) | 1,684-entry EN⇄ZH dictionary for electronics and CS. |
+| **Blog Platform** / 博客平台 | [EN](blog-platform/README_EN.md) · [中文](blog-platform/README_CN.md) | — | Express + MongoDB blog with invite-only accounts (server-side). |
+| **Circuit Lab** / 观澜电路 | [EN](circuit-lab/README_EN.md) · [中文](circuit-lab/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/circuit-lab/) | Real ngspice WebAssembly circuit simulation workbench. |
+| **Field Drift** / 场海 | [EN](field-drift/README_EN.md) · [中文](field-drift/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/field-drift/) | Electromagnetic drifting game, nine physics labs and a field studio. |
+| **Fourier Contour** / 圆上之圆 | [EN](fourier-contour/README_EN.md) · [中文](fourier-contour/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/fourier-contour/) | Epicycle drawing and image → Fourier parameter documents. |
+| **GM/ID Studio** / GM/ID 设计工作台 | [EN](gm-id-studio/README_EN.md) · [中文](gm-id-studio/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/gm-id-studio/dist/GM-ID-Studio.html) | gm/Id transistor sizing workbench on a TSMC 0.18 µm RF model card. |
+| **Insight Space** / 体悟集 | [EN](insight-space/README_EN.md) · [中文](insight-space/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/insight-space/) | Private invite-only journal with optional Supabase backend. |
+| **Life Guide** / 高性价比人生指南 | [EN](life-guide/README_EN.md) · [中文](life-guide/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/life-guide/) | 767 life recommendations scored by cost, payoff and evidence. |
+| **Logic Loom** / 逻辑织机 | [EN](logic-loom/README_EN.md) · [中文](logic-loom/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/logic-loom/) | Build an 8-bit CPU from NAND gates in 20 levels. |
+| **Math Competition** / 大学生数学竞赛 | [EN](math-competition/README_EN.md) · [中文](math-competition/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/math-competition/web/) | 208 competition problems with full solutions and a projector. |
+| **Mini World** / 迷你世界 | [EN](mini-world/README_EN.md) · [中文](mini-world/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/mini-world/) | Browser 3D voxel sandbox with ten worlds and vehicles. |
+| **Number Sense Trainer** / 数感训练场 | [EN](number-sense-trainer.src/README_EN.md) · [中文](number-sense-trainer.src/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/number-sense-trainer.html) |  |
+| **Semiconductor Devices** / 半导体物理与器件 | [EN](semiconductor-devices/README_EN.md) · [中文](semiconductor-devices/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/semiconductor-devices/) | One-page-per-question semiconductor physics final review. |
+| **Silicon Notes** / 硅间札记 | [EN](silicon-notes/README_EN.md) · [中文](silicon-notes/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/silicon-notes/) | Local-first chip-design notebook with evidence tracking. |
+| **Tidal Soundscape** / 潮汐声景 | [EN](soundscape/README_EN.md) · [中文](soundscape/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/soundscape/) | 18-layer real-time synthesized soundscape mixer. |
+| **SPICE RF Calculator** / TSMC RF 器件计算器 | [EN](spice-rf-calculator/README_EN.md) · [中文](spice-rf-calculator/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/spice-rf-calculator/spice-rf-calculator.html) | BSIM3v3 DC / small-signal / RF device calculator. |
+| **Stock Trading Simulator** / 股市训练场 | [EN](stock-trading-simulator/README_EN.md) · [中文](stock-trading-simulator/README_CN.md) | [open](https://etherealnymph.github.io/web-projects/stock-trading-simulator/stock-trading-simulator.html) | Simulated A-share trading terminal with optional quote API. |
+| **Stock Quote API** / A 股行情后端 | [EN](stock-quote-api/README_EN.md) · [中文](stock-quote-api/README_CN.md) | — | FastAPI + AKShare quote service (server-side). |
+
+## Single-page projects
+
+| Page | Live | What it is |
+| --- | --- | --- |
+| **Project Portal** | [index.html](https://etherealnymph.github.io/web-projects/index.html) | The portal with search, filters, favourites and learning paths. |
+| **AI Tools Directory** | [ai-tools.html](https://etherealnymph.github.io/web-projects/ai-tools.html) | A curated directory of AI tools and services. |
+| **Neon Rush 3D** | [neon-rush-3d.html](https://etherealnymph.github.io/web-projects/neon-rush-3d.html) | A neon-styled 3D endless runner built on local Three.js. |
+| **Cat Playground** | [cat-playground.html](https://etherealnymph.github.io/web-projects/cat-playground.html) | A cat-themed interactive page. |
+| **Cosmic History** | [cosmic-history.html](https://etherealnymph.github.io/web-projects/cosmic-history.html) | An interactive lesson on the origin and evolution of the solar system. |
+| **DS-2000 Oscilloscope** | [ds-2000-oscilloscope.html](https://etherealnymph.github.io/web-projects/ds-2000-oscilloscope.html) | A simulated digital storage oscilloscope. |
+| **DS-2000 Oscilloscope FFT** | [ds-2000-oscilloscope-fft.html](https://etherealnymph.github.io/web-projects/ds-2000-oscilloscope-fft.html) | The oscilloscope with FFT spectrum analysis. |
+| **WaveScope** | [wave-scope.html](https://etherealnymph.github.io/web-projects/wave-scope.html) | Another waveform viewer for analog signals. |
+| **Ecosystem Simulator** | [ecosystem-simulator.html](https://etherealnymph.github.io/web-projects/ecosystem-simulator.html) | Watch populations, resources and environment change over time. |
+| **EMC Filter Lab** | [emc-filter-lab.html](https://etherealnymph.github.io/web-projects/emc-filter-lab.html) | Common-mode / differential-mode signals and EMC filters. |
+| **ESP32C3 Panel** | [esp32c3-panel.html](https://etherealnymph.github.io/web-projects/esp32c3-panel.html) | An interactive control and hardware experiment page for ESP32C3. |
+| **Fourier Legacy Lab** | [fourier-legacy.html](https://etherealnymph.github.io/web-projects/fourier-legacy.html) | The earlier Fourier experiment page, kept for comparison. |
+| **Light Scattering Lab** | [light-scattering-lab.html](https://etherealnymph.github.io/web-projects/light-scattering-lab.html) | Rayleigh scattering, Mie scattering and geometric optics. |
+| **PID Control Lab** | [pid-control-lab.html](https://etherealnymph.github.io/web-projects/pid-control-lab.html) | Visualise PID parameters against system response. |
+| **PN Junction Lab** | [pn-junction-lab.html](https://etherealnymph.github.io/web-projects/pn-junction-lab.html) | PN-junction dynamics, parameters and characteristic curves. |
+| **Vocabulary Quiz 180** | [vocabulary-quiz-180.html](https://etherealnymph.github.io/web-projects/vocabulary-quiz-180.html) | 180 English vocabulary multiple-choice questions. |
+| **Sea War** | [seawar.html](https://etherealnymph.github.io/web-projects/seawar.html) | A Canvas real-time sea-territory strategy game with optional Supabase multiplayer. |
+| **War Simulator** | [war-simulator.html](https://etherealnymph.github.io/web-projects/war-simulator.html) | A war simulation and strategy game. |
+| **Lucky Slots** | [lucky-slots.html](https://etherealnymph.github.io/web-projects/lucky-slots.html) | A lightweight slot-machine game. |
+| **Homework 1** | [homework-1.html](https://etherealnymph.github.io/web-projects/homework-1.html) | Course / lab homework page. |
+| **Homework 3** | [homework-3.html](https://etherealnymph.github.io/web-projects/homework-3.html) | Course / lab homework page. |
+
+## Local server
+
+```bash
+python -m http.server 8123
+# http://127.0.0.1:8123/
 ```
 
-也可以直接使用浏览器打开：
+---
 
-```text
-file:///D:/Project/html/index.html
-```
-
-目录页提供：
-
-- 所有项目的统一入口
-- 每个项目的用途说明
-- 按类别筛选
-- 关键词搜索
-- 适配电脑和手机浏览器
-
-## 项目分类
-
-### 学习训练
-
-| 项目 | 入口 | 说明 |
-|---|---|---|
-| 股票训练场 | [股票训练场/股票训练场.html](./股票训练场/股票训练场.html) | 股票行情、模拟交易、持仓、交易记录和支出训练 |
-| 词汇选择题刷题 | [词汇选择题180题刷题网页.html](./词汇选择题180题刷题网页.html) | 180 题英语词汇选择题练习 |
-| 数感训练场 | [数感训练场.html](./数感训练场.html) | 数字直觉和心算训练 |
-| 宇宙历史 | [宇宙历史.html](./宇宙历史.html) | 太阳系起源与演化互动教学 |
-| 生态系统模拟器 | [生态系统模拟器.html](./生态系统模拟器.html) | 生态系统和环境变化模拟 |
-
-### 实验工具
-
-| 项目 | 入口 | 说明 |
-|---|---|---|
-| 傅里叶轮廓实验室 | [fourier-contour/index.html](./fourier-contour/index.html) | 图形轮廓的傅里叶分解与动画 |
-| 傅里叶实验页面 | [Foulier.html](./Foulier.html) | 早期傅里叶实验页面 |
-| PID 控制算法实验室 | [PID.html](./PID.html) | PID 参数和系统响应可视化 |
-| 半导体器件虚拟实验室 | [PN.html](./PN.html) | PN 结器件动力学与参数分析 |
-| 光的散射实验室 | [Light.html](./Light.html) | 瑞利散射、米氏散射和几何光学 |
-| 数字存储示波器 | [DS-2000 DIGITAL STORAGE OSCILLOSCOPE.html](./DS-2000%20DIGITAL%20STORAGE%20OSCILLOSCOPE.html) | 示波器波形观察 |
-| 数字示波器 FFT 版 | [DS-2000 DIGITAL STORAGE OSCILLOSCOPE - FFT.html](./DS-2000%20DIGITAL%20STORAGE%20OSCILLOSCOPE%20-%20FFT.html) | 示波器和 FFT 频谱分析 |
-| WaveScope | [WaveScope.html](./WaveScope.html) | 数字波形观察工具 |
-| EMC 滤波器实验室 | [共模差模.html](./共模差模.html) | 共模、差模信号和滤波器分析 |
-| TSMC RF 器件计算器 | [SpiceTool/SpiceTool.html](./SpiceTool/SpiceTool.html) | 0.18µm RF 器件和 BSIM3v3 计算 |
-| ESP32C3 控制面板 | [ESP32C3.html](./ESP32C3.html) | ESP32C3 交互控制页面 |
-
-### 应用工具
-
-| 项目 | 入口 | 说明 |
-|---|---|---|
-| 双语专业词典 | [bilingual-dictionary/index.html](./bilingual-dictionary/index.html) | 电子、电气和计算机专业词汇查询 |
-| AI 工具大全 | [AI.html](./AI.html) | AI 工具和资源入口 |
-| 作业 1 | [homework1.html](./homework1.html) | 课程或实验作业页面 |
-| 作业 3 | [homework3.html](./homework3.html) | 课程或实验作业页面 |
-
-### 游戏娱乐
-
-| 项目 | 入口 | 说明 |
-|---|---|---|
-| 场海 · Field Drift | [field-drift/index.html](./field-drift/index.html) | 九个可调物理直觉实验、七关三维漂流与可编辑的场源实验室，提供轨迹、受力、能量曲线和模型边界说明 |
-| 怒海争锋 | [seawar.html](./seawar.html) | 海域领地战游戏（48 岛屿、Supabase 联网多人、战术技能、动态事件、战役星章） |
-| 铁血战线 | [WAR.html](./WAR.html) | 战争模拟和策略对抗 |
-| 幸运老虎机 | [Tiger.html](./Tiger.html) | 轻量老虎机小游戏 |
-| 猫咪互动页面 | [v3.0.html](./v3.0.html) | 猫咪主题互动页面 |
-
-
-## 体悟集（私人站点）
-
-`insight-space/` 是一个可部署到 GitHub Pages 的私人「体悟」网站，纯静态前端 + 可选 Supabase 后端，无需构建。
-
-```text
-insight-space/
-├─ index.html
-├─ README.md
-├─ supabase/schema.sql
-├─ assets/
-└─ src/
-```
-
-主要能力：
-
-- 推荐（按综合热度排序）、日记、诗歌、文案、评论等模块，超管可在后台自由增删改；
-- 超管管理邀请码与账号；其他人用邀请码注册，邀请码停用 / 过期后对应模块访问立即失效；
-- 内容支持图片 / 视频 / 文档上传、Markdown 正文、语音与表情包；
-- 内容与评论都支持点赞 / 踩 / 收藏 / 评论（多级回复）；
-- 个人主页可改昵称与密码，支持中英文切换与日间 / 夜间主题。
-
-两种运行模式：
-
-| 模式 | 数据位置 | 说明 |
-|---|---|---|
-| 本地模式（默认） | 浏览器 IndexedDB | 打开即用，适合单人 / 演示 |
-| Supabase 模式 | Supabase 数据库 | 真实多人账号与权限，需按 `insight-space/README.md` 配置 |
-
-本地打开：
-
-```powershell
-cd D:\Project\html
-python -m http.server 8123 --bind 127.0.0.1
-# http://127.0.0.1:8123/insight-space/
-```
-
-在线入口：<https://etherealnymph.github.io/web-projects/insight-space/>
-
-详细说明（部署、Supabase 建表、邀请码与权限模型）见 [insight-space/README.md](./insight-space/README.md)。
-
-## 股票训练场
-
-股票训练场由静态前端和 FastAPI 后端组成：
-
-```text
-股票训练场/
-├─ 股票训练场.html
-├─ README.md
-└─ backend/
-   ├─ main.py
-   ├─ requirements.txt
-   └─ README.md
-```
-
-### 直接打开前端
-
-双击：
-
-```text
-D:\Project\html\股票训练场\股票训练场.html
-```
-
-前端可以在没有后端的情况下运行，使用内置行情快照。
-
-### 启动正式行情后端
-
-在 PowerShell 中执行：
-
-```powershell
-cd D:\Project\html\股票训练场
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r .\backend\requirements.txt
-python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
-```
-
-启动后打开：
-
-```text
-http://127.0.0.1:8000/api/health
-```
-
-如果返回下面内容，说明后端正常：
-
-```json
-{"status":"ok","service":"a-share-quotes"}
-```
-
-然后打开股票训练场页面，点击“刷新行情”即可请求 AKShare 行情。
-
-### 股票后端 API
-
-| API | 作用 |
-|---|---|
-| `GET /api/health` | 检查服务状态 |
-| `GET /api/stocks` | 获取支持的股票目录 |
-| `GET /api/quotes?symbols=600519,000001` | 获取指定股票行情 |
-
-行情服务使用 AKShare 的 `stock_zh_a_spot_em` 接口，底层数据来自东方财富公开行情。
-服务带有 30 秒内存缓存。行情接口受交易时间、网络状态、访问频率和上游服务影响。
-
-股票训练场仅用于学习和模拟训练，不连接真实券商，也不会产生真实订单，不构成投资建议。
-
-## 其他独立项目
-
-### `fourier-contour/`
-
-傅里叶轮廓项目包含独立资源和工具：
-
-```text
-fourier-contour/
-├─ index.html
-├─ assets/
-├─ examples/
-├─ docs/
-└─ tools/
-```
-
-### `bilingual-dictionary/`
-
-双语词典项目包含词库数据文件和校验脚本：
-
-```text
-bilingual-dictionary/
-├─ index.html
-├─ data-*.js
-├─ data-validator.js
-└─ smoke-test.js
-```
-
-### `数感训练场.src/`
-
-这是数感训练场的源代码目录，包含核心逻辑、界面和测试文件。正常使用时直接打开根目录的 [数感训练场.html](./数感训练场.html) 即可。
-
-## 使用说明
-
-- 大多数项目是纯 HTML 文件，可以直接双击打开。
-- 如果浏览器限制本地文件访问资源，建议使用 VS Code 的 Live Server 或其他静态文件服务器。
-- 股票训练场的正式行情功能需要单独启动 FastAPI 后端。
-- 各项目的数据和状态可能保存在浏览器 `localStorage` 中。
-- 请不要随意移动单个项目内部的资源文件，否则可能导致相对路径失效。
-
-### 怒海争锋
-
-《怒海争锋》是一个无需构建、无需后端的 Canvas 单文件即时策略海战。除领地扩张、舰队交战、旗舰操船、岸防炮台和战争迷雾外，当前版本还包括：
-
-- `T / 战术`：48 秒冷却的紧急征募，为己方全岛补充兵力并修复结构；
-- 每约 1 分钟一次的海域事件：潮汐补给、顺风潮或海盗伏击；
-- 战役星章、胜场和成就会保存到浏览器本地 `localStorage`；
-- 支持自定义种子、三档难度、暂停、音效和电脑 / 手机操作。
-
-直接打开 [seawar.html](./seawar.html) 即可开始。联网配置、玩法、键位和测试命令见 [seawar-README.md](./seawar-README.md)；联网配置模板见 [seawar-config.js](./seawar-config.js)。
-
-## 使用静态服务器打开
-
-如果需要统一通过本地 HTTP 地址访问，可以在根目录启动一个静态服务器：
-
-```powershell
-cd D:\Project\html
-python -m http.server 5500
-```
-
-然后打开：
-
-```text
-http://127.0.0.1:5500/index.html
-```
-
-注意：静态服务器只负责网页文件，不能替代股票训练场的 FastAPI 行情后端。股票训练场后端仍然需要单独运行在 `127.0.0.1:8000`。
-
-## 项目维护
-
-新增网页项目后，建议同步更新：
-
-1. 根目录的 `index.html`
-2. 本 README
-3. 对应项目目录内的 README（如果项目包含多个文件或需要后端）
+**Contact · 联系方式:** Etherealnymph · [2115487769@qq.com](mailto:2115487769@qq.com)

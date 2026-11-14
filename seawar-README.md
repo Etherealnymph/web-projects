@@ -76,8 +76,8 @@ python -m http.server 8123 --bind 127.0.0.1
 项目自带无头 Canvas/DOM 打桩测试器：
 
 ```powershell
-node .\_seawar_test\harness.js .\seawar.html "autotest=1&steps=9000&seed=12345&diff=1"
-node .\_seawar_test\harness.js .\seawar.html "autotest=1&steps=1800&seed=4242&diff=1" .\_seawar_test\probe_defense.js
+node .\seawar-test-harness\harness.js .\seawar.html "autotest=1&steps=9000&seed=12345&diff=1"
+node .\seawar-test-harness\harness.js .\seawar.html "autotest=1&steps=1800&seed=4242&diff=1" .\seawar-test-harness\probe_defense.js
 ```
 
 测试会检查地图连通性、数值稳定性、战斗、炮击、压制、炮台和渲染冒烟结果。

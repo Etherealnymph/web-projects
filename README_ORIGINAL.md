@@ -1,0 +1,262 @@
+# 个人网页项目集合
+
+这是一个本地网页项目集合，包含学习训练、交互实验、模拟工具、小游戏和应用页面。
+
+## 2026-11-05 芯片工作台与体验升级
+
+- [观澜电路](./circuit-lab/) 使用 ngspice 46 WebAssembly，提供 30 个案例、网表与模型文件工程、符号/ASC 转换、波形观察与结果导出。
+- [硅海图谱](./analog-atlas/) 提供 OSC、基准源、PLL 的九种拓扑、参数反算、设计对照和可替换工艺配置。当前为明确标注的教学模型，授权 TSMC PDK 待用户接入。
+- [硅间札记](./silicon-notes/) 提供实验/论文/失效复盘、来源与结果关联、双链、比较提纲、复习和公开目录导出。个人草稿默认在本机。
+- [逻辑织机](./logic-loom/) 通过 20 个关卡从基本逻辑门搭到能执行汇编程序的 8 位 CPU，支持组合子电路保存复用。
+- [MiniWorld](./mini-world/) 新增 0.25/0.5/1 m 精细建造与微型构件，城市路灯和长椅采用更小尺度。
+- 总入口新增收藏、最近访问、快速前往与串联学习路线。
+
+新项目均为 GitHub Pages 静态页面，通过本地 HTTP 或 HTTPS 打开。根目录运行 `python3 -m http.server 8123` 后访问 `http://127.0.0.1:8123/`。各项目的 README 列出使用方式、格式支持、模型范围与测试命令。
+
+## 总入口
+
+推荐先打开项目目录页：
+
+```text
+D:\Project\html\index.html
+```
+
+也可以直接使用浏览器打开：
+
+```text
+file:///D:/Project/html/index.html
+```
+
+目录页提供：
+
+- 所有项目的统一入口
+- 每个项目的用途说明
+- 按类别筛选
+- 关键词搜索
+- 适配电脑和手机浏览器
+
+## 项目分类
+
+### 学习训练
+
+| 项目 | 入口 | 说明 |
+|---|---|---|
+| 股票训练场 | [stock-trading-simulator/stock-trading-simulator.html](./stock-trading-simulator/stock-trading-simulator.html) | 股票行情、模拟交易、持仓、交易记录和支出训练 |
+| 词汇选择题刷题 | [vocabulary-quiz-180.html](./vocabulary-quiz-180.html) | 180 题英语词汇选择题练习 |
+| 数感训练场 | [number-sense-trainer.html](./number-sense-trainer.html) | 数字直觉和心算训练 |
+| 宇宙历史 | [cosmic-history.html](./cosmic-history.html) | 太阳系起源与演化互动教学 |
+| 生态系统模拟器 | [ecosystem-simulator.html](./ecosystem-simulator.html) | 生态系统和环境变化模拟 |
+
+### 实验工具
+
+| 项目 | 入口 | 说明 |
+|---|---|---|
+| 傅里叶轮廓实验室 | [fourier-contour/index.html](./fourier-contour/index.html) | 图形轮廓的傅里叶分解与动画 |
+| 傅里叶实验页面 | [fourier-legacy.html](./fourier-legacy.html) | 早期傅里叶实验页面 |
+| PID 控制算法实验室 | [pid-control-lab.html](./pid-control-lab.html) | PID 参数和系统响应可视化 |
+| 半导体器件虚拟实验室 | [pn-junction-lab.html](./pn-junction-lab.html) | PN 结器件动力学与参数分析 |
+| 光的散射实验室 | [light-scattering-lab.html](./light-scattering-lab.html) | 瑞利散射、米氏散射和几何光学 |
+| 数字存储示波器 | [ds-2000-oscilloscope.html](./ds-2000-oscilloscope.html) | 示波器波形观察 |
+| 数字示波器 FFT 版 | [ds-2000-oscilloscope-fft.html](./ds-2000-oscilloscope-fft.html) | 示波器和 FFT 频谱分析 |
+| WaveScope | [wave-scope.html](./wave-scope.html) | 数字波形观察工具 |
+| EMC 滤波器实验室 | [emc-filter-lab.html](./emc-filter-lab.html) | 共模、差模信号和滤波器分析 |
+| TSMC RF 器件计算器 | [spice-rf-calculator/spice-rf-calculator.html](./spice-rf-calculator/spice-rf-calculator.html) | 0.18µm RF 器件和 BSIM3v3 计算 |
+| ESP32C3 控制面板 | [esp32c3-panel.html](./esp32c3-panel.html) | ESP32C3 交互控制页面 |
+
+### 应用工具
+
+| 项目 | 入口 | 说明 |
+|---|---|---|
+| 双语专业词典 | [bilingual-dictionary/index.html](./bilingual-dictionary/index.html) | 电子、电气和计算机专业词汇查询 |
+| AI 工具大全 | [ai-tools.html](./ai-tools.html) | AI 工具和资源入口 |
+| 作业 1 | [homework-1.html](./homework-1.html) | 课程或实验作业页面 |
+| 作业 3 | [homework-3.html](./homework-3.html) | 课程或实验作业页面 |
+
+### 游戏娱乐
+
+| 项目 | 入口 | 说明 |
+|---|---|---|
+| 场海 · Field Drift | [field-drift/index.html](./field-drift/index.html) | 九个可调物理直觉实验、七关三维漂流与可编辑的场源实验室，提供轨迹、受力、能量曲线和模型边界说明 |
+| 怒海争锋 | [seawar.html](./seawar.html) | 海域领地战游戏（48 岛屿、Supabase 联网多人、战术技能、动态事件、战役星章） |
+| 铁血战线 | [war-simulator.html](./war-simulator.html) | 战争模拟和策略对抗 |
+| 幸运老虎机 | [lucky-slots.html](./lucky-slots.html) | 轻量老虎机小游戏 |
+| 猫咪互动页面 | [cat-playground.html](./cat-playground.html) | 猫咪主题互动页面 |
+
+
+## 体悟集（私人站点）
+
+`insight-space/` 是一个可部署到 GitHub Pages 的私人「体悟」网站，纯静态前端 + 可选 Supabase 后端，无需构建。
+
+```text
+insight-space/
+├─ index.html
+├─ README.md
+├─ supabase/schema.sql
+├─ assets/
+└─ src/
+```
+
+主要能力：
+
+- 推荐（按综合热度排序）、日记、诗歌、文案、评论等模块，超管可在后台自由增删改；
+- 超管管理邀请码与账号；其他人用邀请码注册，邀请码停用 / 过期后对应模块访问立即失效；
+- 内容支持图片 / 视频 / 文档上传、Markdown 正文、语音与表情包；
+- 内容与评论都支持点赞 / 踩 / 收藏 / 评论（多级回复）；
+- 个人主页可改昵称与密码，支持中英文切换与日间 / 夜间主题。
+
+两种运行模式：
+
+| 模式 | 数据位置 | 说明 |
+|---|---|---|
+| 本地模式（默认） | 浏览器 IndexedDB | 打开即用，适合单人 / 演示 |
+| Supabase 模式 | Supabase 数据库 | 真实多人账号与权限，需按 `insight-space/README.md` 配置 |
+
+本地打开：
+
+```powershell
+cd D:\Project\html
+python -m http.server 8123 --bind 127.0.0.1
+# http://127.0.0.1:8123/insight-space/
+```
+
+在线入口：<https://etherealnymph.github.io/web-projects/insight-space/>
+
+详细说明（部署、Supabase 建表、邀请码与权限模型）见 [insight-space/README.md](./insight-space/README.md)。
+
+## 股票训练场
+
+股票训练场由静态前端和 FastAPI 后端组成：
+
+```text
+stock-trading-simulator/
+├─ stock-trading-simulator.html
+├─ README.md
+└─ backend/
+   ├─ main.py
+   ├─ requirements.txt
+   └─ README.md
+```
+
+### 直接打开前端
+
+双击：
+
+```text
+D:\Project\html\股票训练场\stock-trading-simulator.html
+```
+
+前端可以在没有后端的情况下运行，使用内置行情快照。
+
+### 启动正式行情后端
+
+在 PowerShell 中执行：
+
+```powershell
+cd D:\Project\html\股票训练场
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r .\backend\requirements.txt
+python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+启动后打开：
+
+```text
+http://127.0.0.1:8000/api/health
+```
+
+如果返回下面内容，说明后端正常：
+
+```json
+{"status":"ok","service":"a-share-quotes"}
+```
+
+然后打开股票训练场页面，点击“刷新行情”即可请求 AKShare 行情。
+
+### 股票后端 API
+
+| API | 作用 |
+|---|---|
+| `GET /api/health` | 检查服务状态 |
+| `GET /api/stocks` | 获取支持的股票目录 |
+| `GET /api/quotes?symbols=600519,000001` | 获取指定股票行情 |
+
+行情服务使用 AKShare 的 `stock_zh_a_spot_em` 接口，底层数据来自东方财富公开行情。
+服务带有 30 秒内存缓存。行情接口受交易时间、网络状态、访问频率和上游服务影响。
+
+股票训练场仅用于学习和模拟训练，不连接真实券商，也不会产生真实订单，不构成投资建议。
+
+## 其他独立项目
+
+### `fourier-contour/`
+
+傅里叶轮廓项目包含独立资源和工具：
+
+```text
+fourier-contour/
+├─ index.html
+├─ assets/
+├─ examples/
+├─ docs/
+└─ tools/
+```
+
+### `bilingual-dictionary/`
+
+双语词典项目包含词库数据文件和校验脚本：
+
+```text
+bilingual-dictionary/
+├─ index.html
+├─ data-*.js
+├─ data-validator.js
+└─ smoke-test.js
+```
+
+### `number-sense-trainer.src/`
+
+这是数感训练场的源代码目录，包含核心逻辑、界面和测试文件。正常使用时直接打开根目录的 [number-sense-trainer.html](./number-sense-trainer.html) 即可。
+
+## 使用说明
+
+- 大多数项目是纯 HTML 文件，可以直接双击打开。
+- 如果浏览器限制本地文件访问资源，建议使用 VS Code 的 Live Server 或其他静态文件服务器。
+- 股票训练场的正式行情功能需要单独启动 FastAPI 后端。
+- 各项目的数据和状态可能保存在浏览器 `localStorage` 中。
+- 请不要随意移动单个项目内部的资源文件，否则可能导致相对路径失效。
+
+### 怒海争锋
+
+《怒海争锋》是一个无需构建、无需后端的 Canvas 单文件即时策略海战。除领地扩张、舰队交战、旗舰操船、岸防炮台和战争迷雾外，当前版本还包括：
+
+- `T / 战术`：48 秒冷却的紧急征募，为己方全岛补充兵力并修复结构；
+- 每约 1 分钟一次的海域事件：潮汐补给、顺风潮或海盗伏击；
+- 战役星章、胜场和成就会保存到浏览器本地 `localStorage`；
+- 支持自定义种子、三档难度、暂停、音效和电脑 / 手机操作。
+
+直接打开 [seawar.html](./seawar.html) 即可开始。联网配置、玩法、键位和测试命令见 [seawar-README.md](./seawar-README.md)；联网配置模板见 [seawar-config.js](./seawar-config.js)。
+
+## 使用静态服务器打开
+
+如果需要统一通过本地 HTTP 地址访问，可以在根目录启动一个静态服务器：
+
+```powershell
+cd D:\Project\html
+python -m http.server 5500
+```
+
+然后打开：
+
+```text
+http://127.0.0.1:5500/index.html
+```
+
+注意：静态服务器只负责网页文件，不能替代股票训练场的 FastAPI 行情后端。股票训练场后端仍然需要单独运行在 `127.0.0.1:8000`。
+
+## 项目维护
+
+新增网页项目后，建议同步更新：
+
+1. 根目录的 `index.html`
+2. 本 README
+3. 对应项目目录内的 README（如果项目包含多个文件或需要后端）
