@@ -1,0 +1,3872 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>游戏分区 · 观澜</title>
+<link rel="icon" href="data:,">
+<style>
+
+:root{
+  /* Dark theme (default) */
+  --bg:#0a0a0c;
+  --bg-elevated:#101013;
+  --bg-panel:#131317;
+  --bg-panel-hover:#181820;
+  --bg-input:#0e0e12;
+  --bg-mega:#0f0f13;
+  --border:rgba(255,255,255,.07);
+  --border-strong:rgba(255,255,255,.13);
+  --border-focus:rgba(99,102,241,.55);
+  --text:#f4f4f5;
+  --text-muted:#8b8b94;
+  --text-subtle:#5a5a64;
+  --accent:#6366f1;
+  --accent-hover:#818cf8;
+  --accent-soft:rgba(99,102,241,.12);
+  --accent-text:#a5b4fc;
+  --success:#10b981;
+  --danger:#ef4444;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.25);
+  --shadow-md:0 4px 12px rgba(0,0,0,.35);
+  --shadow-lg:0 20px 50px rgba(0,0,0,.5);
+  --grid-line:rgba(255,255,255,.025);
+  --nav-h:60px;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#ffffff;
+  --bg-elevated:#ffffff;
+  --bg-panel:#fafafa;
+  --bg-panel-hover:#f4f4f5;
+  --bg-input:#ffffff;
+  --bg-mega:#ffffff;
+  --border:rgba(0,0,0,.08);
+  --border-strong:rgba(0,0,0,.13);
+  --border-focus:rgba(79,70,229,.5);
+  --text:#0a0a0c;
+  --text-muted:#6b6b75;
+  --text-subtle:#9a9aa3;
+  --accent:#4f46e5;
+  --accent-hover:#4338ca;
+  --accent-soft:rgba(79,70,229,.07);
+  --accent-text:#4338ca;
+  --success:#059669;
+  --danger:#dc2626;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 14px rgba(0,0,0,.06);
+  --shadow-lg:0 20px 50px rgba(0,0,0,.12);
+  --grid-line:rgba(0,0,0,.025);
+  color-scheme:light;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:14px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Inter","PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  letter-spacing:-.003em;
+  transition:background-color .35s ease,color .35s ease;
+}
+::selection{background:var(--accent-soft);color:var(--text)}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea{font-family:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* ============ TOP NAV (TI-style) ============ */
+.topnav{
+  position:sticky;top:0;z-index:80;
+  background:color-mix(in srgb,var(--bg) 85%,transparent);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.topnav-inner{
+  max-width:1280px;margin:0 auto;
+  display:flex;align-items:center;gap:6px;
+  height:var(--nav-h);padding:0 20px;
+}
+.brand{
+  display:flex;align-items:center;gap:8px;
+  font-weight:600;font-size:14px;letter-spacing:-.01em;
+  white-space:nowrap;margin-right:10px;
+}
+.brand .mark{
+  width:26px;height:26px;border-radius:7px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-hover));
+  display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700;
+}
+.brand small{color:var(--text-muted);font-weight:400;font-size:11px;letter-spacing:.04em}
+
+/* Main nav menu */
+.nav-menu{display:flex;align-items:center;gap:1px;flex:1;min-width:0;overflow:hidden}
+.nav-item{position:relative;flex-shrink:0}
+.nav-link{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:7px 9px;border-radius:7px;
+  font-size:13px;font-weight:500;color:var(--text-muted);
+  transition:.15s;letter-spacing:0;white-space:nowrap;
+}
+.nav-link:hover,.nav-item:hover .nav-link{color:var(--text);background:var(--bg-panel)}
+.nav-item.active .nav-link{color:var(--accent-text)}
+.nav-link .caret{
+  width:8px;height:8px;
+  border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;
+  transform:rotate(45deg);margin-top:-3px;opacity:.6;
+}
+
+/* Mega menu */
+.mega{
+  position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  min-width:560px;max-width:720px;
+  background:var(--bg-mega);
+  border:1px solid var(--border-strong);
+  border-radius:14px;
+  box-shadow:var(--shadow-lg);
+  padding:24px;
+  opacity:0;visibility:hidden;transform:translateX(-50%) translateY(-6px);
+  transition:.18s cubic-bezier(.16,1,.3,1);
+  z-index:90;
+}
+.nav-item:hover .mega{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.mega::before{
+  content:"";position:absolute;top:-6px;left:50%;transform:translateX(-50%) rotate(45deg);
+  width:12px;height:12px;background:var(--bg-mega);
+  border-left:1px solid var(--border-strong);border-top:1px solid var(--border-strong);
+}
+.mega-head{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:16px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:16px;
+}
+.mega-head .mh-title{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.mega-head .mh-sub{font-size:11.5px;color:var(--text-muted);margin-top:3px;letter-spacing:.02em}
+.mega-head .mh-count{
+  font-size:10.5px;color:var(--text-subtle);font-weight:500;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 9px;border-radius:5px;background:var(--bg-panel);border:1px solid var(--border);
+}
+.mega-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px 32px}
+.mega-sub-title{
+  font-size:10.5px;font-weight:600;color:var(--accent-text);letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:8px;
+}
+.mega-sub-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2px}
+.mega-sub-list li a{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 8px;border-radius:6px;font-size:12.5px;color:var(--text-muted);
+  transition:.12s;letter-spacing:.005em;
+}
+.mega-sub-list li a:hover{background:var(--bg-panel);color:var(--text)}
+.mega-sub-list li a .mi{
+  width:20px;height:20px;border-radius:5px;background:var(--accent-soft);color:var(--accent-text);
+  display:grid;place-items:center;font-size:11px;flex-shrink:0;
+}
+.mega-foot{
+  margin-top:18px;padding-top:14px;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.mega-foot .mf-link{
+  display:inline-flex;align-items:center;gap:5px;
+  color:var(--accent-text);font-size:12.5px;font-weight:500;letter-spacing:.005em;
+}
+.mega-foot .mf-link:hover{color:var(--accent-hover)}
+.mega-foot .mf-desc{font-size:11.5px;color:var(--text-subtle)}
+
+/* Search box in nav */
+.nav-search{
+  position:relative;width:200px;flex-shrink:0;
+  margin-left:auto;
+}
+.nav-search svg{
+  position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  width:14px;height:14px;color:var(--text-subtle);pointer-events:none;
+}
+.nav-search input{
+  width:100%;padding:8px 12px 8px 32px;
+  background:var(--bg-input);border:1px solid var(--border);
+  color:var(--text);border-radius:8px;font-size:13px;outline:none;transition:.15s;
+}
+.nav-search input:focus{border-color:var(--border-focus);background:var(--bg-elevated);width:240px}
+.nav-search input::placeholder{color:var(--text-subtle)}
+
+.nav-tools{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.theme-toggle{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:9px;
+  border:1px solid var(--border);background:var(--bg-panel);transition:.2s;
+}
+.theme-toggle:hover{border-color:var(--border-strong);background:var(--bg-panel-hover)}
+.theme-toggle svg{width:16px;height:16px;color:var(--text-muted)}
+.theme-toggle .sun{display:none}
+.theme-toggle .moon{display:block}
+:root[data-theme="light"] .theme-toggle .sun{display:block}
+:root[data-theme="light"] .theme-toggle .moon{display:none}
+
+/* Mobile nav toggle */
+.nav-toggle{
+  display:none;width:36px;height:36px;border-radius:9px;
+  border:1px solid var(--border);background:var(--bg-panel);
+  align-items:center;justify-content:center;
+}
+.nav-toggle span{
+  display:block;width:16px;height:1.5px;background:var(--text);
+  position:relative;
+}
+.nav-toggle span::before,.nav-toggle span::after{
+  content:"";position:absolute;left:0;width:16px;height:1.5px;background:var(--text);
+}
+.nav-toggle span::before{top:-5px}
+.nav-toggle span::after{top:5px}
+
+/* ============ HOMEPAGE HERO ============ */
+.hero{
+  position:relative;overflow:hidden;
+  padding:120px 24px 140px;
+  border-bottom:1px solid var(--border);
+  background:#0a0a0c;
+}
+:root[data-theme="light"] .hero{background:#f4f4f7}
+.hero-canvas{
+  position:absolute;inset:0;z-index:0;
+  pointer-events:none;
+}
+.hero::before{
+  content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--bg) 35%,transparent) 0%,
+    color-mix(in srgb,var(--bg) 55%,transparent) 50%,
+    var(--bg) 100%);
+  pointer-events:none;
+}
+:root[data-theme="light"] .hero::before{
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--bg) 55%,transparent) 0%,
+    color-mix(in srgb,var(--bg) 75%,transparent) 50%,
+    var(--bg) 100%);
+}
+.hero::after{
+  content:"";position:absolute;inset:0;z-index:1;
+  background:radial-gradient(ellipse at 25% 40%,transparent 0%,color-mix(in srgb,var(--bg) 20%,transparent) 70%);
+  pointer-events:none;
+}
+.hero-inner{max-width:1280px;margin:0 auto;position:relative;z-index:3}
+.hero-eyebrow{
+  font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent-text);font-weight:600;
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--accent-soft);padding:5px 11px;border-radius:999px;
+  border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);
+  backdrop-filter:blur(8px);
+}
+.hero-eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block}
+.hero h1{
+  font-size:clamp(40px,6vw,72px);line-height:1.04;letter-spacing:-.03em;
+  font-weight:700;margin:24px 0 18px;max-width:780px;
+  text-shadow:0 2px 24px rgba(0,0,0,.5);
+}
+.hero h1 .grad{
+  background:linear-gradient(135deg,#a5b4fc 0%,#f0abfc 40%,#67e8f9 80%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p.lead{
+  color:var(--text-muted);font-size:16px;line-height:1.65;max-width:560px;margin:0 0 32px;
+  text-shadow:0 1px 8px rgba(0,0,0,.4);
+}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 20px;border-radius:9px;
+  background:var(--accent);color:#fff;font-size:13.5px;font-weight:500;
+  border:none;transition:.18s;letter-spacing:.01em;
+}
+.btn-primary:hover{background:var(--accent-hover);box-shadow:0 4px 18px var(--accent-soft);transform:translateY(-1px)}
+.btn-secondary{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 20px;border-radius:9px;
+  background:var(--bg-panel);color:var(--text);font-size:13.5px;font-weight:500;
+  border:1px solid var(--border-strong);transition:.18s;
+}
+.btn-secondary:hover{background:var(--bg-panel-hover);border-color:var(--accent)}
+
+/* Hero stats */
+.hero-stats{
+  display:flex;gap:48px;margin-top:56px;padding-top:32px;border-top:1px solid var(--border);
+}
+.hero-stat .num{
+  font-size:32px;font-weight:600;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;line-height:1.1;
+  background:linear-gradient(135deg,var(--accent-text),var(--accent));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-stat .lbl{
+  font-size:11.5px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-top:6px;
+}
+
+/* (hero orbs removed — replaced by three.js canvas background) */
+
+/* ============ PAGE LAYOUT ============ */
+.shell{max-width:1280px;margin:0 auto;padding:0 24px}
+.section{padding:72px 0;border-bottom:1px solid var(--border)}
+.section-head{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  gap:24px;margin-bottom:32px;flex-wrap:wrap;
+}
+.section-title{
+  font-size:26px;font-weight:600;letter-spacing:-.02em;margin:0;
+}
+.section-title .num{
+  font-family:"SF Mono",ui-monospace,monospace;
+  font-size:12px;color:var(--text-subtle);font-weight:400;letter-spacing:.05em;
+  margin-left:10px;vertical-align:middle;
+}
+.section-sub{color:var(--text-muted);font-size:14px;margin-top:6px}
+.section-link{
+  display:inline-flex;align-items:center;gap:5px;
+  color:var(--accent-text);font-size:13px;font-weight:500;
+}
+.section-link:hover{color:var(--accent-hover)}
+
+/* ============ SECTION TEASER GRID (homepage) ============ */
+.sections-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.section-card{
+  position:relative;overflow:hidden;
+  padding:0;border-radius:14px;
+  background:var(--bg-panel);border:1px solid var(--border);
+  transition:.2s;cursor:pointer;
+  display:flex;flex-direction:column;min-height:240px;
+}
+.section-card .sc-cover{
+  position:relative;height:120px;
+  background-size:cover;background-position:center;
+  border-bottom:1px solid var(--border);
+}
+.section-card .sc-cover::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 0%,color-mix(in srgb,var(--bg) 50%,transparent) 80%,var(--bg-panel) 100%);
+}
+.section-card .sc-cover .sc-cover-tint{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--sec-color,var(--accent)) 25%,transparent),transparent 60%);
+  mix-blend-mode:multiply;
+}
+.section-card:hover{
+  border-color:var(--sec-color,var(--accent));
+  transform:translateY(-3px);
+  box-shadow:0 12px 32px rgba(0,0,0,.2);
+}
+.section-card .sc-body{padding:18px 20px 16px;flex:1;display:flex;flex-direction:column;gap:6px;position:relative}
+.section-card .sc-icon{
+  width:38px;height:38px;border-radius:9px;
+  background:color-mix(in srgb,var(--sec-color,var(--accent)) 18%,transparent);
+  color:var(--sec-color,var(--accent-text));
+  display:grid;place-items:center;font-size:18px;font-weight:500;
+  border:1px solid color-mix(in srgb,var(--sec-color,var(--accent)) 30%,transparent);
+  position:absolute;top:-19px;right:20px;
+  backdrop-filter:blur(8px);
+  box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+.section-card .sc-title{font-size:16px;font-weight:600;letter-spacing:-.01em;position:relative;z-index:2}
+.section-card .sc-sub{font-size:12px;color:var(--text-muted);position:relative;z-index:2}
+.section-card .sc-desc{
+  font-size:12.5px;color:var(--text-muted);line-height:1.5;
+  position:relative;z-index:2;margin-top:4px;
+}
+.section-card .sc-foot{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:11.5px;color:var(--text-subtle);
+  position:relative;z-index:2;margin-top:auto;padding-top:12px;
+}
+.section-card .sc-foot .count{
+  font-family:"SF Mono",ui-monospace,monospace;
+  color:var(--sec-color,var(--accent-text));font-weight:600;
+}
+.section-card .sc-foot .arrow{color:var(--text-muted);transition:.18s}
+.section-card:hover .sc-foot .arrow{color:var(--sec-color,var(--accent-text));transform:translateX(3px)}
+
+/* ============ FEATURED CARDS ============ */
+.featured-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+}
+.feat-card{
+  position:relative;padding:18px;border-radius:12px;
+  background:var(--bg-panel);border:1px solid var(--border);
+  transition:.18s;display:flex;flex-direction:column;gap:10px;min-height:140px;
+}
+.feat-card:hover{
+  border-color:var(--border-strong);background:var(--bg-panel-hover);
+  transform:translateY(-2px);box-shadow:var(--shadow-md);
+}
+.feat-card .fc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.feat-card .fc-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--accent-soft);color:var(--accent-text);
+  display:grid;place-items:center;font-size:15px;
+}
+.feat-card .fc-tag{
+  font-size:10px;color:var(--text-muted);font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+}
+.feat-card .fc-title{font-size:14.5px;font-weight:600;letter-spacing:-.01em;line-height:1.3}
+.feat-card .fc-desc{
+  font-size:12px;color:var(--text-muted);line-height:1.5;flex:1;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.feat-card .fc-link{
+  font-size:12px;color:var(--accent-text);font-weight:500;
+  display:inline-flex;align-items:center;gap:4px;
+}
+
+/* ============ SECTION PAGE ============ */
+.page-hero{
+  position:relative;overflow:hidden;
+  padding:88px 24px 72px;border-bottom:1px solid var(--border);
+}
+.page-hero .ph-bg{
+  position:absolute;inset:0;
+  background-size:cover;background-position:center;
+  z-index:0;opacity:.45;
+}
+.page-hero::before{
+  content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(120deg,
+    color-mix(in srgb,var(--bg) 65%,transparent) 0%,
+    color-mix(in srgb,var(--bg) 88%,transparent) 55%,
+    var(--bg) 100%);
+  pointer-events:none;
+}
+.page-hero::after{
+  content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(180deg,
+    transparent 0%,
+    color-mix(in srgb,var(--bg) 50%,transparent) 70%,
+    var(--bg) 100%);
+  pointer-events:none;
+}
+.page-hero-inner{max-width:1280px;margin:0 auto;position:relative;z-index:2}
+.breadcrumb{
+  display:flex;align-items:center;gap:6px;
+  font-size:12.5px;color:var(--text-muted);margin-bottom:24px;letter-spacing:.01em;
+}
+.breadcrumb a:hover{color:var(--text)}
+.breadcrumb .sep{color:var(--text-subtle)}
+.page-hero h1{
+  font-size:clamp(32px,4.5vw,48px);font-weight:700;letter-spacing:-.025em;
+  margin:0 0 12px;line-height:1.1;
+  display:flex;align-items:center;gap:16px;
+  text-shadow:0 2px 12px rgba(0,0,0,.25);
+}
+.page-hero .ph-icon{
+  width:52px;height:52px;border-radius:12px;
+  background:color-mix(in srgb,var(--sec-color,var(--accent)) 18%,transparent);
+  color:var(--sec-color,var(--accent-text));
+  display:grid;place-items:center;font-size:24px;
+  border:1px solid color-mix(in srgb,var(--sec-color,var(--accent)) 30%,transparent);
+  backdrop-filter:blur(8px);
+  box-shadow:0 6px 20px rgba(0,0,0,.15);
+}
+.page-hero .ph-sub{
+  color:var(--text-muted);font-size:15px;line-height:1.6;max-width:680px;margin:0 0 24px;
+  text-shadow:0 1px 6px rgba(0,0,0,.25);
+}
+.page-hero .ph-meta{display:flex;gap:32px;align-items:center}
+.ph-stat{font-size:12px;color:var(--text-muted);letter-spacing:.04em}
+.ph-stat b{
+  display:block;font-size:22px;color:var(--text);font-weight:600;letter-spacing:-.015em;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ============ FILTER CHIPS ============ */
+.filter-bar{
+  display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  padding:24px 0 16px;
+}
+.chip-filter{
+  padding:6px 14px;border-radius:999px;
+  font-size:12.5px;font-weight:500;
+  border:1px solid var(--border);background:var(--bg-elevated);
+  color:var(--text-muted);transition:.15s;letter-spacing:.005em;
+}
+.chip-filter:hover{color:var(--text);border-color:var(--border-strong)}
+.chip-filter.active{
+  background:var(--accent);border-color:var(--accent);color:#fff;
+}
+.chip-filter .count{
+  margin-left:5px;font-size:11px;opacity:.7;font-family:"SF Mono",ui-monospace,monospace;
+}
+
+/* ============ CARDS GRID ============ */
+.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding-bottom:64px}
+.card{
+  position:relative;display:flex;flex-direction:column;
+  background:var(--bg-panel);border:1px solid var(--border);
+  border-radius:12px;padding:20px;
+  min-height:200px;transition:.18s;
+}
+.card:hover{
+  border-color:var(--border-strong);background:var(--bg-panel-hover);
+  transform:translateY(-2px);box-shadow:var(--shadow-md);
+}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.card-icon{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--accent-soft);color:var(--accent-text);
+  display:grid;place-items:center;font-size:17px;font-weight:500;
+  border:1px solid var(--border);
+}
+.card-tag{
+  font-size:10.5px;color:var(--text-muted);font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 8px;border-radius:5px;
+  background:var(--bg-elevated);border:1px solid var(--border);white-space:nowrap;
+}
+.card h3{font-size:15.5px;font-weight:600;margin:0 0 6px;letter-spacing:-.015em;line-height:1.3}
+.card p{color:var(--text-muted);margin:0;font-size:13px;line-height:1.55;flex:1}
+.card-foot{
+  display:flex;flex-direction:column;gap:4px;
+  margin-top:14px;padding-top:12px;border-top:1px solid var(--border);
+}
+.entry{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  color:var(--accent-text);font-size:12.5px;font-weight:500;
+  padding:4px 0;transition:.14s;letter-spacing:.005em;
+}
+.entry:hover{color:var(--accent-hover)}
+.entry .path{
+  font-family:"SF Mono",ui-monospace,monospace;
+  font-size:11.5px;color:var(--text-subtle);font-weight:400;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%;
+}
+.entry .arrow{font-size:13px;flex-shrink:0;transition:.14s}
+.entry:hover .arrow{transform:translateX(2px)}
+.pin-btn{
+  position:absolute;top:14px;right:14px;
+  width:26px;height:26px;border-radius:6px;
+  display:grid;place-items:center;font-size:13px;
+  color:var(--text-subtle);opacity:0;transition:.16s;
+  background:var(--bg-elevated);border:1px solid var(--border);
+}
+.card:hover .pin-btn{opacity:1}
+.pin-btn:hover{color:var(--accent);border-color:var(--accent)}
+.card[data-pinned="true"] .pin-btn{
+  opacity:1;color:var(--accent);background:var(--accent-soft);border-color:var(--accent);
+}
+.card[data-pinned="true"]{border-color:color-mix(in srgb,var(--accent) 30%,var(--border))}
+.card.hidden{display:none}
+
+.empty-state{
+  grid-column:1 / -1;
+  text-align:center;padding:80px 20px;
+  color:var(--text-muted);font-size:14px;
+}
+.empty-state .icon{font-size:36px;margin-bottom:12px;opacity:.5}
+
+/* ============ SEARCH PAGE ============ */
+.search-page{padding:64px 24px;max-width:920px;margin:0 auto}
+.search-head{text-align:center;margin-bottom:40px}
+.search-head h1{font-size:36px;font-weight:700;letter-spacing:-.025em;margin:0 0 12px}
+.search-head p{color:var(--text-muted);font-size:14px;margin:0}
+.search-box-large{
+  position:relative;margin-bottom:32px;
+}
+.search-box-large svg{
+  position:absolute;left:18px;top:50%;transform:translateY(-50%);
+  width:18px;height:18px;color:var(--text-subtle);pointer-events:none;
+}
+.search-box-large input{
+  width:100%;padding:16px 18px 16px 48px;
+  background:var(--bg-panel);border:1px solid var(--border-strong);
+  color:var(--text);border-radius:12px;font-size:15px;outline:none;transition:.15s;
+}
+.search-box-large input:focus{border-color:var(--border-focus);box-shadow:0 0 0 4px var(--accent-soft)}
+.search-meta{font-size:12.5px;color:var(--text-muted);margin-bottom:18px;letter-spacing:.02em}
+.search-results{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.search-empty{text-align:center;padding:60px 20px;color:var(--text-muted);font-size:14px}
+
+/* ============ FOOTER ============ */
+.footer{
+  border-top:1px solid var(--border);
+  padding:48px 24px 32px;background:var(--bg-elevated);
+}
+.footer-inner{
+  max-width:1280px;margin:0 auto;
+  display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:32px;
+}
+.footer .brand{margin-bottom:14px}
+.footer-desc{font-size:12.5px;color:var(--text-muted);line-height:1.6;max-width:280px}
+.footer h4{
+  font-size:11px;font-weight:600;color:var(--text-subtle);
+  letter-spacing:.1em;text-transform:uppercase;margin:0 0 12px;
+}
+.footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.footer ul a{font-size:12.5px;color:var(--text-muted);transition:.12s}
+.footer ul a:hover{color:var(--text)}
+.footer-bottom{
+  max-width:1280px;margin:32px auto 0;padding-top:24px;
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  font-size:11.5px;color:var(--text-subtle);letter-spacing:.02em;
+}
+
+/* ============ FLOATING MESSAGE BUTTON ============ */
+.msg-fab{
+  position:fixed;right:28px;bottom:28px;z-index:60;
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent-hover));
+  color:#fff;display:grid;place-items:center;
+  box-shadow:0 8px 24px var(--accent-soft),0 2px 8px rgba(0,0,0,.2);
+  transition:.22s;
+}
+.msg-fab:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 12px 32px var(--accent-soft),0 4px 12px rgba(0,0,0,.25)}
+.msg-fab svg{width:22px;height:22px}
+.msg-fab .badge{
+  position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;
+  background:var(--success);border:2px solid var(--bg);
+  animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.15);opacity:.7}
+}
+
+/* ============ MODAL ============ */
+.modal-overlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:none;align-items:flex-start;justify-content:center;
+  padding:60px 20px 20px;overflow-y:auto;
+  animation:fadeIn .2s ease;
+}
+.modal-overlay.open{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:var(--bg-elevated);border:1px solid var(--border-strong);
+  border-radius:16px;width:min(520px,100%);box-shadow:var(--shadow-lg);
+  animation:slideUp .28s cubic-bezier(.16,1,.3,1);overflow:hidden;
+}
+@keyframes slideUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px 0}
+.modal-head h2{font-size:17px;font-weight:600;margin:0;letter-spacing:-.015em}
+.modal-head .sub{font-size:12px;color:var(--text-muted);margin-top:3px;letter-spacing:.01em}
+.modal-close{
+  width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+  color:var(--text-muted);font-size:18px;transition:.15s;flex-shrink:0;
+}
+.modal-close:hover{background:var(--bg-panel-hover);color:var(--text)}
+.modal-body{padding:22px 24px 24px}
+.form-field{margin-bottom:16px}
+.form-field label{
+  display:block;font-size:12px;font-weight:500;color:var(--text-muted);
+  margin-bottom:6px;letter-spacing:.01em;
+}
+.form-field label .req{color:var(--danger);margin-left:2px}
+.form-field input,.form-field textarea{
+  width:100%;padding:10px 13px;
+  background:var(--bg-input);border:1px solid var(--border);
+  color:var(--text);border-radius:8px;font-size:13.5px;outline:none;transition:.16s;resize:vertical;
+}
+.form-field input:focus,.form-field textarea:focus{border-color:var(--border-focus);background:var(--bg-elevated)}
+.form-field textarea{min-height:110px;line-height:1.5}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-meta{font-size:11.5px;color:var(--text-subtle);margin-top:-6px;margin-bottom:14px;line-height:1.5}
+.btn-submit{
+  width:100%;padding:11px 16px;border-radius:9px;
+  background:var(--accent);color:#fff;font-size:13.5px;font-weight:500;
+  border:none;transition:.18s;letter-spacing:.01em;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-submit:hover{background:var(--accent-hover);box-shadow:0 4px 14px var(--accent-soft)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed}
+.form-status{margin-top:12px;font-size:12.5px;text-align:center;min-height:18px;letter-spacing:.01em}
+.form-status.success{color:var(--success)}
+.form-status.error{color:var(--danger)}
+.form-status.loading{color:var(--text-muted)}
+
+/* Command palette */
+.modal-palette{width:min(620px,100%)}
+.palette-input-wrap{position:relative;padding:14px 18px;border-bottom:1px solid var(--border)}
+.palette-input-wrap svg{position:absolute;left:28px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text-subtle)}
+.palette-input{
+  width:100%;padding:8px 12px 8px 32px;background:transparent;
+  border:none;color:var(--text);font-size:15px;outline:none;
+}
+.palette-input::placeholder{color:var(--text-subtle)}
+.palette-list{max-height:420px;overflow-y:auto;padding:6px}
+.palette-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;border-radius:8px;cursor:pointer;transition:.12s;
+}
+.palette-item.active,.palette-item:hover{background:var(--accent-soft)}
+.palette-item .pi-icon{
+  width:28px;height:28px;border-radius:7px;
+  background:var(--bg-panel);color:var(--accent-text);
+  display:grid;place-items:center;font-size:14px;flex-shrink:0;
+  border:1px solid var(--border);
+}
+.palette-item .pi-text{flex:1;min-width:0}
+.palette-item .pi-title{font-size:13px;font-weight:500;line-height:1.3}
+.palette-item .pi-meta{font-size:11.5px;color:var(--text-subtle);margin-top:2px}
+.palette-item .pi-arrow{color:var(--text-subtle);font-size:12px}
+.palette-empty{padding:32px;text-align:center;color:var(--text-muted);font-size:13px}
+.palette-foot{
+  display:flex;justify-content:space-between;gap:8px;
+  padding:10px 18px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--text-subtle);
+}
+.palette-foot kbd{
+  font-family:"SF Mono",ui-monospace,monospace;
+  padding:2px 6px;border-radius:4px;background:var(--bg-panel);border:1px solid var(--border);
+  color:var(--text-muted);font-size:10px;
+}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120%);
+  z-index:200;background:var(--bg-elevated);color:var(--text);
+  border:1px solid var(--border-strong);border-radius:10px;
+  padding:11px 18px;font-size:13px;box-shadow:var(--shadow-lg);
+  transition:transform .35s cubic-bezier(.16,1,.3,1);
+  display:flex;align-items:center;gap:10px;letter-spacing:.01em;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast .toast-dot{width:7px;height:7px;border-radius:50%;background:var(--success)}
+.toast.error .toast-dot{background:var(--danger)}
+
+/* Mobile menu drawer */
+.mobile-drawer{
+  position:fixed;inset:0 0 0 auto;width:min(320px,80vw);z-index:90;
+  background:var(--bg-elevated);border-left:1px solid var(--border);
+  transform:translateX(100%);transition:transform .3s cubic-bezier(.16,1,.3,1);
+  padding:80px 20px 20px;overflow-y:auto;
+}
+.mobile-drawer.open{transform:translateX(0)}
+.mobile-drawer .md-item{
+  display:block;padding:12px 14px;border-radius:8px;
+  font-size:14px;color:var(--text-muted);transition:.15s;margin-bottom:4px;
+}
+.mobile-drawer .md-item:hover,.mobile-drawer .md-item.active{color:var(--text);background:var(--bg-panel)}
+.mobile-overlay{
+  position:fixed;inset:0;z-index:85;background:rgba(0,0,0,.5);
+  opacity:0;visibility:hidden;transition:.3s;
+}
+.mobile-overlay.open{opacity:1;visibility:visible}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:1100px){
+  /* Hide horizontal menu, show hamburger, on tablet+small laptop */
+  .nav-menu,.nav-search{display:none}
+  .nav-toggle{display:flex}
+  .sections-grid{grid-template-columns:repeat(2,1fr)}
+  .featured-row{grid-template-columns:repeat(2,1fr)}
+  .footer-inner{grid-template-columns:1fr 1fr;gap:24px}
+}
+@media(max-width:860px){
+  .cards-grid{grid-template-columns:repeat(2,1fr)}
+  .hero{padding:56px 24px 72px}
+  .hero-stats{gap:32px;flex-wrap:wrap}
+  .search-results{grid-template-columns:1fr}
+}
+@media(max-width:580px){
+  .topnav-inner{padding:0 16px;gap:8px}
+  .shell{padding:0 16px}
+  .hero{padding:40px 16px 56px}
+  .hero h1{font-size:36px}
+  .hero-stats{gap:24px}
+  .hero-stat .num{font-size:24px}
+  .sections-grid{grid-template-columns:1fr}
+  .featured-row{grid-template-columns:1fr}
+  .cards-grid{grid-template-columns:1fr}
+  .page-hero{padding:48px 16px 40px}
+  .page-hero h1{font-size:30px;flex-direction:column;align-items:flex-start;gap:12px}
+  .footer-inner{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .msg-fab{right:18px;bottom:18px;width:50px;height:50px}
+  .section{padding:48px 0}
+}
+
+/* Reduced motion */
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+
+</style>
+</head>
+<bodydata-section="games" style="--sec-color:#8b5cf6">
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a href="index.html" class="brand"><span class="mark">观</span><span>观澜 <small>· 实验与造物</small></span></a>
+    <button class="nav-toggle" id="navToggle" aria-label="菜单"><span></span></button>
+    <ul class="nav-menu"><li class="nav-item"><a class="nav-link" href="workbench.html">芯片工作台 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">芯片工作台</div>
+      <div class="mh-sub">从设计到验证</div>
+    </div>
+    <a class="mh-count" href="workbench.html">4 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">交互工作台</div><ul class="mega-sub-list"><li><a href="silicon-notes/"><span class="mi">笺</span><span>硅间札记</span></a></li><li><a href="analog-atlas/"><span class="mi">⌬</span><span>硅海图谱</span></a></li><li><a href="circuit-lab/"><span class="mi">∿</span><span>观澜电路</span></a></li><li><a href="logic-loom/"><span class="mi">⊞</span><span>逻辑织机</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="workbench.html">查看全部 →</a>
+    <span class="mf-desc">交互式工作台：电路仿真、模拟拓扑、札记、逻辑门与微型世界。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="personal-projects.html">个人项目 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">个人项目</div>
+      <div class="mh-sub">私人空间</div>
+    </div>
+    <a class="mh-count" href="personal-projects.html">2 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">私人站点</div><ul class="mega-sub-list"><li><a href="insight-space/index.html"><span class="mi">体</span><span>体悟集 · 私人空间</span></a></li></ul></div><div><div class="mega-sub-title">交互工作台</div><ul class="mega-sub-list"><li><a href="silicon-notes/"><span class="mi">笺</span><span>硅间札记</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="personal-projects.html">查看全部 →</a>
+    <span class="mf-desc">个人站点、札记与私人空间，记录与沉淀。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="learning-quiz.html">学习题库 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">学习题库</div>
+      <div class="mh-sub">竞赛与复习</div>
+    </div>
+    <a class="mh-count" href="learning-quiz.html">2 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">竞赛复习</div><ul class="mega-sub-list"><li><a href="math-competition/web/"><span class="mi">∑</span><span>大学生数学竞赛</span></a></li></ul></div><div><div class="mega-sub-title">课程复习</div><ul class="mega-sub-list"><li><a href="semiconductor-devices/"><span class="mi">μ</span><span>半导体物理与器件</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="learning-quiz.html">查看全部 →</a>
+    <span class="mf-desc">大学生数学竞赛、半导体物理与器件等学习题库。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="checkin.html">每日签到 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">每日签到</div>
+      <div class="mh-sub">额度与积分</div>
+    </div>
+    <a class="mh-count" href="checkin.html">5 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">签到</div><ul class="mega-sub-list"><li><a href="https://gpt.api456.me/dashboarda/"><span class="mi">✓</span><span>99code 签到</span></a></li><li><a href="https://helpcoder.cc/console/personal"><span class="mi">帮</span><span>帮帮程序员签到</span></a></li><li><a href="https://ps.air-outer.com/"><span class="mi">⇄</span><span>Agent Router 签到</span></a></li><li><a href="https://sunapi.5201201314.top/profile"><span class="mi">🔗</span><span>NewAPI 签到</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="checkin.html">查看全部 →</a>
+    <span class="mf-desc">API 中转站与社区的每日签到入口。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="forum.html">论坛社区 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">论坛社区</div>
+      <div class="mh-sub">交流与笔记</div>
+    </div>
+    <a class="mh-count" href="forum.html">6 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">论坛</div><ul class="mega-sub-list"><li><a href="https://bbs.eetop.cn/"><span class="mi">💬</span><span>EETOP 论坛</span></a></li><li><a href="https://bbs.21ic.com/"><span class="mi">💬</span><span>21ic 论坛</span></a></li></ul></div><div><div class="mega-sub-title">留言板</div><ul class="mega-sub-list"><li><a href="https://www.analog-life.com/message/"><span class="mi">A</span><span>Analog-Life 留言板</span></a></li></ul></div><div><div class="mega-sub-title">课程笔记</div><ul class="mega-sub-list"><li><a href="https://lossnotes.cc/CourseNotes/"><span class="mi">笔</span><span>LOSS 学研札记</span></a></li></ul></div><div><div class="mega-sub-title">站点</div><ul class="mega-sub-list"><li><a href="https://rt2innocence.net/"><span class="mi">R</span><span>rt2innocence</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="forum.html">查看全部 →</a>
+    <span class="mf-desc">电子工程论坛、模拟 IC 留言板与课程笔记知识库。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="projects.html">本地项目 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">本地项目</div>
+      <div class="mh-sub">实验与工具</div>
+    </div>
+    <a class="mh-count" href="projects.html">29 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">芯片设计</div><ul class="mega-sub-list"><li><a href="gm-id-studio/dist/GM-ID-Studio.html"><span class="mi">gm</span><span>GM/ID Studio</span></a></li></ul></div><div><div class="mega-sub-title">3D 游戏</div><ul class="mega-sub-list"><li><a href="neon-rush-3d.html"><span class="mi">◇</span><span>霓虹疾驰 · NEON RUSH</span></a></li></ul></div><div><div class="mega-sub-title">3D 沙盒</div><ul class="mega-sub-list"><li><a href="mini-world/index.html"><span class="mi">▦</span><span>迷你世界 · 像素宇宙</span></a></li></ul></div><div><div class="mega-sub-title">应用工具</div><ul class="mega-sub-list"><li><a href="stock-trading-simulator/stock-trading-simulator.html"><span class="mi">↗</span><span>股市训练场</span></a></li><li><a href="bilingual-dictionary/index.html"><span class="mi">字</span><span>双语专业词典</span></a></li><li><a href="ai-tools.html"><span class="mi">AI</span><span>AI 工具大全</span></a></li><li><a href="homework-1.html"><span class="mi">⌘</span><span>作业页面集合</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="projects.html">查看全部 →</a>
+    <span class="mf-desc">本地部署的实验工具、游戏、训练场与外部资源。</span>
+  </div>
+</div></li>
+<li class="nav-item active"><a class="nav-link" href="games.html">游戏分区 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">游戏分区</div>
+      <div class="mh-sub">在线对战</div>
+    </div>
+    <a class="mh-count" href="games.html">9 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">在线游戏</div><ul class="mega-sub-list"><li><a href="https://mk48.io/"><span class="mi">🚢</span><span>MK48.io</span></a></li><li><a href="https://1v1.suroi.io/"><span class="mi">🎯</span><span>Suroi 1v1</span></a></li><li><a href="https://kiomet.com/"><span class="mi">🗺️</span><span>Kiomet</span></a></li><li><a href="https://yorg.io/"><span class="mi">🛡️</span><span>Yorg.io</span></a></li></ul></div><div><div class="mega-sub-title">3D 沙盒</div><ul class="mega-sub-list"><li><a href="mini-world/index.html"><span class="mi">▦</span><span>迷你世界 · 像素宇宙</span></a></li></ul></div><div><div class="mega-sub-title">3D 游戏</div><ul class="mega-sub-list"><li><a href="neon-rush-3d.html"><span class="mi">◇</span><span>霓虹疾驰 · NEON RUSH</span></a></li></ul></div><div><div class="mega-sub-title">游戏娱乐</div><ul class="mega-sub-list"><li><a href="seawar.html"><span class="mi">⚓</span><span>怒海争锋</span></a></li><li><a href="war-simulator.html"><span class="mi">⚔</span><span>铁血战线</span></a></li><li><a href="lucky-slots.html"><span class="mi">7</span><span>幸运老虎机</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="games.html">查看全部 →</a>
+    <span class="mf-desc">多人在线 IO 游戏与本地游戏集合。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="books.html">书籍分区 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">书籍分区</div>
+      <div class="mh-sub">电子书库</div>
+    </div>
+    <a class="mh-count" href="books.html">3 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">电子书</div><ul class="mega-sub-list"><li><a href="https://www.suduguu.com/"><span class="mi">📚</span><span>速读谷</span></a></li><li><a href="https://zxcs.zip/"><span class="mi">📖</span><span>知轩藏书</span></a></li><li><a href="https://zh.zchongqing.ru/"><span class="mi">📕</span><span>中文电子书库</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="books.html">查看全部 →</a>
+    <span class="mf-desc">在线阅读与下载的电子书资源。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="ai.html">AI 分区 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">AI 分区</div>
+      <div class="mh-sub">模型与中转</div>
+    </div>
+    <a class="mh-count" href="ai.html">16 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">AI 仪表盘</div><ul class="mega-sub-list"><li><a href="https://hubcodex.fun/dashboard"><span class="mi">枢</span><span>枢码 AI 模型中间站</span></a></li></ul></div><div><div class="mega-sub-title">AI 对话</div><ul class="mega-sub-list"><li><a href="https://chat.z.ai/"><span class="mi">Z</span><span>Z.ai 智谱对话</span></a></li><li><a href="https://app.clawsgo.cn/chat"><span class="mi">爪</span><span>ClawsGo 对话</span></a></li></ul></div><div><div class="mega-sub-title">API 中转</div><ul class="mega-sub-list"><li><a href="https://api.chengmo.cc.cd/profile"><span class="mi">澄</span><span>澄墨 API</span></a></li><li><a href="https://sunapi.5201201314.top/profile"><span class="mi">N</span><span>NewAPI 控制台</span></a></li><li><a href="https://kiosapi.com/wallet"><span class="mi">K</span><span>Kios API 钱包</span></a></li><li><a href="https://api.yjs.im/keys"><span class="mi">钥</span><span>YJS API 密钥</span></a></li></ul></div><div><div class="mega-sub-title">签到</div><ul class="mega-sub-list"><li><a href="https://jimeng.jianying.com/ai-tool/explore"><span class="mi">梦</span><span>即梦 AI 探索</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="ai.html">查看全部 →</a>
+    <span class="mf-desc">AI 对话、API 中转、AI 工具与模型管理入口。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="eda.html">电子设计 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">电子设计</div>
+      <div class="mh-sub">器件与仿真</div>
+    </div>
+    <a class="mh-count" href="eda.html">11 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">AI PCB</div><ul class="mega-sub-list"><li><a href="https://heypcb.ai/"><span class="mi">⬢</span><span>heypcb AI PCB</span></a></li></ul></div><div><div class="mega-sub-title">器件资料</div><ul class="mega-sub-list"><li><a href="https://datasheet4u.com/"><span class="mi">📄</span><span>Datasheet4U</span></a></li></ul></div><div><div class="mega-sub-title">器件官网</div><ul class="mega-sub-list"><li><a href="https://www.ti.com.cn"><span class="mi">TI</span><span>德州仪器 TI</span></a></li><li><a href="https://www.analog.com/cn/index.html"><span class="mi">AD</span><span>ADI 亚德诺</span></a></li></ul></div><div><div class="mega-sub-title">仿真模型</div><ul class="mega-sub-list"><li><a href="https://www.diodes.com/zh/design/tools/spice-models"><span class="mi">◉</span><span>Diodes SPICE 模型</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="eda.html">查看全部 →</a>
+    <span class="mf-desc">PCB 设计、器件资料、在线仿真与开发板工具。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="modules.html">模块资料 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">模块资料</div>
+      <div class="mh-sub">开发板文档</div>
+    </div>
+    <a class="mh-count" href="modules.html">3 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">模块文档</div><ul class="mega-sub-list"><li><a href="https://voice.hlktech.com/yunSound/sdk/toWebSdkParam?sdkId=17661"><span class="mi">🎙</span><span>海凌科云语音 SDK</span></a></li></ul></div><div><div class="mega-sub-title">开发板文档</div><ul class="mega-sub-list"><li><a href="http://openedv.com/docs/boards/esp32/ATK-DNESP32S3BVXX.html"><span class="mi">原</span><span>正点原子 ESP32-S3</span></a></li><li><a href="https://doc.embedfire.com/products/link/zh/latest/fpga/ebf_xilinx_zynq70xx.html"><span class="mi">火</span><span>野火 Zynq7020 教程</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="modules.html">查看全部 →</a>
+    <span class="mf-desc">开发板文档与模块 SDK 资料。</span>
+  </div>
+</div></li></ul>
+    <div class="nav-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="navSearch" placeholder="搜索全站入口…" autocomplete="off">
+    </div>
+    <div class="nav-tools">
+      <button class="theme-toggle" id="themeToggle" title="切换主题" aria-label="切换主题">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="mobile-overlay" id="mobileOverlay"></div>
+<aside class="mobile-drawer" id="mobileDrawer">
+  <a class="md-item" href="index.html">首页</a>
+  <a class="md-item" href="workbench.html">芯片工作台</a><a class="md-item" href="personal-projects.html">个人项目</a><a class="md-item" href="learning-quiz.html">学习题库</a><a class="md-item" href="checkin.html">每日签到</a><a class="md-item" href="forum.html">论坛社区</a><a class="md-item" href="projects.html">本地项目</a><a class="md-item active" href="games.html">游戏分区</a><a class="md-item" href="books.html">书籍分区</a><a class="md-item" href="ai.html">AI 分区</a><a class="md-item" href="eda.html">电子设计</a><a class="md-item" href="modules.html">模块资料</a>
+  <a class="md-item" href="search.html">搜索</a>
+</aside>
+
+
+<section class="page-hero" style="--sec-color:#8b5cf6">
+  <div class="ph-bg" style="background-image:url('https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/5f415d0e5d8a.jpg')"></div>
+  <div class="page-hero-inner">
+    <div class="breadcrumb">
+      <a href="index.html">首页</a><span class="sep">/</span><span>游戏分区</span>
+    </div>
+    <h1><span class="ph-icon" style="--sec-color:#8b5cf6">◆</span>游戏分区</h1>
+    <p class="ph-sub">多人在线 IO 游戏与本地游戏集合。</p>
+    <div class="ph-meta">
+      <div class="ph-stat"><b>9</b>总入口</div>
+      <div class="ph-stat"><b>4</b>分类</div>
+      <div class="ph-stat"><b>在线对战</b></div>
+    </div>
+  </div>
+</section>
+
+<div class="shell">
+  <div class="filter-bar"><button class="chip-filter active" data-tag="all">全部 <span class="count">9</span></button><button class="chip-filter" data-tag="在线游戏">在线游戏 <span class="count">4</span></button><button class="chip-filter" data-tag="3D 沙盒">3D 沙盒 <span class="count">1</span></button><button class="chip-filter" data-tag="3D 游戏">3D 游戏 <span class="count">1</span></button><button class="chip-filter" data-tag="游戏娱乐">游戏娱乐 <span class="count">3</span></button></div>
+  <div class="cards-grid" id="cardsGrid">
+    <article class="card" data-section="games" data-tag="在线游戏" data-key="https://mk48.io/"><button class="pin-btn" title="收藏 / 取消收藏" aria-label="收藏">★</button><div class="card-top"><div class="card-icon">🚢</div><span class="card-tag">在线游戏</span></div><h3>MK48.io</h3><p>多人在线海战 IO 游戏，操控战舰对战、升级并争夺海域。</p><div class="card-foot"><a class="entry" href="https://mk48.io/" target="_blank" rel="noopener noreferrer"><span class="path">mk48.io</span><span class="arrow-wrap">开始游戏 →</span></a></div></article><article class="card" data-section="games" data-tag="在线游戏" data-key="https://1v1.suroi.io/"><button class="pin-btn" title="收藏 / 取消收藏" aria-label="收藏">★</button><div class="card-top"><div class="card-icon">🎯</div><span class="card-tag">在线游戏</span></div><h3>Suroi 1v1</h3><p>开源吃鸡风格射击游戏的一对一竞技模式，开局快、节奏紧凑。</p><div class="card-foot"><a class="entry" href="https://1v1.suroi.io/" target="_blank" rel="noopener noreferrer"><span class="path">1v1.suroi.io</span><span class="arrow-wrap">开始游戏 →</span></a></div></article><article class="card" data-section="games" data-tag="在线游戏" data-key="https://kiomet.com/"><button class="pin-btn" title="收藏 / 取消收藏" aria-label="收藏">★</button><div class="card-top"><div class="card-icon">🗺️</div><span class="card-tag">在线游戏</span></div><h3>Kiomet</h3><p>多人即时战略游戏，占领领土、扩张势力并吞并对手。</p><div class="card-foot"><a class="entry" href="https://kiomet.com/" target="_blank" rel="noopener noreferrer"><span class="path">kiomet.com</span><span class="arrow-wrap">开始游戏 →</span></a></div></article><article class="card" data-section="games" data-tag="在线游戏" data-key="https://yorg.io/"><button class="pin-btn" title="收藏 / 取消收藏" aria-label="收藏">★</button><div class="card-top"><div class="card-icon">🛡️</div><span class="card-tag">在线游戏</span></div><h3>Yorg.io</h3><p>塔防与资源管理结合的生存策略游戏，搭建防线抵御进攻。</p><div class="card-foot"><a class="entry" href="https://yorg.io/" target="_blank" rel="noopener noreferrer"><span class="path">yorg.io</span><span class="arrow-wrap">开始游戏 →</span></a></div></article><article class="card" data-section="games" data-tag="3D 沙盒" data-key="mini-world/index.html"><button class="pin-btn" title="收藏 / 取消收藏" aria-label="收藏">★</button><div class="card-top"><div class="card-icon">▦</div><span class="card-tag">3D 沙盒</span></div><h3>迷你世界 · 像素宇宙</h3><p>可探索、建造和战斗的浏览器 3D 方块世界，支持多个示例场景与载具。</p><div class="card-foot"><a class="entry" href="mini-world/index.html"><span class="path">mini-world/index.html</span><span class="arrow-wrap">进入世界 →</span></a></div></article><article class="card" data-section="games" data-tag="3D 游戏" data-key="neon-rush-3d.html"><button class="pin-btn" title="收藏 / 取消收藏" aria-label="收藏">★</button><div class="card-top"><div class="card-icon">◇</div><span class="card-tag">3D 游戏</span></div><h3>霓虹疾驰 · NEON RUSH</h3><p>霓虹风格 3D 跑酷游戏，支持键盘操作和本地 Three.js 资源。</p><div class="card-foot"><a class="entry" href="neon-rush-3d.html"><span class="path">neon-rush-3d.html</span><span class="arrow-wrap">开始游戏 →</span></a></div></article><article class="card" data-section="games" data-tag="游戏娱乐" data-key="seawar.html"><button class="pin-btn" title="收藏 / 取消收藏" aria-label="收藏">★</button><div class="card-top"><div class="card-icon">⚓</div><span class="card-tag">游戏娱乐</span></div><h3>怒海争锋</h3><p>海域领地战：拖拽派兵抢岛扩张，用兵力升级岛屿、建造岸防炮台，舰队炮击把敌岛打成「压制」再登陆；敌国波次突袭有倒计时预警。支持鼠标与触屏。</p><div class="card-foot"><a class="entry" href="seawar.html"><span class="path">seawar.html</span><span class="arrow-wrap">开始游戏 →</span></a></div></article><article class="card" data-section="games" data-tag="游戏娱乐" data-key="war-simulator.html"><button class="pin-btn" title="收藏 / 取消收藏" aria-label="收藏">★</button><div class="card-top"><div class="card-icon">⚔</div><span class="card-tag">游戏娱乐</span></div><h3>铁血战线</h3><p>战争模拟和策略对抗游戏，体验部队部署与战局推进。</p><div class="card-foot"><a class="entry" href="war-simulator.html"><span class="path">war-simulator.html</span><span class="arrow-wrap">开始游戏 →</span></a></div></article><article class="card" data-section="games" data-tag="游戏娱乐" data-key="lucky-slots.html"><button class="pin-btn" title="收藏 / 取消收藏" aria-label="收藏">★</button><div class="card-top"><div class="card-icon">7</div><span class="card-tag">游戏娱乐</span></div><h3>幸运老虎机</h3><p>轻量化老虎机小游戏，适合短时间休闲娱乐。</p><div class="card-foot"><a class="entry" href="lucky-slots.html"><span class="path">lucky-slots.html</span><span class="arrow-wrap">开始游戏 →</span></a></div></article>
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="icon">∅</div>
+      <div>该分类下暂无入口。</div>
+    </div>
+  </div>
+</div>
+
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="brand"><span class="mark">观</span><span>观澜</span></div>
+      <p class="footer-desc">从一条波形、一块逻辑门，到可运行的芯片与开放世界。在实验中观察，在札记中沉淀。</p>
+    </div>
+    <div>
+      <h4>分区</h4>
+      <ul>
+        <li><a href="workbench.html">芯片工作台</a></li><li><a href="personal-projects.html">个人项目</a></li><li><a href="learning-quiz.html">学习题库</a></li><li><a href="checkin.html">每日签到</a></li><li><a href="forum.html">论坛社区</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>更多</h4>
+      <ul>
+        <li><a href="projects.html">本地项目</a></li><li><a href="games.html">游戏分区</a></li><li><a href="books.html">书籍分区</a></li><li><a href="ai.html">AI 分区</a></li><li><a href="eda.html">电子设计</a></li><li><a href="modules.html">模块资料</a></li>
+        <li><a href="search.html">全站搜索</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>快捷键</h4>
+      <ul>
+        <li><a href="#" onclick="return false" id="paletteButton">⌘ K 命令面板</a></li>
+        <li><a href="#" id="footerMessage">留言反馈</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>收藏、最近打开与主题偏好保存在当前浏览器。外部站点在新标签页打开。</span>
+    <span>观察 · 设计 · 验证 · 记录</span>
+  </div>
+</footer>
+
+
+<button class="msg-fab" id="messageFab" aria-label="留言" title="给我们留言"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span class="badge"></span></button>
+<div class="modal-overlay" id="messageModal" role="dialog" aria-modal="true" aria-labelledby="msgTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="msgTitle">留言</h2>
+        <div class="sub">写下你的想法、问题或合作意向，提交后将自动推送至我的邮箱。</div>
+      </div>
+      <button class="modal-close" id="messageClose" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="messageForm" novalidate>
+        <div class="form-row">
+          <div class="form-field">
+            <label>称呼<span class="req">*</span></label>
+            <input type="text" name="name" required maxlength="40" placeholder="如何称呼你">
+          </div>
+          <div class="form-field">
+            <label>邮箱</label>
+            <input type="email" name="email" maxlength="80" placeholder="可选，方便回复你">
+          </div>
+        </div>
+        <div class="form-field">
+          <label>留言内容<span class="req">*</span></label>
+          <textarea name="message" required minlength="5" maxlength="2000" placeholder="写下你想说的…"></textarea>
+        </div>
+        <p class="form-meta">提交即同意将你的称呼、邮箱与留言内容通过 Formsubmit.co 加密发送至站点所有者邮箱。我们不会存储或公开你的信息。</p>
+        <button type="submit" class="btn-submit" id="messageSubmit"><span class="btn-label">发送留言</span></button>
+        <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay modal-palette-wrap" id="paletteModal" role="dialog" aria-modal="true">
+  <div class="modal modal-palette">
+    <div class="palette-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="paletteSearch" class="palette-input" placeholder="跳转到任意入口…" autocomplete="off">
+    </div>
+    <div class="palette-list" id="paletteList"></div>
+    <div class="palette-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 选择 · <kbd>↵</kbd> 打开</span>
+      <span><kbd>esc</kbd> 关闭</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="toast-dot"></span><span class="toast-text"></span></div>
+<script>
+/* AUTO-GENERATED — all 84 cards + 9 sections metadata. Do not edit by hand. */
+window.PORTAL_DATA = [
+  {
+    "id": "workbench",
+    "title": "芯片工作台",
+    "subtitle": "从设计到验证",
+    "desc": "交互式工作台：电路仿真、模拟拓扑、札记、逻辑门与微型世界。",
+    "accent": "#6366f1",
+    "icon": "∿",
+    "total": 4,
+    "sub_categories": [
+      {
+        "tag": "交互工作台",
+        "count": 4,
+        "preview": [
+          {
+            "title": "硅间札记",
+            "icon": "笺"
+          },
+          {
+            "title": "硅海图谱",
+            "icon": "⌬"
+          },
+          {
+            "title": "观澜电路",
+            "icon": "∿"
+          },
+          {
+            "title": "逻辑织机",
+            "icon": "⊞"
+          }
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "title": "硅间札记",
+        "icon": "笺",
+        "tag": "交互工作台",
+        "desc": "把实验结果、设计失误与论文想法串联起来，用双链、对照和回忆卡积累可复用经验。",
+        "entries": [
+          {
+            "href": "silicon-notes/",
+            "target": "",
+            "rel": "",
+            "span": "silicon-notes/",
+            "label": "进入 →"
+          }
+        ],
+        "search": "硅间札记 笔记 知识 图谱 论文 Markdown 回顾",
+        "section": "workbench",
+        "sectionTitle": "芯片工作台"
+      },
+      {
+        "title": "硅海图谱",
+        "icon": "⌬",
+        "tag": "交互工作台",
+        "desc": "浏览 OSC、基准源与 PLL 拓扑，比较设计计算，导出网表并接入自己的工艺配置。",
+        "entries": [
+          {
+            "href": "analog-atlas/",
+            "target": "",
+            "rel": "",
+            "span": "analog-atlas/",
+            "label": "进入 →"
+          }
+        ],
+        "search": "硅海图谱 TSMC 180 nm RF PLL oscillator bandgap 拓扑",
+        "section": "workbench",
+        "sectionTitle": "芯片工作台"
+      },
+      {
+        "title": "观澜电路",
+        "icon": "∿",
+        "tag": "交互工作台",
+        "desc": "用真实 ngspice 运行 30 个案例，导入网表、模型和符号，观察波形与参数变化。",
+        "entries": [
+          {
+            "href": "circuit-lab/",
+            "target": "",
+            "rel": "",
+            "span": "circuit-lab/",
+            "label": "进入 →"
+          }
+        ],
+        "search": "观澜电路 SPICE 仿真 电路 symbol asy netlist ngspice",
+        "section": "workbench",
+        "sectionTitle": "芯片工作台"
+      },
+      {
+        "title": "逻辑织机",
+        "icon": "⊞",
+        "tag": "交互工作台",
+        "desc": "从基本门一路搭到 CPU，让自己接出的电路执行程序，把验证过的模块保存复用。",
+        "entries": [
+          {
+            "href": "logic-loom/",
+            "target": "",
+            "rel": "",
+            "span": "logic-loom/",
+            "label": "进入 →"
+          }
+        ],
+        "search": "逻辑织机 数字 芯片 游戏 CPU ALU gates Turing",
+        "section": "workbench",
+        "sectionTitle": "芯片工作台"
+      }
+    ]
+  },
+  {
+    "id": "personal-projects",
+    "title": "个人项目",
+    "subtitle": "私人空间",
+    "desc": "个人站点、札记与私人空间，记录与沉淀。",
+    "accent": "#ec4899",
+    "icon": "体",
+    "total": 2,
+    "sub_categories": [
+      {
+        "tag": "私人站点",
+        "count": 1,
+        "preview": [
+          {
+            "title": "体悟集 · 私人空间",
+            "icon": "体"
+          }
+        ]
+      },
+      {
+        "tag": "交互工作台",
+        "count": 1,
+        "preview": [
+          {
+            "title": "硅间札记",
+            "icon": "笺"
+          }
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "title": "体悟集 · 私人空间",
+        "icon": "体",
+        "tag": "私人站点",
+        "desc": "推荐 / 日记 / 诗歌 / 文案 / 评论，邀请码注册、超管后台、图文音视频与 Markdown 书写。",
+        "entries": [
+          {
+            "href": "insight-space/index.html",
+            "target": "",
+            "rel": "",
+            "span": "insight-space/",
+            "label": "进入体悟集 →"
+          }
+        ],
+        "search": "体悟集 insight 私人 日记 诗歌 文案 评论 邀请码 超管 后台 Markdown",
+        "section": "personal-projects",
+        "sectionTitle": "个人项目"
+      },
+      {
+        "title": "硅间札记",
+        "icon": "笺",
+        "tag": "交互工作台",
+        "desc": "把实验结果、设计失误与论文想法串联起来，用双链、对照和回忆卡积累可复用经验。",
+        "entries": [
+          {
+            "href": "silicon-notes/",
+            "target": "",
+            "rel": "",
+            "span": "silicon-notes/",
+            "label": "进入 →"
+          }
+        ],
+        "search": "硅间札记 笔记 知识 图谱 论文 Markdown 回顾",
+        "section": "personal-projects",
+        "sectionTitle": "个人项目"
+      }
+    ]
+  },
+  {
+    "id": "learning-quiz",
+    "title": "学习题库",
+    "subtitle": "竞赛与复习",
+    "desc": "大学生数学竞赛、半导体物理与器件等学习题库。",
+    "accent": "#f97316",
+    "icon": "∑",
+    "total": 2,
+    "sub_categories": [
+      {
+        "tag": "竞赛复习",
+        "count": 1,
+        "preview": [
+          {
+            "title": "大学生数学竞赛",
+            "icon": "∑"
+          }
+        ]
+      },
+      {
+        "tag": "课程复习",
+        "count": 1,
+        "preview": [
+          {
+            "title": "半导体物理与器件",
+            "icon": "μ"
+          }
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "title": "大学生数学竞赛",
+        "icon": "∑",
+        "tag": "竞赛复习",
+        "desc": "按专题浏览 208 道竞赛题，支持公式渲染、完整解答、评注和一题一屏放映。",
+        "entries": [
+          {
+            "href": "math-competition/web/",
+            "target": "",
+            "rel": "",
+            "span": "math-competition/web/",
+            "label": "开始复习 →"
+          }
+        ],
+        "search": "大学生数学竞赛 数学 竞赛 题目 解答 复习",
+        "section": "learning-quiz",
+        "sectionTitle": "学习题库"
+      },
+      {
+        "title": "半导体物理与器件",
+        "icon": "μ",
+        "tag": "课程复习",
+        "desc": "汇总半导体物理、PN 结、MOSFET 与器件分析题，提供公式渲染、完整解答和知识点复习。",
+        "entries": [
+          {
+            "href": "semiconductor-devices/",
+            "target": "",
+            "rel": "",
+            "span": "semiconductor-devices/",
+            "label": "开始复习 →"
+          }
+        ],
+        "search": "半导体物理 器件 期末复习 PN 结 MOSFET 晶体管 题目 解答",
+        "section": "learning-quiz",
+        "sectionTitle": "学习题库"
+      }
+    ]
+  },
+  {
+    "id": "checkin",
+    "title": "每日签到",
+    "subtitle": "额度与积分",
+    "desc": "API 中转站与社区的每日签到入口。",
+    "accent": "#10b981",
+    "icon": "✓",
+    "total": 5,
+    "sub_categories": [
+      {
+        "tag": "签到",
+        "count": 5,
+        "preview": [
+          {
+            "title": "99code 签到",
+            "icon": "✓"
+          },
+          {
+            "title": "帮帮程序员签到",
+            "icon": "帮"
+          },
+          {
+            "title": "Agent Router 签到",
+            "icon": "⇄"
+          },
+          {
+            "title": "NewAPI 签到",
+            "icon": "🔗"
+          }
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "title": "99code 签到",
+        "icon": "✓",
+        "tag": "签到",
+        "desc": "API 中转站控制台，登录后进入仪表盘完成每日签到。",
+        "entries": [
+          {
+            "href": "https://gpt.api456.me/dashboarda/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "gpt.api456.me/dashboarda",
+            "label": "去签到 →"
+          }
+        ],
+        "search": "99code 签到 API 中转 控制台 gpt.api456.me",
+        "section": "checkin",
+        "sectionTitle": "每日签到"
+      },
+      {
+        "title": "帮帮程序员签到",
+        "icon": "帮",
+        "tag": "签到",
+        "desc": "进入控制台个人中心，完成每日签到领取额度。",
+        "entries": [
+          {
+            "href": "https://helpcoder.cc/console/personal",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "helpcoder.cc/console/personal",
+            "label": "去签到 →"
+          }
+        ],
+        "search": "帮帮程序员 helpcoder 签到 控制台 个人中心",
+        "section": "checkin",
+        "sectionTitle": "每日签到"
+      },
+      {
+        "title": "Agent Router 签到",
+        "icon": "⇄",
+        "tag": "签到",
+        "desc": "Agent Router 控制台入口，登录后完成每日签到。",
+        "entries": [
+          {
+            "href": "https://ps.air-outer.com/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "ps.air-outer.com",
+            "label": "去签到 →"
+          }
+        ],
+        "search": "Agent Router agentrouter 签到 控制台 ps.air-outer.com",
+        "section": "checkin",
+        "sectionTitle": "每日签到"
+      },
+      {
+        "title": "NewAPI 签到",
+        "icon": "🔗",
+        "tag": "签到",
+        "desc": "NewAPI 控制台个人资料页，登录后完成每日签到领取额度。",
+        "entries": [
+          {
+            "href": "https://sunapi.5201201314.top/profile",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "sunapi.5201201314.top/profile",
+            "label": "去签到 →"
+          }
+        ],
+        "search": "NewAPI sunapi 5201201314 签到 profile 额度",
+        "section": "checkin",
+        "sectionTitle": "每日签到"
+      },
+      {
+        "title": "蓝色大肥鱼 · 作品页",
+        "icon": "鱼",
+        "tag": "签到",
+        "desc": "「蓝色大肥鱼」AI 娘二创开放档案（非官方同人整理），收录大量 Q 版 AI 娘同人图与表情包。",
+        "entries": [
+          {
+            "href": "https://xn--pssy23gqgbz2d718b.com/works/deepseek202610220002.html",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "蓝色大肥鱼.com/works",
+            "label": "去看作品 →"
+          }
+        ],
+        "search": "蓝色大肥鱼 大肥鱼 AI娘 AI 二创 表情包 同人 作品 签到",
+        "section": "checkin",
+        "sectionTitle": "每日签到"
+      }
+    ]
+  },
+  {
+    "id": "forum",
+    "title": "论坛社区",
+    "subtitle": "交流与笔记",
+    "desc": "电子工程论坛、模拟 IC 留言板与课程笔记知识库。",
+    "accent": "#f59e0b",
+    "icon": "▣",
+    "total": 6,
+    "sub_categories": [
+      {
+        "tag": "论坛",
+        "count": 2,
+        "preview": [
+          {
+            "title": "EETOP 论坛",
+            "icon": "💬"
+          },
+          {
+            "title": "21ic 论坛",
+            "icon": "💬"
+          }
+        ]
+      },
+      {
+        "tag": "留言板",
+        "count": 1,
+        "preview": [
+          {
+            "title": "Analog-Life 留言板",
+            "icon": "A"
+          }
+        ]
+      },
+      {
+        "tag": "课程笔记",
+        "count": 1,
+        "preview": [
+          {
+            "title": "LOSS 学研札记",
+            "icon": "笔"
+          }
+        ]
+      },
+      {
+        "tag": "站点",
+        "count": 1,
+        "preview": [
+          {
+            "title": "rt2innocence",
+            "icon": "R"
+          }
+        ]
+      },
+      {
+        "tag": "外部资源",
+        "count": 1,
+        "preview": [
+          {
+            "title": "icdesign1.com",
+            "icon": "IC"
+          }
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "title": "EETOP 论坛",
+        "icon": "💬",
+        "tag": "论坛",
+        "desc": "电子工程师技术交流论坛，含半导体、模拟电路、IC 设计等版块，可每日签到领积分。",
+        "entries": [
+          {
+            "href": "https://bbs.eetop.cn/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "bbs.eetop.cn",
+            "label": "进入论坛 →"
+          }
+        ],
+        "search": "EEWorld eetop 论坛 电子工程 入口 bbs.eetop.cn",
+        "section": "forum",
+        "sectionTitle": "论坛社区"
+      },
+      {
+        "title": "21ic 论坛",
+        "icon": "💬",
+        "tag": "论坛",
+        "desc": "21ic 中国电子网论坛，技术交流、资料分享与每日签到社区。",
+        "entries": [
+          {
+            "href": "https://bbs.21ic.com/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "bbs.21ic.com",
+            "label": "进入论坛 →"
+          }
+        ],
+        "search": "21ic 论坛 电子工程 入口 bbs.21ic.com",
+        "section": "forum",
+        "sectionTitle": "论坛社区"
+      },
+      {
+        "title": "Analog-Life 留言板",
+        "icon": "A",
+        "tag": "留言板",
+        "desc": "模拟 IC 设计博客 Analog-Life 的留言板，可向博主提问交流（Cadence/EDA、射频 IC、运放 等教程）。",
+        "entries": [
+          {
+            "href": "https://www.analog-life.com/message/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "analog-life.com/message",
+            "label": "去留言 →"
+          }
+        ],
+        "search": "Analog-Life 模拟 IC 设计 博客 留言板 提问 交流 EDA Cadence 射频 运放 analog-life.com",
+        "section": "forum",
+        "sectionTitle": "论坛社区"
+      },
+      {
+        "title": "LOSS 学研札记",
+        "icon": "笔",
+        "tag": "课程笔记",
+        "desc": "模电（OTA/运放/噪声/CMRR）、微电子器件物理、电路分析、量子力学 的课程笔记知识库。",
+        "entries": [
+          {
+            "href": "https://lossnotes.cc/CourseNotes/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "lossnotes.cc/CourseNotes",
+            "label": "去看笔记 →"
+          }
+        ],
+        "search": "LOSS Notebook 学研札记 课程笔记 模电 微电子器件 电路分析 量子力学 MkDocs lossnotes",
+        "section": "forum",
+        "sectionTitle": "论坛社区"
+      },
+      {
+        "title": "rt2innocence",
+        "icon": "R",
+        "tag": "站点",
+        "desc": "个人站点入口，收录在论坛社区分区便于随时访问。",
+        "entries": [
+          {
+            "href": "https://rt2innocence.net/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "rt2innocence.net",
+            "label": "访问 →"
+          }
+        ],
+        "search": "rt2innocence innocence 个人站点 博客 社区 入口",
+        "section": "forum",
+        "sectionTitle": "论坛社区"
+      },
+      {
+        "title": "icdesign1.com",
+        "icon": "IC",
+        "tag": "外部资源",
+        "desc": "集成电路设计相关网站入口，收录在电子设计项目中便于快速访问。",
+        "entries": [
+          {
+            "href": "https://icdesign1.com/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "icdesign1.com",
+            "label": "访问网站 →"
+          }
+        ],
+        "search": "icdesign1.com IC 设计 模拟集成电路 电子设计 外部资源",
+        "section": "forum",
+        "sectionTitle": "论坛社区"
+      }
+    ]
+  },
+  {
+    "id": "projects",
+    "title": "本地项目",
+    "subtitle": "实验与工具",
+    "desc": "本地部署的实验工具、游戏、训练场与外部资源。",
+    "accent": "#ec4899",
+    "icon": "◈",
+    "total": 29,
+    "sub_categories": [
+      {
+        "tag": "芯片设计",
+        "count": 1,
+        "preview": [
+          {
+            "title": "GM/ID Studio",
+            "icon": "gm"
+          }
+        ]
+      },
+      {
+        "tag": "3D 游戏",
+        "count": 1,
+        "preview": [
+          {
+            "title": "霓虹疾驰 · NEON RUSH",
+            "icon": "◇"
+          }
+        ]
+      },
+      {
+        "tag": "3D 沙盒",
+        "count": 1,
+        "preview": [
+          {
+            "title": "迷你世界 · 像素宇宙",
+            "icon": "▦"
+          }
+        ]
+      },
+      {
+        "tag": "应用工具",
+        "count": 4,
+        "preview": [
+          {
+            "title": "股市训练场",
+            "icon": "↗"
+          },
+          {
+            "title": "双语专业词典",
+            "icon": "字"
+          },
+          {
+            "title": "AI 工具大全",
+            "icon": "AI"
+          },
+          {
+            "title": "作业页面集合",
+            "icon": "⌘"
+          }
+        ]
+      },
+      {
+        "tag": "实验工具",
+        "count": 10,
+        "preview": [
+          {
+            "title": "傅里叶轮廓实验室",
+            "icon": "∿"
+          },
+          {
+            "title": "控制算法可视化实验室",
+            "icon": "⌁"
+          },
+          {
+            "title": "半导体器件虚拟实验室",
+            "icon": "◈"
+          },
+          {
+            "title": "光的散射实验室",
+            "icon": "☼"
+          }
+        ]
+      },
+      {
+        "tag": "学习训练",
+        "count": 4,
+        "preview": [
+          {
+            "title": "词汇选择题刷题",
+            "icon": "Aa"
+          },
+          {
+            "title": "数感训练场",
+            "icon": "#"
+          },
+          {
+            "title": "宇宙历史",
+            "icon": "✦"
+          },
+          {
+            "title": "生态系统模拟器",
+            "icon": "♧"
+          }
+        ]
+      },
+      {
+        "tag": "声音工作台",
+        "count": 1,
+        "preview": [
+          {
+            "title": "潮汐声景",
+            "icon": "≋"
+          }
+        ]
+      },
+      {
+        "tag": "生活指南",
+        "count": 1,
+        "preview": [
+          {
+            "title": "高性价比人生指南",
+            "icon": "✓"
+          }
+        ]
+      },
+      {
+        "tag": "游戏娱乐",
+        "count": 5,
+        "preview": [
+          {
+            "title": "场海 · Field Drift",
+            "icon": "⚡"
+          },
+          {
+            "title": "怒海争锋",
+            "icon": "⚓"
+          },
+          {
+            "title": "铁血战线",
+            "icon": "⚔"
+          },
+          {
+            "title": "幸运老虎机",
+            "icon": "7"
+          }
+        ]
+      },
+      {
+        "tag": "私人站点",
+        "count": 1,
+        "preview": [
+          {
+            "title": "体悟集 · 私人空间",
+            "icon": "体"
+          }
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "title": "GM/ID Studio",
+        "icon": "gm",
+        "tag": "芯片设计",
+        "desc": "基于 TSMC 0.18 µm RF 模型的交互式 gm/Id 设计工作台，探索晶体管工作点与本征增益。",
+        "entries": [
+          {
+            "href": "gm-id-studio/dist/GM-ID-Studio.html",
+            "target": "",
+            "rel": "",
+            "span": "gm-id-studio/dist/GM-ID-Studio.html",
+            "label": "打开工作台 →"
+          }
+        ],
+        "search": "GM ID Studio gm/Id 模拟集成电路 晶体管 设计工作台 TSMC RF",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "霓虹疾驰 · NEON RUSH",
+        "icon": "◇",
+        "tag": "3D 游戏",
+        "desc": "霓虹风格 3D 跑酷游戏，支持键盘操作和本地 Three.js 资源。",
+        "entries": [
+          {
+            "href": "neon-rush-3d.html",
+            "target": "",
+            "rel": "",
+            "span": "neon-rush-3d.html",
+            "label": "开始游戏 →"
+          }
+        ],
+        "search": "霓虹疾驰 neon rush 3D 跑酷 游戏",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "迷你世界 · 像素宇宙",
+        "icon": "▦",
+        "tag": "3D 沙盒",
+        "desc": "可探索、建造和战斗的浏览器 3D 方块世界，支持多个示例场景与载具。",
+        "entries": [
+          {
+            "href": "mini-world/index.html",
+            "target": "",
+            "rel": "",
+            "span": "mini-world/index.html",
+            "label": "进入世界 →"
+          }
+        ],
+        "search": "迷你世界 MiniWorld 像素宇宙 3D 沙盒 建造 战斗",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "股市训练场",
+        "icon": "↗",
+        "tag": "应用工具",
+        "desc": "模拟股票投资终端，包含行情、自选股、模拟下单、持仓、交易记录和日常支出管理。",
+        "entries": [
+          {
+            "href": "stock-trading-simulator/stock-trading-simulator.html",
+            "target": "",
+            "rel": "",
+            "span": "stock-trading-simulator/stock-trading-simulator.html",
+            "label": "进入 →"
+          }
+        ],
+        "search": "股票训练场 模拟投资 股票 行情 交易 财务",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "双语专业词典",
+        "icon": "字",
+        "tag": "应用工具",
+        "desc": "面向电子、电气和计算机相关词汇的双语查询工具，适合学习和查阅专业术语。",
+        "entries": [
+          {
+            "href": "bilingual-dictionary/index.html",
+            "target": "",
+            "rel": "",
+            "span": "bilingual-dictionary/index.html",
+            "label": "打开 →"
+          }
+        ],
+        "search": "双语词典 英语 专业词汇 查询",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "傅里叶轮廓实验室",
+        "icon": "∿",
+        "tag": "实验工具",
+        "desc": "将图形轮廓分解为傅里叶旋转分量，支持示例图形、参数调整和动画演示。",
+        "entries": [
+          {
+            "href": "fourier-contour/index.html",
+            "target": "",
+            "rel": "",
+            "span": "fourier-contour/index.html",
+            "label": "打开 →"
+          }
+        ],
+        "search": "傅里叶 Fourier 轮廓 动画 SVG",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "词汇选择题刷题",
+        "icon": "Aa",
+        "tag": "学习训练",
+        "desc": "180 题英语词汇选择题练习，适合快速刷题、检查词义和巩固记忆。",
+        "entries": [
+          {
+            "href": "vocabulary-quiz-180.html",
+            "target": "",
+            "rel": "",
+            "span": "vocabulary-quiz-180.html",
+            "label": "开始练习 →"
+          }
+        ],
+        "search": "词汇 英语 选择题 180 题库",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "数感训练场",
+        "icon": "#",
+        "tag": "学习训练",
+        "desc": "数字直觉和心算小游戏集合，提供多种互动训练模式。",
+        "entries": [
+          {
+            "href": "number-sense-trainer.html",
+            "target": "",
+            "rel": "",
+            "span": "number-sense-trainer.html",
+            "label": "开始训练 →"
+          }
+        ],
+        "search": "数感 数学 训练 数字",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "潮汐声景",
+        "icon": "≋",
+        "tag": "声音工作台",
+        "desc": "实时合成 18 种自然、空间、音乐与噪声，混合出你的专注、睡眠和放松背景。",
+        "entries": [
+          {
+            "href": "soundscape/",
+            "target": "",
+            "rel": "",
+            "span": "soundscape/",
+            "label": "开始混音 →"
+          }
+        ],
+        "search": "潮汐声景 声音 白噪声 雨声 专注 睡眠 放松 Web Audio",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "宇宙历史",
+        "icon": "✦",
+        "tag": "学习训练",
+        "desc": "以互动内容介绍太阳系的起源与演化，适合浏览和科普学习。",
+        "entries": [
+          {
+            "href": "cosmic-history.html",
+            "target": "",
+            "rel": "",
+            "span": "cosmic-history.html",
+            "label": "开始探索 →"
+          }
+        ],
+        "search": "宇宙 历史 太阳系 教学",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "生态系统模拟器",
+        "icon": "♧",
+        "tag": "学习训练",
+        "desc": "观察生态系统中生物、资源和环境因素的动态变化。",
+        "entries": [
+          {
+            "href": "ecosystem-simulator.html",
+            "target": "",
+            "rel": "",
+            "span": "ecosystem-simulator.html",
+            "label": "打开模拟器 →"
+          }
+        ],
+        "search": "生态系统 模拟器 生物 环境",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "高性价比人生指南",
+        "icon": "✓",
+        "tag": "生活指南",
+        "desc": "按成本、收益和证据检索生活建议，覆盖健康、急救、理财、法律与人生选择。",
+        "entries": [
+          {
+            "href": "life-guide/index.html",
+            "target": "",
+            "rel": "",
+            "span": "life-guide/index.html",
+            "label": "开始检索 →"
+          }
+        ],
+        "search": "高性价比人生指南 生活指南 健康 长寿 理财 急救 自查",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "控制算法可视化实验室",
+        "icon": "⌁",
+        "tag": "实验工具",
+        "desc": "通过可视化方式观察 PID 控制参数与系统响应之间的关系。",
+        "entries": [
+          {
+            "href": "pid-control-lab.html",
+            "target": "",
+            "rel": "",
+            "span": "pid-control-lab.html",
+            "label": "打开实验室 →"
+          }
+        ],
+        "search": "PID 控制 算法 可视化 控制实验",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "半导体器件虚拟实验室",
+        "icon": "◈",
+        "tag": "实验工具",
+        "desc": "探索 PN 结器件的动力学过程、参数和特性曲线。",
+        "entries": [
+          {
+            "href": "pn-junction-lab.html",
+            "target": "",
+            "rel": "",
+            "span": "pn-junction-lab.html",
+            "label": "打开实验室 →"
+          }
+        ],
+        "search": "PN 半导体 器件 动力学 参数",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "光的散射实验室",
+        "icon": "☼",
+        "tag": "实验工具",
+        "desc": "演示瑞利散射、米氏散射与几何光学效果的可视化实验。",
+        "entries": [
+          {
+            "href": "light-scattering-lab.html",
+            "target": "",
+            "rel": "",
+            "span": "light-scattering-lab.html",
+            "label": "打开实验室 →"
+          }
+        ],
+        "search": "光 散射 瑞利 米氏 几何 光学",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "数字存储示波器",
+        "icon": "⌁",
+        "tag": "实验工具",
+        "desc": "模拟示波器操作、波形观察和 FFT 频谱分析，包含基础版和 FFT 版。",
+        "entries": [
+          {
+            "href": "ds-2000-oscilloscope.html",
+            "target": "",
+            "rel": "",
+            "span": "ds-2000-oscilloscope.html",
+            "label": "打开基础版 →"
+          },
+          {
+            "href": "ds-2000-oscilloscope-fft.html",
+            "target": "",
+            "rel": "",
+            "span": "FFT 频谱版",
+            "label": "打开 FFT 版 →"
+          }
+        ],
+        "search": "示波器 oscilloscope FFT 波形 频谱",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "WaveScope 波形观察器",
+        "icon": "≈",
+        "tag": "实验工具",
+        "desc": "另一套数字示波器交互页面，用于观察和分析模拟信号。",
+        "entries": [
+          {
+            "href": "wave-scope.html",
+            "target": "",
+            "rel": "",
+            "span": "wave-scope.html",
+            "label": "打开 →"
+          }
+        ],
+        "search": "WaveScope 示波器 波形",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "EMC 滤波器实验室",
+        "icon": "≋",
+        "tag": "实验工具",
+        "desc": "深度解析共模、差模信号和 EMC 滤波器的工作特性。",
+        "entries": [
+          {
+            "href": "emc-filter-lab.html",
+            "target": "",
+            "rel": "",
+            "span": "emc-filter-lab.html",
+            "label": "打开实验室 →"
+          }
+        ],
+        "search": "EMC 共模 差模 滤波器 信号",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "TSMC RF 器件计算器",
+        "icon": "⌬",
+        "tag": "实验工具",
+        "desc": "基于 0.18µm 工艺参数的 RF 器件和 BSIM3v3 计算工具。",
+        "entries": [
+          {
+            "href": "./spice-rf-calculator/spice-rf-calculator.html",
+            "target": "",
+            "rel": "",
+            "span": "spice-rf-calculator/spice-rf-calculator.html",
+            "label": "打开工具 →"
+          }
+        ],
+        "search": "Spice RF TSMC BSIM3 电路",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "ESP32C3 控制面板",
+        "icon": "▣",
+        "tag": "实验工具",
+        "desc": "面向 ESP32C3 的交互式控制和硬件实验页面。",
+        "entries": [
+          {
+            "href": "esp32c3-panel.html",
+            "target": "",
+            "rel": "",
+            "span": "esp32c3-panel.html",
+            "label": "打开 →"
+          }
+        ],
+        "search": "ESP32C3 控制面板 物联网",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "AI 工具大全",
+        "icon": "AI",
+        "tag": "应用工具",
+        "desc": "人工智能工具和相关资源的集合入口。",
+        "entries": [
+          {
+            "href": "ai-tools.html",
+            "target": "",
+            "rel": "",
+            "span": "ai-tools.html",
+            "label": "打开 →"
+          }
+        ],
+        "search": "AI 工具 人工智能",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "场海 · Field Drift",
+        "icon": "⚡",
+        "tag": "游戏娱乐",
+        "desc": "电磁场 3D 漂移游戏：唯一的运动方程 q(E+v×B)−kv，沿电场线冲浪、被磁场拧开霍耳角，用洛伦兹变换匹配\"无受力速度\"解锁静默门。七关覆盖电场、磁场、E×B 漂移、不变量与动生电动势；另含可编辑场实验室：放置电荷/偶极子/线面柱电流/螺线管，实时查看 φ 电势与 A 磁矢势切面。",
+        "entries": [
+          {
+            "href": "field-drift/index.html",
+            "target": "",
+            "rel": "",
+            "span": "field-drift/index.html",
+            "label": "开始漂流 →"
+          }
+        ],
+        "search": "场海 field drift 电磁场 物理 3d 洛伦兹力 相对论 电场 磁场 漂移 电荷 游戏",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "怒海争锋",
+        "icon": "⚓",
+        "tag": "游戏娱乐",
+        "desc": "海域领地战：拖拽派兵抢岛扩张，用兵力升级岛屿、建造岸防炮台，舰队炮击把敌岛打成「压制」再登陆；敌国波次突袭有倒计时预警。支持鼠标与触屏。",
+        "entries": [
+          {
+            "href": "seawar.html",
+            "target": "",
+            "rel": "",
+            "span": "seawar.html",
+            "label": "开始游戏 →"
+          }
+        ],
+        "search": "海战 sea war 战争 策略 塔防 岸防炮台 波次 突袭 舰队 kiomet yorg mk48 触屏",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "铁血战线",
+        "icon": "⚔",
+        "tag": "游戏娱乐",
+        "desc": "战争模拟和策略对抗游戏，体验部队部署与战局推进。",
+        "entries": [
+          {
+            "href": "war-simulator.html",
+            "target": "",
+            "rel": "",
+            "span": "war-simulator.html",
+            "label": "开始游戏 →"
+          }
+        ],
+        "search": "战争模拟 战争 铁血战线 策略",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "幸运老虎机",
+        "icon": "7",
+        "tag": "游戏娱乐",
+        "desc": "轻量化老虎机小游戏，适合短时间休闲娱乐。",
+        "entries": [
+          {
+            "href": "lucky-slots.html",
+            "target": "",
+            "rel": "",
+            "span": "lucky-slots.html",
+            "label": "开始游戏 →"
+          }
+        ],
+        "search": "老虎机 幸运 游戏",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "咪 · 有猫在就不一样",
+        "icon": "🐱",
+        "tag": "游戏娱乐",
+        "desc": "以猫咪为主题的互动娱乐页面。",
+        "entries": [
+          {
+            "href": "cat-playground.html",
+            "target": "",
+            "rel": "",
+            "span": "cat-playground.html",
+            "label": "打开 →"
+          }
+        ],
+        "search": "猫咪 游戏 咪",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "作业页面集合",
+        "icon": "⌘",
+        "tag": "应用工具",
+        "desc": "课程或实验作业页面入口，保留原文件名便于追踪。",
+        "entries": [
+          {
+            "href": "homework-1.html",
+            "target": "",
+            "rel": "",
+            "span": "homework-1.html",
+            "label": "打开作业 1 →"
+          },
+          {
+            "href": "homework-3.html",
+            "target": "",
+            "rel": "",
+            "span": "homework-3.html",
+            "label": "打开作业 3 →"
+          }
+        ],
+        "search": "作业 homework",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "傅里叶实验页面",
+        "icon": "ƒ",
+        "tag": "实验工具",
+        "desc": "早期傅里叶相关实验页面，适合与新版轮廓实验室对照使用。",
+        "entries": [
+          {
+            "href": "fourier-legacy.html",
+            "target": "",
+            "rel": "",
+            "span": "fourier-legacy.html",
+            "label": "打开 →"
+          }
+        ],
+        "search": "Foulier 傅里叶",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      },
+      {
+        "title": "体悟集 · 私人空间",
+        "icon": "体",
+        "tag": "私人站点",
+        "desc": "推荐 / 日记 / 诗歌 / 文案 / 评论，邀请码注册、超管后台、图文音视频与 Markdown 书写。",
+        "entries": [
+          {
+            "href": "insight-space/index.html",
+            "target": "",
+            "rel": "",
+            "span": "insight-space/",
+            "label": "进入体悟集 →"
+          }
+        ],
+        "search": "体悟集 insight 私人 日记 诗歌 文案 评论 邀请码 超管 后台 Markdown",
+        "section": "projects",
+        "sectionTitle": "本地项目"
+      }
+    ]
+  },
+  {
+    "id": "games",
+    "title": "游戏分区",
+    "subtitle": "在线对战",
+    "desc": "多人在线 IO 游戏与本地游戏集合。",
+    "accent": "#8b5cf6",
+    "icon": "◆",
+    "total": 9,
+    "sub_categories": [
+      {
+        "tag": "在线游戏",
+        "count": 4,
+        "preview": [
+          {
+            "title": "MK48.io",
+            "icon": "🚢"
+          },
+          {
+            "title": "Suroi 1v1",
+            "icon": "🎯"
+          },
+          {
+            "title": "Kiomet",
+            "icon": "🗺️"
+          },
+          {
+            "title": "Yorg.io",
+            "icon": "🛡️"
+          }
+        ]
+      },
+      {
+        "tag": "3D 沙盒",
+        "count": 1,
+        "preview": [
+          {
+            "title": "迷你世界 · 像素宇宙",
+            "icon": "▦"
+          }
+        ]
+      },
+      {
+        "tag": "3D 游戏",
+        "count": 1,
+        "preview": [
+          {
+            "title": "霓虹疾驰 · NEON RUSH",
+            "icon": "◇"
+          }
+        ]
+      },
+      {
+        "tag": "游戏娱乐",
+        "count": 3,
+        "preview": [
+          {
+            "title": "怒海争锋",
+            "icon": "⚓"
+          },
+          {
+            "title": "铁血战线",
+            "icon": "⚔"
+          },
+          {
+            "title": "幸运老虎机",
+            "icon": "7"
+          }
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "title": "MK48.io",
+        "icon": "🚢",
+        "tag": "在线游戏",
+        "desc": "多人在线海战 IO 游戏，操控战舰对战、升级并争夺海域。",
+        "entries": [
+          {
+            "href": "https://mk48.io/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "mk48.io",
+            "label": "开始游戏 →"
+          }
+        ],
+        "search": "mk48 io 海战 战舰 多人 对战 在线游戏",
+        "section": "games",
+        "sectionTitle": "游戏分区"
+      },
+      {
+        "title": "Suroi 1v1",
+        "icon": "🎯",
+        "tag": "在线游戏",
+        "desc": "开源吃鸡风格射击游戏的一对一竞技模式，开局快、节奏紧凑。",
+        "entries": [
+          {
+            "href": "https://1v1.suroi.io/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "1v1.suroi.io",
+            "label": "开始游戏 →"
+          }
+        ],
+        "search": "suroi 1v1 射击 吃鸡 对战 在线游戏",
+        "section": "games",
+        "sectionTitle": "游戏分区"
+      },
+      {
+        "title": "Kiomet",
+        "icon": "🗺️",
+        "tag": "在线游戏",
+        "desc": "多人即时战略游戏，占领领土、扩张势力并吞并对手。",
+        "entries": [
+          {
+            "href": "https://kiomet.com/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "kiomet.com",
+            "label": "开始游戏 →"
+          }
+        ],
+        "search": "kiomet 即时战略 领土 扩张 在线游戏",
+        "section": "games",
+        "sectionTitle": "游戏分区"
+      },
+      {
+        "title": "Yorg.io",
+        "icon": "🛡️",
+        "tag": "在线游戏",
+        "desc": "塔防与资源管理结合的生存策略游戏，搭建防线抵御进攻。",
+        "entries": [
+          {
+            "href": "https://yorg.io/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "yorg.io",
+            "label": "开始游戏 →"
+          }
+        ],
+        "search": "yorg io 塔防 生存 策略 资源 在线游戏",
+        "section": "games",
+        "sectionTitle": "游戏分区"
+      },
+      {
+        "title": "迷你世界 · 像素宇宙",
+        "icon": "▦",
+        "tag": "3D 沙盒",
+        "desc": "可探索、建造和战斗的浏览器 3D 方块世界，支持多个示例场景与载具。",
+        "entries": [
+          {
+            "href": "mini-world/index.html",
+            "target": "",
+            "rel": "",
+            "span": "mini-world/index.html",
+            "label": "进入世界 →"
+          }
+        ],
+        "search": "迷你世界 MiniWorld 像素宇宙 3D 沙盒 建造 战斗",
+        "section": "games",
+        "sectionTitle": "游戏分区"
+      },
+      {
+        "title": "霓虹疾驰 · NEON RUSH",
+        "icon": "◇",
+        "tag": "3D 游戏",
+        "desc": "霓虹风格 3D 跑酷游戏，支持键盘操作和本地 Three.js 资源。",
+        "entries": [
+          {
+            "href": "neon-rush-3d.html",
+            "target": "",
+            "rel": "",
+            "span": "neon-rush-3d.html",
+            "label": "开始游戏 →"
+          }
+        ],
+        "search": "霓虹疾驰 neon rush 3D 跑酷 游戏",
+        "section": "games",
+        "sectionTitle": "游戏分区"
+      },
+      {
+        "title": "怒海争锋",
+        "icon": "⚓",
+        "tag": "游戏娱乐",
+        "desc": "海域领地战：拖拽派兵抢岛扩张，用兵力升级岛屿、建造岸防炮台，舰队炮击把敌岛打成「压制」再登陆；敌国波次突袭有倒计时预警。支持鼠标与触屏。",
+        "entries": [
+          {
+            "href": "seawar.html",
+            "target": "",
+            "rel": "",
+            "span": "seawar.html",
+            "label": "开始游戏 →"
+          }
+        ],
+        "search": "海战 sea war 战争 策略 塔防 岸防炮台 波次 突袭 舰队 kiomet yorg mk48 触屏",
+        "section": "games",
+        "sectionTitle": "游戏分区"
+      },
+      {
+        "title": "铁血战线",
+        "icon": "⚔",
+        "tag": "游戏娱乐",
+        "desc": "战争模拟和策略对抗游戏，体验部队部署与战局推进。",
+        "entries": [
+          {
+            "href": "war-simulator.html",
+            "target": "",
+            "rel": "",
+            "span": "war-simulator.html",
+            "label": "开始游戏 →"
+          }
+        ],
+        "search": "战争模拟 战争 铁血战线 策略",
+        "section": "games",
+        "sectionTitle": "游戏分区"
+      },
+      {
+        "title": "幸运老虎机",
+        "icon": "7",
+        "tag": "游戏娱乐",
+        "desc": "轻量化老虎机小游戏，适合短时间休闲娱乐。",
+        "entries": [
+          {
+            "href": "lucky-slots.html",
+            "target": "",
+            "rel": "",
+            "span": "lucky-slots.html",
+            "label": "开始游戏 →"
+          }
+        ],
+        "search": "老虎机 幸运 游戏",
+        "section": "games",
+        "sectionTitle": "游戏分区"
+      }
+    ]
+  },
+  {
+    "id": "books",
+    "title": "书籍分区",
+    "subtitle": "电子书库",
+    "desc": "在线阅读与下载的电子书资源。",
+    "accent": "#06b6d4",
+    "icon": "▤",
+    "total": 3,
+    "sub_categories": [
+      {
+        "tag": "电子书",
+        "count": 3,
+        "preview": [
+          {
+            "title": "速读谷",
+            "icon": "📚"
+          },
+          {
+            "title": "知轩藏书",
+            "icon": "📖"
+          },
+          {
+            "title": "中文电子书库",
+            "icon": "📕"
+          }
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "title": "速读谷",
+        "icon": "📚",
+        "tag": "电子书",
+        "desc": "在线小说与电子书阅读站，可直接在网页里连续阅读全本。",
+        "entries": [
+          {
+            "href": "https://www.suduguu.com/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "suduguu.com",
+            "label": "去阅读 →"
+          }
+        ],
+        "search": "速读谷 suduguu 小说 电子书 在线阅读",
+        "section": "books",
+        "sectionTitle": "书籍分区"
+      },
+      {
+        "title": "知轩藏书",
+        "icon": "📖",
+        "tag": "电子书",
+        "desc": "知轩藏书镜像站，提供 TXT 电子书检索、排版校对与下载。",
+        "entries": [
+          {
+            "href": "https://zxcs.zip/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "zxcs.zip",
+            "label": "去下载 →"
+          }
+        ],
+        "search": "知轩藏书 zxcs txt 电子书 下载",
+        "section": "books",
+        "sectionTitle": "书籍分区"
+      },
+      {
+        "title": "中文电子书库",
+        "icon": "📕",
+        "tag": "电子书",
+        "desc": "中文电子书资源站，可在线检索书名并获取下载入口。",
+        "entries": [
+          {
+            "href": "https://zh.zchongqing.ru/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "zh.zchongqing.ru",
+            "label": "去查找 →"
+          }
+        ],
+        "search": "中文电子书库 zchongqing 电子书 检索 下载",
+        "section": "books",
+        "sectionTitle": "书籍分区"
+      }
+    ]
+  },
+  {
+    "id": "ai",
+    "title": "AI 分区",
+    "subtitle": "模型与中转",
+    "desc": "AI 对话、API 中转、AI 工具与模型管理入口。",
+    "accent": "#3b82f6",
+    "icon": "◇",
+    "total": 16,
+    "sub_categories": [
+      {
+        "tag": "AI 仪表盘",
+        "count": 1,
+        "preview": [
+          {
+            "title": "枢码 AI 模型中间站",
+            "icon": "枢"
+          }
+        ]
+      },
+      {
+        "tag": "AI 对话",
+        "count": 2,
+        "preview": [
+          {
+            "title": "Z.ai 智谱对话",
+            "icon": "Z"
+          },
+          {
+            "title": "ClawsGo 对话",
+            "icon": "爪"
+          }
+        ]
+      },
+      {
+        "tag": "API 中转",
+        "count": 9,
+        "preview": [
+          {
+            "title": "澄墨 API",
+            "icon": "澄"
+          },
+          {
+            "title": "NewAPI 控制台",
+            "icon": "N"
+          },
+          {
+            "title": "Kios API 钱包",
+            "icon": "K"
+          },
+          {
+            "title": "YJS API 密钥",
+            "icon": "钥"
+          }
+        ]
+      },
+      {
+        "tag": "签到",
+        "count": 1,
+        "preview": [
+          {
+            "title": "即梦 AI 探索",
+            "icon": "梦"
+          }
+        ]
+      },
+      {
+        "tag": "外部资源",
+        "count": 2,
+        "preview": [
+          {
+            "title": "Analog Copilot",
+            "icon": "△"
+          },
+          {
+            "title": "CircuitJS 电路仿真",
+            "icon": "∿"
+          }
+        ]
+      },
+      {
+        "tag": "AI PCB",
+        "count": 1,
+        "preview": [
+          {
+            "title": "heypcb AI PCB",
+            "icon": "⬢"
+          }
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "title": "枢码 AI 模型中间站",
+        "icon": "枢",
+        "tag": "AI 仪表盘",
+        "desc": "枢码 AI 模型中间站仪表盘，登录后管理模型调用与服务配置。",
+        "entries": [
+          {
+            "href": "https://hubcodex.fun/dashboard",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "hubcodex.fun/dashboard",
+            "label": "打开仪表盘 →"
+          }
+        ],
+        "search": "枢码AI hubcodex 模型 中间站 仪表盘 API",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "Z.ai 智谱对话",
+        "icon": "Z",
+        "tag": "AI 对话",
+        "desc": "智谱 Z.ai 在线对话入口，直接使用大模型聊天、问答与推理。",
+        "entries": [
+          {
+            "href": "https://chat.z.ai/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "chat.z.ai",
+            "label": "去对话 →"
+          }
+        ],
+        "search": "z.ai 智谱 chat 对话 大模型 AI",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "ClawsGo 对话",
+        "icon": "爪",
+        "tag": "AI 对话",
+        "desc": "ClawsGo 在线对话页面，可调用多种模型进行问答与写作。",
+        "entries": [
+          {
+            "href": "https://app.clawsgo.cn/chat",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "app.clawsgo.cn/chat",
+            "label": "去对话 →"
+          }
+        ],
+        "search": "clawsgo chat 对话 AI 助手",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "澄墨 API",
+        "icon": "澄",
+        "tag": "API 中转",
+        "desc": "API 中转服务平台，登录个人中心查看额度、用量与密钥。",
+        "entries": [
+          {
+            "href": "https://api.chengmo.cc.cd/profile",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "api.chengmo.cc.cd/profile",
+            "label": "打开 →"
+          }
+        ],
+        "search": "澄墨 chengmo API 中转 个人中心 profile 额度",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "NewAPI 控制台",
+        "icon": "N",
+        "tag": "API 中转",
+        "desc": "NewAPI 中转站个人资料页，查看额度、令牌与调用情况。",
+        "entries": [
+          {
+            "href": "https://sunapi.5201201314.top/profile",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "sunapi.5201201314.top/profile",
+            "label": "打开 →"
+          }
+        ],
+        "search": "newapi sunapi 5201201314 中转 profile 令牌 额度",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "Kios API 钱包",
+        "icon": "K",
+        "tag": "API 中转",
+        "desc": "Kios API 服务站钱包页面，查看余额、消费与充值记录。",
+        "entries": [
+          {
+            "href": "https://kiosapi.com/wallet",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "kiosapi.com/wallet",
+            "label": "打开 →"
+          }
+        ],
+        "search": "kiosapi kios 钱包 wallet 余额 充值 中转",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "YJS API 密钥",
+        "icon": "钥",
+        "tag": "API 中转",
+        "desc": "API 密钥管理页面，创建、查看和管理调用令牌。",
+        "entries": [
+          {
+            "href": "https://api.yjs.im/keys",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "api.yjs.im/keys",
+            "label": "打开 →"
+          }
+        ],
+        "search": "yjs api keys 密钥 令牌 中转",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "聚合 AI 密钥",
+        "icon": "聚",
+        "tag": "API 中转",
+        "desc": "聚合模型中转站密钥管理页，用一套密钥调用多家模型。",
+        "entries": [
+          {
+            "href": "https://api.juheai.shop/keys",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "api.juheai.shop/keys",
+            "label": "打开 →"
+          }
+        ],
+        "search": "聚合 ai juheai keys 密钥 多模型 中转",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "可可 AI 控制台",
+        "icon": "可",
+        "tag": "API 中转",
+        "desc": "可可 AI 控制台，用于管理令牌、调用额度与渠道配置。",
+        "entries": [
+          {
+            "href": "https://api.kekeai.xyz/console",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "api.kekeai.xyz/console",
+            "label": "打开 →"
+          }
+        ],
+        "search": "可可 ai kekeai console 控制台 令牌 额度",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "帮帮程序员控制台",
+        "icon": "帮",
+        "tag": "API 中转",
+        "desc": "控制台个人中心，管理密钥、额度、账单并完成每日签到。",
+        "entries": [
+          {
+            "href": "https://helpcoder.cc/console/personal",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "helpcoder.cc/console/personal",
+            "label": "打开 →"
+          }
+        ],
+        "search": "帮帮程序员 helpcoder console personal 控制台 个人中心",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "Agent Router",
+        "icon": "⇄",
+        "tag": "API 中转",
+        "desc": "Agent Router 控制台入口，管理调用额度并完成每日签到。",
+        "entries": [
+          {
+            "href": "https://ps.air-outer.com/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "ps.air-outer.com",
+            "label": "打开 →"
+          }
+        ],
+        "search": "agent router air-outer 中转 控制台 签到",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "99code 仪表盘",
+        "icon": "99",
+        "tag": "API 中转",
+        "desc": "99code API 中转站仪表盘，查看用量、密钥与签到状态。",
+        "entries": [
+          {
+            "href": "https://gpt.api456.me/dashboarda/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "gpt.api456.me/dashboarda",
+            "label": "打开 →"
+          }
+        ],
+        "search": "99code api456 dashboarda 仪表盘 中转 签到",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "即梦 AI 探索",
+        "icon": "梦",
+        "tag": "签到",
+        "desc": "即梦 AI 的探索页，可浏览 AI 生成的图片与视频作品，也作为每日任务入口。",
+        "entries": [
+          {
+            "href": "https://jimeng.jianying.com/ai-tool/explore",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "jimeng.jianying.com/ai-tool/explore",
+            "label": "打开 →"
+          }
+        ],
+        "search": "即梦 jimeng jianying 剪映 AI 绘图 视频 生成 探索 作品 签到",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "Analog Copilot",
+        "icon": "△",
+        "tag": "外部资源",
+        "desc": "放大器设计空间浏览器，用于探索模拟电路设计方案和参数空间。",
+        "entries": [
+          {
+            "href": "https://www.analogcopilot.com/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "analogcopilot.com",
+            "label": "访问网站 →"
+          }
+        ],
+        "search": "Analog Copilot 放大器 设计空间 浏览器 模拟电路 外部资源",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "CircuitJS 电路仿真",
+        "icon": "∿",
+        "tag": "外部资源",
+        "desc": "在线电路仿真工具，可直接搭建电路并观察电压、电流和波形变化。",
+        "entries": [
+          {
+            "href": "https://www.eetree.cn/circuitjs/circuitjs.html",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "eetree.cn/circuitjs",
+            "label": "打开仿真器 →"
+          }
+        ],
+        "search": "CircuitJS 电路仿真 电路模拟 eetree 外部资源",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      },
+      {
+        "title": "heypcb AI PCB",
+        "icon": "⬢",
+        "tag": "AI PCB",
+        "desc": "描述要做的硬件，自动生成原理图、布局与可制造文件，并输出可编辑、可带走的 KiCad 工程。",
+        "entries": [
+          {
+            "href": "https://heypcb.ai/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "heypcb.ai",
+            "label": "去设计 →"
+          }
+        ],
+        "search": "heypcb AI PCB 电路板 原理图 布局 Gerber KiCad 硬件设计 eda",
+        "section": "ai",
+        "sectionTitle": "AI 分区"
+      }
+    ]
+  },
+  {
+    "id": "eda",
+    "title": "电子设计",
+    "subtitle": "器件与仿真",
+    "desc": "PCB 设计、器件资料、在线仿真与开发板工具。",
+    "accent": "#14b8a6",
+    "icon": "⬢",
+    "total": 11,
+    "sub_categories": [
+      {
+        "tag": "AI PCB",
+        "count": 1,
+        "preview": [
+          {
+            "title": "heypcb AI PCB",
+            "icon": "⬢"
+          }
+        ]
+      },
+      {
+        "tag": "器件资料",
+        "count": 1,
+        "preview": [
+          {
+            "title": "Datasheet4U",
+            "icon": "📄"
+          }
+        ]
+      },
+      {
+        "tag": "器件官网",
+        "count": 2,
+        "preview": [
+          {
+            "title": "德州仪器 TI",
+            "icon": "TI"
+          },
+          {
+            "title": "ADI 亚德诺",
+            "icon": "AD"
+          }
+        ]
+      },
+      {
+        "tag": "仿真模型",
+        "count": 1,
+        "preview": [
+          {
+            "title": "Diodes SPICE 模型",
+            "icon": "◉"
+          }
+        ]
+      },
+      {
+        "tag": "在线仿真",
+        "count": 3,
+        "preview": [
+          {
+            "title": "Wokwi 在线仿真",
+            "icon": "⚙"
+          },
+          {
+            "title": "DigiSim 电路实验室",
+            "icon": "◫"
+          },
+          {
+            "title": "OpenCircuits",
+            "icon": "⌗"
+          }
+        ]
+      },
+      {
+        "tag": "在线烧录",
+        "count": 1,
+        "preview": [
+          {
+            "title": "ESP 在线烧录",
+            "icon": "⚡"
+          }
+        ]
+      },
+      {
+        "tag": "在线设计",
+        "count": 1,
+        "preview": [
+          {
+            "title": "Tinkercad",
+            "icon": "✎"
+          }
+        ]
+      },
+      {
+        "tag": "在线工具",
+        "count": 1,
+        "preview": [
+          {
+            "title": "波特律动 LED 工具",
+            "icon": "💡"
+          }
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "title": "heypcb AI PCB",
+        "icon": "⬢",
+        "tag": "AI PCB",
+        "desc": "描述要做的硬件，自动生成原理图、布局与可制造文件，并输出可编辑、可带走的 KiCad 工程。",
+        "entries": [
+          {
+            "href": "https://heypcb.ai/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "heypcb.ai",
+            "label": "去设计 →"
+          }
+        ],
+        "search": "heypcb AI PCB 电路板 原理图 布局 Gerber KiCad 硬件设计 eda",
+        "section": "eda",
+        "sectionTitle": "电子设计"
+      },
+      {
+        "title": "Datasheet4U",
+        "icon": "📄",
+        "tag": "器件资料",
+        "desc": "海量元器件数据手册搜索站，按型号快速找到 PDF 规格书。",
+        "entries": [
+          {
+            "href": "https://datasheet4u.com/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "datasheet4u.com",
+            "label": "去查询 →"
+          }
+        ],
+        "search": "datasheet4u 数据手册 规格书 元器件 pdf 查询",
+        "section": "eda",
+        "sectionTitle": "电子设计"
+      },
+      {
+        "title": "德州仪器 TI",
+        "icon": "TI",
+        "tag": "器件官网",
+        "desc": "TI 中文官网，芯片选型、数据手册、参考设计与在线仿真工具。",
+        "entries": [
+          {
+            "href": "https://www.ti.com.cn",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "www.ti.com.cn",
+            "label": "访问 →"
+          }
+        ],
+        "search": "ti 德州仪器 选型 数据手册 参考设计",
+        "section": "eda",
+        "sectionTitle": "电子设计"
+      },
+      {
+        "title": "ADI 亚德诺",
+        "icon": "AD",
+        "tag": "器件官网",
+        "desc": "ADI 中文官网，模拟与混合信号器件选型、仿真和设计资源。",
+        "entries": [
+          {
+            "href": "https://www.analog.com/cn/index.html",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "analog.com/cn",
+            "label": "访问 →"
+          }
+        ],
+        "search": "adi analog devices 亚德诺 模拟 选型 设计资源",
+        "section": "eda",
+        "sectionTitle": "电子设计"
+      },
+      {
+        "title": "Diodes SPICE 模型",
+        "icon": "◉",
+        "tag": "仿真模型",
+        "desc": "Diodes 官方 SPICE 模型下载与在线设计工具页面。",
+        "entries": [
+          {
+            "href": "https://www.diodes.com/zh/design/tools/spice-models",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "diodes.com/spice-models",
+            "label": "去下载 →"
+          }
+        ],
+        "search": "diodes spice 模型 仿真 下载 设计工具",
+        "section": "eda",
+        "sectionTitle": "电子设计"
+      },
+      {
+        "title": "Wokwi 在线仿真",
+        "icon": "⚙",
+        "tag": "在线仿真",
+        "desc": "在线 Arduino / ESP32 电路与代码仿真，无需实物即可调试。",
+        "entries": [
+          {
+            "href": "https://wokwi.com/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "wokwi.com",
+            "label": "打开仿真 →"
+          }
+        ],
+        "search": "wokwi 在线 仿真 arduino esp32 电路 代码",
+        "section": "eda",
+        "sectionTitle": "电子设计"
+      },
+      {
+        "title": "ESP 在线烧录",
+        "icon": "⚡",
+        "tag": "在线烧录",
+        "desc": "在浏览器中直接为 ESP 系列芯片烧录固件，省去本地工具链。",
+        "entries": [
+          {
+            "href": "https://esp-claw.com/zh-cn/flash/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "esp-claw.com/flash",
+            "label": "去烧录 →"
+          }
+        ],
+        "search": "esp claw 在线烧录 flash 固件 浏览器",
+        "section": "eda",
+        "sectionTitle": "电子设计"
+      },
+      {
+        "title": "Tinkercad",
+        "icon": "✎",
+        "tag": "在线设计",
+        "desc": "在线三维设计与电路搭建工具，适合入门练习和教学演示。",
+        "entries": [
+          {
+            "href": "https://www.tinkercad.com/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "tinkercad.com",
+            "label": "去设计 →"
+          }
+        ],
+        "search": "tinkercad 三维 建模 电路 教学 在线设计",
+        "section": "eda",
+        "sectionTitle": "电子设计"
+      },
+      {
+        "title": "波特律动 LED 工具",
+        "icon": "💡",
+        "tag": "在线工具",
+        "desc": "波特律动在线工具页，用于 LED 灯效相关配置与调试。",
+        "entries": [
+          {
+            "href": "https://led.baud-dance.com/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "led.baud-dance.com",
+            "label": "打开 →"
+          }
+        ],
+        "search": "led baud-dance 波特律动 灯效 点灯 工具",
+        "section": "eda",
+        "sectionTitle": "电子设计"
+      },
+      {
+        "title": "DigiSim 电路实验室",
+        "icon": "◫",
+        "tag": "在线仿真",
+        "desc": "在线电路实验平台，覆盖逻辑、继电器、电学与模拟电路仿真。",
+        "entries": [
+          {
+            "href": "https://digisim.io/zh",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "digisim.io/zh",
+            "label": "打开实验室 →"
+          }
+        ],
+        "search": "digisim 数字 逻辑 模拟 电路 仿真 实验室",
+        "section": "eda",
+        "sectionTitle": "电子设计"
+      },
+      {
+        "title": "OpenCircuits",
+        "icon": "⌗",
+        "tag": "在线仿真",
+        "desc": "免费开源的在线数字电路与逻辑设计器，可拖拽搭建并仿真。",
+        "entries": [
+          {
+            "href": "https://www.opencircuits.io/",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "opencircuits.io",
+            "label": "去设计 →"
+          }
+        ],
+        "search": "opencircuits 数字电路 逻辑 设计器 开源 仿真",
+        "section": "eda",
+        "sectionTitle": "电子设计"
+      }
+    ]
+  },
+  {
+    "id": "modules",
+    "title": "模块资料",
+    "subtitle": "开发板文档",
+    "desc": "开发板文档与模块 SDK 资料。",
+    "accent": "#a855f7",
+    "icon": "⚙",
+    "total": 3,
+    "sub_categories": [
+      {
+        "tag": "模块文档",
+        "count": 1,
+        "preview": [
+          {
+            "title": "海凌科云语音 SDK",
+            "icon": "🎙"
+          }
+        ]
+      },
+      {
+        "tag": "开发板文档",
+        "count": 2,
+        "preview": [
+          {
+            "title": "正点原子 ESP32-S3",
+            "icon": "原"
+          },
+          {
+            "title": "野火 Zynq7020 教程",
+            "icon": "火"
+          }
+        ]
+      }
+    ],
+    "cards": [
+      {
+        "title": "海凌科云语音 SDK",
+        "icon": "🎙",
+        "tag": "模块文档",
+        "desc": "海凌科语音模块 Web SDK 参数页，用于配置在线语音识别。",
+        "entries": [
+          {
+            "href": "https://voice.hlktech.com/yunSound/sdk/toWebSdkParam?sdkId=17661",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "voice.hlktech.com/sdk",
+            "label": "打开 →"
+          }
+        ],
+        "search": "海凌科 hlktech 语音模块 sdk 识别 参数",
+        "section": "modules",
+        "sectionTitle": "模块资料"
+      },
+      {
+        "title": "正点原子 ESP32-S3",
+        "icon": "原",
+        "tag": "开发板文档",
+        "desc": "ATK-DNESP32S3 开发板在线文档，含原理图、资源与例程说明。",
+        "entries": [
+          {
+            "href": "http://openedv.com/docs/boards/esp32/ATK-DNESP32S3BVXX.html",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "openedv.com/ATK-DNESP32S3",
+            "label": "打开文档 →"
+          }
+        ],
+        "search": "正点原子 openedv atk-dnesp32s3 开发板 文档 例程",
+        "section": "modules",
+        "sectionTitle": "模块资料"
+      },
+      {
+        "title": "野火 Zynq7020 教程",
+        "icon": "火",
+        "tag": "开发板文档",
+        "desc": "野火 Xilinx Zynq-7000 系列 FPGA 教程文档，含开发指南。",
+        "entries": [
+          {
+            "href": "https://doc.embedfire.com/products/link/zh/latest/fpga/ebf_xilinx_zynq70xx.html",
+            "target": "_blank",
+            "rel": "noopener noreferrer",
+            "span": "doc.embedfire.com/zynq70xx",
+            "label": "打开文档 →"
+          }
+        ],
+        "search": "野火 embedfire zynq zynq7020 fpga 教程 文档",
+        "section": "modules",
+        "sectionTitle": "模块资料"
+      }
+    ]
+  }
+];
+window.PORTAL_SECTIONS = [
+  {
+    "id": "workbench",
+    "title": "芯片工作台",
+    "subtitle": "从设计到验证",
+    "desc": "交互式工作台：电路仿真、模拟拓扑、札记、逻辑门与微型世界。",
+    "accent": "#6366f1",
+    "icon": "∿"
+  },
+  {
+    "id": "personal-projects",
+    "title": "个人项目",
+    "subtitle": "私人空间",
+    "desc": "个人站点、札记与私人空间，记录与沉淀。",
+    "accent": "#ec4899",
+    "icon": "体"
+  },
+  {
+    "id": "learning-quiz",
+    "title": "学习题库",
+    "subtitle": "竞赛与复习",
+    "desc": "大学生数学竞赛、半导体物理与器件等学习题库。",
+    "accent": "#f97316",
+    "icon": "∑"
+  },
+  {
+    "id": "checkin",
+    "title": "每日签到",
+    "subtitle": "额度与积分",
+    "desc": "API 中转站与社区的每日签到入口。",
+    "accent": "#10b981",
+    "icon": "✓"
+  },
+  {
+    "id": "forum",
+    "title": "论坛社区",
+    "subtitle": "交流与笔记",
+    "desc": "电子工程论坛、模拟 IC 留言板与课程笔记知识库。",
+    "accent": "#f59e0b",
+    "icon": "▣"
+  },
+  {
+    "id": "projects",
+    "title": "本地项目",
+    "subtitle": "实验与工具",
+    "desc": "本地部署的实验工具、游戏、训练场与外部资源。",
+    "accent": "#ec4899",
+    "icon": "◈"
+  },
+  {
+    "id": "games",
+    "title": "游戏分区",
+    "subtitle": "在线对战",
+    "desc": "多人在线 IO 游戏与本地游戏集合。",
+    "accent": "#8b5cf6",
+    "icon": "◆"
+  },
+  {
+    "id": "books",
+    "title": "书籍分区",
+    "subtitle": "电子书库",
+    "desc": "在线阅读与下载的电子书资源。",
+    "accent": "#06b6d4",
+    "icon": "▤"
+  },
+  {
+    "id": "ai",
+    "title": "AI 分区",
+    "subtitle": "模型与中转",
+    "desc": "AI 对话、API 中转、AI 工具与模型管理入口。",
+    "accent": "#3b82f6",
+    "icon": "◇"
+  },
+  {
+    "id": "eda",
+    "title": "电子设计",
+    "subtitle": "器件与仿真",
+    "desc": "PCB 设计、器件资料、在线仿真与开发板工具。",
+    "accent": "#14b8a6",
+    "icon": "⬢"
+  },
+  {
+    "id": "modules",
+    "title": "模块资料",
+    "subtitle": "开发板文档",
+    "desc": "开发板文档与模块 SDK 资料。",
+    "accent": "#a855f7",
+    "icon": "⚙"
+  }
+];
+window.PORTAL_RECIPIENT_EMAIL = "2115487769@qq.com";
+// Flatten all cards for search & palette
+window.PORTAL_ALL_CARDS = (function(){
+  const out = [];
+  (window.PORTAL_DATA || []).forEach(s => {
+    (s.cards || []).forEach(c => out.push(Object.assign({}, c, {section:s.id, sectionTitle:s.title})));
+  });
+  return out;
+})();
+
+
+/* ============ Shared portal behavior: nav, theme, palette, message, search ============ */
+(function(){
+  const DATA = window.PORTAL_DATA || [];
+  const ALL_CARDS = window.PORTAL_ALL_CARDS || [];
+  const RECIPIENT_EMAIL = window.PORTAL_RECIPIENT_EMAIL || "";
+  const PAGE_SECTION = document.body.dataset.section || "";  // current section, set per page
+
+  /* ============ THEME ============ */
+  (function(){
+    const saved = localStorage.getItem("portal:theme");
+    const sysDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const theme = saved || (sysDark ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+  const themeToggle = document.getElementById("themeToggle");
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      const cur = document.documentElement.getAttribute("data-theme");
+      const next = cur === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("portal:theme", next);
+    });
+  }
+
+  /* ============ MOBILE DRAWER ============ */
+  const navToggle = document.getElementById("navToggle");
+  const mobileDrawer = document.getElementById("mobileDrawer");
+  const mobileOverlay = document.getElementById("mobileOverlay");
+  function openDrawer() {
+    mobileDrawer && mobileDrawer.classList.add("open");
+    mobileOverlay && mobileOverlay.classList.add("open");
+  }
+  function closeDrawer() {
+    mobileDrawer && mobileDrawer.classList.remove("open");
+    mobileOverlay && mobileOverlay.classList.remove("open");
+  }
+  if (navToggle) navToggle.addEventListener("click", openDrawer);
+  if (mobileOverlay) mobileOverlay.addEventListener("click", closeDrawer);
+
+  /* ============ NAV SEARCH → search.html ============ */
+  const navSearch = document.getElementById("navSearch");
+  if (navSearch) {
+    navSearch.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        const q = navSearch.value.trim();
+        if (q) location.href = "search.html?q=" + encodeURIComponent(q);
+      }
+    });
+  }
+
+  /* ============ PIN / FAVORITES (cross-page via localStorage) ============ */
+  const FAV_KEY = "portal:favorites";
+  const RECENT_KEY = "portal:recent";
+  let favorites = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
+  let recents = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+
+  function cardKey(card) {
+    const e = card.entries && card.entries[0];
+    return e ? e.href : card.title;
+  }
+  function findCardByKey(key) {
+    return ALL_CARDS.find(c => cardKey(c) === key);
+  }
+  function syncPinState() {
+    document.querySelectorAll(".card").forEach(el => {
+      const key = el.dataset.key;
+      if (!key) return;
+      el.dataset.pinned = favorites.includes(key) ? "true" : "false";
+    });
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
+  }
+
+  document.addEventListener("click", e => {
+    const pinBtn = e.target.closest(".pin-btn");
+    if (pinBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const card = pinBtn.closest(".card");
+      const key = card.dataset.key;
+      if (favorites.includes(key)) {
+        favorites = favorites.filter(x => x !== key);
+        showToast("已取消收藏", "info");
+      } else {
+        favorites.unshift(key);
+        showToast("已加入收藏", "success");
+      }
+      localStorage.setItem(FAV_KEY, JSON.stringify(favorites));
+      syncPinState();
+      // If on homepage, refresh shelves
+      if (typeof window.renderShelves === "function") window.renderShelves();
+    }
+  });
+
+  // Track entry clicks for "recent" - delegated
+  document.addEventListener("click", e => {
+    const entry = e.target.closest(".entry");
+    if (!entry) return;
+    const card = entry.closest(".card");
+    if (!card) return;
+    const key = card.dataset.key;
+    if (!key) return;
+    recents = [key, ...recents.filter(x => x !== key)].slice(0, 8);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(recents));
+  });
+
+  // Expose for homepage
+  window.portalFindCardByKey = findCardByKey;
+  window.portalFavorites = () => favorites;
+  window.portalRecents = () => recents;
+  window.portalCardKey = cardKey;
+  window.portalEscapeHtml = escapeHtml;
+
+  syncPinState();
+
+  /* ============ ⌘K COMMAND PALETTE ============ */
+  const paletteModal = document.getElementById("paletteModal");
+  const paletteSearch = document.getElementById("paletteSearch");
+  const paletteList = document.getElementById("paletteList");
+  let paletteItems = [];
+  let paletteActiveIdx = 0;
+
+  function openPalette() {
+    if (!paletteModal) return;
+    paletteModal.classList.add("open");
+    paletteSearch.value = "";
+    renderPalette("");
+    setTimeout(() => paletteSearch && paletteSearch.focus(), 30);
+  }
+  function closePalette() {
+    paletteModal && paletteModal.classList.remove("open");
+  }
+  function renderPalette(query) {
+    if (!paletteList) return;
+    const q = query.trim().toLowerCase();
+    const list = q ? ALL_CARDS.filter(c => (c.search + " " + c.title).toLowerCase().includes(q)) : ALL_CARDS;
+    paletteItems = list.slice(0, 30);
+    paletteActiveIdx = 0;
+    if (paletteItems.length === 0) {
+      paletteList.innerHTML = '<div class="palette-empty">没有匹配的入口</div>';
+      return;
+    }
+    paletteList.innerHTML = paletteItems.map((c, i) => `
+      <div class="palette-item${i === 0 ? " active" : ""}" data-idx="${i}">
+        <div class="pi-icon">${escapeHtml(c.icon || "•")}</div>
+        <div class="pi-text">
+          <div class="pi-title">${escapeHtml(c.title)}</div>
+          <div class="pi-meta">${escapeHtml(c.sectionTitle)} · ${escapeHtml(c.tag)}</div>
+        </div>
+        <div class="pi-arrow">↵</div>
+      </div>
+    `).join("");
+    paletteList.querySelectorAll(".palette-item").forEach(el => {
+      el.addEventListener("click", () => activatePaletteItem(parseInt(el.dataset.idx)));
+      el.addEventListener("mouseenter", () => setPaletteActive(parseInt(el.dataset.idx)));
+    });
+  }
+  function setPaletteActive(idx) {
+    paletteActiveIdx = idx;
+    paletteList && paletteList.querySelectorAll(".palette-item").forEach((el, i) => {
+      el.classList.toggle("active", i === idx);
+    });
+    const active = paletteList && paletteList.querySelector(".palette-item.active");
+    if (active) active.scrollIntoView({ block: "nearest" });
+  }
+  function activatePaletteItem(idx) {
+    const c = paletteItems[idx];
+    if (!c) return;
+    closePalette();
+    // Navigate. If external, open in new tab. Else if local, navigate within site.
+    const e = c.entries && c.entries[0];
+    if (!e) return;
+    if (e.target === "_blank") window.open(e.href, "_blank", "noopener,noreferrer");
+    else location.href = e.href;
+  }
+  if (paletteSearch) {
+    paletteSearch.addEventListener("input", () => renderPalette(paletteSearch.value));
+    paletteSearch.addEventListener("keydown", e => {
+      if (e.key === "ArrowDown") { e.preventDefault(); setPaletteActive(Math.min(paletteActiveIdx + 1, paletteItems.length - 1)); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); setPaletteActive(Math.max(paletteActiveIdx - 1, 0)); }
+      else if (e.key === "Enter") { e.preventDefault(); activatePaletteItem(paletteActiveIdx); }
+      else if (e.key === "Escape") { e.preventDefault(); closePalette(); }
+    });
+  }
+  const paletteBtn = document.getElementById("paletteButton");
+  if (paletteBtn) paletteBtn.addEventListener("click", openPalette);
+
+  document.addEventListener("keydown", e => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      if (paletteModal && paletteModal.classList.contains("open")) closePalette();
+      else openPalette();
+    }
+    if (e.key === "Escape") {
+      paletteModal && paletteModal.classList.remove("open");
+      const msgModal = document.getElementById("messageModal");
+      msgModal && msgModal.classList.remove("open");
+    }
+  });
+
+  /* ============ MESSAGE MODAL + FORMSUBMIT ============ */
+  const msgModal = document.getElementById("messageModal");
+  const msgFab = document.getElementById("messageFab");
+  const msgClose = document.getElementById("messageClose");
+  const msgForm = document.getElementById("messageForm");
+  const formStatus = document.getElementById("formStatus");
+  const msgSubmit = document.getElementById("messageSubmit");
+
+  function openMessage() {
+    if (!msgModal) return;
+    msgModal.classList.add("open");
+    setTimeout(() => msgForm && msgForm.querySelector("input[name=name]").focus(), 30);
+  }
+  function closeMessage() { msgModal && msgModal.classList.remove("open"); }
+  if (msgFab) msgFab.addEventListener("click", openMessage);
+  if (msgClose) msgClose.addEventListener("click", closeMessage);
+  if (msgModal) msgModal.addEventListener("click", e => { if (e.target === msgModal) closeMessage(); });
+
+  if (msgForm) {
+    msgForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const fd = new FormData(msgForm);
+      const name = (fd.get("name") || "").toString().trim();
+      const email = (fd.get("email") || "").toString().trim();
+      const message = (fd.get("message") || "").toString().trim();
+      if (!name || !message || message.length < 5) {
+        formStatus.textContent = "请填写称呼，并写至少 5 个字的留言。";
+        formStatus.className = "form-status error";
+        return;
+      }
+      msgSubmit.disabled = true;
+      msgSubmit.querySelector(".btn-label").textContent = "发送中…";
+      formStatus.textContent = "正在发送…";
+      formStatus.className = "form-status loading";
+      try {
+        const resp = await fetch("https://formsubmit.co/ajax/" + encodeURIComponent(RECIPIENT_EMAIL), {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({
+            _subject: "[观澜·留言] 来自 " + name,
+            name: name,
+            email: email || "(未填写)",
+            message: message,
+            _template: "table",
+            _captcha: "false",
+          }),
+        });
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const json = await resp.json().catch(() => ({}));
+        if (json.success === "false" || json.success === false) throw new Error(json.message || "发送失败");
+        msgForm.reset();
+        formStatus.textContent = "留言已发送，我会尽快查看。";
+        formStatus.className = "form-status success";
+        showToast("留言已发送至邮箱", "success");
+        setTimeout(closeMessage, 1800);
+      } catch (err) {
+        console.error(err);
+        formStatus.textContent = "发送失败：" + (err.message || "网络异常") + "。可换种网络再试，或直接邮件联系。";
+        formStatus.className = "form-status error";
+        showToast("发送失败，请稍后重试", "error");
+      } finally {
+        msgSubmit.disabled = false;
+        msgSubmit.querySelector(".btn-label").textContent = "发送留言";
+      }
+    });
+  }
+
+  /* ============ TOAST ============ */
+  const toastEl = document.getElementById("toast");
+  let toastTimer = null;
+  function showToast(text, kind) {
+    if (!toastEl) return;
+    toastEl.querySelector(".toast-text").textContent = text;
+    toastEl.className = "toast" + (kind === "error" ? " error" : "");
+    void toastEl.offsetWidth;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
+  }
+
+  /* ============ HOMEPAGE-ONLY: featured shelves & section cards ============ */
+  // (rendered server-side in HTML, but we expose helpers for shelf rendering)
+  window.renderShelves = function() {
+    const favEl = document.getElementById("favorite-shelf");
+    const recEl = document.getElementById("recent-shelf");
+    if (!favEl && !recEl) return;
+    const favKeys = favorites;
+    const recKeys = recents;
+    if (favEl) {
+      if (favKeys.length === 0) {
+        favEl.innerHTML = '<span class="shelf-empty">悬停卡片点 ★ 收藏</span>';
+      } else {
+        favEl.innerHTML = favKeys.map(k => {
+          const c = findCardByKey(k);
+          if (!c) return "";
+          return `<a class="chip" href="${c.entries[0].href}" ${c.entries[0].target === "_blank" ? 'target="_blank" rel="noopener noreferrer"' : ''}><span class="chip-icon">${escapeHtml(c.icon || "•")}</span>${escapeHtml(c.title)}</a>`;
+        }).join("");
+      }
+    }
+    if (recEl) {
+      if (recKeys.length === 0) {
+        recEl.innerHTML = '<span class="shelf-empty">点开任意入口后将出现在这里</span>';
+      } else {
+        recEl.innerHTML = recKeys.map(k => {
+          const c = findCardByKey(k);
+          if (!c) return "";
+          return `<a class="chip" href="${c.entries[0].href}" ${c.entries[0].target === "_blank" ? 'target="_blank" rel="noopener noreferrer"' : ''}><span class="chip-icon">${escapeHtml(c.icon || "•")}</span>${escapeHtml(c.title)}</a>`;
+        }).join("");
+      }
+    }
+  };
+  window.renderShelves();
+})();
+
+</script>
+
+<script>
+(function(){
+  const grid = document.getElementById("cardsGrid");
+  const empty = document.getElementById("emptyState");
+  document.querySelectorAll(".chip-filter").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".chip-filter").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const tag = btn.dataset.tag;
+      let shown = 0;
+      grid.querySelectorAll(".card").forEach(card => {
+        const visible = tag === "all" || card.dataset.tag === tag;
+        card.classList.toggle("hidden", !visible);
+        if (visible) shown++;
+      });
+      empty.style.display = shown === 0 ? "block" : "none";
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
