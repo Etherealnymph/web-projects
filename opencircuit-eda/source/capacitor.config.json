@@ -1,0 +1,6 @@
+{
+  "appId": "com.etherealnymph.opencircuit.eda",
+  "appName": "OpenCircuit EDA",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

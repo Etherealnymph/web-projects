@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect x='12' y='12' width='232' height='232' rx='48' fill='%230f172a' stroke='%2338bdf8' stroke-width='12'/%3E%3Cpath d='M48 128 L84 128 L106 76 L138 180 L164 128 L208 128' fill='none' stroke='%234ade80' stroke-width='16' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='48' cy='128' r='12' fill='%230f172a' stroke='%2338bdf8' stroke-width='8'/%3E%3Ccircle cx='208' cy='128' r='12' fill='%234ade80'/%3E%3C/svg%3E">
+<title>OpenCircuit EDA · Spice-like Schematic & PDK Workbench</title>
+<style>
+  :root {
+    --bg-dark: #14151b;
+    --bg-panel: #1e2029;
+    --bg-sub: #272935;
+    --border-color: #3a3d4e;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-green: #4ade80;
+    --accent-amber: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* 顶部主菜单栏 */
+  #menubar {
+    height: 36px;
+    background: #111217;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 2px;
+    z-index: 60;
+    font-size: 13px;
+  }
+  .brand-title {
+    font-weight: 700;
+    color: var(--accent-green);
+    margin-right: 14px;
+    font-size: 13.5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .menu-root { position: relative; }
+  .menu-root-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12.5px;
+  }
+  .menu-root-btn:hover, .menu-root.open > .menu-root-btn {
+    background: #2d303e;
+    color: #fff;
+  }
+  .menu-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 230px;
+    background: #232530;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    padding: 5px 0;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+    display: none;
+    z-index: 120;
+  }
+  .menu-root.open > .menu-dropdown { display: block; }
+  .menu-item {
+    position: relative;
+    padding: 7px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12.5px;
+    color: #e2e8f0;
+    cursor: pointer;
+    gap: 14px;
+    white-space: nowrap;
+  }
+  .menu-item:hover { background: #2563eb; color: #fff; }
+  .menu-item .check-col { display: inline-block; width: 16px; font-weight: bold; color: var(--accent-green); }
+  .menu-item:hover .check-col { color: #fff; }
+  .menu-item .shortcut-hint { font-size: 11px; color: #94a3b8; font-family: Consolas, monospace; }
+  .menu-item:hover .shortcut-hint { color: #dbeafe; }
+  .menu-sep { height: 1px; background: #3a3d4e; margin: 4px 0; }
+  .menu-sub {
+    position: absolute;
+    top: -5px;
+    left: 100%;
+    min-width: 215px;
+    max-height: 360px;
+    overflow-y: auto;
+    background: #232530;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    padding: 5px 0;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+    display: none;
+  }
+  .menu-item:hover > .menu-sub { display: block; }
+
+  /* 正文上侧次菜单栏 (文件多开标签 + 工艺库状态 + 快速按钮) */
+  #sub-header {
+    height: 36px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 10px;
+    z-index: 40;
+  }
+  #file-tabs {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+    overflow-x: auto;
+    flex: 1;
+  }
+  #file-tabs::-webkit-scrollbar { height: 3px; }
+  #file-tabs::-webkit-scrollbar-thumb { background: #475569; }
+  .file-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: #171820;
+    border-right: 1px solid var(--border-color);
+    border-top: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .file-tab:hover { background: #252732; color: #f8fafc; }
+  .file-tab.active { background: #272935; color: #fff; border-top-color: var(--accent); font-weight: 500; }
+  .file-tab .dirty-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-amber); display: none; }
+  .file-tab.dirty .dirty-dot { display: inline-block; }
+  .file-tab .tab-close { font-size: 12px; padding: 1px 4px; border-radius: 3px; color: #94a3b8; }
+  .file-tab .tab-close:hover { background: #ef4444; color: #fff; }
+
+  .sub-right-tools {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-left: 8px;
+  }
+  .pdk-badge {
+    font-size: 11.5px;
+    background: #1e293b;
+    border: 1px solid #38bdf8;
+    color: #7dd3fc;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .pdk-badge:hover { background: #0f172a; }
+  .q-btn {
+    background: #2f3241;
+    color: #e2e8f0;
+    border: 1px solid #4b5563;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .q-btn:hover { background: #3f4356; border-color: var(--accent); }
+  .q-btn.active { background: #d97706; border-color: #fbbf24; color: #fff; font-weight: 600; }
+  .q-btn.primary { background: #2563eb; border-color: #3b82f6; color: #fff; }
+
+  /* 主工作区 (支持动态顺序变换 + 拖拽拉伸 + 收起展开) */
+  main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+  }
+  .work-pane {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+  .work-pane.collapsed {
+    width: 32px !important;
+    min-width: 32px !important;
+    flex: 0 0 32px !important;
+  }
+  .work-pane.collapsed .pane-body,
+  .work-pane.collapsed .pane-header-full {
+    display: none !important;
+  }
+  .work-pane.collapsed .pane-collapsed-bar {
+    display: flex !important;
+  }
+
+  .pane-collapsed-bar {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+    gap: 10px;
+    height: 100%;
+    background: #171820;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 12px;
+  }
+  .pane-collapsed-bar:hover { background: #232530; color: #fff; }
+  .vertical-label {
+    writing-mode: vertical-rl;
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+
+  .pane-header-full {
+    height: 30px;
+    padding: 0 8px;
+    background: #1d1f28;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .pane-actions { display: flex; align-items: center; gap: 3px; }
+  .icon-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #94a3b8;
+    padding: 1px 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 11.5px;
+  }
+  .icon-btn:hover { background: #334155; color: #fff; border-color: #475569; }
+
+  /* 拖拽拉伸条 */
+  .resizer {
+    width: 5px;
+    background: #16171e;
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    cursor: col-resize;
+    flex-shrink: 0;
+    z-index: 20;
+    transition: background 0.15s;
+  }
+  .resizer:hover, .resizer.dragging { background: var(--accent); }
+
+  /* 1. 文件树区域 */
+  #pane-files { width: 220px; min-width: 140px; background: #16171f; }
+  #tree-container { flex: 1; overflow-y: auto; padding: 6px 0; font-size: 12.5px; }
+  .tree-node {
+    display: flex;
+    align-items: center;
+    padding: 4px 10px;
+    cursor: pointer;
+    color: #cbd5e1;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  .tree-node:hover { background: #262936; }
+  .tree-node.active { background: #1e3a8a; color: #fff; font-weight: 500; }
+  .tree-node { justify-content: space-between; }
+  .tree-node-label { display: flex; align-items: center; gap: 5px; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+  .tree-node-actions { display: none; align-items: center; gap: 2px; flex-shrink: 0; }
+  .tree-node:hover .tree-node-actions { display: flex; }
+  .tree-act-btn { background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 11px; padding: 1px 4px; border-radius: 3px; }
+  .tree-act-btn:hover { background: #334155; color: #fff; }
+  .tree-act-btn.del:hover { background: #ef4444; color: #fff; }
+  .term-tab-bar { display: flex; align-items: center; gap: 4px; overflow-x: auto; }
+  .term-subtab { background: #1e2029; border: 1px solid #3a3d4e; color: #94a3b8; border-radius: 4px; padding: 2px 8px; font-size: 11.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .term-subtab.active { background: #1e3a8a; border-color: #3b82f6; color: #fff; font-weight: 600; }
+  .term-subtab-x { font-size: 10px; opacity: 0.75; }
+  .term-subtab-x:hover { color: #fca5a5; opacity: 1; }
+  .tree-arrow { width: 12px; font-size: 10px; color: #94a3b8; text-align: center; }
+
+  /* 2. 代码编辑区域（严格像素级对齐行号、高亮背景与文本框） */
+  #pane-code { width: 390px; min-width: 220px; background: #191a21; }
+  #multi-hl-bar {
+    background: #422006;
+    border-bottom: 1px solid #d97706;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    color: #fef3c7;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .code-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    font-family: Consolas, "Courier New", "Microsoft YaHei", "PingFang SC", monospace;
+    font-size: 12px;
+    line-height: 24px;
+  }
+  #gutter-col {
+    width: 64px;
+    padding: 10px 6px 28px 6px;
+    background: #13141a;
+    border-right: 1px solid #282a36;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-sizing: border-box;
+  }
+  .gutter-row {
+    width: 100%;
+    height: 24px;
+    line-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    font-size: 12px;
+    color: #64748b;
+    flex-shrink: 0;
+    box-sizing: border-box;
+  }
+  .gutter-row.active-line {
+    color: #facc15;
+    font-weight: bold;
+    background: rgba(250, 204, 21, 0.16);
+  }
+  .gutter-row input[type="checkbox"] {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    cursor: pointer;
+    accent-color: #f59e0b;
+    margin: 0;
+  }
+  .gutter-spacer { width: 12px; height: 12px; flex-shrink: 0; display: inline-block; }
+  .gutter-num {
+    min-width: 30px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .code-edit-area {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+  }
+  #line-highlight-overlay {
+    position: absolute;
+    inset: 0;
+    padding: 10px 10px 28px 10px;
+    margin: 0;
+    box-sizing: border-box;
+    pointer-events: none;
+    overflow: hidden;
+    white-space: pre;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 24px;
+    letter-spacing: 0;
+    color: transparent;
+    z-index: 1;
+  }
+  .hl-line-row {
+    height: 24px;
+    line-height: 24px;
+    width: 3000px;
+  }
+  .hl-line-row.active {
+    background: rgba(250, 204, 21, 0.22);
+    border-left: 3px solid #facc15;
+    margin-left: -10px;
+    padding-left: 7px;
+  }
+  #syntax-overlay {
+    position: absolute;
+    inset: 0;
+    padding: 10px 10px 28px 10px;
+    margin: 0;
+    box-sizing: border-box;
+    pointer-events: none;
+    overflow: hidden;
+    white-space: pre;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 24px;
+    letter-spacing: 0;
+    color: #e2e8f0;
+    z-index: 2;
+  }
+  .tok-comment { color: #6a9955; font-style: italic; }
+  .tok-kw { color: #c586c0; font-weight: 600; }
+  .tok-inst { color: #4fc1ff; font-weight: 600; }
+  .tok-nodes { color: #dcdcaa; }
+  .tok-model { color: #4ec9b0; }
+  .tok-param-k { color: #9cdcfe; }
+  .tok-param-v { color: #ce9178; }
+  .tok-dot { color: #f59e0b; font-weight: 600; }
+  #netlist-input {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    color: transparent;
+    caret-color: #f8fafc;
+    border: none;
+    padding: 10px 10px 28px 10px;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 24px;
+    letter-spacing: 0;
+    resize: none;
+    outline: none;
+    white-space: pre;
+    overflow: auto;
+    user-select: text;
+  }
+
+  /* 3. 原理图画布区域 */
+  #pane-canvas { flex: 1; min-width: 300px; background: #ffffff; }
+  #canvas-body { position: relative; flex: 1; overflow: hidden; background: #ffffff; }
+  #schematic-svg { width: 100%; height: 100%; display: block; }
+
+  /* 面包屑层级导航条 */
+  #breadcrumb-bar {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    background: rgba(248, 250, 252, 0.96);
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    z-index: 15;
+  }
+  .crumb-link { color: #2563eb; cursor: pointer; font-weight: 600; }
+  .crumb-link:hover { text-decoration: underline; }
+  .layer-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #e2e8f0;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .layer-trigger:hover { background: #dbeafe; border-color: #60a5fa; color: #1d4ed8; }
+  #layer-quick-menu {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    min-width: 225px;
+    max-height: 360px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.18);
+    padding: 6px 0;
+    display: none;
+    z-index: 35;
+    color: #1e293b;
+  }
+  #layer-quick-menu.open { display: block; }
+  .lq-section-title {
+    padding: 4px 12px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .lq-item {
+    padding: 6px 12px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .lq-item:hover { background: #eff6ff; color: #1d4ed8; }
+  .lq-item .lq-check { display: inline-block; width: 14px; font-weight: 700; color: #16a34a; }
+  .lq-sep { height: 1px; background: #e2e8f0; margin: 5px 0; }
+
+  /* 底部网站运行时间栏 */
+  #site-footer {
+    height: 26px;
+    background: #111217;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    z-index: 50;
+  }
+  #site-uptime {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    color: var(--accent);
+    font-size: 11.5px;
+  }
+
+  /* 悬浮移动岛 (Dynamic Floating Island) */
+  #floating-island {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 22, 30, 0.94);
+    border: 1px solid #475569;
+    border-radius: 999px;
+    padding: 5px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+    z-index: 25;
+    cursor: grab;
+    backdrop-filter: blur(6px);
+  }
+  #floating-island:active { cursor: grabbing; }
+  .island-drag-grip { color: #64748b; font-size: 12px; padding-right: 2px; }
+  .island-btn {
+    background: #2b2e3d;
+    color: #f1f5f9;
+    border: 1px solid #475569;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.12s;
+  }
+  .island-btn:hover { background: #3b82f6; border-color: #60a5fa; color: #fff; }
+  .island-btn.active { background: #d97706; border-color: #fbbf24; color: #fff; }
+  .island-gear {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 4px;
+  }
+  .island-gear:hover { color: #fff; }
+  #floating-island.island-minimized {
+    width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+  }
+  #floating-island.island-minimized > *:not(#island-restore-btn) {
+    display: none !important;
+  }
+  #island-restore-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: #38bdf8;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+  #floating-island.island-minimized #island-restore-btn {
+    display: flex;
+  }
+  #place-island {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.95);
+    border: 1.5px solid #38bdf8;
+    border-radius: 999px;
+    padding: 5px 12px;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    z-index: 26;
+    cursor: grab;
+    backdrop-filter: blur(6px);
+  }
+  #place-island:active { cursor: grabbing; }
+
+  /* 器件属性与参数调节悬浮卡片 */
+  #func-card {
+    position: absolute;
+    top: 52px;
+    right: 12px;
+    width: 295px;
+    background: rgba(255, 251, 235, 0.98);
+    color: #1e293b;
+    border: 2px solid #f59e0b;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+    z-index: 18;
+    display: none;
+  }
+  #func-card .badge {
+    display: inline-block;
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #f59e0b;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+  }
+  #func-card h4 { font-size: 13px; color: #0f172a; margin-bottom: 4px; }
+  #func-card p { line-height: 1.4; color: #334155; margin-bottom: 6px; }
+  .param-edit-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 6px 0;
+    background: #fff;
+    border: 1px solid #fde68a;
+    border-radius: 5px;
+    padding: 6px;
+  }
+  .param-edit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 11.5px;
+  }
+  .param-edit-row input {
+    width: 145px;
+    padding: 2px 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    font-family: Consolas, monospace;
+    font-size: 11.5px;
+  }
+  #func-card .pin-list {
+    font-family: Consolas, monospace;
+    font-size: 11px;
+    background: #fff;
+    border: 1px solid #fde68a;
+    border-radius: 4px;
+    padding: 4px 6px;
+    color: #1e3a8a;
+    word-break: break-all;
+  }
+
+  /* 连接线检查反馈横幅 */
+  #check-banner {
+    position: absolute;
+    top: 52px;
+    left: 12px;
+    max-width: 450px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+    display: none;
+    z-index: 22;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  }
+  #check-banner.ok { display: block; background: #ecfdf5; color: #065f46; border: 1.5px solid #10b981; }
+  #check-banner.err { display: block; background: #fef2f2; color: #991b1b; border: 1.5px solid #ef4444; }
+  #check-banner.warn { display: block; background: #fffbeb; color: #92400e; border: 1.5px solid #f59e0b; }
+
+  /* 最高图层 AI 对话框 */
+  #ai-dialog {
+    position: fixed;
+    top: 56px;
+    right: 24px;
+    width: 680px;
+    height: 580px;
+    min-width: 380px;
+    min-height: 360px;
+    max-width: 96vw;
+    max-height: 92vh;
+    background: #1a1c24;
+    border: 1px solid #475569;
+    border-radius: 10px;
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.72);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    resize: both;
+    z-index: 300;
+  }
+  #ai-dialog.maximized {
+    top: 40px !important;
+    left: 2vw !important;
+    right: auto !important;
+    width: 96vw !important;
+    height: 90vh !important;
+    resize: none;
+  }
+  #ai-dialog-header {
+    height: 38px;
+    background: #111217;
+    border-bottom: 1px solid #334155;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: move;
+    flex-shrink: 0;
+  }
+  .ai-win-btns { display: flex; align-items: center; gap: 6px; }
+  .ai-win-btn {
+    background: #272935;
+    border: 1px solid #475569;
+    color: #cbd5e1;
+    width: 24px;
+    height: 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ai-win-btn:hover { background: #3b82f6; color: #fff; border-color: #60a5fa; }
+  .ai-win-btn.close:hover { background: #ef4444; border-color: #f87171; }
+  #ai-minimized-pill {
+    position: fixed;
+    bottom: 36px;
+    right: 20px;
+    background: #1e293b;
+    border: 1.5px solid #38bdf8;
+    color: #f8fafc;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    gap: 8px;
+    z-index: 300;
+  }
+  #ai-minimized-pill:hover { background: #0f172a; }
+  .ai-body-wrap { flex: 1; display: flex; overflow: hidden; }
+  .ai-history-sidebar {
+    width: 195px;
+    background: #14151b;
+    border-right: 1px solid #334155;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .ai-history-list { flex: 1; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+  .ai-hist-item {
+    padding: 6px 8px;
+    border-radius: 5px;
+    background: #1e2029;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    font-size: 11.5px;
+    color: #cbd5e1;
+  }
+  .ai-hist-item:hover { background: #272935; }
+  .ai-hist-item.active { background: #1e3a8a; border-color: #3b82f6; color: #fff; }
+  .ai-hist-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .ai-hist-del { background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 11px; padding: 1px 4px; border-radius: 3px; }
+  .ai-hist-del:hover { background: #ef4444; color: #fff; }
+  .ai-main-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #1a1c24; }
+  #ai-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    user-select: text;
+  }
+  .ai-msg {
+    max-width: 90%;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    word-break: break-word;
+  }
+  .ai-msg.user { align-self: flex-end; background: #1d4ed8; color: #fff; }
+  .ai-msg.assistant { align-self: flex-start; background: #262936; color: #e2e8f0; border: 1px solid #3a3d4e; }
+  .ai-code-card {
+    margin-top: 6px;
+    background: #0f1117;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .ai-code-card-head {
+    background: #1e293b;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #93c5fd;
+  }
+  .ai-code-card pre {
+    padding: 8px;
+    margin: 0;
+    overflow-x: auto;
+    font-family: Consolas, monospace;
+    font-size: 11.5px;
+    color: #f8fafc;
+    white-space: pre;
+  }
+  .ai-input-bar {
+    padding: 8px 10px;
+    background: #14151b;
+    border-top: 1px solid #334155;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ai-quick-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+  /* 白天模式 (Light Theme) */
+  body.theme-light {
+    --bg-dark: #f1f5f9;
+    --bg-panel: #ffffff;
+    --bg-sub: #f8fafc;
+    --border-color: #cbd5e1;
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --accent: #0284c7;
+    --accent-green: #16a34a;
+  }
+  body.theme-light #menubar,
+  body.theme-light #site-footer {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+  body.theme-light .menu-root-btn { color: #0f172a; }
+  body.theme-light .menu-root-btn:hover,
+  body.theme-light .menu-root.open > .menu-root-btn { background: #cbd5e1; color: #0f172a; }
+  body.theme-light .menu-dropdown,
+  body.theme-light .menu-sub { background: #ffffff; border-color: #cbd5e1; }
+  body.theme-light .menu-item { color: #1e293b; }
+  body.theme-light .menu-item:hover { background: #2563eb; color: #fff; }
+  body.theme-light .file-tab { background: #e2e8f0; color: #475569; }
+  body.theme-light .file-tab.active { background: #ffffff; color: #0f172a; }
+  body.theme-light .q-btn { background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; }
+  body.theme-light .q-btn.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+  body.theme-light #pane-files { background: #f8fafc; }
+  body.theme-light .tree-node { color: #1e293b; }
+  body.theme-light .tree-node:hover { background: #e2e8f0; }
+  body.theme-light .tree-node.active { background: #2563eb; color: #fff; }
+  body.theme-light .pane-header-full { background: #e2e8f0; color: #0f172a; }
+  body.theme-light #pane-code { background: #ffffff; }
+  body.theme-light #gutter-col { background: #f1f5f9; border-right-color: #cbd5e1; }
+  body.theme-light #syntax-overlay { color: #1e293b; }
+  body.theme-light #netlist-input { caret-color: #0f172a; }
+  body.theme-light .tok-comment { color: #15803d; }
+  body.theme-light .tok-kw { color: #7e22ce; }
+  body.theme-light .tok-inst { color: #0369a1; }
+  body.theme-light .tok-nodes { color: #b45309; }
+  body.theme-light .tok-model { color: #0f766e; }
+  body.theme-light .tok-param-k { color: #1d4ed8; }
+  body.theme-light .tok-param-v { color: #c2410c; }
+
+  /* 底部停靠工作区 (终端 / 示波器 / 频谱仪) */
+  #workspace-stack {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .h-resizer {
+    height: 5px;
+    background: #16171e;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    cursor: row-resize;
+    flex-shrink: 0;
+    z-index: 25;
+    transition: background 0.15s;
+  }
+  .h-resizer:hover, .h-resizer.dragging { background: var(--accent); }
+  #bottom-dock {
+    height: 310px;
+    min-height: 160px;
+    max-height: 68vh;
+    background: #14151b;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    z-index: 30;
+  }
+  #bottom-dock-header {
+    height: 32px;
+    background: #111217;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+  #bottom-dock-tabs {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+    gap: 2px;
+  }
+  .dock-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: #181a22;
+    border-right: 1px solid var(--border-color);
+    border-top: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .dock-tab:hover { background: #232530; color: #f8fafc; }
+  .dock-tab.active {
+    background: #1e2029;
+    color: #fff;
+    border-top-color: var(--accent);
+    font-weight: 600;
+  }
+  .dock-tab-close {
+    font-size: 11px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #94a3b8;
+  }
+  .dock-tab-close:hover { background: #ef4444; color: #fff; }
+  #bottom-dock-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+    padding: 8px 10px;
+  }
+  .dock-panel {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    height: 100%;
+    min-height: 0;
+  }
+  .dock-panel.active { display: flex; }
+  .dock-panel .term-output { flex: 1; height: auto; min-height: 80px; }
+  .dock-panel .inst-canvas-wrap { flex: 1; height: auto; min-height: 130px; }
+  body.theme-light #bottom-dock { background: #f8fafc; color: #0f172a; }
+  body.theme-light #bottom-dock-header { background: #e2e8f0; }
+  body.theme-light .dock-tab { background: #cbd5e1; color: #334155; }
+  body.theme-light .dock-tab.active { background: #ffffff; color: #0f172a; }
+  body.theme-light .inst-controls-bar { background: #f1f5f9; border-color: #cbd5e1; color: #0f172a; }
+
+  /* Toast 友好错误与状态提示 */
+  #toast-container {
+    position: fixed;
+    top: 46px;
+    right: 16px;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .eda-toast {
+    pointer-events: auto;
+    min-width: 240px;
+    max-width: 380px;
+    padding: 9px 14px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+    border: 1px solid #475569;
+    background: #1e293b;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    animation: toastIn 0.18s ease-out;
+  }
+  .eda-toast.error { background: #450a0a; border-color: #ef4444; color: #fecaca; }
+  .eda-toast.warn { background: #451a03; border-color: #f59e0b; color: #fde68a; }
+  .eda-toast.ok { background: #064e3b; border-color: #10b981; color: #a7f3d0; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* 无障碍：豁免代码与输入区的全局 user-select: none */
+  textarea, input, pre, code, .term-output, #ai-messages, #netlist-input, #syntax-overlay {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+  }
+
+  /* 工作点报表 & Lint 徽标 */
+  .dcop-table { width: 100%; border-collapse: collapse; font-size: 11.5px; font-family: Consolas, monospace; }
+  .dcop-table th, .dcop-table td { border: 1px solid #334155; padding: 4px 8px; text-align: left; }
+  .dcop-table th { background: #1e293b; color: #7dd3fc; position: sticky; top: 0; }
+  body.theme-light .dcop-table th { background: #e2e8f0; color: #0f172a; border-color: #cbd5e1; }
+  body.theme-light .dcop-table td { border-color: #cbd5e1; color: #0f172a; }
+  .lint-badge { font-size: 11px; padding: 1px 6px; border-radius: 4px; cursor: pointer; font-weight: 600; }
+  .lint-badge.ok { background: #064e3b; color: #6ee7b7; border: 1px solid #10b981; }
+  .lint-badge.warn { background: #451a03; color: #fcd34d; border: 1px solid #f59e0b; }
+  @media print {
+    #menubar, #sub-header, #pane-files, #pane-code, .resizer, #bottom-dock, #bottom-resizer, #site-footer, #floating-island, #place-island, #status-bar, #func-card, #breadcrumb-bar { display: none !important; }
+    #pane-canvas, #canvas-body, #schematic-svg { width: 100vw !important; height: 100vh !important; }
+  }
+
+  /* 终端与仪器弹窗 */
+  .term-output {
+    background: #0b0d12;
+    color: #e2e8f0;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.55;
+    padding: 10px 12px;
+    height: 290px;
+    overflow-y: auto;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    white-space: pre-wrap;
+    user-select: text;
+  }
+  .term-input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #0b0d12;
+    border: 1px solid #475569;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+  }
+  .term-input-row input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #4ade80;
+    outline: none;
+    font-family: inherit;
+    font-size: inherit;
+  }
+  .inst-canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: 330px;
+    background: #090d16;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .inst-canvas-wrap canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .inst-controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 10px;
+    background: #171820;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  #ai-config-view {
+    flex: 1;
+    padding: 16px 20px;
+    overflow-y: auto;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #check-banner ul { margin-top: 4px; padding-left: 18px; max-height: 150px; overflow-y: auto; }
+  .banner-close { float: right; cursor: pointer; font-weight: bold; margin-left: 10px; }
+
+  #status-bar {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    background: rgba(20, 22, 30, 0.92);
+    color: #f8fafc;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    pointer-events: none;
+    display: flex;
+    gap: 14px;
+    z-index: 15;
+  }
+
+  /* 通用弹窗 */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+  }
+  .modal-box {
+    width: 520px;
+    max-width: 92vw;
+    max-height: 84vh;
+    background: #22242e;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
+  }
+  .modal-header {
+    padding: 11px 15px;
+    background: #171820;
+    border-bottom: 1px solid #3a3d4e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 13.5px;
+  }
+  .modal-body {
+    padding: 14px 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 12.5px;
+  }
+  .modal-footer {
+    padding: 10px 15px;
+    background: #171820;
+    border-top: 1px solid #3a3d4e;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .form-row { display: flex; flex-direction: column; gap: 4px; }
+  .form-row label { color: #cbd5e1; font-size: 12px; font-weight: 500; }
+  .form-row input, .form-row select {
+    background: #14151b;
+    border: 1px solid #475569;
+    color: #f8fafc;
+    padding: 6px 9px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    outline: none;
+  }
+  .port-config-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #2b2d3a;
+    padding: 6px 10px;
+    border-radius: 5px;
+    gap: 8px;
+  }
+  .sc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: #2b2d3a;
+    border-radius: 5px;
+  }
+  .sc-key-btn {
+    background: #14151b;
+    border: 1px solid #64748b;
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    cursor: pointer;
+    min-width: 110px;
+    text-align: center;
+  }
+  .sc-key-btn.recording { border-color: #fbbf24; color: #fbbf24; background: #451a03; }
+
+  /* 响应式适配：平板与手机端 (Tablet & Phone) */
+  @media (max-width: 1024px) {
+    #menubar { flex-wrap: wrap; height: auto; padding: 4px 8px; row-gap: 2px; }
+    #sub-header { flex-wrap: wrap; height: auto; padding: 4px 8px; gap: 4px; }
+    .sub-right-tools { flex-wrap: wrap; }
+    #pane-files { width: 170px; min-width: 120px; }
+    #pane-code { width: 280px; min-width: 180px; }
+  }
+  @media (max-width: 768px) {
+    body { height: auto; min-height: 100vh; overflow-y: auto; }
+    #workspace-stack { overflow: visible; }
+    #workspace-main { flex-direction: column; overflow: visible; }
+    .resizer { display: none !important; }
+    #pane-files, #pane-code, #pane-canvas {
+      width: 100% !important;
+      min-width: 100% !important;
+      flex: none !important;
+    }
+    #pane-files { max-height: 200px; }
+    #pane-code { height: 260px; }
+    #pane-canvas { height: 60vh; min-height: 360px; }
+    #floating-island, #place-island { max-width: 95vw; overflow-x: auto; }
+    #func-card { width: 220px; font-size: 11px; }
+    #status-bar { font-size: 10px; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  }
+</style>
+  <script type="module" crossorigin src="./assets/index-DcSUem2m.js"></script>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<input type="file" id="open-file-input" accept=".scs,.cir,.sp,.net,.txt,.json,.lib,.l,.v,.sv,.vhd,.vhdl" multiple style="display:none">
+<input type="file" id="open-folder-input" webkitdirectory directory multiple style="display:none">
+<input type="file" id="pdk-file-input" accept=".scs,.lib,.l,.sp,.cir,.txt" style="display:none">
+
+<!-- 顶部主菜单栏 -->
+<nav id="menubar">
+  <div class="brand-title"><svg width="20" height="20" viewBox="0 0 256 256" style="flex-shrink:0;"><rect x="12" y="12" width="232" height="232" rx="48" fill="#0f172a" stroke="#38bdf8" stroke-width="14"/><path d="M48 128 L84 128 L106 76 L138 180 L164 128 L208 128" fill="none" stroke="#4ade80" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><circle cx="48" cy="128" r="14" fill="#0f172a" stroke="#38bdf8" stroke-width="9"/><circle cx="208" cy="128" r="14" fill="#4ade80"/></svg> OpenCircuit EDA</div>
+
+  <!-- 1. 文件 -->
+  <div class="menu-root" data-menu="file">
+    <button class="menu-root-btn" data-i18n="top_file">文件</button>
+    <div class="menu-dropdown">
+      <div class="menu-item" onclick="triggerOpenFolder()"><span data-i18n="m_open_folder">打开文件夹...</span><span class="shortcut-hint" data-sc="openFolder"></span></div>
+      <div class="menu-item" onclick="triggerOpenFile()"><span data-i18n="m_open_file">打开文件...</span><span class="shortcut-hint" data-sc="openFile"></span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="saveCurrentFile()"><span data-i18n="m_save">保存 (保存修改)</span><span class="shortcut-hint" data-sc="save"></span></div>
+      <div class="menu-item" onclick="saveAsCurrentFile()"><span data-i18n="m_save_as">另存为...</span><span class="shortcut-hint" data-sc="saveAs"></span></div>
+    </div>
+  </div>
+
+  <!-- 2. 导出 -->
+  <div class="menu-root" data-menu="export">
+    <button class="menu-root-btn" data-i18n="top_export">导出</button>
+    <div class="menu-dropdown">
+      <div class="menu-item" onclick="openCreateSubcktModal()"><span data-i18n="m_create_subckt">📦 创建子电路 (配置端口方向)...</span></div>
+      <div class="menu-item" onclick="exportProjectState()"><span data-i18n="m_export_state">💾 导出文件 (保留元件及位置)</span><span class="shortcut-hint">.eda.json</span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="exportSVG(false)"><span data-i18n="m_export_svg">导出默认 SVG 图片</span><span class="shortcut-hint">.svg</span></div>
+      <div class="menu-item" onclick="exportSVG(true)"><span data-i18n="m_export_svg_tr">导出透明图片 (无背景)</span><span class="shortcut-hint">.svg</span></div>
+      <div class="menu-item" onclick="exportRaster('png')"><span data-i18n="m_export_png">导出 PNG 图片</span><span class="shortcut-hint">.png</span></div>
+      <div class="menu-item" onclick="exportRaster('jpeg')"><span data-i18n="m_export_jpg">导出 JPG 图片</span><span class="shortcut-hint">.jpg</span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="exportPrintablePdf()"><span data-i18n="m_export_pdf">🖨 导出矢量 PDF (打印)</span><span class="shortcut-hint">.pdf</span></div>
+      <div class="menu-item" onclick="exportKiCadSch()"><span data-i18n="m_export_kicad">🔌 导出 KiCad 兼容原理图</span><span class="shortcut-hint">.kicad_sch</span></div>
+    </div>
+  </div>
+
+  <!-- 3. 固化 -->
+  <div class="menu-root" data-menu="freeze">
+    <button class="menu-root-btn" data-i18n="top_freeze">固化</button>
+    <div class="menu-dropdown">
+      <div class="menu-item" onclick="openPdkModal()"><span data-i18n="m_pdk_mgr">📚 工艺库管理与固化...</span></div>
+      <div class="menu-item" onclick="freezeCurrentSubcktToLib()"><span data-i18n="m_freeze_subckt">📌 固化当前子电路到库</span></div>
+    </div>
+  </div>
+
+  <!-- 4. 编辑 -->
+  <div class="menu-root" data-menu="edit">
+    <button class="menu-root-btn" data-i18n="top_edit">编辑</button>
+    <div class="menu-dropdown">
+      <div class="menu-item" onclick="undoEdit()"><span data-i18n="m_undo">撤销</span><span class="shortcut-hint" data-sc="undo"></span></div>
+      <div class="menu-item" onclick="redoEdit()"><span data-i18n="m_redo">重做</span><span class="shortcut-hint" data-sc="redo"></span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="deleteSelectedDevices()"><span data-i18n="m_del_dev">删除选中元件</span><span class="shortcut-hint" data-sc="delete"></span></div>
+      <div class="menu-item" onclick="selectAllDevices()"><span data-i18n="m_sel_all">全选元件</span><span class="shortcut-hint" data-sc="selectAll"></span></div>
+      <div class="menu-item" onclick="copySelectedDevices()"><span data-i18n="m_copy_dev">📋 复制选中元件</span><span class="shortcut-hint">Ctrl+C</span></div>
+      <div class="menu-item" onclick="pasteCopiedDevices()"><span data-i18n="m_paste_dev">📥 粘贴元件组</span><span class="shortcut-hint">Ctrl+V</span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="alignSelectedDevices('left')"><span data-i18n="m_align_left">⫷ 左对齐选中元件</span></div>
+      <div class="menu-item" onclick="alignSelectedDevices('top')"><span data-i18n="m_align_top">⊤ 顶对齐选中元件</span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="openShortcutModal()"><span data-i18n="m_shortcuts">⌨ 自定义快捷键...</span></div>
+    </div>
+  </div>
+
+  <!-- 4.5 操作 -->
+  <div class="menu-root" data-menu="ops">
+    <button class="menu-root-btn" data-i18n="top_ops">操作</button>
+    <div class="menu-dropdown">
+      <div class="menu-item" onclick="rotateSelectedDevices(90); closeAllMenus();"><span data-i18n="op_rot_cw">↻ 顺时针旋转 90°</span><span class="shortcut-hint" data-sc="rotate"></span></div>
+      <div class="menu-item" onclick="rotateSelectedDevices(-90); closeAllMenus();"><span data-i18n="op_rot_ccw">↺ 逆时针旋转 90°</span><span class="shortcut-hint" data-sc="rotateCCW"></span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="flipSelectedDevices('x'); closeAllMenus();"><span data-i18n="op_flip_x">⇄ 水平对称 (左右镜像)</span><span class="shortcut-hint" data-sc="flipX"></span></div>
+      <div class="menu-item" onclick="flipSelectedDevices('y'); closeAllMenus();"><span data-i18n="op_flip_y">⇅ 垂直对称 (上下镜像)</span><span class="shortcut-hint" data-sc="flipY"></span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="copySelectedDevices(); closeAllMenus();"><span data-i18n="m_copy_dev">📋 复制选中元件</span><span class="shortcut-hint">Ctrl+C</span></div>
+      <div class="menu-item" onclick="pasteCopiedDevices(); closeAllMenus();"><span data-i18n="m_paste_dev">📥 粘贴元件组</span><span class="shortcut-hint">Ctrl+V</span></div>
+      <div class="menu-item" onclick="openEditParamModalForSelected(); closeAllMenus();"><span data-i18n="op_edit_params">⚙ 配置元件参数</span><span class="shortcut-hint" data-sc="editParams"></span></div>
+      <div class="menu-item" onclick="deleteSelectedDevices(); closeAllMenus();"><span data-i18n="op_delete">🗑 删除选中 (元件/电线)</span><span class="shortcut-hint" data-sc="delete"></span></div>
+    </div>
+  </div>
+
+  <!-- 5. 视图 -->
+  <div class="menu-root" data-menu="view">
+    <button class="menu-root-btn" data-i18n="top_view">视图</button>
+    <div class="menu-dropdown">
+      <div class="menu-item">
+        <span data-i18n="m_hierarchy">层级视图 ▸</span>
+        <div class="menu-sub" id="menu-hierarchy-sub"></div>
+      </div>
+      <div class="menu-item">
+        <span data-i18n="m_display">显示 ▸</span>
+        <div class="menu-sub">
+          <div class="menu-item" onclick="toggleLayer('powerLabels', event)"><span><i class="check-col" id="chk-powerLabels">✓</i><span data-i18n="l_power">电源标签</span></span></div>
+          <div class="menu-item" onclick="toggleLayer('portLabels', event)"><span><i class="check-col" id="chk-portLabels">✓</i><span data-i18n="l_port">端口标签</span></span></div>
+          <div class="menu-item" onclick="toggleLayer('instNames', event)"><span><i class="check-col" id="chk-instNames">✓</i><span data-i18n="l_inst_name">元件名</span></span></div>
+          <div class="menu-item" onclick="toggleLayer('instParams', event)"><span><i class="check-col" id="chk-instParams">✓</i><span data-i18n="l_inst_param">元件参数</span></span></div>
+          <div class="menu-item" onclick="toggleLayer('dcOp', event)"><span><i class="check-col" id="chk-dcOp"> </i><span data-i18n="l_dc_op">静态工作点标注 (DC OP)</span></span></div>
+          <div class="menu-sep"></div>
+          <div class="menu-item" onclick="toggleFloatingIsland(event)"><span><i class="check-col" id="chk-floatingIsland">✓</i><span data-i18n="l_island">悬浮移动岛</span></span></div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <span data-i18n="m_pane_order">区域顺序与布局 ▸</span>
+        <div class="menu-sub">
+          <div class="menu-item" onclick="setPaneOrder(['files','code','canvas'])"><span data-i18n="m_order_1">文件区 → 代码区 → 原理图区</span></div>
+          <div class="menu-item" onclick="setPaneOrder(['code','files','canvas'])"><span data-i18n="m_order_2">代码区 → 文件区 → 原理图区</span></div>
+          <div class="menu-item" onclick="setPaneOrder(['canvas','code','files'])"><span data-i18n="m_order_3">原理图区 → 代码区 → 文件区</span></div>
+          <div class="menu-item" onclick="setPaneOrder(['files','canvas','code'])"><span data-i18n="m_order_4">文件区 → 原理图区 → 代码区</span></div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <span data-i18n="menu_theme">主题模式 ▸</span>
+        <div class="menu-sub">
+          <div class="menu-item" onclick="setThemeMode('dark')"><span><i class="check-col" id="chk-theme-dark">✓</i><span data-i18n="m_theme_dark">🌙 夜晚模式 (Dark)</span></span></div>
+          <div class="menu-item" onclick="setThemeMode('light')"><span><i class="check-col" id="chk-theme-light"> </i><span data-i18n="m_theme_light">☀ 白天模式 (Light)</span></span></div>
+          <div class="menu-item" onclick="setThemeMode('system')"><span><i class="check-col" id="chk-theme-system"> </i><span data-i18n="m_theme_sys">🖥 跟随系统 (System)</span></span></div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <span data-i18n="menu_lang">语言 / Language ▸</span>
+        <div class="menu-sub">
+          <div class="menu-item" onclick="setLanguageMode('zh')"><span><i class="check-col" id="chk-lang-zh">✓</i>简体中文</span></div>
+          <div class="menu-item" onclick="setLanguageMode('en')"><span><i class="check-col" id="chk-lang-en"> </i>English</span></div>
+        </div>
+      </div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="clearAllHighlights()"><span data-i18n="menu_clear_hl">清除高亮</span><span class="shortcut-hint" data-sc="clearHighlight"></span></div>
+      <div class="menu-item" onclick="resetZoom()"><span data-i18n="menu_fit">适应画布</span><span class="shortcut-hint" data-sc="fitView"></span></div>
+    </div>
+  </div>
+
+  <!-- 6. 运行 -->
+  <div class="menu-root" data-menu="run">
+    <button class="menu-root-btn" data-i18n="top_run">运行</button>
+    <div class="menu-dropdown">
+      <div class="menu-item" onclick="parseAndRender()"><span data-i18n="run_gen">▶ 生成原理图</span><span class="shortcut-hint" data-sc="generate"></span></div>
+      <div class="menu-item">
+        <span data-i18n="run_compile">⚙ 编译原理图到代码 ▸</span>
+        <div class="menu-sub">
+          <div class="menu-item" onclick="compileSchematicToCode('spectre'); closeAllMenus();"><span>编译为 Spectre (.scs)</span><span class="shortcut-hint">.scs</span></div>
+          <div class="menu-item" onclick="compileSchematicToCode('spice'); closeAllMenus();"><span>编译为 SPICE (.sp/.cir)</span><span class="shortcut-hint">.sp</span></div>
+          <div class="menu-item" onclick="compileSchematicToCode('verilog'); closeAllMenus();"><span>编译为 Verilog (.v)</span><span class="shortcut-hint">.v</span></div>
+          <div class="menu-item" onclick="compileSchematicToCode('vhdl'); closeAllMenus();"><span>编译为 VHDL (.vhd)</span><span class="shortcut-hint">.vhd</span></div>
+        </div>
+      </div>
+      <div class="menu-item" onclick="runConnectivityCheck()"><span data-i18n="run_check">✔ 检查连接线</span><span class="shortcut-hint" data-sc="checkConn"></span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="runSpiceSimulation('tran')"><span data-i18n="run_tran">⚡ Tran 瞬态仿真</span><span class="shortcut-hint">Transient</span></div>
+      <div class="menu-item" onclick="runSpiceSimulation('dc')"><span data-i18n="run_dc">📈 DC 直流扫描仿真</span><span class="shortcut-hint">DC Sweep</span></div>
+      <div class="menu-item" onclick="runSpiceSimulation('ac')"><span data-i18n="run_ac">〰 AC 交流频率响应</span><span class="shortcut-hint">AC Bode</span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="openOscilloscopeModal()"><span data-i18n="run_scope">📺 打开示波器 (Oscilloscope)</span></div>
+      <div class="menu-item" onclick="openSpectrumModal()"><span data-i18n="run_spec">📊 打开频谱仪 (Spectrum)</span></div>
+      <div class="menu-item" onclick="openDcOpTablePanel()"><span data-i18n="run_dcop_tbl">📋 工作点报表 (DC OP Table)</span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="runCornerSweep()"><span data-i18n="run_corner">📐 Corner / 参数扫描 (SS/TT/FF)</span></div>
+      <div class="menu-item" onclick="runMonteCarlo()"><span data-i18n="run_mc">🎲 蒙特卡洛失配 (Monte Carlo)</span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="openTerminalModal()"><span data-i18n="run_term">💻 打开终端 (Terminal)</span></div>
+    </div>
+  </div>
+
+  <!-- 7. 放置 -->
+  <div class="menu-root" data-menu="place">
+    <button class="menu-root-btn" data-i18n="top_place">放置</button>
+    <div class="menu-dropdown">
+      <div class="menu-item" onclick="togglePlaceIsland(event)"><span><i class="check-col" id="chk-placeIsland"> </i><span data-i18n="p_island">放置移动岛</span></span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item">
+        <span data-i18n="p_nmos">NMOS (当前工艺库) ▸</span>
+        <div class="menu-sub" id="place-nmos-sub"></div>
+      </div>
+      <div class="menu-item">
+        <span data-i18n="p_pmos">PMOS (当前工艺库) ▸</span>
+        <div class="menu-sub" id="place-pmos-sub"></div>
+      </div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="openPlaceDialog('resistor', 'resistor'); closeAllMenus();"><span data-i18n="p_res">电阻 (R)</span><span class="shortcut-hint" data-sc="placeResistor"></span></div>
+      <div class="menu-item" onclick="openPlaceDialog('inductor', 'inductor'); closeAllMenus();"><span data-i18n="p_ind">电感 (L)</span><span class="shortcut-hint" data-sc="placeInductor"></span></div>
+      <div class="menu-item" onclick="openPlaceDialog('capacitor', 'capacitor'); closeAllMenus();"><span data-i18n="p_cap">电容 (C)</span><span class="shortcut-hint" data-sc="placeCapacitor"></span></div>
+      <div class="menu-item" onclick="openPlaceDialog('tline', 'tline', 'z0=50 td=1n'); closeAllMenus();"><span data-i18n="p_tline">传输线 (Tline)</span></div>
+      <div class="menu-item">
+        <span data-i18n="p_logic">逻辑门与数字单元 ▸</span>
+        <div class="menu-sub">
+          <div class="menu-item" onclick="openPlaceDialog('gate_and', 'gate_and'); closeAllMenus();"><span>AND (与门)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('gate_nand', 'gate_nand'); closeAllMenus();"><span>NAND (与非门)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('gate_or', 'gate_or'); closeAllMenus();"><span>OR (或门)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('gate_nor', 'gate_nor'); closeAllMenus();"><span>NOR (或非门)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('gate_xor', 'gate_xor'); closeAllMenus();"><span>XOR (异或门)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('gate_xnor', 'gate_xnor'); closeAllMenus();"><span>XNOR (同或门)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('gate_inv', 'gate_inv'); closeAllMenus();"><span>INV / NOT (非门)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('gate_buf', 'gate_buf'); closeAllMenus();"><span>BUF (缓冲器)</span></div>
+          <div class="menu-sep"></div>
+          <div class="menu-item" onclick="openPlaceDialog('mux2', 'mux2'); closeAllMenus();"><span>MUX2 (二选一选择器)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('dff', 'dff'); closeAllMenus();"><span>DFF (D触发器)</span></div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <span data-i18n="p_analog_rf">模拟与 BJT 模块 ▸</span>
+        <div class="menu-sub">
+          <div class="menu-item" onclick="openPlaceDialog('npn', 'npn', 'bf=200'); closeAllMenus();"><span>NPN BJT</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('pnp', 'pnp', 'bf=120'); closeAllMenus();"><span>PNP BJT</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('subckt_inst', 'err_n', '', 'in_p in_n out vdd vss'); closeAllMenus();"><span data-i18n="p_opamp">运算放大器 (OpAmp)</span></div>
+        </div>
+      </div>
+      <div class="menu-sep"></div>
+      <div class="menu-item">
+        <span data-i18n="p_sources">电源与激励源 ▸</span>
+        <div class="menu-sub">
+          <div class="menu-item" onclick="openPlaceDialog('vsource', 'vsource', 'dc=1.8'); closeAllMenus();"><span data-i18n="p_vdc">🔋 理想电压源 (DC Voltage)</span><span class="shortcut-hint" data-sc="placeVsource"></span></div>
+          <div class="menu-item" onclick="openPlaceDialog('isource', 'isource', 'dc=20u'); closeAllMenus();"><span data-i18n="p_idc">⚡ 理想电流源 (DC Current)</span><span class="shortcut-hint" data-sc="placeIsource"></span></div>
+          <div class="menu-item" onclick="openPlaceDialog('vsin', 'vsin', 'dc=0 ampl=1 freq=1M'); closeAllMenus();"><span data-i18n="p_vsin">〰 正弦/交流源 (Sine / AC)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('vpulse', 'vpulse', 'val0=0 val1=1.8 period=10n'); closeAllMenus();"><span data-i18n="p_vpulse">⎍ 脉冲源 (Pulse)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('vsweep', 'vsweep', 'fstart=1k fstop=1G ampl=1'); closeAllMenus();"><span data-i18n="p_vsweep">📈 扫频源 (Sweep / Chirp)</span></div>
+          <div class="menu-sep"></div>
+          <div class="menu-item" onclick="openPlaceDialog('vcvs', 'vcvs', 'gain=10', 'out_p out_n in_p in_n')"><span data-i18n="p_vcvs">◇ 压控电压源 (VCVS)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('vccs', 'vccs', 'gm=1m', 'out_p out_n in_p in_n')"><span data-i18n="p_vccs">◇ 压控电流源 (VCCS)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('cccs', 'cccs', 'gain=1', 'out_p out_n in_p in_n')"><span data-i18n="p_cccs">◇ 流控电流源 (CCCS)</span></div>
+          <div class="menu-item" onclick="openPlaceDialog('ccvs', 'ccvs', 'rm=1k', 'out_p out_n in_p in_n')"><span data-i18n="p_ccvs">◇ 流控电压源 (CCVS)</span></div>
+        </div>
+      </div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="openPlaceDialog('term_vdd', 'term_vdd'); closeAllMenus();"><span data-i18n="p_term_vdd">🔴 红空圆 (VDD 高电平)</span><span class="shortcut-hint" data-sc="placeTermVdd"></span></div>
+      <div class="menu-item" onclick="openPlaceDialog('term_gnd', 'term_gnd'); closeAllMenus();"><span data-i18n="p_term_gnd">⚫ 实心黑圆 (GND 地)</span><span class="shortcut-hint" data-sc="placeTermGnd"></span></div>
+      <div class="menu-item" onclick="openPlaceDialog('term_neg', 'term_neg'); closeAllMenus();"><span data-i18n="p_term_neg">⭕ 空黑圆 (VEE / 参考)</span><span class="shortcut-hint" data-sc="placeTermNeg"></span></div>
+      <div class="menu-sep"></div>
+      <div class="menu-item">
+        <span data-i18n="p_subckt">子电路导入 ▸</span>
+        <div class="menu-sub" id="place-subckt-sub"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. 设计 -->
+  <div class="menu-root" data-menu="design">
+    <button class="menu-root-btn" data-i18n="top_design">设计</button>
+    <div class="menu-dropdown">
+      <div class="menu-item" onclick="setEditMode('move')">
+        <span><i class="check-col" id="chk-mode-move">✓</i><span data-i18n="d_move">挪动调整</span></span>
+        <span class="shortcut-hint" data-sc="modeMove"></span>
+      </div>
+      <div class="menu-item" onclick="setEditMode('wire')">
+        <span><i class="check-col" id="chk-mode-wire"> </i><span data-i18n="d_wire">连接引脚</span></span>
+        <span class="shortcut-hint" data-sc="modeWire"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. AI -->
+  <div class="menu-root" data-menu="ai">
+    <button class="menu-root-btn" onclick="openAiDialog(); closeAllMenus();" style="color:#38bdf8;font-weight:600;" data-i18n="top_ai">🤖 AI</button>
+  </div>
+
+  <!-- 10. 更多 -->
+  <div class="menu-root" data-menu="more">
+    <button class="menu-root-btn" data-i18n="top_more">更多</button>
+    <div class="menu-dropdown">
+      <div class="menu-item" onclick="window.open('https://github.com/Etherealnymph', '_blank', 'noopener,noreferrer'); closeAllMenus();">
+        <span data-i18n="m_github">🐙 Github主页</span>
+        <span class="shortcut-hint">↗</span>
+      </div>
+      <div class="menu-item">
+        <span data-i18n="m_dev_info">👤 开发者信息 ▸</span>
+        <div class="menu-sub">
+          <div class="menu-item" style="cursor:default;"><span data-i18n="m_author">作者: Etherealnymph</span></div>
+          <div class="menu-sep"></div>
+          <div class="menu-item" onclick="window.open('https://etherealnymph.github.io/web-projects/index.html', '_blank', 'noopener,noreferrer'); closeAllMenus();">
+            <span data-i18n="m_other_proj">🚀 作者其他项目</span>
+            <span class="shortcut-hint">↗</span>
+          </div>
+          <div class="menu-item" onclick="openContactAuthorModal(); closeAllMenus();">
+            <span data-i18n="m_contact">✉ 联系作者</span>
+            <span class="shortcut-hint">FormSubmit</span>
+          </div>
+        </div>
+      </div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" onclick="openVersionModal(); closeAllMenus();">
+        <span data-i18n="m_version">ℹ 版本信息</span>
+        <span class="shortcut-hint">v2.1.0</span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- 正文上侧次菜单栏 -->
+<div id="sub-header">
+  <div id="file-tabs"></div>
+  <div class="sub-right-tools">
+    <button class="q-btn" onclick="openLabsModal()" data-i18n="quick_labs">🧪 实验预设</button>
+    <button class="q-btn" onclick="shareProjectUrl()" data-i18n="quick_share">🔗 分享链接</button>
+    <button class="q-btn" id="btn-quick-term" onclick="openTerminalModal()" data-i18n="quick_term" data-i18n-title="tip_quick_term" title="打开下方终端区域">💻 终端</button>
+    <span class="pdk-badge" id="current-pdk-badge" onclick="openPdkModal()" data-i18n-title="tip_pdk_badge" title="点击切换或导入工艺库">PDK: TSMC 0.18um RF</span>
+    <button class="q-btn primary" id="btn-quick-gen" onclick="parseAndRender()">▶ 生成</button>
+    <button class="q-btn" id="btn-quick-check" onclick="runConnectivityCheck()">✔ 检查连接线</button>
+  </div>
+</div>
+
+<!-- 主工作区与下方停靠区 -->
+<div id="workspace-stack">
+<main id="workspace-main">
+  <!-- 区域 1：树状文件夹区 -->
+  <section id="pane-files" class="work-pane">
+    <div class="pane-collapsed-bar" onclick="togglePaneCollapse('pane-files')" data-i18n-title="tip_expand_files" title="点击展开文件区">
+      <span>▶</span>
+      <span class="vertical-label" data-i18n="pane_files_short">资源管理器</span>
+    </div>
+    <div class="pane-header-full">
+      <span data-i18n="pane_files">📁 资源管理器</span>
+      <div class="pane-actions">
+        <button class="icon-btn" data-i18n-title="tip_move_left" title="左移区域" onclick="movePane('files', -1)">◀</button>
+        <button class="icon-btn" data-i18n-title="tip_move_right" title="右移区域" onclick="movePane('files', 1)">▶</button>
+        <button class="icon-btn" data-i18n-title="tip_new_file" title="新建工程文件" onclick="openNewProjectItemModal('file')">+📄</button>
+        <button class="icon-btn" data-i18n-title="tip_new_folder" title="新建工程文件夹" onclick="openNewProjectItemModal('folder')">+📁</button>
+        <button class="icon-btn" data-i18n-title="tip_save_proj" title="保存整个工程" onclick="saveWorkspaceFolder('')">💾</button>
+        <button class="icon-btn" data-i18n-title="tip_collapse_files" title="收起文件区" onclick="togglePaneCollapse('pane-files')">«</button>
+      </div>
+    </div>
+    <div id="tree-container" class="pane-body"></div>
+  </section>
+
+  <div class="resizer" data-left="pane-files" data-right="pane-code"></div>
+
+  <!-- 区域 2：网表源码区 -->
+  <section id="pane-code" class="work-pane">
+    <div class="pane-collapsed-bar" onclick="togglePaneCollapse('pane-code')" data-i18n-title="tip_expand_code" title="点击展开代码区">
+      <span>▶</span>
+      <span class="vertical-label" data-i18n="pane_code_short">网表源码</span>
+    </div>
+    <div class="pane-header-full">
+      <span id="editor-filename" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" data-i18n="pane_code_short">网表源码</span>
+      <div class="pane-actions">
+        <span id="lint-badge" class="lint-badge ok" onclick="showLintToast()" title="点击查看网表 Lint 详情">✔ 0 Lint</span>
+        <span id="parse-stats" style="color:var(--accent);font-weight:normal;margin-right:4px;" data-i18n="status_ready">就绪</span>
+        <button class="icon-btn" data-i18n-title="tip_move_left" title="左移区域" onclick="movePane('code', -1)">◀</button>
+        <button class="icon-btn" data-i18n-title="tip_move_right" title="右移区域" onclick="movePane('code', 1)">▶</button>
+        <button class="icon-btn" data-i18n-title="tip_collapse_code" title="收起代码区" onclick="togglePaneCollapse('pane-code')">«</button>
+      </div>
+    </div>
+    <div id="multi-hl-bar" class="pane-body">
+      <span id="multi-hl-count">已高亮 2 行器件代码</span>
+      <button class="q-btn" style="background:#b45309;border-color:#f59e0b;color:#fff;padding:1px 8px;" onclick="clearAllHighlights()" data-i18n="btn_clear_all_hl">✖ 取消全部高亮</button>
+    </div>
+    <div class="code-wrapper pane-body">
+      <div id="gutter-col"></div>
+      <div class="code-edit-area">
+        <div id="line-highlight-overlay"></div>
+        <pre id="syntax-overlay" aria-hidden="true"></pre>
+        <textarea id="netlist-input" spellcheck="false"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <div class="resizer" data-left="pane-code" data-right="pane-canvas"></div>
+
+  <!-- 区域 3：原理图画布区 -->
+  <section id="pane-canvas" class="work-pane">
+    <div class="pane-header-full">
+      <span data-i18n="pane_canvas">📐 原理图视图</span>
+      <div class="pane-actions">
+        <button class="icon-btn" data-i18n-title="tip_move_left" title="左移区域" onclick="movePane('canvas', -1)">◀</button>
+        <button class="icon-btn" data-i18n-title="tip_move_right" title="右移区域" onclick="movePane('canvas', 1)">▶</button>
+      </div>
+    </div>
+    <div id="canvas-body" class="pane-body" tabindex="-1" style="outline:none;">
+      <div id="breadcrumb-bar"></div>
+
+      <!-- 可拖拽、可自定义的悬浮移动岛 -->
+      <div id="floating-island" title="按住左侧圆点可拖动移动岛位置">
+        <span class="island-drag-grip">⠿</span>
+        <div id="island-buttons" style="display:flex;gap:5px;align-items:center;"></div>
+        <button class="island-gear" onclick="openIslandConfigModal()" title="自定义移动岛按钮或隐藏移动岛">⚙</button>
+        <button class="island-gear" onclick="toggleIslandMinimize(true, event)" title="最小化为圆形">—</button>
+        <button id="island-restore-btn" onclick="toggleIslandMinimize(false, event)" title="点击展开移动岛">⚡</button>
+      </div>
+
+      <!-- 放置类移动岛 -->
+      <div id="place-island" data-i18n-title="tip_place_island" title="按住左侧圆点可拖动放置移动岛">
+        <span class="island-drag-grip">⠿</span>
+        <span style="font-size:11px;color:#7dd3fc;font-weight:600;margin-right:2px;" data-i18n="pi_label">放置:</span>
+        <button class="island-btn" onclick="quickPlacePdkMos('nmos')">NMOS</button>
+        <button class="island-btn" onclick="quickPlacePdkMos('pmos')">PMOS</button>
+        <button class="island-btn" onclick="openPlaceDialog('resistor', 'resistor')" data-i18n="pi_res">电阻 R</button>
+        <button class="island-btn" onclick="openPlaceDialog('inductor', 'inductor')" data-i18n="pi_ind">电感 L</button>
+        <button class="island-btn" onclick="openPlaceDialog('capacitor', 'capacitor')" data-i18n="pi_cap">电容 C</button>
+        <button class="island-btn" onclick="openPlaceDialog('vsource', 'vsource', 'dc=1.8')" data-i18n="pi_vdc">电压源</button>
+        <button class="island-btn" onclick="openPlaceDialog('isource', 'isource', 'dc=20u')" data-i18n="pi_idc">电流源</button>
+        <button class="island-btn" onclick="openPlaceDialog('vsweep', 'vsweep', 'fstart=1k fstop=1G ampl=1')" data-i18n="pi_sweep">扫频源</button>
+        <button class="island-btn" onclick="openPlaceDialog('term_vdd', 'term_vdd')" title="红空圆">🔴</button>
+        <button class="island-btn" onclick="openPlaceDialog('term_gnd', 'term_gnd')" title="实心黑圆">⚫</button>
+        <button class="island-btn" onclick="openPlaceDialog('term_neg', 'term_neg')" title="空黑圆">⭕</button>
+        <button class="island-btn" onclick="quickPlaceFirstSubckt()" data-i18n="pi_subckt">子电路</button>
+        <button class="island-gear" onclick="togglePlaceIsland(event, false)" data-i18n-title="tip_close_pi" title="关闭放置移动岛">✕</button>
+      </div>
+
+      <div id="check-banner"></div>
+
+      <!-- 元件属性与参数即时编辑卡片 -->
+      <div id="func-card">
+        <div class="badge" id="func-badge">器件信息</div>
+        <h4 id="func-title"></h4>
+        <p id="func-desc"></p>
+        <div class="param-edit-grid" id="func-param-editor"></div>
+        <div class="pin-list" id="func-pins"></div>
+      </div>
+
+      <svg id="schematic-svg" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="world-grid-small" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="0.8"/>
+          </pattern>
+          <pattern id="world-grid-major" width="100" height="100" patternUnits="userSpaceOnUse">
+            <rect width="100" height="100" fill="url(#world-grid-small)"/>
+            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#cbd5e1" stroke-width="1.2"/>
+          </pattern>
+        </defs>
+        <g id="viewport"></g>
+      </svg>
+
+      <div id="status-bar">
+        <span id="mode-tip">挪动模式：Ctrl+点击多选，左键框选批量移动，双击子电路/SPICE器件查看内部等效电路</span>
+        <span id="routing-metrics"></span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="bottom-resizer" class="h-resizer" style="display:none;"></div>
+
+<!-- 下方新建显示区域：终端 / 示波器 / 频谱仪 -->
+<section id="bottom-dock" style="display:none;">
+  <div id="bottom-dock-header">
+    <div id="bottom-dock-tabs"></div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <button class="icon-btn" onclick="toggleBottomDockCollapse()" id="btn-dock-collapse" data-i18n-title="tip_dock_collapse" title="折叠/展开下方区域">▼</button>
+      <button class="icon-btn" onclick="closeAllBottomDock()" data-i18n-title="tip_dock_close_all" title="关闭下方区域">✕</button>
+    </div>
+  </div>
+  <div id="bottom-dock-body">
+    <!-- 终端区域 (支持新建多个终端并行工作) -->
+    <div id="dock-panel-terminal" class="dock-panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11.5px;color:#94a3b8;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <div id="term-tabs-bar" class="term-tab-bar"></div>
+          <button class="q-btn primary" style="padding:2px 8px;" onclick="createNewTerminalInstance()" data-i18n="btn_new_term">+ 新建终端</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span><span data-i18n="term_cwd_lbl">默认工作目录：</span><code id="term-cwd-label" style="color:#38bdf8;"></code></span>
+          <button class="q-btn" onclick="copyTerminalCdCmd()" data-i18n="term_copy_cd" data-i18n-title="tip_term_copy_cd" title="复制在系统终端进入 HTML 所在目录的命令">📋 复制本地 cd 命令</button>
+        </div>
+      </div>
+      <div id="term-output" class="term-output"></div>
+      <div class="term-input-row">
+        <span id="term-prompt" style="color:#38bdf8;white-space:nowrap;">eda:~$</span>
+        <input type="text" id="term-input" data-i18n-placeholder="term_ph" placeholder="输入命令，如 help, pwd, ls, run tran, run dc, run ac, open scope, check..." autocomplete="off">
+      </div>
+    </div>
+
+    <!-- 示波器区域 -->
+    <div id="dock-panel-scope" class="dock-panel">
+      <div class="inst-controls-bar">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button class="q-btn primary" onclick="runSpiceSimulation('tran')" data-i18n="btn_run_tran">⚡ Tran</button>
+          <button class="q-btn" onclick="runSpiceSimulation('dc')" data-i18n="btn_run_dc">📈 DC</button>
+          <label><span data-i18n="stim_type_lbl">激励:</span>
+            <select id="stim-type-select" onchange="onExcitationChanged()" style="background:#14151b;border:1px solid #475569;color:#fff;padding:2px 6px;border-radius:4px;">
+              <option value="none" data-i18n="stim_none">默认电源</option>
+              <option value="sine" data-i18n="stim_sine">正弦激励 (Sine)</option>
+              <option value="pulse" data-i18n="stim_pulse">脉冲激励 (Pulse)</option>
+              <option value="step" data-i18n="stim_step">阶跃激励 (Step)</option>
+              <option value="chirp" data-i18n="stim_chirp">扫频激励 (Sweep)</option>
+            </select>
+          </label>
+          <label><span data-i18n="stim_loc_lbl">激励位置:</span>
+            <select id="stim-node-select" onchange="onExcitationChanged()" style="background:#14151b;border:1px solid #475569;color:#fff;padding:2px 6px;border-radius:4px;"></select>
+          </label>
+          <button class="q-btn" id="btn-pick-stim" onclick="startPickSchematicPort('stim')" data-i18n="btn_pick_stim">🎯 画布选激励点</button>
+          <label><span data-i18n="stim_ampl_lbl">幅值(V):</span>
+            <input type="number" id="stim-ampl-input" value="1.0" step="0.1" min="0.01" onchange="onExcitationChanged()" style="width:54px;background:#14151b;border:1px solid #475569;color:#fff;padding:2px 4px;border-radius:4px;">
+          </label>
+          <label><span data-i18n="stim_freq_lbl">频率(MHz):</span>
+            <input type="number" id="stim-freq-input" value="10" step="1" min="0.001" onchange="onExcitationChanged()" style="width:58px;background:#14151b;border:1px solid #475569;color:#fff;padding:2px 4px;border-radius:4px;">
+          </label>
+          <button class="q-btn" id="btn-pick-probe-scope" onclick="startPickSchematicPort('probe')" data-i18n="btn_pick_probe">🎯 原理图选端口</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <label><span data-i18n="scope_xzoom">X缩放:</span> <input type="range" id="scope-xzoom" min="1" max="10" step="0.25" value="1" oninput="setScopeZoom(this.value, null)" style="width:60px;"></label>
+          <label><span data-i18n="scope_yzoom">Y缩放:</span> <input type="range" id="scope-yzoom" min="0.5" max="8" step="0.25" value="1" oninput="setScopeZoom(null, this.value)" style="width:60px;"></label>
+          <button class="q-btn" onclick="resetScopeView()" data-i18n="btn_reset_zoom">⟲ 复位</button>
+          <span id="scope-cursor-info" style="font-family:Consolas,monospace;color:#38bdf8;min-width:165px;text-align:right;" data-i18n="scope_cursor_idle">移动鼠标查看交点读数</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:12px;flex-wrap:wrap;">
+        <span style="color:#94a3b8;" data-i18n="scope_ports_lbl">观测端口:</span>
+        <div id="scope-channels" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"></div>
+      </div>
+      <div class="inst-canvas-wrap">
+        <canvas id="scope-canvas"></canvas>
+      </div>
+      <div id="scope-metrics" style="font-size:11.5px;color:#cbd5e1;font-family:Consolas,monospace;"></div>
+    </div>
+
+    <!-- 工作点报表区域 -->
+    <div id="dock-panel-dcop" class="dock-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+        <span style="font-weight:600;color:#4ade80;" data-i18n="dcop_tbl_title">📋 直流工作点报表 (DC Operating Point & Small-Signal)</span>
+        <button class="q-btn" onclick="exportDcOpCsv()" data-i18n="btn_export_csv">💾 导出 CSV</button>
+      </div>
+      <div style="flex:1;overflow:auto;border:1px solid #334155;border-radius:6px;">
+        <table class="dcop-table" id="dcop-table"></table>
+      </div>
+    </div>
+
+    <!-- 频谱仪区域 -->
+    <div id="dock-panel-spectrum" class="dock-panel">
+      <div class="inst-controls-bar">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button class="q-btn primary" onclick="runSpiceSimulation('tran'); openSpectrumModal('fft');" data-i18n="btn_fft">⚡ Tran FFT</button>
+          <button class="q-btn" onclick="runSpiceSimulation('ac'); openSpectrumModal('ac');" data-i18n="btn_ac">〰 AC 扫频</button>
+          <label><span data-i18n="spec_port_lbl">响应端口:</span> <select id="spec-node-select" onchange="drawSpectrumAnalyzer()" style="background:#14151b;border:1px solid #475569;color:#fff;padding:2px 6px;border-radius:4px;"></select></label>
+          <button class="q-btn" id="btn-pick-probe-spec" onclick="startPickSchematicPort('probe')" data-i18n="btn_pick_probe">🎯 原理图选端口</button>
+          <label><span data-i18n="spec_mode_lbl">模式:</span> <select id="spec-mode-select" onchange="drawSpectrumAnalyzer()" style="background:#14151b;border:1px solid #475569;color:#fff;padding:2px 6px;border-radius:4px;"><option value="fft" data-i18n="spec_opt_fft">Tran FFT 频谱 (dBV)</option><option value="ac" data-i18n="spec_opt_ac">AC 扫频幅频响应 (dB)</option></select></label>
+          <label><span data-i18n="stim_loc_lbl">激励位置:</span> <select id="spec-stim-node-select" onchange="syncStimNodeFromSpec(this.value)" style="background:#14151b;border:1px solid #475569;color:#fff;padding:2px 6px;border-radius:4px;"></select></label>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <label><span data-i18n="scope_xzoom">X缩放:</span> <input type="range" id="spec-xzoom" min="1" max="10" step="0.25" value="1" oninput="setSpecZoom(this.value, null)" style="width:60px;"></label>
+          <label><span data-i18n="scope_yzoom">Y缩放:</span> <input type="range" id="spec-yzoom" min="0.5" max="8" step="0.25" value="1" oninput="setSpecZoom(null, this.value)" style="width:60px;"></label>
+          <button class="q-btn" onclick="resetSpecView()" data-i18n="btn_reset_zoom">⟲ 复位</button>
+          <span id="spec-cursor-info" style="font-family:Consolas,monospace;color:#fbbf24;" data-i18n="spec_cursor_idle">移动鼠标查看频率/幅度</span>
+        </div>
+      </div>
+      <div class="inst-canvas-wrap">
+        <canvas id="spectrum-canvas"></canvas>
+      </div>
+      <div id="spec-metrics" style="font-size:11.5px;color:#cbd5e1;font-family:Consolas,monospace;"></div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- 底部运行时间状态栏 -->
+<footer id="site-footer">
+  <span data-i18n="footer_brand">OpenCircuit EDA (Spice-like) · Author: Etherealnymph</span>
+  <span id="site-uptime">网站已运行: 计算中...</span>
+</footer>
+
+<!-- 弹窗 1：工艺库选择与固化 -->
+<div id="pdk-modal" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span data-i18n="mod_pdk_title">📚 工艺库选择与固化管理</span>
+      <button class="q-btn" onclick="closeModal('pdk-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label data-i18n="mod_pdk_list">已存工艺库列表（内置 TSMC 0.18um RF 及已固化库）</label>
+        <select id="saved-pdk-select" onchange="selectSavedPdk(this.value)"></select>
+      </div>
+      <div id="pdk-summary-box" style="background:#14151b;border:1px solid #3a3d4e;border-radius:5px;padding:8px 10px;font-size:12px;line-height:1.5;color:#cbd5e1;"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="q-btn" onclick="document.getElementById('pdk-file-input').click()" data-i18n="mod_pdk_import">📂 从本地导入工艺库文件 (.scs/.lib)</button>
+        <button class="q-btn primary" onclick="freezePdkToLocal()" data-i18n="mod_pdk_freeze">💾 固化当前工艺库 (保存至本地 pdk_libs/ 目录)</button>
+        <button class="q-btn" onclick="importOpenSourcePdk('sky130')">🌐 导入 SkyWater sky130</button>
+        <button class="q-btn" onclick="importOpenSourcePdk('gf180')">🌐 导入 GF180mcu</button>
+      </div>
+      <div style="border-top:1px solid #3a3d4e;padding-top:8px;margin-top:4px;">
+        <div style="font-weight:600;margin-bottom:6px;color:#7dd3fc;">✏ 可视化 PDK 模型参数微调 (Vth0 / u0 / Lambda)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+          <label style="font-size:11px;">Vth0 (V)<input id="pdk-edit-vth0" type="number" step="0.05" value="0.50" style="width:100%;margin-top:2px;"></label>
+          <label style="font-size:11px;">Kp (uA/V²)<input id="pdk-edit-kp" type="number" step="10" value="180" style="width:100%;margin-top:2px;"></label>
+          <label style="font-size:11px;">Lambda (1/V)<input id="pdk-edit-lambda" type="number" step="0.01" value="0.02" style="width:100%;margin-top:2px;"></label>
+        </div>
+        <button class="q-btn" style="margin-top:6px;" onclick="applyPdkParamEdit()">✔ 应用到仿真引擎并固化</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="q-btn primary" onclick="closeModal('pdk-modal')" data-i18n="btn_ok">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗 2：放置元件及参数配置 -->
+<div id="place-modal" class="modal-backdrop">
+  <div class="modal-box" style="width:420px;">
+    <div class="modal-header">
+      <span id="place-modal-title">放置元件</span>
+      <button class="q-btn" onclick="closeModal('place-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label data-i18n="mod_place_inst">元件实例名 (Instance Name)</label>
+        <input type="text" id="place-inst-name">
+      </div>
+      <div class="form-row">
+        <label data-i18n="mod_place_model">模型名 (Model / Subckt)</label>
+        <input type="text" id="place-model-name" readonly>
+      </div>
+      <div class="form-row">
+        <label data-i18n="mod_place_nodes">连接网络 (空格分隔引脚网络，如: d g s b 或 p n)</label>
+        <input type="text" id="place-nodes-str">
+      </div>
+      <div class="form-row">
+        <label data-i18n="mod_place_params">元件参数 (如: w=20u l=1u 或 r=10k / l=5n / c=1p)</label>
+        <input type="text" id="place-params-str">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="q-btn" onclick="closeModal('place-modal')" data-i18n="btn_cancel">取消</button>
+      <button class="q-btn primary" onclick="confirmPlaceDevice()" data-i18n="btn_place_confirm">放置到原理图</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗 3：导出创建子电路（端口 Input/Output/InOut 配置 + 固化到本地） -->
+<div id="subckt-export-modal" class="modal-backdrop">
+  <div class="modal-box" style="width:540px;">
+    <div class="modal-header">
+      <span>📦 创建并导出子电路 (Subckt)</span>
+      <button class="q-btn" onclick="closeModal('subckt-export-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>子电路名称 (Subckt Name)</label>
+        <input type="text" id="export-subckt-name" value="my_subckt">
+      </div>
+      <div style="font-size:12px;color:#94a3b8;">
+        配置外部引脚及方向（<b>输入 Input</b> / <b>输出 Output</b> / <b>输入输出 InOut</b>）。你也可以直接点击画布上的网络标签加入端口列表：
+      </div>
+      <div style="display:flex;gap:6px;">
+        <select id="add-port-net-select" style="flex:1;background:#14151b;border:1px solid #475569;color:#fff;padding:5px;border-radius:4px;"></select>
+        <button class="q-btn" onclick="addPortFromSelect()">+ 添加标签为端口</button>
+        <button class="q-btn" onclick="pickPortFromCanvas()">🎯 从原理图点击选择</button>
+      </div>
+      <div id="subckt-ports-list" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;"></div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#fbbf24;cursor:pointer;margin-top:4px;">
+        <input type="checkbox" id="chk-freeze-subckt-local" checked>
+        导出时同时固化到本地子电路库（保存至本地 subckt_libs/ 并加入放置菜单）
+      </label>
+    </div>
+    <div class="modal-footer">
+      <button class="q-btn" onclick="closeModal('subckt-export-modal')">取消</button>
+      <button class="q-btn primary" onclick="confirmCreateSubckt()">生成并导出子电路</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗 4：自定义移动岛 -->
+<div id="island-modal" class="modal-backdrop">
+  <div class="modal-box" style="width:430px;">
+    <div class="modal-header">
+      <span data-i18n="mod_island_title">⚙ 自定义悬浮移动岛</span>
+      <button class="q-btn" onclick="closeModal('island-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="island-config-list"></div>
+    <div class="modal-footer">
+      <button class="q-btn" style="border-color:#ef4444;color:#fca5a5;" onclick="hideIslandFromModal()" data-i18n="btn_hide_island">隐藏移动岛</button>
+      <button class="q-btn primary" onclick="closeModal('island-modal')" data-i18n="btn_done">完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗：联系作者 (FormSubmit) -->
+<div id="contact-author-modal" class="modal-backdrop">
+  <div class="modal-box" style="width:460px;">
+    <div class="modal-header">
+      <span>✉ 联系作者 (Etherealnymph)</span>
+      <button class="q-btn" onclick="closeModal('contact-author-modal')">✕</button>
+    </div>
+    <form id="contact-author-form" action="https://formsubmit.co/2115487769@qq.com" method="POST">
+      <input type="hidden" name="_subject" value="Spectre EDA 工作台用户留言">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_template" value="table">
+      <div class="modal-body">
+        <div class="form-row">
+          <label>您的称呼 <span style="color:#ef4444;">*</span></label>
+          <input type="text" id="contact-name" name="name" placeholder="请输入您的名字或昵称" required>
+        </div>
+        <div class="form-row">
+          <label>您的邮箱 <span style="color:#ef4444;">*</span></label>
+          <input type="email" id="contact-email" name="email" placeholder="用于接收作者回复，如 name@example.com" required>
+        </div>
+        <div class="form-row">
+          <label>留言内容 <span style="color:#ef4444;">*</span></label>
+          <textarea id="contact-message" name="message" rows="4" minlength="6" placeholder="请输入您的建议、问题反馈或合作意向（不少于6个字）..." required style="background:#14151b;border:1px solid #475569;color:#f8fafc;padding:7px 9px;border-radius:4px;font-size:12.5px;outline:none;resize:vertical;font-family:inherit;"></textarea>
+        </div>
+        <div id="contact-status" style="font-size:12px;display:none;padding:6px 9px;border-radius:4px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="q-btn" onclick="closeModal('contact-author-modal')">取消</button>
+        <button type="submit" id="contact-submit-btn" class="q-btn primary">发送邮件</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 弹窗 5：自定义快捷键 -->
+<div id="shortcut-modal" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span data-i18n="mod_sc_title">⌨ 快捷键设置（点击按键可重新录制）</span>
+      <button class="q-btn" onclick="closeModal('shortcut-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="shortcut-list"></div>
+    <div class="modal-footer">
+      <button class="q-btn" onclick="resetDefaultShortcuts()" data-i18n="btn_reset_default">恢复默认</button>
+      <button class="q-btn primary" onclick="closeModal('shortcut-modal')" data-i18n="btn_done">完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- 最高图层 AI 电路开发助手对话框 -->
+<div id="ai-dialog">
+  <div id="ai-dialog-header">
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#38bdf8;">
+      <span data-i18n="ai_title">🤖 OpenCircuit EDA AI 电路助手</span>
+      <span id="ai-folder-badge" data-i18n="ai_local_cache" style="font-size:10.5px;font-weight:normal;color:#94a3b8;background:#1e293b;padding:1px 6px;border-radius:4px;">本地缓存</span>
+    </div>
+    <div class="ai-win-btns">
+      <button class="ai-win-btn" onclick="bindAiLocalFolder()" title="绑定本地同目录文件夹保存对话与文件">📁</button>
+      <button class="ai-win-btn" onclick="toggleAiConfigView(true)" title="AI 接口与模型配置">⚙</button>
+      <button class="ai-win-btn" onclick="minimizeAiDialog()" title="最小化">—</button>
+      <button class="ai-win-btn" id="ai-max-btn" onclick="toggleMaximizeAiDialog()" title="放大 / 还原">□</button>
+      <button class="ai-win-btn close" onclick="closeAiDialog()" title="关闭">✕</button>
+    </div>
+  </div>
+
+  <!-- 首次配置界面 -->
+  <div id="ai-config-view">
+    <div style="font-size:13px;font-weight:600;color:#f8fafc;" data-i18n="ai_cfg_heading">⚙ 首次使用请先配置 AI 模型接口</div>
+    <div style="font-size:12px;color:#94a3b8;line-height:1.5;" data-i18n="ai_cfg_desc">
+      配置后 AI 将自动加载电路设计助手技能，协助编写网表、排查连线、设计子电路并保存文件到本地。
+    </div>
+    <div style="font-size:11.5px;background:#451a03;border:1px solid #f59e0b;color:#fde68a;padding:6px 10px;border-radius:5px;" data-i18n="ai_cfg_sec">
+      ⚠ 安全提示：API Key 仅保存在本地浏览器 localStorage 并直连目标接口，请勿在公共设备保存，使用风险自担。
+    </div>
+    <div class="form-row">
+      <label data-i18n="ai_cfg_preset_lbl">快捷预设 (OpenAI / DeepSeek / 兼容接口)</label>
+      <select id="ai-cfg-preset" onchange="applyAiPreset(this.value)">
+        <option value="custom" data-i18n="ai_preset_custom">自定义兼容接口 (OpenAI Format)</option>
+        <option value="deepseek">DeepSeek (api.deepseek.com)</option>
+        <option value="openai">OpenAI (api.openai.com)</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label data-i18n="ai_cfg_base_lbl">API 地址 (Chat Completions URL)</label>
+      <input type="text" id="ai-cfg-base" placeholder="https://api.deepseek.com/chat/completions">
+    </div>
+    <div class="form-row">
+      <label data-i18n="ai_cfg_key_lbl">API Key (本地脱敏保护)</label>
+      <input type="password" id="ai-cfg-key" placeholder="sk-...">
+    </div>
+    <div class="form-row">
+      <label data-i18n="ai_cfg_model_lbl">模型名称 (Model)</label>
+      <input type="text" id="ai-cfg-model" data-i18n-placeholder="ai_cfg_model_ph" placeholder="deepseek-chat 或 gpt-4o-mini">
+    </div>
+    <div id="ai-cfg-msg" style="font-size:12px;color:#fca5a5;display:none;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
+      <button class="q-btn" onclick="bindAiLocalFolder()" data-i18n="ai_cfg_bind_dir">📁 选择本地对话存储文件夹</button>
+      <button class="q-btn primary" onclick="saveAiConfigAndEnter()" data-i18n="ai_cfg_save_btn">保存配置并开始对话</button>
+    </div>
+  </div>
+
+  <!-- 聊天主界面 -->
+  <div id="ai-chat-view" class="ai-body-wrap">
+    <div class="ai-history-sidebar">
+      <div style="padding:8px;border-bottom:1px solid #334155;display:flex;gap:4px;">
+        <button class="q-btn primary" style="flex:1;" onclick="createNewAiSession()" data-i18n="ai_new_chat">+ 新建对话</button>
+        <button class="q-btn" onclick="exportAllAiSessions()" title="导出全部历史对话到本地文件夹">💾</button>
+      </div>
+      <div id="ai-history-list" class="ai-history-list"></div>
+      <div style="padding:6px 8px;border-top:1px solid #334155;display:flex;gap:4px;">
+        <button class="q-btn" style="flex:1;font-size:11px;" onclick="document.getElementById('ai-import-input').click()" data-i18n="ai_import">导入历史</button>
+        <button class="q-btn" style="flex:1;font-size:11px;color:#fca5a5;" onclick="clearAllAiSessions()" data-i18n="ai_clear_all">清空全部</button>
+      </div>
+      <input type="file" id="ai-import-input" accept=".json" style="display:none" onchange="importAiSessionsFile(event)">
+    </div>
+
+    <div class="ai-main-panel">
+      <div id="ai-messages"></div>
+      <div class="ai-input-bar">
+        <div class="ai-quick-actions">
+          <button class="q-btn" onclick="aiQuickPrompt(currentLang==='en'?'Analyze the current circuit netlist and suggest improvements':'请分析当前编辑器中的网表结构并提出优化建议')" data-i18n="ai_q_analyze">分析当前电路</button>
+          <button class="q-btn" onclick="aiQuickPrompt(currentLang==='en'?'Design a bandgap or cascode amplifier netlist in .scs format':'请帮我设计一个带隙基准或共源共栅放大器网表，并给出可直接保存的 .scs 代码')" data-i18n="ai_q_gen">生成新电路</button>
+          <button class="q-btn" onclick="aiExplainCurrentSim()" data-i18n="ai_q_explain">📊 AI 解释当前仿真</button>
+          <button class="q-btn" onclick="aiSaveCurrentNetlistLocal()" data-i18n="ai_q_save">💾 保存当前网表到本地</button>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <textarea id="ai-user-input" rows="2" data-i18n-placeholder="ai_input_ph" placeholder="输入电路设计需求（Ctrl+Enter 发送）..." style="flex:1;background:#1e2029;border:1px solid #475569;color:#f8fafc;padding:6px 8px;border-radius:5px;font-size:12.5px;resize:none;outline:none;font-family:inherit;"></textarea>
+          <button id="ai-send-btn" class="q-btn primary" style="padding:0 14px;" onclick="sendAiMessage()" data-i18n="ai_send">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ai-minimized-pill" onclick="restoreAiDialog()">
+  <span>🤖 AI 电路助手</span>
+  <span style="font-size:11px;color:#38bdf8;">点击展开</span>
+</div>
+
+
+<!-- 弹窗：新建工程文件 / 文件夹 -->
+<div id="new-proj-item-modal" class="modal-backdrop">
+  <div class="modal-box" style="width:400px;">
+    <div class="modal-header">
+      <span id="new-proj-modal-title">📄 新建工程文件</span>
+      <button class="q-btn" onclick="closeModal('new-proj-item-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label id="new-proj-path-label">路径 (例如: Digital_HDL/counter4.v 或 My_Project)</label>
+        <input type="text" id="new-proj-path-input">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="q-btn" onclick="closeModal('new-proj-item-modal')" data-i18n="btn_cancel">取消</button>
+      <button class="q-btn primary" onclick="confirmNewProjectItem()" data-i18n="btn_ok">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗：交互式电路实验预设库 -->
+<div id="labs-modal" class="modal-backdrop">
+  <div class="modal-box" style="width:540px;">
+    <div class="modal-header">
+      <span data-i18n="mod_labs_title">🧪 交互式电路实验预设库 (Labs)</span>
+      <button class="q-btn" onclick="closeModal('labs-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="labs-preset-list" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+    <div class="modal-footer">
+      <button class="q-btn" onclick="closeModal('labs-modal')" data-i18n="btn_cancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗：重命名文件 / 文件夹 -->
+<div id="rename-item-modal" class="modal-backdrop">
+  <div class="modal-box" style="width:400px;">
+    <div class="modal-header">
+      <span id="rename-modal-title">✏ 重命名</span>
+      <button class="q-btn" onclick="closeModal('rename-item-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label id="rename-item-label">新名称</label>
+        <input type="text" id="rename-item-input" onkeydown="if(event.key==='Enter')confirmRenameItem()">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="q-btn" onclick="closeModal('rename-item-modal')" data-i18n="btn_cancel">取消</button>
+      <button class="q-btn primary" onclick="confirmRenameItem()" data-i18n="btn_ok">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗：版本信息 -->
+<div id="version-modal" class="modal-backdrop">
+  <div class="modal-box" style="width:480px;">
+    <div class="modal-header">
+      <span data-i18n="mod_version_title">ℹ OpenCircuit EDA 版本信息</span>
+      <button class="q-btn" onclick="closeModal('version-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="line-height:1.65;">
+      <div style="display:flex;align-items:center;gap:12px;padding-bottom:8px;border-bottom:1px solid #3a3d4e;">
+        <svg width="40" height="40" viewBox="0 0 256 256" style="flex-shrink:0;"><rect x="12" y="12" width="232" height="232" rx="48" fill="#0f172a" stroke="#38bdf8" stroke-width="14"/><path d="M48 128 L84 128 L106 76 L138 180 L164 128 L208 128" fill="none" stroke="#4ade80" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><circle cx="48" cy="128" r="14" fill="#0f172a" stroke="#38bdf8" stroke-width="9"/><circle cx="208" cy="128" r="14" fill="#4ade80"/></svg>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:#4ade80;">OpenCircuit EDA</div>
+          <div style="font-size:12px;color:#94a3b8;">Version <b style="color:#38bdf8;">v2.1.0</b> · Schema v2 · Author: Etherealnymph</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#cbd5e1;">
+        <b>核心功能：</b>Spectre / SPICE / Verilog / VHDL 网表解析与图形化、正交自动布线、MNA 直流/瞬态/交流频域仿真、示波器与频谱仪、PDK 工艺库与子电路层次化设计。
+      </div>
+      <div style="background:#14151b;border:1px solid #3a3d4e;border-radius:6px;padding:10px;font-size:12px;color:#cbd5e1;">
+        <div style="font-weight:600;color:#7dd3fc;margin-bottom:4px;">v2.1.0 更新日志：</div>
+        <ul style="padding-left:18px;margin:0;display:flex;flex-direction:column;gap:3px;">
+          <li>资源管理器支持文件与文件夹重命名</li>
+          <li>放置元件免参数弹窗，支持鼠标跟随预览、左键连续放置与快捷键放置</li>
+          <li>放置电源默认为独立空白端口，新增红空圆 / 实心黑圆 / 空黑圆节点放置</li>
+          <li>支持单击/Ctrl+多选电线及 Delete 删除连线</li>
+          <li>新增「操作」菜单栏：顺/逆时针旋转、水平/垂直对称、复制粘贴及快捷键</li>
+        </ul>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="q-btn primary" onclick="closeModal('version-modal')" data-i18n="btn_ok">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗：元件参数配置 (选中按 Q 或右键) -->
+<div id="edit-param-modal" class="modal-backdrop">
+  <div class="modal-box" style="width:450px;">
+    <div class="modal-header">
+      <span id="edit-param-title">⚙ 元件参数配置</span>
+      <button class="q-btn" onclick="closeModal('edit-param-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>实例名称 (Instance Name)</label>
+        <input type="text" id="ep-inst-name">
+      </div>
+      <div class="form-row">
+        <label>模型 / 类型 (Model)</label>
+        <input type="text" id="ep-model-name">
+      </div>
+      <div class="form-row">
+        <label>引脚网络 (空格分隔，依次对应各引脚)</label>
+        <input type="text" id="ep-nodes-str">
+        <div id="ep-pins-hint" style="font-size:11px;color:#94a3b8;"></div>
+      </div>
+      <div class="form-row">
+        <label>器件参数 (如: dc=1.8 或 r=10k 或 w=10u l=1u)</label>
+        <input type="text" id="ep-params-str" onkeydown="if(event.key==='Enter')confirmEditParamModal()">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="q-btn" onclick="closeModal('edit-param-modal')" data-i18n="btn_cancel">取消</button>
+      <button class="q-btn primary" onclick="confirmEditParamModal()" data-i18n="btn_ok">确定</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

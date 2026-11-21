@@ -1,0 +1,67 @@
+{
+  "name": "opencircuit-eda",
+  "version": "2.1.0",
+  "description": "OpenCircuit EDA - Spice-like Schematic, Verilog/VHDL & MNA Simulation Workbench",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "electron:dev": "vite build && electron .",
+    "electron:win": "vite build && electron-builder --win portable nsis",
+    "electron:mac": "vite build && electron-builder --mac dmg zip",
+    "electron:linux": "vite build && electron-builder --linux AppImage deb",
+    "android:sync": "vite build && npx cap sync android"
+  },
+  "devDependencies": {
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.1.0"
+  },
+  "main": "electron/main.cjs",
+  "build": {
+    "appId": "com.etherealnymph.opencircuit.eda",
+    "productName": "OpenCircuit EDA",
+    "directories": {
+      "output": "release"
+    },
+    "npmRebuild": false,
+    "nodeGypRebuild": false,
+    "buildDependenciesFromSource": false,
+    "asar": true,
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json",
+      "!node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "electron/icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "electron/icon.png",
+      "category": "public.app-category.developer-tools"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "electron/icon.png",
+      "category": "Development"
+    }
+  },
+  "author": "Etherealnymph <2115487769@qq.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/Etherealnymph"
+}

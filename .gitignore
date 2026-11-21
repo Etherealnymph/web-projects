@@ -15,3 +15,14 @@ Thumbs.db
 # Supabase CLI local state
 supabase/.temp/
 supabase/.branches/
+
+# Homepage redesign staging folders (only the integrated files are deployed)
+index/
+index-2.0/
+
+# OpenCircuit EDA local build tree (deployed copy lives in opencircuit-eda/)
+opencircuit-eda-v2.1.0/
+node_modules/
+
+# One-off integration helper
+.portal_integrate.py

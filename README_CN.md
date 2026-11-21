@@ -45,6 +45,7 @@
 | **大学生数学竞赛** / Math Competition | [EN](math-competition/README_EN.md) · [中文](math-competition/README_CN.md) | [打开](https://etherealnymph.github.io/web-projects/math-competition/web/) | 208 道竞赛题、完整解答与一题一屏放映。 |
 | **迷你世界** / Mini World | [EN](mini-world/README_EN.md) · [中文](mini-world/README_CN.md) | [打开](https://etherealnymph.github.io/web-projects/mini-world/) | 浏览器 3D 方块沙盒，十个世界与载具。 |
 | **数感训练场** / Number Sense Trainer | [EN](number-sense-trainer.src/README_EN.md) · [中文](number-sense-trainer.src/README_CN.md) | [打开](https://etherealnymph.github.io/web-projects/number-sense-trainer.html) |  |
+| **开源电路 EDA** / OpenCircuit EDA | [中文](opencircuit-eda/README.md) | [打开](https://etherealnymph.github.io/web-projects/opencircuit-eda/) | 浏览器内运行的 Spice 风格 EDA：原理图绘制、网表解析、MNA 直流/瞬态/交流仿真、示波器、频谱仪与 PDK 工艺库。 |
 | **半导体物理与器件** / Semiconductor Devices | [EN](semiconductor-devices/README_EN.md) · [中文](semiconductor-devices/README_CN.md) | [打开](https://etherealnymph.github.io/web-projects/semiconductor-devices/) | 一页一题的半导体物理期末复习。 |
 | **硅间札记** / Silicon Notes | [EN](silicon-notes/README_EN.md) · [中文](silicon-notes/README_CN.md) | [打开](https://etherealnymph.github.io/web-projects/silicon-notes/) | 本地优先的芯片设计笔记，带证据链。 |
 | **潮汐声景** / Tidal Soundscape | [EN](soundscape/README_EN.md) · [中文](soundscape/README_CN.md) | [打开](https://etherealnymph.github.io/web-projects/soundscape/) | 18 层实时合成声景混音器。 |
