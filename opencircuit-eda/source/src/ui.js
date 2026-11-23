@@ -11,7 +11,7 @@ import {
   routeSchematic, simplifyPath
 } from './router.js';
 import {
-  EDA_SCHEMA_VERSION, maskApiKey, showToast, parseEngineeringValue,
+  EDA_SCHEMA_VERSION, maskApiKey, showToast as showClassicNotification, parseEngineeringValue,
   solveLinearSystem, solveComplexLinearSystem, buildMnaSystem, solveMnaDc,
   simulateDC, simulateTran, simulateAC
 } from './simulator.js';
@@ -403,13 +403,11 @@ function initMenus() {
       menuCloseTimer = setTimeout(() => closeAllMenus(), 180);
     });
   });
-  document.querySelectorAll(".menu-root-btn").forEach(btn => {
+  document.querySelectorAll(".menu-root > .menu-root-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       const root = btn.parentElement;
-      const wasOpen = root.classList.contains("open");
-      closeAllMenus();
-      if (!wasOpen) openMenuRoot(root);
+      openMenuRoot(root);
     });
   });
   window.addEventListener("click", () => { closeAllMenus(); closeLayerQuickMenu(); });
@@ -448,7 +446,7 @@ function rebuildHierarchySubmenu() {
     item.className = "menu-item";
     const isCur = f.activeSubckt === k;
     const label = k === "__TOP__" ? sub.name : `${k} (${sub.elements.length} 器件)`;
-    item.innerHTML = `<span><i class="check-col">${isCur ? "✓" : " "}</i>${label}</span>`;
+    item.innerHTML = `<span><i class="check-col">${isCur ? "✓" : " "}</i>${escapeHtml(label)}</span>`;
     item.onclick = () => { switchSubckt(k, true); closeAllMenus(); };
     subMenu.appendChild(item);
   });
@@ -466,7 +464,7 @@ function rebuildPlaceMenus() {
   pdk.nmosModels.forEach(m => {
     const div = document.createElement("div");
     div.className = "menu-item";
-    div.innerHTML = `<span>${m.name}</span><span class="shortcut-hint">${m.defaultParams}</span>`;
+    div.innerHTML = `<span>${escapeHtml(m.name)}</span><span class="shortcut-hint">${escapeHtml(m.defaultParams)}</span>`;
     div.onclick = () => { closeAllMenus(); openPlaceDialog("nmos", m.name, m.defaultParams); };
     nmosSub.appendChild(div);
   });
@@ -474,7 +472,7 @@ function rebuildPlaceMenus() {
   pdk.pmosModels.forEach(m => {
     const div = document.createElement("div");
     div.className = "menu-item";
-    div.innerHTML = `<span>${m.name}</span><span class="shortcut-hint">${m.defaultParams}</span>`;
+    div.innerHTML = `<span>${escapeHtml(m.name)}</span><span class="shortcut-hint">${escapeHtml(m.defaultParams)}</span>`;
     div.onclick = () => { closeAllMenus(); openPlaceDialog("pmos", m.name, m.defaultParams); };
     pmosSub.appendChild(div);
   });
@@ -503,7 +501,7 @@ function rebuildPlaceMenus() {
     availSubckts.forEach(s => {
       const div = document.createElement("div");
       div.className = "menu-item";
-      div.innerHTML = `<span>${s.name}</span><span class="shortcut-hint">[${s.source}]</span>`;
+      div.innerHTML = `<span>${escapeHtml(s.name)}</span><span class="shortcut-hint">[${escapeHtml(s.source)}]</span>`;
       div.onclick = () => {
         closeAllMenus();
         openPlaceDialog("subckt_inst", s.name, "", s.ports.join(" "));
@@ -516,7 +514,7 @@ function rebuildPlaceMenus() {
 /* 工艺库管理与固化 */
 function updatePdkBadge() {
   const pdk = getActivePdk();
-  document.getElementById("current-pdk-badge").textContent = `PDK: ${pdk.name}`;
+  document.getElementById("current-pdk-badge").textContent = `符号库 · ${pdk.name}`;
 }
 
 function openPdkModal() {
@@ -542,10 +540,10 @@ function selectSavedPdk(id) {
 function renderPdkSummary() {
   const pdk = getActivePdk();
   document.getElementById("pdk-summary-box").innerHTML = `
-    <b>当前激活工艺库：</b>${pdk.name}<br>
-    <b>支持 NMOS 模型 (${pdk.nmosModels.length})：</b>${pdk.nmosModels.map(m => m.name).join(", ")}<br>
-    <b>支持 PMOS 模型 (${pdk.pmosModels.length})：</b>${pdk.pmosModels.map(m => m.name).join(", ")}<br>
-    <b>内置等效电路子电路：</b>${Object.keys(pdk.equivSubckts || {}).join(", ") || "无"}
+    <b>绘图符号库：</b>${escapeHtml(pdk.name)}<br>
+    <b>NMOS 名称映射 (${pdk.nmosModels.length})：</b>${pdk.nmosModels.map(m => escapeHtml(m.name)).join(", ")}<br>
+    <b>PMOS 名称映射 (${pdk.pmosModels.length})：</b>${pdk.pmosModels.map(m => escapeHtml(m.name)).join(", ")}<br>
+    <b>内置等效电路子电路：</b>${Object.keys(pdk.equivSubckts || {}).map(escapeHtml).join(", ") || "无"}
   `;
 }
 
@@ -554,13 +552,23 @@ document.getElementById("pdk-file-input").addEventListener("change", (e) => {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (ev) => {
-    const newPdk = parsePdkLibraryText(ev.target.result, file.name);
+    const content=String(ev.target.result);
+    const folder=getActiveFile()?.path.split('/').slice(0,-1).join('/');
+    const path=folder ? folder+'/'+file.name : file.name;
+    const existing=workspaceFiles.find(f=>f.path===path);
+    if (existing && existing.content !== content) {
+      showToast("同路径已有不同文件，请在工作台中导入并选择保存位置", "warn");
+      return;
+    }
+    if (!existing) workspaceFiles.push(classicSourceFile(path,content));
+    renderFileTree();
+    const newPdk = parsePdkLibraryText(content, file.name);
     savedPdks.push(newPdk);
     activePdkId = newPdk.id;
     localStorage.setItem("spectre_eda_pdks", JSON.stringify(savedPdks));
     updatePdkBadge();
     openPdkModal();
-    document.getElementById("mode-tip").textContent = `已导入并激活本地工艺库: ${file.name}`;
+    document.getElementById("mode-tip").textContent = `已保存模型原文 ${path} 并加载其绘图名称；仿真时从入口使用 include 或 lib 引用`;
   };
   reader.readAsText(file);
   e.target.value = "";
@@ -761,7 +769,7 @@ function placeElementAtCursor(x, y) {
   layout.elements.push(newEl);
 
   if (!["term_vdd", "term_gnd", "term_neg"].includes(newEl.type)) {
-    const spiceLine = `    ${instName} (${nodes.join(" ")}) ${placingTool.modelName} ${paramStr}`.trim();
+    const spiceLine = classicElementLine(newEl, f);
     insertDeviceLineToNetlist(f, spiceLine);
   }
   rerenderOnly();
@@ -773,25 +781,44 @@ function confirmPlaceDevice() {
   if (placingTool) placeElementAtCursor(placingTool.mouseX ?? 260, placingTool.mouseY ?? 220);
 }
 
-function insertDeviceLineToNetlist(fileObj, lineText) {
-  let code = fileObj.content;
-  if (fileObj.activeSubckt && fileObj.activeSubckt !== "__TOP__") {
-    const endReg = new RegExp(`(^\\s*ends\\s+${fileObj.activeSubckt}\\b)`, "im");
-    if (endReg.test(code)) {
-      code = code.replace(endReg, `${lineText}\n$1`);
-    } else {
-      code += `\n${lineText}\n`;
-    }
-  } else {
-    code += `\n${lineText}\n`;
+function isSpiceFile(f) {
+  return !/\.scs$/i.test(f.name) && !/^\s*simulator\s+lang=spectre/im.test(f.content);
+}
+function classicElementLine(el, f) {
+  const nets=el.pins.map(p=>p.net).join(' ');
+  const params=el.params || {};
+  const pairs=Object.entries(params).map(([k,v])=>`${k}=${v}`).join(' ');
+  if (!isSpiceFile(f)) return `${el.name} (${nets}) ${el.model} ${pairs}`.trimEnd();
+  const key={resistor:'r',inductor:'l',capacitor:'c',vsource:'dc',isource:'dc'}[el.type];
+  if (key) {
+    const tail=Object.entries(params).filter(([k])=>k!==key).map(([k,v])=>`${k}=${v}`).join(' ');
+    return `${el.name} ${nets} ${params[key] || '0'} ${tail}`.trimEnd();
   }
-  fileObj.content = code;
-  fileObj.dirty = true;
-  document.getElementById("netlist-input").value = code;
-  fileObj.parsedDesign = parseSpectreNetlist(code);
-  realDeviceLineMap = fileObj.parsedDesign.lineMap;
-  refreshEditorGutter();
+  return `${el.name} ${nets} ${el.model} ${pairs}`.trimEnd();
+}
+function applyClassicSource(f, text) {
+  f.content=text;
+  f.dirty=true;
+  f.parsedDesign=parseSpectreNetlist(text,f.name);
+  for (const [name,layout] of Object.entries(f.layoutsBySubckt)) {
+    const defs=f.parsedDesign.subckts[name]?.elements || [];
+    const linesByName=new Map(defs.map(el=>[el.name,el.line]));
+    for (const el of layout.elements) el.line=linesByName.get(el.name) || 0;
+  }
+  realDeviceLineMap=f.parsedDesign.lineMap;
+  document.getElementById('netlist-input').value=text;
   renderFileTabs();
+  refreshEditorGutter();
+}
+function insertDeviceLineToNetlist(f,lineText) {
+  const lines=f.content.split('\n');
+  let pos;
+  if (f.activeSubckt && f.activeSubckt!=='__TOP__') {
+    const first=f.parsedDesign.subckts[f.activeSubckt]?.line;
+    pos=lines.findIndex((s,i)=>i>=first && /^\s*\.?ends\b/i.test(s));
+  } else pos=lines.findIndex(s=>/^\s*\.end\b/i.test(s));
+  lines.splice(pos<0?lines.length:pos,0,lineText);
+  applyClassicSource(f,lines.join('\n'));
 }
 
 /* 导出创建子电路：Input / Output / InOut 端口配置 + 画布点击选择 + 固化到本地 */
@@ -858,16 +885,18 @@ function renderSubcktPortsList() {
     const row = document.createElement("div");
     row.className = "port-config-row";
     row.innerHTML = `
-      <span style="font-family:Consolas,monospace;font-weight:bold;color:#38bdf8;">${p.name}</span>
+      <span style="font-family:Consolas,monospace;font-weight:bold;color:#38bdf8;">${escapeHtml(p.name)}</span>
       <div style="display:flex;align-items:center;gap:6px;">
-        <select onchange="subcktExportPorts[${idx}].dir=this.value" style="background:#14151b;border:1px solid #475569;color:#fff;padding:3px 6px;border-radius:4px;font-size:12px;">
+        <select data-port-dir="" style="background:#14151b;border:1px solid #475569;color:#fff;padding:3px 6px;border-radius:4px;font-size:12px;">
           <option value="input" ${p.dir === "input" ? "selected" : ""}>输入 (Input)</option>
           <option value="output" ${p.dir === "output" ? "selected" : ""}>输出 (Output)</option>
           <option value="inout" ${p.dir === "inout" ? "selected" : ""}>输入输出 (InOut)</option>
         </select>
-        <button class="q-btn" style="padding:2px 6px;" onclick="subcktExportPorts.splice(${idx},1);renderSubcktPortsList();">✕</button>
+        <button class="q-btn" style="padding:2px 6px;" data-port-remove="">✕</button>
       </div>
     `;
+    row.querySelector("[data-port-dir]").onchange=e=>{p.dir=e.target.value;};
+    row.querySelector("[data-port-remove]").onclick=()=>{subcktExportPorts.splice(idx,1);renderSubcktPortsList();};
     box.appendChild(row);
   });
 }
@@ -1402,26 +1431,6 @@ function renderSVG(layout, routed, subckt) {
   if (viewVisibility.dcOp) {
     const dcOp = computeDcOperatingPoint(layout, getActiveFile());
     const dcLayer = createEl("g");
-    // 标注各电线的静态电流
-    routed.wires.forEach((w) => {
-      if (!w.points || w.points.length < 2) return;
-      const midIdx = Math.floor((w.points.length - 1) / 2);
-      const pA = w.points[midIdx], pB = w.points[midIdx + 1];
-      const mx = (pA.x + pB.x) / 2, my = (pA.y + pB.y) / 2;
-      const iStr = dcOp.wireCurrents[w.net] || "12.5uA";
-      const isHoriz = Math.abs(pB.x - pA.x) >= Math.abs(pB.y - pA.y);
-      const arrow = isHoriz ? (pB.x >= pA.x ? "→" : "←") : (pB.y >= pA.y ? "↓" : "↑");
-      const label = `${arrow}${iStr}`;
-      const lw = Math.max(46, label.length * 6.2 + 8);
-      dcLayer.appendChild(createEl("rect", {
-        x: mx - lw / 2, y: my - 8, width: lw, height: 14, rx: 3,
-        fill: "rgba(255, 247, 237, 0.94)", stroke: "#f97316", "stroke-width": 1
-      }));
-      dcLayer.appendChild(createEl("text", {
-        x: mx, y: my + 2.5, "text-anchor": "middle",
-        fill: "#c2410c", "font-size": "9.5", "font-weight": "bold", "font-family": "Consolas, monospace"
-      }, label));
-    });
     const annotatedNets = new Set();
     layout.elements.forEach(el => {
       el.pins.forEach(p => {
@@ -1779,7 +1788,7 @@ function openEquivalentCircuitForDevice(el) {
     if (eqCode) {
       const parsedEquiv = parseSpectreNetlist(eqCode);
       f.parsedDesign.subckts[eqSubName] = parsedEquiv.subckts[eqSubName];
-      enterSubcktHierarchy(eqSubName, `${el.name} SPICE等效电路`);
+      enterSubcktHierarchy(eqSubName, `${el.name} 教学等效电路`);
       return;
     }
   }
@@ -1790,7 +1799,7 @@ function openEquivalentCircuitForDevice(el) {
     const equivSpice = `subckt ${equivSubName} ( d g s b )\nrg ( g gi ) resistor r=5\ncgs ( gi s ) capacitor c=15f\ncgd ( gi d ) capacitor c=5f\ncdb ( d b ) capacitor c=8f\ncsb ( s b ) capacitor c=8f\nm_core ( d gi s b ) ${chType} w=${el.params.w || "10u"} l=${el.params.l || "1u"}\nends ${equivSubName}`;
     const parsedEquiv = parseSpectreNetlist(equivSpice);
     f.parsedDesign.subckts[equivSubName] = parsedEquiv.subckts[equivSubName];
-    enterSubcktHierarchy(equivSubName, `${el.name} SPICE等效电路`);
+    enterSubcktHierarchy(equivSubName, `${el.name} 教学等效电路`);
   }
 }
 
@@ -1852,8 +1861,8 @@ function renderLayerQuickMenu() {
       if (sub.elements.length === 0) return;
       const isCur = f.activeSubckt === k;
       const label = k === "__TOP__" ? "Top-Level" : k;
-      html += `<div class="lq-item" onclick="switchSubckt('${k.replace(/'/g, "\'")}', true); closeLayerQuickMenu(); event.stopPropagation();">
-        <span><i class="lq-check">${isCur ? "✓" : ""}</i>${label}</span>
+      html += `<div class="lq-item" onclick="switchSubckt(${escapeHtml(JSON.stringify(k))}, true); closeLayerQuickMenu(); event.stopPropagation();">
+        <span><i class="lq-check">${isCur ? "✓" : ""}</i>${escapeHtml(label)}</span>
         <span style="color:#64748b;font-size:11px;">${sub.elements.length} 器件</span>
       </div>`;
     });
@@ -1869,7 +1878,7 @@ function renderLayerQuickMenu() {
   layers.forEach(([key, label]) => {
     const fn = key === "floatingIsland" ? "toggleFloatingIsland(event)" : `toggleLayer('${key}', event)`;
     html += `<div class="lq-item" onclick="${fn}; renderLayerQuickMenu();">
-      <span><i class="lq-check">${viewVisibility[key] ? "✓" : ""}</i>${label}</span>
+      <span><i class="lq-check">${viewVisibility[key] ? "✓" : ""}</i>${escapeHtml(label)}</span>
     </div>`;
   });
   menu.innerHTML = html;
@@ -1883,8 +1892,8 @@ function updateBreadcrumbs() {
   const stack = f.hierarchyStack && f.hierarchyStack.length ? f.hierarchyStack : [f.activeSubckt];
   const crumbsHtml = stack.map((subKey, idx) => {
     const label = subKey === "__TOP__" ? "Top-Level" : subKey;
-    if (idx === stack.length - 1) return `<b>${label}</b>`;
-    return `<span class="crumb-link" onclick="jumpBreadcrumb(${idx})">${label}</span> <span>/</span>`;
+    if (idx === stack.length - 1) return `<b>${escapeHtml(label)}</b>`;
+    return `<span class="crumb-link" onclick="jumpBreadcrumb(${idx})">${escapeHtml(label)}</span> <span>/</span>`;
   }).join(" ");
   bar.innerHTML = `<button type="button" class="layer-trigger" onclick="toggleLayerQuickMenu(event)" title="点击快速切换电路层级与显示图层">${currentLang === "en" ? "Layers ▾" : "图层 ▾"}</button> ${crumbsHtml} <div id="layer-quick-menu" onclick="event.stopPropagation()"></div>`;
   if (layerQuickMenuOpen) renderLayerQuickMenu();
@@ -1923,7 +1932,7 @@ function updateFuncCard(layout) {
     entries.forEach(([k, v]) => {
       const row = document.createElement("div");
       row.className = "param-edit-row";
-      row.innerHTML = `<b>${k} =</b>`;
+      row.innerHTML = `<b>${escapeHtml(k)} =</b>`;
       const inp = document.createElement("input");
       inp.value = v;
       inp.onchange = () => {
@@ -1940,23 +1949,7 @@ function updateFuncCard(layout) {
   document.getElementById("func-pins").textContent = "引脚: " + el.pins.map(p => `${p.name}=${p.net}`).join(", ");
 }
 
-function syncElementParamsToCode(el) {
-  const f = getActiveFile();
-  if (!f || !el.line) return;
-  const lines = f.content.split(/\r?\n/);
-  const idx = el.line - 1;
-  if (lines[idx]) {
-    const nodesStr = el.pins.map(p => p.net).join(" ");
-    const paramsStr = Object.entries(el.params).map(([k, v]) => `${k}=${v}`).join(" ");
-    const indent = lines[idx].match(/^\s*/)[0];
-    lines[idx] = `${indent}${el.name} (${nodesStr}) ${el.model} ${paramsStr}`.trimEnd();
-    f.content = lines.join("\n");
-    f.dirty = true;
-    document.getElementById("netlist-input").value = f.content;
-    renderFileTabs();
-    refreshEditorGutter();
-  }
-}
+function syncElementParamsToCode() { syncLayoutToActiveNetlist(); }
 
 function inspectSubcktConnectivity(subKey, layout, subDef) {
   const errs = [];
@@ -2037,10 +2030,10 @@ function runConnectivityCheck() {
     rerenderOnly();
 
     const layerLabel = firstErrorResult.subKey === "__TOP__" ? "Top-Level" : firstErrorResult.subKey;
-    const warnHtml = firstErrorResult.warns.length ? `<div style="margin-top:6px;color:#b45309;"><b>⚠ 警告 (${firstErrorResult.warns.length})：</b><ul>${firstErrorResult.warns.map(w => `<li>${w}</li>`).join("")}</ul></div>` : "";
+    const warnHtml = firstErrorResult.warns.length ? `<div style="margin-top:6px;color:#b45309;"><b>⚠ 警告 (${firstErrorResult.warns.length})：</b><ul>${firstErrorResult.warns.map(w => `<li>${escapeHtml(w)}</li>`).join("")}</ul></div>` : "";
     banner.style.display = "";
     banner.className = "err";
-    banner.innerHTML = `<span class="banner-close" onclick="this.parentElement.style.display='none'">✕</span><b>✘ [${layerLabel}] 发现 ${firstErrorResult.errs.length} 处连接线错误：</b><ul>${firstErrorResult.errs.map(e => `<li>${e}</li>`).join("")}</ul>${warnHtml}`;
+    banner.innerHTML = `<span class="banner-close" onclick="this.parentElement.style.display='none'">✕</span><b>✘ [${escapeHtml(layerLabel)}] 发现 ${firstErrorResult.errs.length} 处连接线错误：</b><ul>${firstErrorResult.errs.map(e => `<li>${escapeHtml(e)}</li>`).join("")}</ul>${warnHtml}`;
     document.getElementById("mode-tip").textContent = `✘ 已跳转至报错图层 [${layerLabel}] 并高亮 ${firstErrorResult.errs.length} 处错误`;
     return;
   }
@@ -2058,7 +2051,7 @@ function runConnectivityCheck() {
     const layerLabel = firstWarnResult.subKey === "__TOP__" ? "Top-Level" : firstWarnResult.subKey;
     banner.style.display = "";
     banner.className = "warn";
-    banner.innerHTML = `<span class="banner-close" onclick="this.parentElement.style.display='none'">✕</span><b>⚠ [${layerLabel}] 发现 ${firstWarnResult.warns.length} 处单端标签警告（无断路错误）：</b><ul>${firstWarnResult.warns.map(w => `<li>${w}</li>`).join("")}</ul>`;
+    banner.innerHTML = `<span class="banner-close" onclick="this.parentElement.style.display='none'">✕</span><b>⚠ [${escapeHtml(layerLabel)}] 发现 ${firstWarnResult.warns.length} 处单端标签警告（无断路错误）：</b><ul>${firstWarnResult.warns.map(w => `<li>${escapeHtml(w)}</li>`).join("")}</ul>`;
     document.getElementById("mode-tip").textContent = `⚠ [${layerLabel}] 存在 ${firstWarnResult.warns.length} 处单端口标签警告`;
     return;
   }
@@ -2640,14 +2633,14 @@ function confirmRenameItem() {
 function renderFileTree() {
   const container = document.getElementById("tree-container");
   container.innerHTML = "";
-  const rootTree = { folders: {}, files: [] };
+  const rootTree = { folders: Object.create(null), files: [] };
 
   const ensureFolder = (folderPath) => {
     const parts = folderPath.split("/").filter(Boolean);
     let curr = rootTree;
     for (let i = 0; i < parts.length; i++) {
       const fName = parts[i], fullPath = parts.slice(0, i + 1).join("/");
-      if (!curr.folders[fName]) curr.folders[fName] = { name: fName, fullPath, folders: {}, files: [] };
+      if (!curr.folders[fName]) curr.folders[fName] = { name: fName, fullPath, folders: Object.create(null), files: [] };
       curr = curr.folders[fName];
     }
     return curr;
@@ -2666,12 +2659,12 @@ function renderFileTree() {
       const div = document.createElement("div");
       div.className = "tree-node";
       div.style.paddingLeft = `${10 + depth * 13}px`;
-      div.innerHTML = `<span class="tree-node-label" ondblclick="renameWorkspaceFolder('${folder.fullPath.replace(/'/g, "\\'")}', event)"><span class="tree-arrow">${isExp ? "▾" : "▸"}</span><span>📁</span><span>${folder.name}</span></span>
+      div.innerHTML = `<span class="tree-node-label" ondblclick="renameWorkspaceFolder(${escapeHtml(JSON.stringify(folder.fullPath))}, event)"><span class="tree-arrow">${isExp ? "▾" : "▸"}</span><span>📁</span><span>${escapeHtml(folder.name)}</span></span>
         <span class="tree-node-actions">
-          <button class="tree-act-btn" title="新建文件" onclick="openNewProjectItemModal('file', '${folder.fullPath.replace(/'/g, "\\'")}')">+📄</button>
-          <button class="tree-act-btn" title="重命名" onclick="renameWorkspaceFolder('${folder.fullPath.replace(/'/g, "\\'")}', event)">✏</button>
-          <button class="tree-act-btn" title="保存文件夹" onclick="saveWorkspaceFolder('${folder.fullPath.replace(/'/g, "\\'")}', event)">💾</button>
-          <button class="tree-act-btn del" title="删除文件夹" onclick="deleteWorkspaceFolder('${folder.fullPath.replace(/'/g, "\\'")}', event)">🗑</button>
+          <button class="tree-act-btn" title="新建文件" onclick="openNewProjectItemModal('file', ${escapeHtml(JSON.stringify(folder.fullPath))})">+📄</button>
+          <button class="tree-act-btn" title="重命名" onclick="renameWorkspaceFolder(${escapeHtml(JSON.stringify(folder.fullPath))}, event)">✏</button>
+          <button class="tree-act-btn" title="保存文件夹" onclick="saveWorkspaceFolder(${escapeHtml(JSON.stringify(folder.fullPath))}, event)">💾</button>
+          <button class="tree-act-btn del" title="删除文件夹" onclick="deleteWorkspaceFolder(${escapeHtml(JSON.stringify(folder.fullPath))}, event)">🗑</button>
         </span>`;
       div.onclick = (e) => {
         if (e.target.closest(".tree-node-actions")) return;
@@ -2686,7 +2679,7 @@ function renderFileTree() {
       const div = document.createElement("div");
       div.className = "tree-node" + (file.id === activeFileId ? " active" : "");
       div.style.paddingLeft = `${10 + depth * 13}px`;
-      div.innerHTML = `<span class="tree-node-label" ondblclick="renameWorkspaceFile('${file.id}', event)"><span class="tree-arrow"></span><span>📄</span><span>${file.name}${file.dirty ? " *" : ""}</span></span>
+      div.innerHTML = `<span class="tree-node-label" ondblclick="renameWorkspaceFile('${file.id}', event)"><span class="tree-arrow"></span><span>📄</span><span>${escapeHtml(file.name)}${file.dirty ? " *" : ""}</span></span>
         <span class="tree-node-actions">
           <button class="tree-act-btn" title="重命名" onclick="renameWorkspaceFile('${file.id}', event)">✏</button>
           <button class="tree-act-btn" title="保存文件" onclick="saveWorkspaceFileById('${file.id}', event)">💾</button>
@@ -2710,7 +2703,7 @@ function renderFileTabs() {
     if (!file) return;
     const tab = document.createElement("div");
     tab.className = "file-tab" + (file.id === activeFileId ? " active" : "") + (file.dirty ? " dirty" : "");
-    tab.innerHTML = `<span>📄 ${file.name}</span><span class="dirty-dot"></span><span class="tab-close">✕</span>`;
+    tab.innerHTML = `<span>📄 ${escapeHtml(file.name)}</span><span class="dirty-dot"></span><span class="tab-close">✕</span>`;
     tab.onclick = (e) => { if (e.target.classList.contains("tab-close")) closeFileTab(file.id); else openFileInTab(file.id); };
     tabsBar.appendChild(tab);
   });
@@ -2884,7 +2877,7 @@ function downloadBlob(blob, filename) {
 function pushUndoSnapshot() {
   const f = getActiveFile(), layout = getCurrentLayout();
   if (!f || !layout) return;
-  f.undoStack.push({ subckt: f.activeSubckt, snapshot: JSON.parse(JSON.stringify(layout)) });
+  f.undoStack.push({ subckt: f.activeSubckt, content: f.content, snapshot: JSON.parse(JSON.stringify(layout)) });
   if (f.undoStack.length > 40) f.undoStack.shift();
   f.redoStack = [];
 }
@@ -2894,8 +2887,9 @@ function undoEdit() {
   if (!f || f.undoStack.length === 0) return;
   const entry = f.undoStack.pop();
   const cur = f.layoutsBySubckt[entry.subckt];
-  if (cur) f.redoStack.push({ subckt: entry.subckt, snapshot: JSON.parse(JSON.stringify(cur)) });
+  if (cur) f.redoStack.push({ subckt: entry.subckt, content: f.content, snapshot: JSON.parse(JSON.stringify(cur)) });
   f.layoutsBySubckt[entry.subckt] = entry.snapshot;
+  if (entry.content!==undefined && entry.content!==f.content) applyClassicSource(f,entry.content);
   rerenderOnly();
 }
 
@@ -2904,8 +2898,9 @@ function redoEdit() {
   if (!f || f.redoStack.length === 0) return;
   const entry = f.redoStack.pop();
   const cur = f.layoutsBySubckt[entry.subckt];
-  if (cur) f.undoStack.push({ subckt: entry.subckt, snapshot: JSON.parse(JSON.stringify(cur)) });
+  if (cur) f.undoStack.push({ subckt: entry.subckt, content: f.content, snapshot: JSON.parse(JSON.stringify(cur)) });
   f.layoutsBySubckt[entry.subckt] = entry.snapshot;
+  if (entry.content!==undefined && entry.content!==f.content) applyClassicSource(f,entry.content);
   rerenderOnly();
 }
 
@@ -2956,7 +2951,7 @@ function deleteSelectedDevices() {
     layout.elements = layout.elements.filter(e => !selectedDeviceNames.has(e.name));
     selectedDeviceNames.clear();
   }
-  if (f) f.dirty = true;
+  if (f) syncLayoutToActiveNetlist();
   rerenderOnly();
 }
 
@@ -3065,12 +3060,61 @@ function confirmEditParamModal() {
   showToast(`✔ 已更新 ${newName} 参数与连接`, "ok");
 }
 
+// Update the device cards touched by a graphical edit; the rest of the source deck
+// can contain independent subcircuits, arbitrary waveform clauses and model cards.
 function syncLayoutToActiveNetlist() {
-  const f = getActiveFile();
-  const layout = getCurrentLayout();
+  const f=getActiveFile(),layout=getCurrentLayout();
   if (!f || !layout) return;
-  const lang = detectHdlLanguage(f.content, f.name);
-  compileSchematicToCode(lang, true);
+  const original=f.parsedDesign.subckts[f.activeSubckt]?.elements || [];
+  const lines=f.content.split('\n');
+  const placed=new Map(layout.elements.filter(el=>el.line).map(el=>[el.line,el]));
+  for (const previous of original) {
+    const idx=previous.line-1, raw=lines[idx];
+    if (!raw || raw.trimStart().split(/[\s(]+/)[0]!==previous.name) continue;
+    const next=placed.get(previous.line);
+    if (!next) {
+      // Keep line indices stable for the other elements being edited in the same pass.
+      lines[idx]='';
+      for (let j=idx+1;j<lines.length && /^\s*\+/.test(lines[j]);j++) lines[j]='';
+      continue;
+    }
+    const nodes=next.pins.map(p=>p.net).slice(0,previous.nodes.length);
+    const pinsChanged=nodes.some((net,i)=>net!==previous.nodes[i]);
+    const paramsChanged=JSON.stringify(next.params)!==JSON.stringify(previous.params);
+    if (!pinsChanged && !paramsChanged && next.name===previous.name && next.model===previous.model) continue;
+    const commentStart=raw.search(/\s(?:\/\/|;|\$)/);
+    const body=commentStart<0?raw:raw.slice(0,commentStart), comment=commentStart<0?'':raw.slice(commentStart);
+    const spectre=body.match(/^(\s*)\S+\s*\(([^)]*)\)\s*(\S+)(.*)$/);
+    let tail;
+    let head;
+    if (spectre) {
+      head=spectre[1]+next.name+' ('+nodes.join(' ')+') '+next.model;
+      tail=spectre[4];
+    } else {
+      const parts=Array.from(body.matchAll(/\S+/g));
+      if (parts.length<=nodes.length) continue;
+      head=body.slice(0,parts[0].index)+[next.name,...nodes].join(' ');
+      const offset=parts[nodes.length].index+parts[nodes.length][0].length;
+      tail=body.slice(offset);
+      // Preserve the exact stimulus/backend syntax after the original terminal list.
+      if (next.model!==previous.model && !['resistor','capacitor','inductor','vsource','isource'].includes(next.type)) {
+        tail=tail.replace(/^(\s*)\S+/,(_,space)=>space+next.model);
+      }
+    }
+    if (paramsChanged) {
+      const scalar=!spectre && {resistor:'r',capacitor:'c',inductor:'l',vsource:'dc',isource:'dc'}[next.type];
+      for (const key of new Set([...Object.keys(previous.params),...Object.keys(next.params)])) {
+        const value=next.params[key];
+        if (previous.params[key]===value || !/^[\w.]+$/.test(key)) continue;
+        const pattern=new RegExp('(^|\\s)'+key.replace(/\./g,'\\.')+'\\s*=\\s*[^\\s]+','i');
+        if (pattern.test(tail)) tail=tail.replace(pattern,(_,space)=>value==null?'':space+key+'='+value);
+        else if (key===scalar && value!=null) tail=tail.replace(/^(\s*(?:(?:dc|ac)\s+)?)\S+/i,(_,prefix)=>prefix+value);
+        else if (value!=null) tail+=' '+key+'='+value;
+      }
+    }
+    lines[idx]=head+tail+comment;
+  }
+  applyClassicSource(f,lines.join('\n'));
 }
 
 function compileSchematicToCode(targetLang = "spectre", silent = false) {
@@ -3366,7 +3410,7 @@ document.getElementById("netlist-input").addEventListener("input", () => {
   if (!f) return;
   f.content = document.getElementById("netlist-input").value;
   f.dirty = true;
-  f.parsedDesign = parseSpectreNetlist(f.content);
+  f.parsedDesign = parseSpectreNetlist(f.content,f.name);
   realDeviceLineMap = f.parsedDesign.lineMap;
   refreshEditorGutter();
   renderFileTabs();
@@ -3712,15 +3756,18 @@ function renderAiHistoryList() {
   aiSessions.forEach(s => {
     const item = document.createElement("div");
     item.className = "ai-hist-item" + (s.id === activeAiSessionId ? " active" : "");
-    item.innerHTML = `<span class="ai-hist-title" title="${s.createdAt}">${s.title}</span><button class="ai-hist-del" title="删除对话">🗑</button>`;
+    item.innerHTML = `<span class="ai-hist-title" title="${escapeHtml(s.createdAt)}">${escapeHtml(s.title)}</span><button class="ai-hist-del" title="删除对话">🗑</button>`;
     item.onclick = () => { activeAiSessionId = s.id; renderAiHistoryList(); renderAiMessages(); };
     item.querySelector(".ai-hist-del").onclick = (ev) => deleteAiSession(s.id, ev);
     list.appendChild(item);
   });
 }
 
-function escapeHtml(str) {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[char]);
+}
+function showToast(message,type,duration) {
+  showClassicNotification(escapeHtml(String(message).replace(/<\/?b>/gi,'')),type,duration);
 }
 
 function renderAiMessages() {
@@ -3745,7 +3792,7 @@ function renderAiMessages() {
           const codeBody = nlIdx !== -1 ? inner.slice(nlIdx + 1) : inner;
           const card = document.createElement("div");
           card.className = "ai-code-card";
-          card.innerHTML = `<div class="ai-code-card-head"><span>${lang || "netlist"}</span><div style="display:flex;gap:4px;"><button class="q-btn" style="padding:1px 6px;font-size:10.5px;">▶ 应用到网表</button><button class="q-btn" style="padding:1px 6px;font-size:10.5px;">💾 保存本地</button></div></div><pre>${escapeHtml(codeBody)}</pre>`;
+          card.innerHTML = `<div class="ai-code-card-head"><span>${escapeHtml(lang || "netlist")}</span><div style="display:flex;gap:4px;"><button class="q-btn" style="padding:1px 6px;font-size:10.5px;">▶ 应用到网表</button><button class="q-btn" style="padding:1px 6px;font-size:10.5px;">💾 保存本地</button></div></div><pre>${escapeHtml(codeBody)}</pre>`;
           const btns = card.querySelectorAll("button");
           btns[0].onclick = () => applyAiCodeToEditor(codeBody);
           btns[1].onclick = () => saveAiCodeToLocalFile(codeBody, `ai_circuit_${msgIdx}_${pIdx}.scs`);
@@ -3816,7 +3863,7 @@ async function sendAiMessage() {
   persistAiSessions();
 
   const f = getActiveFile();
-  const sysPrompt = `${AI_WEB_APP_SKILL}\n\n${AI_OPERATION_SKILL}\n\n[当前工作台上下文]\n当前文件: ${f ? f.path : "无"}\n当前子电路层级: ${f ? f.activeSubckt : "无"}\n当前 PDK: ${getActivePdk().name}\n当前网表内容:\n\`\`\`spectre\n${f ? f.content.slice(0, 3500) : ""}\n\`\`\``;
+  const sysPrompt = `${AI_WEB_APP_SKILL}\n\n${AI_OPERATION_SKILL}\n\n[当前工作台上下文]\n当前文件: ${f ? f.path : "无"}\n当前子电路层级: ${f ? f.activeSubckt : "无"}\n当前经典绘图符号库: ${getActivePdk().name}\n当前网表内容:\n\`\`\`spectre\n${f ? f.content.slice(0, 3500) : ""}\n\`\`\``;
 
   const btn = document.getElementById("ai-send-btn");
   aiSending = true;
@@ -3889,94 +3936,18 @@ try {
   currentTheme = localStorage.getItem("spectre_eda_theme") || "dark";
 } catch (e) {}
 
-function computeDcOperatingPoint(layout, f) {
-  const nodeVoltages = {};
-  const deviceOps = {};
-  let mosOps = {};
-  if (layout && layout.elements) {
-    try {
-      const dcRes = simulateDC(layout.elements, { pdkParams: typeof pdkSimParams !== "undefined" ? pdkSimParams : undefined });
-      Object.entries(dcRes.nodeVoltages || {}).forEach(([k, v]) => {
-        if (Math.abs(v) < 25) nodeVoltages[k] = v;
-      });
-      mosOps = dcRes.mosOps || {};
-    } catch (e) {
-      showToast(e.message || "DC operating point error", "err", 4500);
+function computeDcOperatingPoint(layout) {
+  const unavailable={nodeVoltages:{},deviceOps:{},mosOps:{}};
+  if (!layout?.elements.length) return unavailable;
+  try {
+    const solved=solveMnaDc(layout.elements,{returnFull:true,pdkParams:pdkSimParams});
+    if (!solved.converged) return unavailable;
+    const deviceOps={};
+    for (const [name,op] of Object.entries(solved.mosOps)) {
+      if (Number.isFinite(op.id)) deviceOps[name]=`Id≈${(op.id*1e6).toFixed(1)} µA (${op.region})`;
     }
-  }
-  let vdd = 1.8;
-  const content = f ? f.content : "";
-  const vddM = content.match(/dc=([\d.]+)/i);
-  if (vddM) vdd = parseFloat(vddM[1]) || 1.8;
-
-  if (!layout || !layout.elements) return { nodeVoltages, deviceOps };
-  layout.elements.forEach(el => {
-    el.pins.forEach(p => {
-      if (!p.net) return;
-      if (isHighVoltNet(p.net)) nodeVoltages[p.net] = vdd;
-      else if (isLowVoltNet(p.net)) nodeVoltages[p.net] = 0.0;
-      else if (isNegVoltNet(p.net)) nodeVoltages[p.net] = -vdd;
-    });
-  });
-
-  // Heuristic DC solver iterations
-  for (let it = 0; it < 4; it++) {
-    layout.elements.forEach(el => {
-      el.pins.forEach(p => {
-        if (!p.net || nodeVoltages[p.net] !== undefined) return;
-        const nl = p.net.toLowerCase();
-        if (nl.includes("vref")) nodeVoltages[p.net] = 1.21;
-        else if (nl.includes("vbn") || nl === "a" || nl === "b") nodeVoltages[p.net] = 0.72;
-        else if (nl.includes("vbp") || nl === "vg" || nl === "vg3") nodeVoltages[p.net] = Math.max(0.4, vdd - 0.68);
-        else if (nl.includes("tail")) nodeVoltages[p.net] = 0.28;
-        else if (nl.includes("gate")) nodeVoltages[p.net] = 0.65;
-        else if (nl.includes("mid")) nodeVoltages[p.net] = vdd * 0.55;
-        else if (nl.includes("out") || nl.includes("iref")) nodeVoltages[p.net] = vdd * 0.62;
-        else nodeVoltages[p.net] = vdd * 0.50;
-      });
-    });
-  }
-
-  layout.elements.forEach(el => {
-    if (el.type === "nmos" || el.type === "pmos") {
-      const mop = mosOps[el.name];
-      if (mop) {
-        const idUa = (mop.id * 1e6).toFixed(1);
-        deviceOps[el.name] = `Id=${idUa}uA (${mop.region})`;
-      } else {
-        deviceOps[el.name] = `Id=0.0uA (Cutoff)`;
-      }
-    } else if (el.type === "pnp" || el.type === "npn") {
-      deviceOps[el.name] = `Ic=25uA (Fwd)`;
-    }
-  });
-  const wireCurrents = {};
-  if (layout && layout.elements) {
-    layout.elements.forEach(el => {
-      let iVal = "15.0uA";
-      if (el.type === "isource" && el.params.dc) iVal = el.params.dc;
-      else if (el.type === "resistor" && el.params.r) {
-        const rNum = parseFloat(el.params.r) || 10;
-        const unit = /k/i.test(el.params.r) ? 1e3 : (/m/i.test(el.params.r) && !/meg/i.test(el.params.r) ? 1e-3 : 1);
-        const v0 = nodeVoltages[el.pins[0]?.net] ?? 1.2, v1 = nodeVoltages[el.pins[1]?.net] ?? 0;
-        const iMa = Math.abs(v0 - v1) / (rNum * unit) * 1e6;
-        iVal = iMa >= 1000 ? `${(iMa / 1000).toFixed(2)}mA` : `${iMa.toFixed(1)}uA`;
-      } else if (el.type === "nmos" || el.type === "pmos") {
-        const idUa = el.params.w ? Math.min(500, Math.max(5, Math.round(parseFloat(el.params.w) * 1.5))) : 20;
-        iVal = `${idUa}.0uA`;
-      } else if (el.type === "pnp" || el.type === "npn") {
-        iVal = "25.0uA";
-      } else if (el.type === "capacitor") {
-        iVal = "0.0uA";
-      }
-      el.pins.forEach(p => {
-        if (p.net && !wireCurrents[p.net]) {
-          wireCurrents[p.net] = (p.name === "G" || p.name === "B") ? "0.0uA" : iVal;
-        }
-      });
-    });
-  }
-  return { nodeVoltages, deviceOps, mosOps, wireCurrents };
+    return {nodeVoltages:solved.nodeVoltages,deviceOps,mosOps:solved.mosOps};
+  } catch { return unavailable; }
 }
 
 const I18N_DICT = {
@@ -3994,7 +3965,7 @@ const I18N_DICT = {
     m_pdk_mgr: "📚 工艺库管理与固化...", m_freeze_subckt: "📌 固化当前子电路到库",
     m_undo: "撤销", m_redo: "重做", m_del_dev: "删除选中元件", m_sel_all: "全选元件", m_shortcuts: "⌨ 自定义快捷键...",
     m_hierarchy: "层级视图 ▸", m_display: "显示 ▸",
-    l_power: "电源标签", l_port: "端口标签", l_inst_name: "元件名", l_inst_param: "元件参数", l_dc_op: "静态工作点标注 (DC OP)", l_island: "悬浮移动岛",
+    l_power: "电源标签", l_port: "端口标签", l_inst_name: "元件名", l_inst_param: "元件参数", l_dc_op: "工作点教学估算", l_island: "悬浮移动岛",
     m_pane_order: "区域顺序与布局 ▸",
     m_order_1: "文件区 → 代码区 → 原理图区", m_order_2: "代码区 → 文件区 → 原理图区",
     m_order_3: "原理图区 → 代码区 → 文件区", m_order_4: "文件区 → 原理图区 → 代码区",
@@ -4012,13 +3983,13 @@ const I18N_DICT = {
     m_github: "🐙 Github主页", m_dev_info: "👤 开发者信息 ▸", m_author: "作者: Etherealnymph", m_other_proj: "🚀 作者其他项目", m_contact: "✉ 联系作者",
     quick_term: "💻 终端", quick_gen: "▶ 生成", quick_check: "✔ 检查连接线",
     tip_quick_term: "打开下方终端区域", tip_pdk_badge: "点击切换或导入工艺库",
-    pane_files: "📁 资源管理器", pane_files_short: "资源管理器", pane_code_short: "网表源码", pane_canvas: "📐 原理图视图",
+    pane_files: "📁 文件", pane_files_short: "文件", pane_code_short: "网表源码", pane_canvas: "📐 原理图视图",
     status_ready: "就绪", btn_clear_all_hl: "✖ 取消全部高亮",
     tip_expand_files: "点击展开文件区", tip_collapse_files: "收起文件区", tip_new_file: "新建网表",
     tip_expand_code: "点击展开代码区", tip_collapse_code: "收起代码区", tip_move_left: "左移区域", tip_move_right: "右移区域",
     tip_place_island: "按住左侧圆点可拖动放置移动岛", tip_close_pi: "关闭放置移动岛",
     pi_label: "放置:", pi_res: "电阻 R", pi_ind: "电感 L", pi_cap: "电容 C", pi_vdc: "电压源", pi_idc: "电流源", pi_sweep: "扫频源", pi_subckt: "子电路",
-    dock_tab_terminal: "💻 终端", dock_tab_scope: "📺 示波器", dock_tab_spectrum: "📊 频谱仪", dock_tab_dcop: "📋 工作点报表", quick_labs: "🧪 实验预设", quick_share: "🔗 分享链接", dcop_tbl_title: "📋 直流工作点报表 (DC Operating Point & Small-Signal)", btn_export_csv: "💾 导出 CSV", run_dcop_tbl: "📋 工作点报表 (DC OP Table)", run_corner: "📐 Corner / 参数扫描 (SS/TT/FF)", run_mc: "🎲 蒙特卡洛失配 (Monte Carlo)", p_tline: "传输线 (Tline)", p_analog_rf: "模拟与 BJT 模块 ▸", p_opamp: "运算放大器 (OpAmp)", m_copy_dev: "📋 复制选中元件", m_paste_dev: "📥 粘贴元件组", m_align_left: "⫷ 左对齐选中元件", m_align_top: "⊤ 顶对齐选中元件", m_export_pdf: "🖨 导出矢量 PDF (打印)", m_export_kicad: "🔌 导出 KiCad 兼容原理图", mod_labs_title: "🧪 交互式电路实验预设库 (Labs)", ai_q_explain: "📊 AI 解释当前仿真",
+    dock_tab_terminal: "💻 终端", dock_tab_scope: "📺 教学近似波形", dock_tab_spectrum: "📊 频谱仪", dock_tab_dcop: "📋 工作点报表", quick_labs: "🧪 实验预设", quick_share: "🔗 分享链接", dcop_tbl_title: "📋 直流工作点报表 (DC Operating Point & Small-Signal)", btn_export_csv: "💾 导出 CSV", run_dcop_tbl: "📋 工作点报表 (DC OP Table)", run_corner: "参数扰动演示（教学近似）", run_mc: "随机失配演示（教学近似）", p_tline: "传输线 (Tline)", p_analog_rf: "模拟与 BJT 模块 ▸", p_opamp: "运算放大器 (OpAmp)", m_copy_dev: "📋 复制选中元件", m_paste_dev: "📥 粘贴元件组", m_align_left: "⫷ 左对齐选中元件", m_align_top: "⊤ 顶对齐选中元件", m_export_pdf: "🖨 导出矢量 PDF (打印)", m_export_kicad: "🔌 导出 KiCad 兼容原理图", mod_labs_title: "🧪 交互式电路实验预设库 (Labs)", ai_q_explain: "📊 AI 解释当前仿真",
     tip_dock_collapse: "折叠/展开下方区域", tip_dock_close_all: "关闭下方区域",
     term_cwd_lbl: "默认工作目录：", term_copy_cd: "📋 复制本地 cd 命令", tip_term_copy_cd: "复制在系统终端进入 HTML 所在目录的命令",
     term_ph: "输入命令，如 help, pwd, ls, run tran, run dc, run ac, open scope, check...",
@@ -4028,7 +3999,7 @@ const I18N_DICT = {
     btn_pick_probe: "🎯 原理图选端口", scope_xzoom: "X缩放:", scope_yzoom: "Y缩放:", btn_reset_zoom: "⟲ 复位", btn_new_term: "+ 新建终端", tip_new_folder: "新建工程文件夹", tip_save_proj: "保存整个工程", scope_cursor_idle: "移动鼠标查看交点读数", scope_ports_lbl: "观测端口:",
     spec_port_lbl: "响应端口:", spec_mode_lbl: "模式:", spec_opt_fft: "Tran FFT 频谱 (dBV)", spec_opt_ac: "AC 扫频幅频响应 (dB)", spec_cursor_idle: "移动鼠标查看频率/幅度",
     footer_brand: "OpenCircuit EDA (Spice-like) · Author: Etherealnymph",
-    mod_pdk_title: "📚 工艺库选择与固化管理", mod_pdk_list: "已存工艺库列表（内置 TSMC 0.18um RF 及已固化库）",
+    mod_pdk_title: "📚 经典绘图符号库", mod_pdk_list: "绘图符号与名称映射（内置教学符号及已保存符号）",
     mod_pdk_import: "📂 从本地导入工艺库文件 (.scs/.lib)", mod_pdk_freeze: "💾 固化当前工艺库 (保存至本地 pdk_libs/ 目录)", btn_ok: "确定",
     mod_place_inst: "元件实例名 (Instance Name)", mod_place_model: "模型名 (Model / Subckt)", mod_place_nodes: "连接网络 (空格分隔引脚网络，如: d g s b 或 p n)", mod_place_params: "元件参数 (如: w=20u l=1u 或 r=10k / l=5n / c=1p)",
     btn_cancel: "取消", btn_place_confirm: "放置到原理图",
@@ -4062,7 +4033,7 @@ const I18N_DICT = {
     m_pdk_mgr: "📚 PDK Library & Freeze...", m_freeze_subckt: "📌 Freeze Current Subckt",
     m_undo: "Undo", m_redo: "Redo", m_del_dev: "Delete Selected", m_sel_all: "Select All", m_shortcuts: "⌨ Keyboard Shortcuts...",
     m_hierarchy: "Hierarchy View ▸", m_display: "Display Layers ▸",
-    l_power: "Power Labels", l_port: "Port Labels", l_inst_name: "Instance Names", l_inst_param: "Parameters", l_dc_op: "DC Operating Point (DC OP)", l_island: "Floating Island",
+    l_power: "Power Labels", l_port: "Port Labels", l_inst_name: "Instance Names", l_inst_param: "Parameters", l_dc_op: "Illustrative DC estimates", l_island: "Floating Island",
     m_pane_order: "Pane Layout Order ▸",
     m_order_1: "Files → Code → Schematic", m_order_2: "Code → Files → Schematic",
     m_order_3: "Schematic → Code → Files", m_order_4: "Files → Schematic → Code",
@@ -4080,13 +4051,13 @@ const I18N_DICT = {
     m_github: "🐙 GitHub Home", m_dev_info: "👤 Developer Info ▸", m_author: "Author: Etherealnymph", m_other_proj: "🚀 Other Projects", m_contact: "✉ Contact Author",
     quick_term: "💻 Terminal", quick_gen: "▶ Generate", quick_check: "✔ Check Wires",
     tip_quick_term: "Open bottom Terminal dock", tip_pdk_badge: "Click to switch or import PDK",
-    pane_files: "📁 Explorer", pane_files_short: "Explorer", pane_code_short: "Source Code", pane_canvas: "📐 Schematic View",
+    pane_files: "📁 Files", pane_files_short: "Files", pane_code_short: "Source Code", pane_canvas: "📐 Schematic View",
     status_ready: "Ready", btn_clear_all_hl: "✖ Clear All Highlights",
     tip_expand_files: "Expand Explorer", tip_collapse_files: "Collapse Explorer", tip_new_file: "New Netlist",
     tip_expand_code: "Expand Code", tip_collapse_code: "Collapse Code", tip_move_left: "Move Left", tip_move_right: "Move Right",
     tip_place_island: "Drag grip to move Place Island", tip_close_pi: "Close Place Island",
     pi_label: "Place:", pi_res: "Res R", pi_ind: "Ind L", pi_cap: "Cap C", pi_vdc: "V Source", pi_idc: "I Source", pi_sweep: "Sweep", pi_subckt: "Subckt",
-    dock_tab_terminal: "💻 Terminal", dock_tab_scope: "📺 Oscilloscope", dock_tab_spectrum: "📊 Spectrum", dock_tab_dcop: "📋 DC OP Table", quick_labs: "🧪 Labs", quick_share: "🔗 Share URL", dcop_tbl_title: "📋 DC Operating Point & Small-Signal Table", btn_export_csv: "💾 Export CSV", run_dcop_tbl: "📋 DC Operating Point Table", run_corner: "📐 Corner Sweep (SS/TT/FF)", run_mc: "🎲 Monte Carlo Mismatch", p_tline: "Transmission Line (Tline)", p_analog_rf: "Analog & BJT Blocks ▸", p_opamp: "OpAmp (err_n)", m_copy_dev: "📋 Copy Selected", m_paste_dev: "📥 Paste Devices", m_align_left: "⫷ Align Left", m_align_top: "⊤ Align Top", m_export_pdf: "🖨 Export Vector PDF (Print)", m_export_kicad: "🔌 Export KiCad Schematic", mod_labs_title: "🧪 Interactive Circuit Labs", ai_q_explain: "📊 AI Explain Sim",
+    dock_tab_terminal: "💻 Terminal", dock_tab_scope: "Approximate teaching traces", dock_tab_spectrum: "📊 Spectrum", dock_tab_dcop: "📋 DC OP Table", quick_labs: "🧪 Labs", quick_share: "🔗 Share URL", dcop_tbl_title: "📋 DC Operating Point & Small-Signal Table", btn_export_csv: "💾 Export CSV", run_dcop_tbl: "📋 DC Operating Point Table", run_corner: "Parameter perturbation demo (approximate)", run_mc: "Random mismatch demo (approximate)", p_tline: "Transmission Line (Tline)", p_analog_rf: "Analog & BJT Blocks ▸", p_opamp: "OpAmp (err_n)", m_copy_dev: "📋 Copy Selected", m_paste_dev: "📥 Paste Devices", m_align_left: "⫷ Align Left", m_align_top: "⊤ Align Top", m_export_pdf: "🖨 Export Vector PDF (Print)", m_export_kicad: "🔌 Export KiCad Schematic", mod_labs_title: "🧪 Interactive Circuit Labs", ai_q_explain: "📊 AI Explain Sim",
     tip_dock_collapse: "Collapse/Expand Bottom Dock", tip_dock_close_all: "Close Bottom Dock",
     term_cwd_lbl: "Working Dir: ", term_copy_cd: "📋 Copy cd Command", tip_term_copy_cd: "Copy cd command to HTML directory",
     term_ph: "Enter command: help, pwd, ls, run tran, run dc, run ac, open scope, check...",
@@ -4096,7 +4067,7 @@ const I18N_DICT = {
     btn_pick_probe: "🎯 Pick Port", scope_xzoom: "X-Zoom:", scope_yzoom: "Y-Zoom:", btn_reset_zoom: "⟲ Reset", btn_new_term: "+ New Term", tip_new_folder: "New Project Folder", tip_save_proj: "Save Project", scope_cursor_idle: "Hover for intersection", scope_ports_lbl: "Probe Ports:",
     spec_port_lbl: "Response Port:", spec_mode_lbl: "Mode:", spec_opt_fft: "Tran FFT Spectrum (dBV)", spec_opt_ac: "AC Magnitude Response (dB)", spec_cursor_idle: "Hover to read freq/mag",
     footer_brand: "Spectre EDA Schematic & PDK Workbench · Author: Etherealnymph",
-    mod_pdk_title: "📚 PDK Library & Freeze Manager", mod_pdk_list: "Saved PDK Libraries (Built-in TSMC 0.18um RF & Frozen)",
+    mod_pdk_title: "Classic drawing symbol libraries", mod_pdk_list: "Drawing symbols and model-name mappings",
     mod_pdk_import: "📂 Import Local PDK (.scs/.lib)", mod_pdk_freeze: "💾 Freeze Active PDK Locally", btn_ok: "OK",
     mod_place_inst: "Instance Name", mod_place_model: "Model / Subckt Name", mod_place_nodes: "Connected Nets (space-separated)", mod_place_params: "Parameters (e.g. w=20u l=1u or r=10k)",
     btn_cancel: "Cancel", btn_place_confirm: "Place on Schematic",
@@ -4441,12 +4412,11 @@ if (termInp) {
       appendTermLine("已触发跨层级连线检查，详情请见原理图上方反馈横幅。");
     } else if (op === "run" && ["tran", "dc", "ac"].includes((parts[1] || "").toLowerCase())) {
       const st = parts[1].toLowerCase();
-      runSpiceSimulation(st, true);
-      appendTermLine(`已完成 ${st.toUpperCase()} 仿真并更新波形数据，可输入 "open scope" 或 "open spectrum" 查看结果。`);
+      toWorkbench(st,"scope");
     } else if (op === "open" && parts[1] === "scope") {
-      openOscilloscopeModal();
+      toWorkbench("tran","scope");
     } else if (op === "open" && parts[1] === "spectrum") {
-      openSpectrumModal();
+      toWorkbench("tran","spectrum");
     } else {
       appendTermLine(`未知命令: ${cmd} (输入 help 查看支持命令)`);
     }
@@ -4610,8 +4580,8 @@ function runSpiceSimulation(simType, silentModal = false) {
     const modeTip = document.getElementById("mode-tip");
     if (modeTip) {
       modeTip.textContent = currentLang === "en"
-        ? `Completed ${simType.toUpperCase()} MNA simulation (${nodes.length} nodes)`
-        : `已完成 ${simType.toUpperCase()} 真实 MNA 仿真 (${nodes.length} 个观测节点)`;
+        ? `Completed illustrative ${simType.toUpperCase()} estimate (${nodes.length} nodes)`
+        : `已完成 ${simType.toUpperCase()} 教学近似仿真 (${nodes.length} 个观测节点)`;
     }
   } catch (err) {
     showToast(`仿真求解失败: ${err.message}`, "err", 5500);
@@ -4622,6 +4592,7 @@ function openOscilloscopeModal() {
   populateExcitationNodeSelectors();
   if (!simDataStore[activeScopeType]) runSpiceSimulation("tran", true);
   const data = simDataStore[activeScopeType] || simDataStore.tran;
+  if (!data?.series) return;
   const chBox = document.getElementById("scope-channels");
   const nodeNames = Object.keys(data.series);
   if (scopeActiveNodes.size === 0) nodeNames.slice(0, 3).forEach(n => scopeActiveNodes.add(n));
@@ -5208,7 +5179,9 @@ function pasteCopiedDevices() {
     computePinPositions(clone);
     layout.elements.push(clone);
     selectedDeviceNames.add(clone.name);
-    const line = `    ${clone.name} (${clone.pins.map(p => p.net).join(" ")}) ${clone.model} ${Object.entries(clone.params).map(([k, v]) => `${k}=${v}`).join(" ")}`.trim();
+    const originalLine=f.content.split('\n')[orig.line-1];
+    const first=originalLine?.trimStart().split(/[\s(]+/)[0];
+    const line=first===orig.name ? originalLine.replace(/^(\s*)[^\s(]+/,(_,space)=>space+clone.name) : classicElementLine(clone,f);
     insertDeviceLineToNetlist(f, line);
   });
   rerenderOnly();
@@ -5263,15 +5236,15 @@ function openDcOpTablePanel() {
   let rows = `<thead><tr><th>类型</th><th>名称</th><th>直流电压 / 电流</th><th>小信号 / 状态 (gm / ro / Region)</th></tr></thead><tbody>`;
   Object.entries(dcOp.nodeVoltages).forEach(([net, v]) => {
     const iStr = dcOp.wireCurrents?.[net] || "—";
-    rows += `<tr><td>Node</td><td><b>${net}</b></td><td>${v.toFixed(4)} V</td><td>Branch I ≈ ${iStr}</td></tr>`;
+    rows += `<tr><td>Node</td><td><b>${escapeHtml(net)}</b></td><td>${v.toFixed(4)} V</td><td>Branch I ≈ ${iStr}</td></tr>`;
   });
   layout.elements.forEach(el => {
-    const op = dcOp.deviceOps[el.name] || "Linear / Active";
+    const op = dcOp.deviceOps[el.name] || "—";
     const mop = dcOp.mosOps?.[el.name];
     const gmStr = (el.type === "nmos" || el.type === "pmos") && mop
       ? `gm=${(mop.gm * 1e3).toFixed(2)}mS, ro=${(mop.ro / 1e3).toFixed(1)}kΩ`
       : `Model: ${el.model}`;
-    rows += `<tr><td>${el.type.toUpperCase()}</td><td><b>${el.name}</b></td><td>${op}</td><td>${gmStr}</td></tr>`;
+    rows += `<tr><td>${el.type.toUpperCase()}</td><td><b>${escapeHtml(el.name)}</b></td><td>${escapeHtml(op)}</td><td>${escapeHtml(gmStr)}</td></tr>`;
   });
   rows += `</tbody>`;
   tbl.innerHTML = rows;
@@ -5297,9 +5270,9 @@ function runCornerSweep() {
   const stimNode = document.getElementById("stim-node-select")?.value || nodes[0];
   const basePdk = typeof pdkSimParams !== "undefined" ? pdkSimParams : { vth0: 0.5, kpN: 180e-6, kpP: 60e-6, lambda: 0.02 };
   const corners = [
-    { label: "TT(27C)", pdk: { ...basePdk } },
-    { label: "FF(-40C)", pdk: { ...basePdk, vth0: Math.max(0.25, basePdk.vth0 - 0.08), kpN: basePdk.kpN * 1.18, kpP: basePdk.kpP * 1.18 } },
-    { label: "SS(125C)", pdk: { ...basePdk, vth0: basePdk.vth0 + 0.08, kpN: basePdk.kpN * 0.84, kpP: basePdk.kpP * 0.84 } }
+    { label: "nominal", pdk: { ...basePdk } },
+    { label: "higher Kp", pdk: { ...basePdk, vth0: Math.max(0.25, basePdk.vth0 - 0.08), kpN: basePdk.kpN * 1.18, kpP: basePdk.kpP * 1.18 } },
+    { label: "lower Kp", pdk: { ...basePdk, vth0: basePdk.vth0 + 0.08, kpN: basePdk.kpN * 0.84, kpP: basePdk.kpP * 0.84 } }
   ];
   try {
     let xVals = [], series = {};
@@ -5310,11 +5283,11 @@ function runCornerSweep() {
       const trace = res.series[targetNode] || Object.values(res.series)[0] || [];
       series[`${targetNode}_${c.label}`] = trace;
     });
-    simDataStore.dc = { type: "dc", xLabel: `Sweep ${stimNode} (V) [SS/TT/FF]`, xScale: 1, xVals, series };
+    simDataStore.dc = { type: "dc", xLabel: `Sweep ${stimNode} (V) [illustrative parameter perturbation]`, xScale: 1, xVals, series };
     activeScopeType = "dc";
     scopeActiveNodes = new Set(Object.keys(series));
     openOscilloscopeModal();
-    showToast("✔ 已完成真实 MNA SS / TT / FF Corner 参数扫描", "ok");
+    showToast("✔ 教学参数扰动曲线已生成（阈值 ±80 mV，Kp 按比例变化）", "ok");
   } catch (err) {
     showToast(`Corner 扫描失败: ${err.message}`, "err", 4500);
   }
@@ -5342,11 +5315,11 @@ function runMonteCarlo() {
       xVals = res.xVals;
       mcSeries[`${targetNode}_MC#${r}`] = res.series[targetNode] || Object.values(res.series)[0] || [];
     }
-    simDataStore.dc = { type: "dc", xLabel: `Sweep ${stimNode} (V) [Monte Carlo]`, xScale: 1, xVals, series: mcSeries };
+    simDataStore.dc = { type: "dc", xLabel: `Sweep ${stimNode} (V) [illustrative mismatch]`, xScale: 1, xVals, series: mcSeries };
     activeScopeType = "dc";
     scopeActiveNodes = new Set(Object.keys(mcSeries));
     openOscilloscopeModal();
-    showToast("✔ 已完成真实 MNA Monte Carlo 失配采样 (6 runs, Vth/Kp 高斯扰动)", "ok");
+    showToast("✔ 教学随机失配曲线已生成 (6 runs, Vth/Kp 高斯扰动)", "ok");
   } catch (err) {
     showToast(`Monte Carlo 失败: ${err.message}`, "err", 4500);
   }
@@ -5377,7 +5350,7 @@ function openLabsModal() {
       workspaceFiles.push(nf);
       closeModal("labs-modal");
       openFileInTab(nf.id);
-      runSpiceSimulation("tran", false);
+      showToast("已打开经典图形示例，可在新版工作台设置测试台与仿真参数", "ok");
     };
     box.appendChild(card);
   });
@@ -5394,33 +5367,11 @@ function shareProjectUrl() {
   showToast("🔗 已生成工程分享链接并写入地址栏/剪贴板！", "ok");
 }
 
-function importOpenSourcePdk(kind) {
-  const pdk = kind === "sky130"
-    ? {
-        id: "pdk_sky130", name: "SkyWater 130nm (sky130_fd_pr)", fileName: "sky130_fd_pr.lib",
-        nmosModels: [{ name: "sky130_fd_pr__nfet_01v8", desc: "SkyWater 130nm 1.8V NMOS", defaultParams: "w=1u l=0.15u" }],
-        pmosModels: [{ name: "sky130_fd_pr__pfet_01v8", desc: "SkyWater 130nm 1.8V PMOS", defaultParams: "w=2u l=0.15u" }],
-        equivSubckts: {}
-      }
-    : {
-        id: "pdk_gf180", name: "GlobalFoundries 180nm (gf180mcu)", fileName: "gf180mcu.lib",
-        nmosModels: [{ name: "nfet_03v3", desc: "GF180mcu 3.3V NMOS", defaultParams: "w=2u l=0.28u" }],
-        pmosModels: [{ name: "pfet_03v3", desc: "GF180mcu 3.3V PMOS", defaultParams: "w=4u l=0.28u" }],
-        equivSubckts: {}
-      };
-  if (!savedPdks.some(p => p.id === pdk.id)) savedPdks.push(pdk);
-  activePdkId = pdk.id;
-  localStorage.setItem("spectre_eda_pdks", JSON.stringify(savedPdks));
-  updatePdkBadge();
-  openPdkModal();
-  showToast(`✔ 已导入开源 PDK: ${pdk.name}`, "ok");
-}
-
 function applyPdkParamEdit() {
   pdkSimParams.vth0 = parseFloat(document.getElementById("pdk-edit-vth0")?.value || "0.5");
   pdkSimParams.kpN = (parseFloat(document.getElementById("pdk-edit-kp")?.value || "180")) * 1e-6;
   pdkSimParams.lambda = parseFloat(document.getElementById("pdk-edit-lambda")?.value || "0.02");
-  showToast(`✔ 已更新 PDK 模型参数 (Vth0=${pdkSimParams.vth0}V, Kp=${(pdkSimParams.kpN*1e6).toFixed(0)}uA/V²)`, "ok");
+  showToast(`✔ 已更新教学近似模型参数 (Vth0=${pdkSimParams.vth0}V, Kp=${(pdkSimParams.kpN*1e6).toFixed(0)}uA/V²)`, "ok");
   rerenderOnly();
 }
 
@@ -5429,10 +5380,54 @@ function aiExplainCurrentSim() {
   if (!f || !layout) return;
   const dcOp = computeDcOperatingPoint(layout, f);
   const summary = Object.entries(dcOp.nodeVoltages).map(([k, v]) => `${k}=${v.toFixed(2)}V`).join(", ");
-  aiQuickPrompt(`请结合当前电路网表与直流工作点 (${summary})，解释电路工作原理、关键节点波形特征并给出性能优化建议。`);
+  aiQuickPrompt(`请结合当前电路网表与直流经典近似模型工作点估算 (${summary})，解释电路工作原理、关键节点波形特征并给出性能优化建议。`);
+}
+
+let classicOrigin=null;
+function classicSourceFile(path, content) {
+  return {id:crypto.randomUUID(),path,name:path.split('/').at(-1),content,dirty:false,
+    parsedDesign:null,activeSubckt:'__TOP__',hierarchyStack:['__TOP__'],layoutsBySubckt:{},undoStack:[],redoStack:[]};
+}
+function importWorkbenchProject() {
+  if (location.hash!=='#workbench') return;
+  try {
+    const item=sessionStorage.getItem('opencircuit.classic.transfer');
+    if (!item) throw Error('此标签页没有可恢复的工作台工程');
+    const project=JSON.parse(item);
+    if (!Array.isArray(project.files) || !project.files.length) throw Error('工程缺少文件');
+    const imported=project.files.map(f=>{
+      if (typeof f.path!=='string'||!f.path||typeof f.content!=='string') throw Error('工程包含无效文件');
+      return classicSourceFile(f.path,f.content);
+    });
+    workspaceFiles=imported;
+    expandedFolders=new Set();
+    for (const f of imported) {
+      const parts=f.path.split('/');
+      for (let i=1;i<parts.length;i++) expandedFolders.add(parts.slice(0,i).join('/'));
+    }
+    const active=imported.find(f=>f.path===project.active) || imported.find(f=>f.path===project.entry) || imported[0];
+    activeFileId=active.id;
+    openTabIds=[activeFileId];
+    classicOrigin=project;
+  } catch(e) { showToast('打开工作台工程失败：'+e.message,'err'); }
+}
+function toWorkbench(type=null, tab=null) {
+  const active=getActiveFile();
+  if (!active) return;
+  active.content=document.getElementById('netlist-input').value;
+  const originalEntry=workspaceFiles.find(f=>f.path===classicOrigin?.entry);
+  const next={schemaVersion:3,title:classicOrigin?.title || active.name,entry:(originalEntry||active).path,
+    active:active.path,files:workspaceFiles.map(({path,content})=>({path,content})),custom:classicOrigin?.custom || [],
+    workbenchId:classicOrigin?.workbenchId, workbenchRevision:classicOrigin?.workbenchRevision,
+    configMode:classicOrigin?.configMode, config:classicOrigin?.config || null, ...(tab ? {classicAction:{type,tab}} : {})};
+  try {
+    sessionStorage.setItem('opencircuit.from-classic',JSON.stringify(next));
+    location.assign('./index.html#from-classic');
+  } catch(e) { showToast('当前工程超过标签页传递空间或浏览器存储不可用。请先从文件区保存工程。','err'); }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  importWorkbenchProject();
   applyTheme();
   applyLanguage();
   initMenus();
@@ -5463,7 +5458,7 @@ Object.assign(window, {
   createNewTerminalInstance, deleteSelectedDevices, drawSpectrumAnalyzer,
   exportAllAiSessions, exportDcOpCsv, exportKiCadSch, exportPrintablePdf,
   exportProjectState, exportRaster, exportSVG, freezeCurrentSubcktToLib,
-  freezePdkToLocal, hideIslandFromModal, importAiSessionsFile, importOpenSourcePdk,
+  freezePdkToLocal, hideIslandFromModal, importAiSessionsFile, toWorkbench,
   jumpBreadcrumb, minimizeAiDialog, movePane, onExcitationChanged, openAiDialog,
   openContactAuthorModal, openCreateSubcktModal, openDcOpTablePanel, openFileInTab,
   openIslandConfigModal, openLabsModal, openNewProjectItemModal, openOscilloscopeModal,
@@ -5476,6 +5471,8 @@ Object.assign(window, {
   selectSavedPdk, sendAiMessage, setEditMode, setLanguageMode, setPaneOrder,
   setScopeZoom, setSpecZoom, setThemeMode, shareProjectUrl, showLintToast,
   startPickSchematicPort, switchSubckt, syncStimNodeFromSpec, toggleAiConfigView,
+  toggleLayerQuickMenu, closeLayerQuickMenu, renderLayerQuickMenu, triggerStandardFormSubmitFallback,
+  deleteWorkspaceFile, deleteWorkspaceFolder, saveWorkspaceFileById,
   toggleBottomDockCollapse, toggleFloatingIsland, toggleIslandMinimize, toggleLayer,
   toggleMaximizeAiDialog, togglePaneCollapse, togglePlaceIsland, triggerOpenFile,
   triggerOpenFolder, undoEdit,

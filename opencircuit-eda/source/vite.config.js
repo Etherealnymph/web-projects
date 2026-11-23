@@ -4,6 +4,7 @@ export default defineConfig({
   base: './',
   build: {
     outDir: 'dist',
-    sourcemap: true
-  }
+    rollupOptions: { input: { workbench: 'index.html', classic: 'classic.html' } },
+    sourcemap: false,
+  },
 });
