@@ -1,0 +1,8 @@
+* SKY130 1.8 V NMOS | TT gate-voltage sweep | W=L=1 um
+.include "sky130_fd_pr__nfet_01v8__mismatch.corner.spice"
+.include "sky130_fd_pr__nfet_01v8__tt.corner.spice"
+VD drain 0 DC 0.05
+VG gate 0 DC 0
+Xn drain gate 0 0 sky130_fd_pr__nfet_01v8 L=1u W=1u
+.dc VG 0 1.8 0.05
+.end

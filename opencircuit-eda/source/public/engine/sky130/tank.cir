@@ -1,0 +1,7 @@
+* SKY130 center-tapped spiral with a 100 pF tank capacitor
+.include "sky130_fd_pr__ind_03_90.model.spice"
+Itest 0 port DC 0 AC 1
+Xcoil port 0 ct 0 sky130_fd_pr__ind_03_90
+Ctank port 0 100p
+.ac dec 40 1Meg 10G
+.end

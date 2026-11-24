@@ -1,55 +1,77 @@
-# OpenCircuit EDA v2.1.0
+# OpenCircuit EDA 3.0
 
-浏览器内直接运行的开源 Spice 风格 EDA 工作台，已作为静态站点部署在本仓库中：
+OpenCircuit 把原理图、网表、模型库和测量仪表放在同一个浏览器工程里。新工作台用 ngspice 46 WebAssembly 求解模拟电路。编辑器、求解器、工艺模型和导出器均可从本目录本地运行。
 
-- 在线访问：<https://etherealnymph.github.io/web-projects/opencircuit-eda/>
-- 站点入口：首页「精选入口」、`projects.html`（本地项目）、`eda.html`（电子设计）
+## 第一次使用
 
-## 功能
+打开工作台后，会看到含电源、RC 子电路、串联电流探针和负载的阶跃响应测试台。
 
-- 原理图绘制：正交自动布线、移动岛、旋转 / 镜像 / 对齐、复制粘贴、自定义快捷键
-- 网表解析：Spectre / SPICE / Verilog / VHDL 与 `.scs`、`.cir`、`.sp` 工程文件
-- 仿真引擎：MNA 直流工作点、瞬态（Tran）、直流扫描（DC）、交流频响（AC）
-- 观测工具：示波器、频谱仪、DC 工作点报表、终端
-- 工艺与层次：PDK 工艺库管理、子电路固化、Corner / 蒙特卡洛分析
-- AI 电路助手：配置 OpenAI / DeepSeek 兼容接口后可直接对话生成与排查电路
+1. 单击 **Xfilter**，在右侧检查器查看实例位置与子电路定义。选择 **进入子层** 或在 **图层** 下拉框选择 **RC_CELL**。
+2. 单击 **R1** 后可编辑实例，或打开实例代码。**代码编辑器** 支持撤销、重做、行号定位、缩进、查找替换、复制行和注释。
+3. 单击 **TRAN** 设置分析类型和参数，再单击 **运行仿真**。在仪器台选择输入与输出通道、时基、垂直量程和触发方式。
+4. 打开顶部 **实验库**，选择 **电阻分压与电流**。工作台创建独立工程并求解。数字表应显示 V(out) 约 3.333333 V，I(Vsense) 约 +1.666667 mA。
+5. 使用顶部工程菜单切换、改名、创建、导入或删除工程。源码与元数据按工程存入 IndexedDB。多标签页同时修改同一工程时，工作台提示另存副本或打开已保存的版本。导出完整工程 JSON 可供备份或在其他浏览器继续。
 
-## 部署说明
+## 设计与测量
 
-本目录中的 `index.html` 与 `assets/` 是 `vite build` 产物，已使用相对路径（`base: './'`），
-不依赖服务器根路径，因此可以直接放在 GitHub Pages 的任意子目录下访问。
+| 能力 | 工作台中的操作 |
+| --- | --- |
+| 分层原理图 | 查看 SPICE 和 Spectre 的测试台与子电路、Verilog 模块、VHDL 实体。点击元件可跳到实例和模型定义源行。 |
+| 结构化 HDL | 支持门级实例、常见组合赋值和层次模块。过程块可定位到源码。复杂表达式和待综合语法由诊断标明。 |
+| SPICE 模拟 | 支持 OP、独立源 DC 扫描、线性/每十倍频程/每倍频程 AC 扫描和 TRAN。瞬态支持起止时间、最大步长和 UIC。可用「从网表读取」跟随分析卡。 |
+| Spectre 输入 | 支持可转换的 RLC、源、子电路、常用模型及部分 DC/AC/TRAN 分析语句。转换失败会显示诊断。 |
+| 仪器台 | 双通道示波器、触发及时基、数字电压表和电流表、FFT 频谱、源函数预览与写入。频谱由瞬态数据重采样后计算；AC 频响使用求解器的复数输出。电流表可用串联 0 V 探针读取支路电流。 |
+| 激励 | 正弦、方波、三角波、多谐波及受限数学表达式。发生器将信号写入入口网表，重新求解后可测量其作用。 |
+| 放置与连线 | 27 种模板涵盖 RLC、独立与受控源、半导体、传输线、开关、运放和电流探针。按引脚顺序指定网络，同名网络连接。「经典绘图编辑器」提供旧版画布布线、拖动、旋转和对齐。 |
+| 工程存储 | 模型卡和源码按文件保存，常规编辑仅写改动文件及元数据。运行结果与未修改的大型库分开处理。支持旧版单文件与多文件工程 JSON 的源码导入。 |
+| 导出 | 全层 PNG ZIP、多页矢量 PDF、SVG/PNG、当前层 KiCad 原理图及 XML 网表、物料表、入口原文、展开依赖的 SPICE 网表、波形 CSV 和完整工程 JSON。 |
 
-更新应用时：
+在顶部 **工艺库** 中可搜索模型定义、跳转源码、切换已引用库中实际声明的工艺角，并编辑入口里支持的数值设计变量。可从「工艺角与栅极偏置」实验试用这组操作。
 
-```bash
-cd opencircuit-eda/source
-npm install
+## 导入真实工艺模型
+
+选择 **工程文件 → 导入 → 导入工程或 PDK 目录**，选中同时包含电路和模型文件的共同父目录。打开测试台网表，在编辑器的 **••• → 设为设计与仿真入口** 选定入口。举例，工程有 test.cir 和 models/devices.lib 时，入口可以写：
+
+~~~spice
+* NMOS transfer test
+.lib "models/devices.lib" tt
+VD d 0 0.05
+VG g 0 0
+M1 d g 0 0 nch W=1u L=1u
+.dc VG 0 1.8 0.05
+.end
+~~~
+
+此例假设库含 tt 段以及名为 nch 的 MOS 模型。若库使用 .subckt 封装器件，应根据该文件的端口顺序改用 X 实例。导入对话框和实验库中可直接运行两个已附带的 SkyWater 示例：
+
+- **SKY130 螺旋电感谐振**使用公开电感模型和 100 pF 电容。在 1 MHz–10 GHz、每十倍频程 40 点的 AC 扫描中，采样点的阻抗峰值约为 8.362 Ω，频率约为 398.1 MHz。
+- **SKY130 1.8 V NMOS 转移特性**使用 TT 工艺角和实际 BSIM4 尺寸分档模型。W=L=1 µm，VDS=50 mV，在 VGS=1.8 V 时，流经漏极的电流约为 12.0773 µA。电压源探针 I(VD) 按流入源正端的约定显示负号。
+
+ngspice 模型文本、相对包含路径和可用模型参数决定具体库的兼容性。商业加密模型、需要外部插件的模型及 Cadence 专有数据库需要对应工具。HDL 的行为时序仿真与流片签核不在当前验证范围。
+
+## AI 与自定义元件
+
+页面内的 window.OpenCircuitEDA 接口可供浏览器代理创建或编辑工程、选层、定位元件、设置分析、运行仿真、读取误差和波形、导出结果。接口直接作用于当前标签页，无需 API Key。[AI 调试技能](skills/opencircuit-workbench/SKILL.md)
+
+自定义元件通过 JSON 指定引脚顺序、SPICE 位号前缀、参数及可选模型或子电路定义。[代码规范与子电路示例](docs/custom-components.md)
+
+## 运行及构建
+
+本目录根部是静态发布文件。从本目录启动 HTTP 服务后访问浏览器中对应的地址。
+
+~~~sh
+python3 -m http.server 8765 --bind 127.0.0.1
+~~~
+
+源代码和测试位于 source。使用 Node.js 和 npm 可重新构建：
+
+~~~sh
+cd source
+npm ci
+npm test
 npm run build
-# 将 dist/index.html 与 dist/assets/ 覆盖到上级目录
-cp -r dist/index.html dist/assets ..
-```
+~~~
 
-## 源码
+将 source/dist/ 的全部内容复制至发布目录，包含 assets、engine、docs、licenses、skills 和首页等文件。应用使用相对 URL，支持 GitHub Pages 子目录。Web 构建只安装 Vite、Vitest 及其依赖。若需要使用存量桌面打包脚本，可先运行 npm run desktop:setup 安装 Electron 工具。
 
-`source/` 保留了可重新构建的源码（`src/`、`tests/`、Electron 桌面端入口等）：
-
-```bash
-cd opencircuit-eda/source
-npm install
-npm test        # vitest
-npm run build   # 生成 dist/
-```
-
-桌面端打包（需在本地安装 Electron Builder 依赖）：
-
-```bash
-npm run electron:win    # Windows portable + nsis
-npm run electron:mac    # macOS dmg + zip
-npm run electron:linux  # Linux AppImage + deb
-```
-
-## 说明
-
-- 所有数据默认保存在浏览器 `localStorage`；打开文件夹、保存工程等能力使用
-  File System Access API，需要 Chrome / Edge 等支持该 API 的浏览器。
-- AI 接口 Key 仅保存在本机浏览器中，不会上传到本仓库。
+ngspice 与 SKY130 模型的固定版本、上游来源和许可证见[内核与模型说明](engine/README.md)。PDF 中思源黑体子集的许可随站点提供。
