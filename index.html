@@ -79,7 +79,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 input,textarea{font-family:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 
-/* ============ TOP NAV (simplified) ============ */
+/* ============ TOP NAV (TI-style) ============ */
 .topnav{
   position:sticky;top:0;z-index:80;
   background:color-mix(in srgb,var(--bg) 85%,transparent);
@@ -89,62 +89,115 @@ input,textarea{font-family:inherit}
 }
 .topnav-inner{
   max-width:1280px;margin:0 auto;
-  display:flex;align-items:center;gap:12px;
-  height:var(--nav-h);padding:0 24px;
+  display:flex;align-items:center;gap:6px;
+  height:var(--nav-h);padding:0 20px;
 }
 .brand{
   display:flex;align-items:center;gap:8px;
-  font-weight:600;font-size:15px;letter-spacing:-.01em;
-  white-space:nowrap;
+  font-weight:600;font-size:14px;letter-spacing:-.01em;
+  white-space:nowrap;margin-right:10px;
 }
 .brand .mark{
-  width:28px;height:28px;border-radius:8px;
+  width:26px;height:26px;border-radius:7px;
   background:linear-gradient(135deg,var(--accent),var(--accent-hover));
-  display:grid;place-items:center;color:#fff;font-size:14px;font-weight:700;
+  display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700;
 }
-.brand small{color:var(--text-muted);font-weight:400;font-size:11.5px;letter-spacing:.04em}
+.brand small{color:var(--text-muted);font-weight:400;font-size:11px;letter-spacing:.04em}
 
-/* Hamburger button - always visible */
-.nav-toggle{
-  width:38px;height:38px;border-radius:9px;
-  display:inline-flex;align-items:center;justify-content:center;
-  border:1px solid var(--border);background:var(--bg-panel);
-  cursor:pointer;transition:.18s;flex-shrink:0;
+/* Main nav menu */
+.nav-menu{display:flex;align-items:center;gap:1px;flex:1;min-width:0;overflow:hidden}
+.nav-item{position:relative;flex-shrink:0}
+.nav-link{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:7px 9px;border-radius:7px;
+  font-size:13px;font-weight:500;color:var(--text-muted);
+  transition:.15s;letter-spacing:0;white-space:nowrap;
 }
-.nav-toggle:hover{background:var(--bg-panel-hover);border-color:var(--border-strong)}
-.nav-toggle svg{width:16px;height:16px;color:var(--text-muted);transition:.18s}
-.nav-toggle:hover svg{color:var(--text)}
-.nav-toggle.open svg{transform:rotate(90deg)}
-.nav-toggle.open{background:var(--accent-soft);border-color:var(--accent)}
-.nav-toggle.open svg{color:var(--accent-text)}
+.nav-link:hover,.nav-item:hover .nav-link{color:var(--text);background:var(--bg-panel)}
+.nav-item.active .nav-link{color:var(--accent-text)}
+.nav-link .caret{
+  width:8px;height:8px;
+  border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;
+  transform:rotate(45deg);margin-top:-3px;opacity:.6;
+}
 
-/* Search box in nav - flex:1 takes remaining space */
+/* Mega menu */
+.mega{
+  position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  min-width:560px;max-width:720px;
+  background:var(--bg-mega);
+  border:1px solid var(--border-strong);
+  border-radius:14px;
+  box-shadow:var(--shadow-lg);
+  padding:24px;
+  opacity:0;visibility:hidden;transform:translateX(-50%) translateY(-6px);
+  transition:.18s cubic-bezier(.16,1,.3,1);
+  z-index:90;
+}
+.nav-item:hover .mega{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.mega::before{
+  content:"";position:absolute;top:-6px;left:50%;transform:translateX(-50%) rotate(45deg);
+  width:12px;height:12px;background:var(--bg-mega);
+  border-left:1px solid var(--border-strong);border-top:1px solid var(--border-strong);
+}
+.mega-head{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:16px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:16px;
+}
+.mega-head .mh-title{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.mega-head .mh-sub{font-size:11.5px;color:var(--text-muted);margin-top:3px;letter-spacing:.02em}
+.mega-head .mh-count{
+  font-size:10.5px;color:var(--text-subtle);font-weight:500;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 9px;border-radius:5px;background:var(--bg-panel);border:1px solid var(--border);
+}
+.mega-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px 32px}
+.mega-sub-title{
+  font-size:10.5px;font-weight:600;color:var(--accent-text);letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:8px;
+}
+.mega-sub-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2px}
+.mega-sub-list li a{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 8px;border-radius:6px;font-size:12.5px;color:var(--text-muted);
+  transition:.12s;letter-spacing:.005em;
+}
+.mega-sub-list li a:hover{background:var(--bg-panel);color:var(--text)}
+.mega-sub-list li a .mi{
+  width:20px;height:20px;border-radius:5px;background:var(--accent-soft);color:var(--accent-text);
+  display:grid;place-items:center;font-size:11px;flex-shrink:0;
+}
+.mega-foot{
+  margin-top:18px;padding-top:14px;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.mega-foot .mf-link{
+  display:inline-flex;align-items:center;gap:5px;
+  color:var(--accent-text);font-size:12.5px;font-weight:500;letter-spacing:.005em;
+}
+.mega-foot .mf-link:hover{color:var(--accent-hover)}
+.mega-foot .mf-desc{font-size:11.5px;color:var(--text-subtle)}
+
+/* Search box in nav */
 .nav-search{
-  position:relative;flex:1;max-width:520px;
-  margin-left:8px;
+  position:relative;width:200px;flex-shrink:0;
+  margin-left:auto;
 }
 .nav-search svg{
-  position:absolute;left:13px;top:50%;transform:translateY(-50%);
-  width:15px;height:15px;color:var(--text-subtle);pointer-events:none;
+  position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  width:14px;height:14px;color:var(--text-subtle);pointer-events:none;
 }
 .nav-search input{
-  width:100%;padding:9px 14px 9px 38px;
+  width:100%;padding:8px 12px 8px 32px;
   background:var(--bg-input);border:1px solid var(--border);
-  color:var(--text);border-radius:9px;font-size:13.5px;outline:none;transition:.15s;
+  color:var(--text);border-radius:8px;font-size:13px;outline:none;transition:.15s;
 }
-.nav-search input:focus{border-color:var(--border-focus);background:var(--bg-elevated);box-shadow:0 0 0 3px var(--accent-soft)}
+.nav-search input:focus{border-color:var(--border-focus);background:var(--bg-elevated);width:240px}
 .nav-search input::placeholder{color:var(--text-subtle)}
-.nav-search .search-kbd{
-  position:absolute;right:10px;top:50%;transform:translateY(-50%);
-  font-family:"SF Mono",ui-monospace,monospace;font-size:10.5px;
-  padding:2px 6px;border-radius:4px;background:var(--bg-panel);border:1px solid var(--border);
-  color:var(--text-subtle);pointer-events:none;
-}
 
-.nav-tools{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
+.nav-tools{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .theme-toggle{
   display:inline-flex;align-items:center;justify-content:center;
-  width:38px;height:38px;border-radius:9px;
+  width:36px;height:36px;border-radius:9px;
   border:1px solid var(--border);background:var(--bg-panel);transition:.2s;
 }
 .theme-toggle:hover{border-color:var(--border-strong);background:var(--bg-panel-hover)}
@@ -154,150 +207,21 @@ input,textarea{font-family:inherit}
 :root[data-theme="light"] .theme-toggle .sun{display:block}
 :root[data-theme="light"] .theme-toggle .moon{display:none}
 
-/* ============ DROPDOWN MENU (desktop) ============ */
-.nav-dropdown{
-  position:absolute;top:calc(100% - 1px);left:24px;
-  width:min(420px,calc(100% - 48px));
-  background:var(--bg-elevated);
-  border:1px solid var(--border-strong);
-  border-top:none;
-  border-radius:0 0 14px 14px;
-  box-shadow:var(--shadow-lg);
-  padding:8px;
-  opacity:0;visibility:hidden;transform:translateY(-8px);
-  transition:.18s cubic-bezier(.16,1,.3,1);
-  z-index:90;
-  max-height:calc(100vh - var(--nav-h) - 24px);
-  overflow-y:auto;
+/* Mobile nav toggle */
+.nav-toggle{
+  display:none;width:36px;height:36px;border-radius:9px;
+  border:1px solid var(--border);background:var(--bg-panel);
+  align-items:center;justify-content:center;
 }
-.nav-dropdown.open{opacity:1;visibility:visible;transform:translateY(0)}
-.nd-item{
-  display:flex;align-items:center;gap:12px;
-  padding:10px 12px;border-radius:8px;
-  font-size:13.5px;color:var(--text-muted);
-  transition:.12s;cursor:pointer;
-}
-.nd-item:hover{background:var(--bg-panel);color:var(--text)}
-.nd-item.active{color:var(--accent-text);background:var(--accent-soft)}
-.nd-item .nd-icon{
-  width:28px;height:28px;border-radius:7px;
-  display:grid;place-items:center;font-size:14px;
-  background:color-mix(in srgb,var(--nd-color,var(--accent)) 15%,transparent);
-  color:var(--nd-color,var(--accent-text));
-  border:1px solid color-mix(in srgb,var(--nd-color,var(--accent)) 30%,transparent);
-  flex-shrink:0;
-}
-.nd-item .nd-text{flex:1;min-width:0}
-.nd-item .nd-title{font-weight:500;letter-spacing:-.005em;line-height:1.3}
-.nd-item .nd-sub{font-size:11.5px;color:var(--text-subtle);margin-top:1px}
-.nd-item .nd-count{
-  font-family:"SF Mono",ui-monospace,monospace;font-size:11px;
-  color:var(--text-subtle);padding:2px 7px;border-radius:4px;
-  background:var(--bg-panel);border:1px solid var(--border);
-}
-.nd-item.nd-divider{margin-top:6px;padding-top:12px;border-top:1px solid var(--border)}
-.nd-section-label{
-  font-size:10px;font-weight:600;color:var(--text-subtle);
-  letter-spacing:.12em;text-transform:uppercase;
-  padding:8px 12px 4px;
-}
-
-/* ============ MOBILE DRAWER (left slide-in) ============ */
-.mobile-overlay{
-  position:fixed;inset:0;z-index:85;background:rgba(0,0,0,.5);
-  backdrop-filter:blur(4px);
-  opacity:0;visibility:hidden;transition:.3s;
-}
-.mobile-overlay.open{opacity:1;visibility:visible}
-.mobile-drawer{
-  position:fixed;top:0;left:0;bottom:0;z-index:90;
-  width:min(320px,85vw);
-  background:var(--bg-elevated);
-  border-right:1px solid var(--border);
-  transform:translateX(-100%);transition:transform .3s cubic-bezier(.16,1,.3,1);
-  padding:0;overflow-y:auto;
-  display:flex;flex-direction:column;
-}
-.mobile-drawer.open{transform:translateX(0)}
-.mobile-drawer .md-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:18px 20px;border-bottom:1px solid var(--border);
-  position:sticky;top:0;background:var(--bg-elevated);z-index:1;
-}
-.mobile-drawer .md-head .brand{font-size:14px}
-.mobile-drawer .md-close{
-  width:32px;height:32px;border-radius:8px;display:grid;place-items:center;
-  color:var(--text-muted);font-size:20px;transition:.15s;
-}
-.mobile-drawer .md-close:hover{background:var(--bg-panel);color:var(--text)}
-.mobile-drawer .md-search{
-  padding:14px 20px;border-bottom:1px solid var(--border);
+.nav-toggle span{
+  display:block;width:16px;height:1.5px;background:var(--text);
   position:relative;
 }
-.mobile-drawer .md-search input{
-  width:100%;padding:10px 14px;
-  background:var(--bg-input);border:1px solid var(--border);
-  color:var(--text);border-radius:9px;font-size:13.5px;outline:none;
+.nav-toggle span::before,.nav-toggle span::after{
+  content:"";position:absolute;left:0;width:16px;height:1.5px;background:var(--text);
 }
-.mobile-drawer .md-search input:focus{border-color:var(--border-focus)}
-.mobile-drawer .md-list{padding:8px 12px 24px;flex:1}
-.mobile-drawer .md-item{
-  display:flex;align-items:center;gap:12px;
-  padding:11px 12px;border-radius:8px;
-  font-size:14px;color:var(--text-muted);
-  transition:.12s;margin-bottom:2px;cursor:pointer;
-}
-.mobile-drawer .md-item:hover,.mobile-drawer .md-item.active{
-  color:var(--text);background:var(--bg-panel);
-}
-.mobile-drawer .md-item.active{color:var(--accent-text);background:var(--accent-soft)}
-.mobile-drawer .md-item .md-icon{
-  width:28px;height:28px;border-radius:7px;
-  display:grid;place-items:center;font-size:14px;
-  background:color-mix(in srgb,var(--md-color,var(--accent)) 15%,transparent);
-  color:var(--md-color,var(--accent-text));
-  border:1px solid color-mix(in srgb,var(--md-color,var(--accent)) 30%,transparent);
-  flex-shrink:0;
-}
-.mobile-drawer .md-item .md-text{flex:1;min-width:0}
-.mobile-drawer .md-item .md-count{
-  font-family:"SF Mono",ui-monospace,monospace;font-size:11px;
-  color:var(--text-subtle);
-}
-.mobile-drawer .md-divider{
-  margin:8px 12px;height:1px;background:var(--border);
-}
-.mobile-drawer .md-section-label{
-  font-size:10px;font-weight:600;color:var(--text-subtle);
-  letter-spacing:.12em;text-transform:uppercase;
-  padding:12px 24px 6px;
-}
-
-/* ============ FOOTER UPTIME ============ */
-.footer-uptime{
-  display:flex;align-items:center;gap:8px;
-  font-family:"SF Mono",ui-monospace,monospace;
-  font-size:11.5px;color:var(--text-muted);
-  font-variant-numeric:tabular-nums;
-  letter-spacing:.02em;
-  white-space:nowrap;
-}
-.footer-uptime::before{
-  content:"";display:inline-block;
-  width:7px;height:7px;border-radius:50%;
-  background:var(--success);
-  box-shadow:0 0 8px var(--success);
-  animation:uptime-pulse 2s ease-in-out infinite;
-  flex-shrink:0;
-}
-@keyframes uptime-pulse{
-  0%,100%{opacity:1;transform:scale(1)}
-  50%{opacity:.6;transform:scale(.85)}
-}
-.footer-uptime .uptime-num{
-  display:inline-block;min-width:2.2ch;text-align:right;
-  color:var(--text);
-}
+.nav-toggle span::before{top:-5px}
+.nav-toggle span::after{top:5px}
 
 /* ============ HOMEPAGE HERO ============ */
 .hero{
@@ -834,26 +758,21 @@ input,textarea{font-family:inherit}
 
 /* ============ RESPONSIVE ============ */
 @media(max-width:1100px){
+  /* Hide horizontal menu, show hamburger, on tablet+small laptop */
+  .nav-menu,.nav-search{display:none}
+  .nav-toggle{display:flex}
   .sections-grid{grid-template-columns:repeat(2,1fr)}
   .featured-row{grid-template-columns:repeat(2,1fr)}
   .footer-inner{grid-template-columns:1fr 1fr;gap:24px}
 }
-/* Mobile: hide desktop dropdown, show left drawer (drawer is always rendered, just toggled by JS) */
-@media(max-width:768px){
-  /* On mobile, the dropdown menu is replaced by the side drawer (JS-driven).
-     Hide the dropdown element on small screens to avoid double menus. */
-  .nav-dropdown{display:none !important}
+@media(max-width:860px){
   .cards-grid{grid-template-columns:repeat(2,1fr)}
   .hero{padding:56px 24px 72px}
   .hero-stats{gap:32px;flex-wrap:wrap}
   .search-results{grid-template-columns:1fr}
-  .topnav-inner{padding:0 16px;gap:10px}
-  .nav-search{margin-left:0}
-  /* Hide the kbd hint on mobile */
-  .nav-search .search-kbd{display:none}
-  .footer-bottom{flex-direction:column;align-items:flex-start;gap:8px}
 }
 @media(max-width:580px){
+  .topnav-inner{padding:0 16px;gap:8px}
   .shell{padding:0 16px}
   .hero{padding:40px 16px 56px}
   .hero h1{font-size:36px}
@@ -868,8 +787,6 @@ input,textarea{font-family:inherit}
   .form-row{grid-template-columns:1fr}
   .msg-fab{right:18px;bottom:18px;width:50px;height:50px}
   .section{padding:48px 0}
-  /* On very small screens, hide the brand subtitle to save space */
-  .brand small{display:none}
 }
 
 /* Reduced motion */
@@ -894,11 +811,164 @@ input,textarea{font-family:inherit}
 <nav class="topnav">
   <div class="topnav-inner">
     <a href="index.html" class="brand"><span class="mark">观</span><span>观澜 <small>· 实验与造物</small></span></a>
-    <button class="nav-toggle" id="navToggle" aria-label="菜单" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <button class="nav-toggle" id="navToggle" aria-label="菜单"><span></span></button>
+    <ul class="nav-menu"><li class="nav-item"><a class="nav-link" href="workbench.html">芯片工作台 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">芯片工作台</div>
+      <div class="mh-sub">从设计到验证</div>
+    </div>
+    <a class="mh-count" href="workbench.html">4 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">交互工作台</div><ul class="mega-sub-list"><li><a href="silicon-notes/"><span class="mi">笺</span><span>硅间札记</span></a></li><li><a href="analog-atlas/"><span class="mi">⌬</span><span>硅海图谱</span></a></li><li><a href="circuit-lab/"><span class="mi">∿</span><span>观澜电路</span></a></li><li><a href="logic-loom/"><span class="mi">⊞</span><span>逻辑织机</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="workbench.html">查看全部 →</a>
+    <span class="mf-desc">交互式工作台：电路仿真、模拟拓扑、札记、逻辑门与微型世界。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="personal-projects.html">个人项目 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">个人项目</div>
+      <div class="mh-sub">私人空间</div>
+    </div>
+    <a class="mh-count" href="personal-projects.html">2 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">私人站点</div><ul class="mega-sub-list"><li><a href="insight-space/index.html"><span class="mi">体</span><span>体悟集 · 私人空间</span></a></li></ul></div><div><div class="mega-sub-title">交互工作台</div><ul class="mega-sub-list"><li><a href="silicon-notes/"><span class="mi">笺</span><span>硅间札记</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="personal-projects.html">查看全部 →</a>
+    <span class="mf-desc">个人站点、札记与私人空间，记录与沉淀。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="learning-quiz.html">学习题库 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">学习题库</div>
+      <div class="mh-sub">竞赛与复习</div>
+    </div>
+    <a class="mh-count" href="learning-quiz.html">2 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">竞赛复习</div><ul class="mega-sub-list"><li><a href="math-competition/web/"><span class="mi">∑</span><span>大学生数学竞赛</span></a></li></ul></div><div><div class="mega-sub-title">课程复习</div><ul class="mega-sub-list"><li><a href="semiconductor-devices/"><span class="mi">μ</span><span>半导体物理与器件</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="learning-quiz.html">查看全部 →</a>
+    <span class="mf-desc">大学生数学竞赛、半导体物理与器件等学习题库。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="checkin.html">每日签到 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">每日签到</div>
+      <div class="mh-sub">额度与积分</div>
+    </div>
+    <a class="mh-count" href="checkin.html">5 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">签到</div><ul class="mega-sub-list"><li><a href="https://gpt.api456.me/dashboarda/"><span class="mi">✓</span><span>99code 签到</span></a></li><li><a href="https://helpcoder.cc/console/personal"><span class="mi">帮</span><span>帮帮程序员签到</span></a></li><li><a href="https://ps.air-outer.com/"><span class="mi">⇄</span><span>Agent Router 签到</span></a></li><li><a href="https://sunapi.5201201314.top/profile"><span class="mi">🔗</span><span>NewAPI 签到</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="checkin.html">查看全部 →</a>
+    <span class="mf-desc">API 中转站与社区的每日签到入口。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="forum.html">论坛社区 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">论坛社区</div>
+      <div class="mh-sub">交流与笔记</div>
+    </div>
+    <a class="mh-count" href="forum.html">6 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">论坛</div><ul class="mega-sub-list"><li><a href="https://bbs.eetop.cn/"><span class="mi">💬</span><span>EETOP 论坛</span></a></li><li><a href="https://bbs.21ic.com/"><span class="mi">💬</span><span>21ic 论坛</span></a></li></ul></div><div><div class="mega-sub-title">留言板</div><ul class="mega-sub-list"><li><a href="https://www.analog-life.com/message/"><span class="mi">A</span><span>Analog-Life 留言板</span></a></li></ul></div><div><div class="mega-sub-title">课程笔记</div><ul class="mega-sub-list"><li><a href="https://lossnotes.cc/CourseNotes/"><span class="mi">笔</span><span>LOSS 学研札记</span></a></li></ul></div><div><div class="mega-sub-title">站点</div><ul class="mega-sub-list"><li><a href="https://rt2innocence.net/"><span class="mi">R</span><span>rt2innocence</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="forum.html">查看全部 →</a>
+    <span class="mf-desc">电子工程论坛、模拟 IC 留言板与课程笔记知识库。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="projects.html">本地项目 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">本地项目</div>
+      <div class="mh-sub">实验与工具</div>
+    </div>
+    <a class="mh-count" href="projects.html">29 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">芯片设计</div><ul class="mega-sub-list"><li><a href="gm-id-studio/dist/GM-ID-Studio.html"><span class="mi">gm</span><span>GM/ID Studio</span></a></li></ul></div><div><div class="mega-sub-title">3D 游戏</div><ul class="mega-sub-list"><li><a href="neon-rush-3d.html"><span class="mi">◇</span><span>霓虹疾驰 · NEON RUSH</span></a></li></ul></div><div><div class="mega-sub-title">3D 沙盒</div><ul class="mega-sub-list"><li><a href="mini-world/index.html"><span class="mi">▦</span><span>迷你世界 · 像素宇宙</span></a></li></ul></div><div><div class="mega-sub-title">应用工具</div><ul class="mega-sub-list"><li><a href="stock-trading-simulator/stock-trading-simulator.html"><span class="mi">↗</span><span>股市训练场</span></a></li><li><a href="bilingual-dictionary/index.html"><span class="mi">字</span><span>双语专业词典</span></a></li><li><a href="ai-tools.html"><span class="mi">AI</span><span>AI 工具大全</span></a></li><li><a href="homework-1.html"><span class="mi">⌘</span><span>作业页面集合</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="projects.html">查看全部 →</a>
+    <span class="mf-desc">本地部署的实验工具、游戏、训练场与外部资源。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="games.html">游戏分区 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">游戏分区</div>
+      <div class="mh-sub">在线对战</div>
+    </div>
+    <a class="mh-count" href="games.html">9 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">在线游戏</div><ul class="mega-sub-list"><li><a href="https://mk48.io/"><span class="mi">🚢</span><span>MK48.io</span></a></li><li><a href="https://1v1.suroi.io/"><span class="mi">🎯</span><span>Suroi 1v1</span></a></li><li><a href="https://kiomet.com/"><span class="mi">🗺️</span><span>Kiomet</span></a></li><li><a href="https://yorg.io/"><span class="mi">🛡️</span><span>Yorg.io</span></a></li></ul></div><div><div class="mega-sub-title">3D 沙盒</div><ul class="mega-sub-list"><li><a href="mini-world/index.html"><span class="mi">▦</span><span>迷你世界 · 像素宇宙</span></a></li></ul></div><div><div class="mega-sub-title">3D 游戏</div><ul class="mega-sub-list"><li><a href="neon-rush-3d.html"><span class="mi">◇</span><span>霓虹疾驰 · NEON RUSH</span></a></li></ul></div><div><div class="mega-sub-title">游戏娱乐</div><ul class="mega-sub-list"><li><a href="seawar.html"><span class="mi">⚓</span><span>怒海争锋</span></a></li><li><a href="war-simulator.html"><span class="mi">⚔</span><span>铁血战线</span></a></li><li><a href="lucky-slots.html"><span class="mi">7</span><span>幸运老虎机</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="games.html">查看全部 →</a>
+    <span class="mf-desc">多人在线 IO 游戏与本地游戏集合。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="books.html">书籍分区 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">书籍分区</div>
+      <div class="mh-sub">电子书库</div>
+    </div>
+    <a class="mh-count" href="books.html">3 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">电子书</div><ul class="mega-sub-list"><li><a href="https://www.suduguu.com/"><span class="mi">📚</span><span>速读谷</span></a></li><li><a href="https://zxcs.zip/"><span class="mi">📖</span><span>知轩藏书</span></a></li><li><a href="https://zh.zchongqing.ru/"><span class="mi">📕</span><span>中文电子书库</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="books.html">查看全部 →</a>
+    <span class="mf-desc">在线阅读与下载的电子书资源。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="ai.html">AI 分区 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">AI 分区</div>
+      <div class="mh-sub">模型与中转</div>
+    </div>
+    <a class="mh-count" href="ai.html">16 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">AI 仪表盘</div><ul class="mega-sub-list"><li><a href="https://hubcodex.fun/dashboard"><span class="mi">枢</span><span>枢码 AI 模型中间站</span></a></li></ul></div><div><div class="mega-sub-title">AI 对话</div><ul class="mega-sub-list"><li><a href="https://chat.z.ai/"><span class="mi">Z</span><span>Z.ai 智谱对话</span></a></li><li><a href="https://app.clawsgo.cn/chat"><span class="mi">爪</span><span>ClawsGo 对话</span></a></li></ul></div><div><div class="mega-sub-title">API 中转</div><ul class="mega-sub-list"><li><a href="https://api.chengmo.cc.cd/profile"><span class="mi">澄</span><span>澄墨 API</span></a></li><li><a href="https://sunapi.5201201314.top/profile"><span class="mi">N</span><span>NewAPI 控制台</span></a></li><li><a href="https://kiosapi.com/wallet"><span class="mi">K</span><span>Kios API 钱包</span></a></li><li><a href="https://api.yjs.im/keys"><span class="mi">钥</span><span>YJS API 密钥</span></a></li></ul></div><div><div class="mega-sub-title">签到</div><ul class="mega-sub-list"><li><a href="https://jimeng.jianying.com/ai-tool/explore"><span class="mi">梦</span><span>即梦 AI 探索</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="ai.html">查看全部 →</a>
+    <span class="mf-desc">AI 对话、API 中转、AI 工具与模型管理入口。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="eda.html">电子设计 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">电子设计</div>
+      <div class="mh-sub">器件与仿真</div>
+    </div>
+    <a class="mh-count" href="eda.html">11 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">AI PCB</div><ul class="mega-sub-list"><li><a href="https://heypcb.ai/"><span class="mi">⬢</span><span>heypcb AI PCB</span></a></li></ul></div><div><div class="mega-sub-title">器件资料</div><ul class="mega-sub-list"><li><a href="https://datasheet4u.com/"><span class="mi">📄</span><span>Datasheet4U</span></a></li></ul></div><div><div class="mega-sub-title">器件官网</div><ul class="mega-sub-list"><li><a href="https://www.ti.com.cn"><span class="mi">TI</span><span>德州仪器 TI</span></a></li><li><a href="https://www.analog.com/cn/index.html"><span class="mi">AD</span><span>ADI 亚德诺</span></a></li></ul></div><div><div class="mega-sub-title">仿真模型</div><ul class="mega-sub-list"><li><a href="https://www.diodes.com/zh/design/tools/spice-models"><span class="mi">◉</span><span>Diodes SPICE 模型</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="eda.html">查看全部 →</a>
+    <span class="mf-desc">PCB 设计、器件资料、在线仿真与开发板工具。</span>
+  </div>
+</div></li>
+<li class="nav-item"><a class="nav-link" href="modules.html">模块资料 <span class="caret"></span></a><div class="mega">
+  <div class="mega-head">
+    <div>
+      <div class="mh-title">模块资料</div>
+      <div class="mh-sub">开发板文档</div>
+    </div>
+    <a class="mh-count" href="modules.html">3 entries</a>
+  </div>
+  <div class="mega-grid"><div><div class="mega-sub-title">模块文档</div><ul class="mega-sub-list"><li><a href="https://voice.hlktech.com/yunSound/sdk/toWebSdkParam?sdkId=17661"><span class="mi">🎙</span><span>海凌科云语音 SDK</span></a></li></ul></div><div><div class="mega-sub-title">开发板文档</div><ul class="mega-sub-list"><li><a href="http://openedv.com/docs/boards/esp32/ATK-DNESP32S3BVXX.html"><span class="mi">原</span><span>正点原子 ESP32-S3</span></a></li><li><a href="https://doc.embedfire.com/products/link/zh/latest/fpga/ebf_xilinx_zynq70xx.html"><span class="mi">火</span><span>野火 Zynq7020 教程</span></a></li></ul></div></div>
+  <div class="mega-foot">
+    <a class="mf-link" href="modules.html">查看全部 →</a>
+    <span class="mf-desc">开发板文档与模块 SDK 资料。</span>
+  </div>
+</div></li></ul>
     <div class="nav-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       <input type="text" id="navSearch" placeholder="搜索全站入口…" autocomplete="off">
-      <kbd class="search-kbd">⌘ K</kbd>
     </div>
     <div class="nav-tools">
       <button class="theme-toggle" id="themeToggle" title="切换主题" aria-label="切换主题">
@@ -906,10 +976,13 @@ input,textarea{font-family:inherit}
       </button>
     </div>
   </div>
-  <div class="nav-dropdown" id="navDropdown"><div class="nd-section-label">导航</div><a class="nd-item" href="index.html"><span class="nd-icon">观</span><span class="nd-text"><span class="nd-title">首页</span><span class="nd-sub">主页与精选入口</span></span></a><a class="nd-item" href="workbench.html" style="--nd-color:#6366f1"><span class="nd-icon">∿</span><span class="nd-text"><span class="nd-title">芯片工作台</span><span class="nd-sub">从设计到验证</span></span><span class="nd-count">4</span></a><a class="nd-item" href="personal-projects.html" style="--nd-color:#ec4899"><span class="nd-icon">体</span><span class="nd-text"><span class="nd-title">个人项目</span><span class="nd-sub">私人空间</span></span><span class="nd-count">2</span></a><a class="nd-item" href="learning-quiz.html" style="--nd-color:#f97316"><span class="nd-icon">∑</span><span class="nd-text"><span class="nd-title">学习题库</span><span class="nd-sub">竞赛与复习</span></span><span class="nd-count">2</span></a><a class="nd-item" href="checkin.html" style="--nd-color:#10b981"><span class="nd-icon">✓</span><span class="nd-text"><span class="nd-title">每日签到</span><span class="nd-sub">额度与积分</span></span><span class="nd-count">5</span></a><a class="nd-item" href="forum.html" style="--nd-color:#f59e0b"><span class="nd-icon">▣</span><span class="nd-text"><span class="nd-title">论坛社区</span><span class="nd-sub">交流与笔记</span></span><span class="nd-count">6</span></a><a class="nd-item" href="projects.html" style="--nd-color:#ec4899"><span class="nd-icon">◈</span><span class="nd-text"><span class="nd-title">本地项目</span><span class="nd-sub">实验与工具</span></span><span class="nd-count">30</span></a><a class="nd-item" href="games.html" style="--nd-color:#8b5cf6"><span class="nd-icon">◆</span><span class="nd-text"><span class="nd-title">游戏分区</span><span class="nd-sub">在线对战</span></span><span class="nd-count">9</span></a><a class="nd-item" href="books.html" style="--nd-color:#06b6d4"><span class="nd-icon">▤</span><span class="nd-text"><span class="nd-title">书籍分区</span><span class="nd-sub">电子书库</span></span><span class="nd-count">3</span></a><a class="nd-item" href="ai.html" style="--nd-color:#3b82f6"><span class="nd-icon">◇</span><span class="nd-text"><span class="nd-title">AI 分区</span><span class="nd-sub">模型与中转</span></span><span class="nd-count">16</span></a><a class="nd-item" href="eda.html" style="--nd-color:#14b8a6"><span class="nd-icon">⬢</span><span class="nd-text"><span class="nd-title">电子设计</span><span class="nd-sub">器件与仿真</span></span><span class="nd-count">12</span></a><a class="nd-item" href="modules.html" style="--nd-color:#a855f7"><span class="nd-icon">⚙</span><span class="nd-text"><span class="nd-title">模块资料</span><span class="nd-sub">开发板文档</span></span><span class="nd-count">3</span></a><a class="nd-item nd-divider" href="#" id="dropdownContact"><span class="nd-icon" style="--nd-color:#10b981">✉</span><span class="nd-text"><span class="nd-title">联系作者</span><span class="nd-sub">留言将推送至作者邮箱</span></span></a></div>
 </nav>
 <div class="mobile-overlay" id="mobileOverlay"></div>
-<aside class="mobile-drawer" id="mobileDrawer"><div class="md-head"><a href="index.html" class="brand"><span class="mark">观</span><span>观澜</span></a><button class="md-close" id="mdClose" aria-label="关闭菜单"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div class="md-search"><input type="text" id="mdSearch" placeholder="搜索全站入口…" autocomplete="off"></div><div class="md-list"><a class="md-item active" href="index.html" style="--md-color:#6366f1"><span class="md-icon">观</span><span class="md-text">首页</span></a><a class="md-item" href="workbench.html" style="--md-color:#6366f1"><span class="md-icon">∿</span><span class="md-text">芯片工作台</span><span class="md-count">4</span></a><a class="md-item" href="personal-projects.html" style="--md-color:#ec4899"><span class="md-icon">体</span><span class="md-text">个人项目</span><span class="md-count">2</span></a><a class="md-item" href="learning-quiz.html" style="--md-color:#f97316"><span class="md-icon">∑</span><span class="md-text">学习题库</span><span class="md-count">2</span></a><a class="md-item" href="checkin.html" style="--md-color:#10b981"><span class="md-icon">✓</span><span class="md-text">每日签到</span><span class="md-count">5</span></a><a class="md-item" href="forum.html" style="--md-color:#f59e0b"><span class="md-icon">▣</span><span class="md-text">论坛社区</span><span class="md-count">6</span></a><a class="md-item" href="projects.html" style="--md-color:#ec4899"><span class="md-icon">◈</span><span class="md-text">本地项目</span><span class="md-count">30</span></a><a class="md-item" href="games.html" style="--md-color:#8b5cf6"><span class="md-icon">◆</span><span class="md-text">游戏分区</span><span class="md-count">9</span></a><a class="md-item" href="books.html" style="--md-color:#06b6d4"><span class="md-icon">▤</span><span class="md-text">书籍分区</span><span class="md-count">3</span></a><a class="md-item" href="ai.html" style="--md-color:#3b82f6"><span class="md-icon">◇</span><span class="md-text">AI 分区</span><span class="md-count">16</span></a><a class="md-item" href="eda.html" style="--md-color:#14b8a6"><span class="md-icon">⬢</span><span class="md-text">电子设计</span><span class="md-count">12</span></a><a class="md-item" href="modules.html" style="--md-color:#a855f7"><span class="md-icon">⚙</span><span class="md-text">模块资料</span><span class="md-count">3</span></a><div class="md-divider"></div><a class="md-item" href="#" id="drawerContact" style="--md-color:#10b981"><span class="md-icon">✉</span><span class="md-text">联系作者</span></a></div></aside>
+<aside class="mobile-drawer" id="mobileDrawer">
+  <a class="md-item" href="index.html">首页</a>
+  <a class="md-item" href="workbench.html">芯片工作台</a><a class="md-item" href="personal-projects.html">个人项目</a><a class="md-item" href="learning-quiz.html">学习题库</a><a class="md-item" href="checkin.html">每日签到</a><a class="md-item" href="forum.html">论坛社区</a><a class="md-item" href="projects.html">本地项目</a><a class="md-item" href="games.html">游戏分区</a><a class="md-item" href="books.html">书籍分区</a><a class="md-item" href="ai.html">AI 分区</a><a class="md-item" href="eda.html">电子设计</a><a class="md-item" href="modules.html">模块资料</a>
+  <a class="md-item" href="search.html">搜索</a>
+</aside>
 
 
 <!-- ============ HERO ============ -->
@@ -921,11 +994,10 @@ input,textarea{font-family:inherit}
     <p class="lead">从一条波形、一块逻辑门，到可运行的芯片与开放世界。在实验中观察，在札记中沉淀，再把新的问题带回来。</p>
     <div class="hero-cta">
       <a class="btn-primary" href="workbench.html">进入工作台 →</a>
-      <a class="btn-secondary" href="opencircuit-eda/">⚡ OpenCircuit EDA</a>
       <a class="btn-secondary" href="#" id="paletteButton">⌘ K 快速前往</a>
     </div>
     <div class="hero-stats">
-      <div class="hero-stat"><div class="num">92</div><div class="lbl">项目入口</div></div>
+      <div class="hero-stat"><div class="num">90</div><div class="lbl">项目入口</div></div>
       <div class="hero-stat"><div class="num">11</div><div class="lbl">主题分区</div></div>
       <div class="hero-stat"><div class="num">∞</div><div class="lbl">实验可能</div></div>
     </div>
@@ -968,7 +1040,7 @@ input,textarea{font-family:inherit}
         <div class="section-sub">从每个分区挑选的代表作，快速进入。</div>
       </div>
     </div>
-    <div class="featured-row"><a class="feat-card" href="opencircuit-eda/"><div class="fc-top"><div class="fc-icon">⚡</div><span class="fc-tag">最新上线</span></div><div class="fc-title">OpenCircuit EDA</div><div class="fc-desc">浏览器内的开源 Spice 风格 EDA 工作台：画原理图、解析网表、跑直流/瞬态/交流仿真，示波器与频谱仪开箱即用。</div><div class="fc-link">打开工作台 →</div></a><a class="feat-card" href="insight-space/index.html"><div class="fc-top"><div class="fc-icon">体</div><span class="fc-tag">个人项目</span></div><div class="fc-title">体悟集 · 私人空间</div><div class="fc-desc">推荐 / 日记 / 诗歌 / 文案 / 评论，邀请码注册、超管后台、图文音视频与 Markdown 书写。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="silicon-notes/"><div class="fc-top"><div class="fc-icon">笺</div><span class="fc-tag">个人项目</span></div><div class="fc-title">硅间札记</div><div class="fc-desc">把实验结果、设计失误与论文想法串联起来，用双链、对照和回忆卡积累可复用经验。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="https://bbs.eetop.cn/"><div class="fc-top"><div class="fc-icon">💬</div><span class="fc-tag">论坛社区</span></div><div class="fc-title">EETOP 论坛</div><div class="fc-desc">电子工程师技术交流论坛，含半导体、模拟电路、IC 设计等版块，可每日签到领积分。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="https://bbs.21ic.com/"><div class="fc-top"><div class="fc-icon">💬</div><span class="fc-tag">论坛社区</span></div><div class="fc-title">21ic 论坛</div><div class="fc-desc">21ic 中国电子网论坛，技术交流、资料分享与每日签到社区。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="https://www.analog-life.com/message/"><div class="fc-top"><div class="fc-icon">A</div><span class="fc-tag">论坛社区</span></div><div class="fc-title">Analog-Life 留言板</div><div class="fc-desc">模拟 IC 设计博客 Analog-Life 的留言板，可向博主提问交流（Cadence/EDA、射频 IC、运放 等教程）。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="https://lossnotes.cc/CourseNotes/"><div class="fc-top"><div class="fc-icon">笔</div><span class="fc-tag">论坛社区</span></div><div class="fc-title">LOSS 学研札记</div><div class="fc-desc">模电（OTA/运放/噪声/CMRR）、微电子器件物理、电路分析、量子力学 的课程笔记知识库。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="https://rt2innocence.net/"><div class="fc-top"><div class="fc-icon">R</div><span class="fc-tag">论坛社区</span></div><div class="fc-title">rt2innocence</div><div class="fc-desc">个人站点入口，收录在论坛社区分区便于随时访问。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="https://icdesign1.com/"><div class="fc-top"><div class="fc-icon">IC</div><span class="fc-tag">论坛社区</span></div><div class="fc-title">icdesign1.com</div><div class="fc-desc">集成电路设计相关网站入口，收录在电子设计项目中便于快速访问。</div><div class="fc-link">进入 →</div></a></div>
+    <div class="featured-row"><a class="feat-card" href="insight-space/index.html"><div class="fc-top"><div class="fc-icon">体</div><span class="fc-tag">个人项目</span></div><div class="fc-title">体悟集 · 私人空间</div><div class="fc-desc">推荐 / 日记 / 诗歌 / 文案 / 评论，邀请码注册、超管后台、图文音视频与 Markdown 书写。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="silicon-notes/"><div class="fc-top"><div class="fc-icon">笺</div><span class="fc-tag">个人项目</span></div><div class="fc-title">硅间札记</div><div class="fc-desc">把实验结果、设计失误与论文想法串联起来，用双链、对照和回忆卡积累可复用经验。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="https://bbs.eetop.cn/"><div class="fc-top"><div class="fc-icon">💬</div><span class="fc-tag">论坛社区</span></div><div class="fc-title">EETOP 论坛</div><div class="fc-desc">电子工程师技术交流论坛，含半导体、模拟电路、IC 设计等版块，可每日签到领积分。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="https://bbs.21ic.com/"><div class="fc-top"><div class="fc-icon">💬</div><span class="fc-tag">论坛社区</span></div><div class="fc-title">21ic 论坛</div><div class="fc-desc">21ic 中国电子网论坛，技术交流、资料分享与每日签到社区。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="https://www.analog-life.com/message/"><div class="fc-top"><div class="fc-icon">A</div><span class="fc-tag">论坛社区</span></div><div class="fc-title">Analog-Life 留言板</div><div class="fc-desc">模拟 IC 设计博客 Analog-Life 的留言板，可向博主提问交流（Cadence/EDA、射频 IC、运放 等教程）。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="https://lossnotes.cc/CourseNotes/"><div class="fc-top"><div class="fc-icon">笔</div><span class="fc-tag">论坛社区</span></div><div class="fc-title">LOSS 学研札记</div><div class="fc-desc">模电（OTA/运放/噪声/CMRR）、微电子器件物理、电路分析、量子力学 的课程笔记知识库。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="https://rt2innocence.net/"><div class="fc-top"><div class="fc-icon">R</div><span class="fc-tag">论坛社区</span></div><div class="fc-title">rt2innocence</div><div class="fc-desc">个人站点入口，收录在论坛社区分区便于随时访问。</div><div class="fc-link">进入 →</div></a><a class="feat-card" href="https://icdesign1.com/"><div class="fc-top"><div class="fc-icon">IC</div><span class="fc-tag">论坛社区</span></div><div class="fc-title">icdesign1.com</div><div class="fc-desc">集成电路设计相关网站入口，收录在电子设计项目中便于快速访问。</div><div class="fc-link">进入 →</div></a></div>
   </div>
 </section>
 
@@ -978,10 +1050,10 @@ input,textarea{font-family:inherit}
     <div class="section-head">
       <div>
         <h2 class="section-title">主题分区<span class="num">SECTIONS</span></h2>
-        <div class="section-sub">11 个分区，92 个入口，悬停顶部菜单可快速预览。</div>
+        <div class="section-sub">9 个分区，84 个入口，悬停顶部菜单可快速预览。</div>
       </div>
     </div>
-    <div class="sections-grid"><a class="section-card" href="workbench.html" style="--sec-color:#6366f1"><div class="sc-cover" style="background-image:url('assets/portal/covers/workbench.webp')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">∿</div><div class="sc-title">芯片工作台</div><div class="sc-sub">从设计到验证</div><div class="sc-desc">交互式工作台：电路仿真、模拟拓扑、札记、逻辑门与微型世界。</div><div class="sc-foot"><span class="count">4 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="personal-projects.html" style="--sec-color:#ec4899"><div class="sc-cover" style="background-image:url('assets/portal/covers/personal-projects.webp')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">体</div><div class="sc-title">个人项目</div><div class="sc-sub">私人空间</div><div class="sc-desc">个人站点、札记与私人空间，记录与沉淀。</div><div class="sc-foot"><span class="count">2 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="learning-quiz.html" style="--sec-color:#f97316"><div class="sc-cover" style="background-image:url('assets/portal/covers/study.webp')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">∑</div><div class="sc-title">学习题库</div><div class="sc-sub">竞赛与复习</div><div class="sc-desc">大学生数学竞赛、半导体物理与器件等学习题库。</div><div class="sc-foot"><span class="count">2 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="checkin.html" style="--sec-color:#10b981"><div class="sc-cover" style="background-image:url('assets/portal/covers/checkin.webp')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">✓</div><div class="sc-title">每日签到</div><div class="sc-sub">额度与积分</div><div class="sc-desc">API 中转站与社区的每日签到入口。</div><div class="sc-foot"><span class="count">5 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="forum.html" style="--sec-color:#f59e0b"><div class="sc-cover" style="background-image:url('assets/portal/covers/forum.webp')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">▣</div><div class="sc-title">论坛社区</div><div class="sc-sub">交流与笔记</div><div class="sc-desc">电子工程论坛、模拟 IC 留言板与课程笔记知识库。</div><div class="sc-foot"><span class="count">6 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="projects.html" style="--sec-color:#ec4899"><div class="sc-cover" style="background-image:url('assets/portal/covers/personal-projects.webp')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">◈</div><div class="sc-title">本地项目</div><div class="sc-sub">实验与工具</div><div class="sc-desc">本地部署的实验工具、游戏、训练场与外部资源。</div><div class="sc-foot"><span class="count">30 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="games.html" style="--sec-color:#8b5cf6"><div class="sc-cover" style="background-image:url('assets/portal/covers/games.webp')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">◆</div><div class="sc-title">游戏分区</div><div class="sc-sub">在线对战</div><div class="sc-desc">多人在线 IO 游戏与本地游戏集合。</div><div class="sc-foot"><span class="count">9 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="books.html" style="--sec-color:#06b6d4"><div class="sc-cover" style="background-image:url('assets/portal/covers/study.webp')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">▤</div><div class="sc-title">书籍分区</div><div class="sc-sub">电子书库</div><div class="sc-desc">在线阅读与下载的电子书资源。</div><div class="sc-foot"><span class="count">3 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="ai.html" style="--sec-color:#3b82f6"><div class="sc-cover" style="background-image:url('assets/portal/covers/ai.webp')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">◇</div><div class="sc-title">AI 分区</div><div class="sc-sub">模型与中转</div><div class="sc-desc">AI 对话、API 中转、AI 工具与模型管理入口。</div><div class="sc-foot"><span class="count">16 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="eda.html" style="--sec-color:#14b8a6"><div class="sc-cover" style="background-image:url('assets/portal/covers/eda.webp')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">⬢</div><div class="sc-title">电子设计</div><div class="sc-sub">器件与仿真</div><div class="sc-desc">PCB 设计、器件资料、在线仿真与开发板工具。</div><div class="sc-foot"><span class="count">12 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="modules.html" style="--sec-color:#a855f7"><div class="sc-cover" style="background-image:url('assets/portal/covers/modules.webp')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">⚙</div><div class="sc-title">模块资料</div><div class="sc-sub">开发板文档</div><div class="sc-desc">开发板文档与模块 SDK 资料。</div><div class="sc-foot"><span class="count">3 entries</span><span class="arrow">→</span></div></div></a></div>
+    <div class="sections-grid"><a class="section-card" href="workbench.html" style="--sec-color:#6366f1"><div class="sc-cover" style="background-image:url('https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/dcf19a1b425b.png')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">∿</div><div class="sc-title">芯片工作台</div><div class="sc-sub">从设计到验证</div><div class="sc-desc">交互式工作台：电路仿真、模拟拓扑、札记、逻辑门与微型世界。</div><div class="sc-foot"><span class="count">4 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="personal-projects.html" style="--sec-color:#ec4899"><div class="sc-cover" style="background-image:url('https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/64ebbaba2618.jpg')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">体</div><div class="sc-title">个人项目</div><div class="sc-sub">私人空间</div><div class="sc-desc">个人站点、札记与私人空间，记录与沉淀。</div><div class="sc-foot"><span class="count">2 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="learning-quiz.html" style="--sec-color:#f97316"><div class="sc-cover" style="background-image:url('https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/709733e8f67c.png')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">∑</div><div class="sc-title">学习题库</div><div class="sc-sub">竞赛与复习</div><div class="sc-desc">大学生数学竞赛、半导体物理与器件等学习题库。</div><div class="sc-foot"><span class="count">2 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="checkin.html" style="--sec-color:#10b981"><div class="sc-cover" style="background-image:url('https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/07ccca963158.png')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">✓</div><div class="sc-title">每日签到</div><div class="sc-sub">额度与积分</div><div class="sc-desc">API 中转站与社区的每日签到入口。</div><div class="sc-foot"><span class="count">5 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="forum.html" style="--sec-color:#f59e0b"><div class="sc-cover" style="background-image:url('https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/0836079e317d.jpeg')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">▣</div><div class="sc-title">论坛社区</div><div class="sc-sub">交流与笔记</div><div class="sc-desc">电子工程论坛、模拟 IC 留言板与课程笔记知识库。</div><div class="sc-foot"><span class="count">6 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="projects.html" style="--sec-color:#ec4899"><div class="sc-cover" style="background-image:url('https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/64ebbaba2618.jpg')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">◈</div><div class="sc-title">本地项目</div><div class="sc-sub">实验与工具</div><div class="sc-desc">本地部署的实验工具、游戏、训练场与外部资源。</div><div class="sc-foot"><span class="count">29 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="games.html" style="--sec-color:#8b5cf6"><div class="sc-cover" style="background-image:url('https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/5f415d0e5d8a.jpg')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">◆</div><div class="sc-title">游戏分区</div><div class="sc-sub">在线对战</div><div class="sc-desc">多人在线 IO 游戏与本地游戏集合。</div><div class="sc-foot"><span class="count">9 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="books.html" style="--sec-color:#06b6d4"><div class="sc-cover" style="background-image:url('https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/709733e8f67c.png')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">▤</div><div class="sc-title">书籍分区</div><div class="sc-sub">电子书库</div><div class="sc-desc">在线阅读与下载的电子书资源。</div><div class="sc-foot"><span class="count">3 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="ai.html" style="--sec-color:#3b82f6"><div class="sc-cover" style="background-image:url('https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/68d8828a8c27.jpg')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">◇</div><div class="sc-title">AI 分区</div><div class="sc-sub">模型与中转</div><div class="sc-desc">AI 对话、API 中转、AI 工具与模型管理入口。</div><div class="sc-foot"><span class="count">16 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="eda.html" style="--sec-color:#14b8a6"><div class="sc-cover" style="background-image:url('https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/8296dcd44490.jpeg')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">⬢</div><div class="sc-title">电子设计</div><div class="sc-sub">器件与仿真</div><div class="sc-desc">PCB 设计、器件资料、在线仿真与开发板工具。</div><div class="sc-foot"><span class="count">11 entries</span><span class="arrow">→</span></div></div></a><a class="section-card" href="modules.html" style="--sec-color:#a855f7"><div class="sc-cover" style="background-image:url('https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/194d52eb560d.jpg')"><div class="sc-cover-tint"></div></div><div class="sc-body"><div class="sc-icon">⚙</div><div class="sc-title">模块资料</div><div class="sc-sub">开发板文档</div><div class="sc-desc">开发板文档与模块 SDK 资料。</div><div class="sc-foot"><span class="count">3 entries</span><span class="arrow">→</span></div></div></a></div>
   </div>
 </section>
 
@@ -994,56 +1066,30 @@ input,textarea{font-family:inherit}
     </div>
     <div>
       <h4>分区</h4>
-      <ul><li><a href="workbench.html">芯片工作台</a></li><li><a href="personal-projects.html">个人项目</a></li><li><a href="learning-quiz.html">学习题库</a></li><li><a href="checkin.html">每日签到</a></li><li><a href="forum.html">论坛社区</a></li><li><a href="projects.html">本地项目</a></li></ul>
+      <ul>
+        <li><a href="workbench.html">芯片工作台</a></li><li><a href="personal-projects.html">个人项目</a></li><li><a href="learning-quiz.html">学习题库</a></li><li><a href="checkin.html">每日签到</a></li><li><a href="forum.html">论坛社区</a></li>
+      </ul>
     </div>
     <div>
       <h4>更多</h4>
-      <ul><li><a href="games.html">游戏分区</a></li><li><a href="books.html">书籍分区</a></li><li><a href="ai.html">AI 分区</a></li><li><a href="eda.html">电子设计</a></li><li><a href="modules.html">模块资料</a></li><li><a href="search.html">全站搜索</a></li></ul>
+      <ul>
+        <li><a href="projects.html">本地项目</a></li><li><a href="games.html">游戏分区</a></li><li><a href="books.html">书籍分区</a></li><li><a href="ai.html">AI 分区</a></li><li><a href="eda.html">电子设计</a></li><li><a href="modules.html">模块资料</a></li>
+        <li><a href="search.html">全站搜索</a></li>
+      </ul>
     </div>
     <div>
-      <h4>快捷</h4>
+      <h4>快捷键</h4>
       <ul>
         <li><a href="#" onclick="return false" id="paletteButton">⌘ K 命令面板</a></li>
-        <li><a href="#" id="footerMessage">联系作者</a></li>
+        <li><a href="#" id="footerMessage">留言反馈</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
-    <span class="footer-uptime" id="footerUptime" title="自 2026-11-20 起持续运行">
-      <span>本站已运行</span>
-      <span class="uptime-num" id="uptime-days">0</span><span>天</span>
-      <span class="uptime-num" id="uptime-hours">00</span><span>时</span>
-      <span class="uptime-num" id="uptime-mins">00</span><span>分</span>
-      <span class="uptime-num" id="uptime-secs">00</span><span>秒</span>
-    </span>
+    <span>收藏、最近打开与主题偏好保存在当前浏览器。外部站点在新标签页打开。</span>
     <span>观察 · 设计 · 验证 · 记录</span>
   </div>
 </footer>
-<script>
-/* ============ Uptime counter (from 2026-11-20 00:00:00 UTC+8) ============ */
-(function(){
-  var START_TIME = new Date("2026-11-20T00:00:00+08:00").getTime();
-  function pad(n, w) { w = w || 2; return String(n).padStart(w, "0"); }
-  function tick(){
-    var now = Date.now();
-    var diff = Math.max(0, now - START_TIME);
-    var days = Math.floor(diff / 86400000); diff -= days * 86400000;
-    var hours = Math.floor(diff / 3600000); diff -= hours * 3600000;
-    var mins = Math.floor(diff / 60000); diff -= mins * 60000;
-    var secs = Math.floor(diff / 1000);
-    var dEl = document.getElementById("uptime-days");
-    var hEl = document.getElementById("uptime-hours");
-    var mEl = document.getElementById("uptime-mins");
-    var sEl = document.getElementById("uptime-secs");
-    if (dEl) dEl.textContent = days;
-    if (hEl) hEl.textContent = pad(hours);
-    if (mEl) mEl.textContent = pad(mins);
-    if (sEl) sEl.textContent = pad(secs);
-  }
-  tick();
-  setInterval(tick, 1000);
-})();
-</script>
 
 
 <button class="msg-fab" id="messageFab" aria-label="留言" title="给我们留言"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span class="badge"></span></button>
@@ -1097,7 +1143,7 @@ input,textarea{font-family:inherit}
 
 <div class="toast" id="toast"><span class="toast-dot"></span><span class="toast-text"></span></div>
 <script>
-/* AUTO-GENERATED — all 92 cards + 9 sections metadata. Do not edit by hand. */
+/* AUTO-GENERATED — all 84 cards + 9 sections metadata. Do not edit by hand. */
 window.PORTAL_DATA = [
   {
     "id": "workbench",
@@ -1651,19 +1697,15 @@ window.PORTAL_DATA = [
     "desc": "本地部署的实验工具、游戏、训练场与外部资源。",
     "accent": "#ec4899",
     "icon": "◈",
-    "total": 30,
+    "total": 29,
     "sub_categories": [
       {
         "tag": "芯片设计",
-        "count": 2,
+        "count": 1,
         "preview": [
           {
             "title": "GM/ID Studio",
             "icon": "gm"
-          },
-          {
-            "title": "OpenCircuit EDA",
-            "icon": "⚡"
           }
         ]
       },
@@ -1728,30 +1770,6 @@ window.PORTAL_DATA = [
           {
             "title": "光的散射实验室",
             "icon": "☼"
-          },
-          {
-            "title": "数字存储示波器",
-            "icon": "⌁"
-          },
-          {
-            "title": "WaveScope 波形观察器",
-            "icon": "≈"
-          },
-          {
-            "title": "EMC 滤波器实验室",
-            "icon": "≋"
-          },
-          {
-            "title": "TSMC RF 器件计算器",
-            "icon": "⌬"
-          },
-          {
-            "title": "ESP32C3 控制面板",
-            "icon": "▣"
-          },
-          {
-            "title": "傅里叶实验页面",
-            "icon": "ƒ"
           }
         ]
       },
@@ -1816,10 +1834,6 @@ window.PORTAL_DATA = [
           {
             "title": "幸运老虎机",
             "icon": "7"
-          },
-          {
-            "title": "咪 · 有猫在就不一样",
-            "icon": "🐱"
           }
         ]
       },
@@ -1835,24 +1849,6 @@ window.PORTAL_DATA = [
       }
     ],
     "cards": [
-      {
-        "title": "OpenCircuit EDA",
-        "icon": "⚡",
-        "tag": "芯片设计",
-        "desc": "浏览器里的开源 Spice 风格 EDA 工作台：原理图绘制、Spectre/SPICE/Verilog/VHDL 网表解析、MNA 直流/瞬态/交流仿真、示波器与频谱仪、PDK 工艺库与子电路层次设计。",
-        "entries": [
-          {
-            "href": "opencircuit-eda/",
-            "target": "",
-            "rel": "",
-            "span": "opencircuit-eda/",
-            "label": "打开工作台 →"
-          }
-        ],
-        "search": "OpenCircuit EDA EDA 开源 Spice Spectre 原理图 仿真 网表 PDK 示波器 频谱仪 MNA Verilog VHDL",
-        "section": "projects",
-        "sectionTitle": "本地项目"
-      },
       {
         "title": "GM/ID Studio",
         "icon": "gm",
@@ -3099,7 +3095,7 @@ window.PORTAL_DATA = [
     "desc": "PCB 设计、器件资料、在线仿真与开发板工具。",
     "accent": "#14b8a6",
     "icon": "⬢",
-    "total": 12,
+    "total": 11,
     "sub_categories": [
       {
         "tag": "AI PCB",
@@ -3192,37 +3188,9 @@ window.PORTAL_DATA = [
             "icon": "💡"
           }
         ]
-      },
-      {
-        "tag": "本地 EDA",
-        "count": 1,
-        "preview": [
-          {
-            "title": "OpenCircuit EDA",
-            "icon": "⚡"
-          }
-        ]
       }
     ],
     "cards": [
-      {
-        "title": "OpenCircuit EDA",
-        "icon": "⚡",
-        "tag": "本地 EDA",
-        "desc": "浏览器内直接运行的开源 Spice 风格 EDA：画原理图、解析网表、跑直流/瞬态/交流仿真，示波器与频谱仪开箱即用，支持 PDK 工艺库与子电路层次设计。",
-        "entries": [
-          {
-            "href": "opencircuit-eda/",
-            "target": "",
-            "rel": "",
-            "span": "opencircuit-eda/",
-            "label": "打开工作台 →"
-          }
-        ],
-        "search": "OpenCircuit EDA 本地 开源 EDA Spice Spectre 原理图 仿真 网表 PDK 示波器 频谱仪",
-        "section": "eda",
-        "sectionTitle": "电子设计"
-      },
       {
         "title": "heypcb AI PCB",
         "icon": "⬢",
@@ -3640,85 +3608,20 @@ window.PORTAL_ALL_CARDS = (function(){
     });
   }
 
-  /* ============ NAV TOGGLE: dropdown (desktop) / drawer (mobile) ============ */
+  /* ============ MOBILE DRAWER ============ */
   const navToggle = document.getElementById("navToggle");
-  const navDropdown = document.getElementById("navDropdown");
   const mobileDrawer = document.getElementById("mobileDrawer");
   const mobileOverlay = document.getElementById("mobileOverlay");
-  const mdClose = document.getElementById("mdClose");
-
-  function isMobile() {
-    return window.matchMedia("(max-width: 768px)").matches;
+  function openDrawer() {
+    mobileDrawer && mobileDrawer.classList.add("open");
+    mobileOverlay && mobileOverlay.classList.add("open");
   }
-
-  function openNav() {
-    if (isMobile()) {
-      // Open left drawer on mobile
-      mobileDrawer && mobileDrawer.classList.add("open");
-      mobileOverlay && mobileOverlay.classList.add("open");
-    } else {
-      // Open dropdown on desktop
-      navDropdown && navDropdown.classList.add("open");
-      navToggle && navToggle.classList.add("open");
-      navToggle && navToggle.setAttribute("aria-expanded", "true");
-    }
-  }
-  function closeNav() {
-    navDropdown && navDropdown.classList.remove("open");
-    navToggle && navToggle.classList.remove("open");
-    navToggle && navToggle.setAttribute("aria-expanded", "false");
+  function closeDrawer() {
     mobileDrawer && mobileDrawer.classList.remove("open");
     mobileOverlay && mobileOverlay.classList.remove("open");
   }
-  function toggleNav() {
-    const isOpen = (navDropdown && navDropdown.classList.contains("open"))
-                || (mobileDrawer && mobileDrawer.classList.contains("open"));
-    if (isOpen) closeNav();
-    else openNav();
-  }
-  if (navToggle) navToggle.addEventListener("click", e => { e.stopPropagation(); toggleNav(); });
-  if (mdClose) mdClose.addEventListener("click", closeNav);
-  if (mobileOverlay) mobileOverlay.addEventListener("click", closeNav);
-  // Close dropdown when clicking outside (desktop)
-  document.addEventListener("click", e => {
-    if (!navDropdown || !navDropdown.classList.contains("open")) return;
-    if (e.target.closest("#navDropdown") || e.target.closest("#navToggle")) return;
-    closeNav();
-  });
-  // Close dropdown on Escape
-  document.addEventListener("keydown", e => {
-    if (e.key === "Escape") closeNav();
-  });
-  // If user resizes while dropdown is open, close it (forces re-evaluation of mode)
-  window.addEventListener("resize", () => {
-    if (navDropdown && !navDropdown.classList.contains("open")
-        && mobileDrawer && !mobileDrawer.classList.contains("open")) return;
-    closeNav();
-  });
-
-  /* ============ CONTACT AUTHOR: opens message modal ============ */
-  // Wire up "联系作者" links in dropdown, drawer, and footer
-  function openMessageFromLink(e) {
-    e.preventDefault();
-    closeNav();
-    const fab = document.getElementById("messageFab");
-    if (fab) fab.click();
-  }
-  ["dropdownContact", "drawerContact", "footerMessage"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener("click", openMessageFromLink);
-  });
-
-  /* ============ MOBILE DRAWER SEARCH ============ */
-  const mdSearch = document.getElementById("mdSearch");
-  if (mdSearch) {
-    mdSearch.addEventListener("keydown", e => {
-      if (e.key === "Enter") {
-        const q = mdSearch.value.trim();
-        if (q) location.href = "search.html?q=" + encodeURIComponent(q);
-      }
-    });
-  }
+  if (navToggle) navToggle.addEventListener("click", openDrawer);
+  if (mobileOverlay) mobileOverlay.addEventListener("click", closeDrawer);
 
   /* ============ NAV SEARCH → search.html ============ */
   const navSearch = document.getElementById("navSearch");
