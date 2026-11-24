@@ -447,6 +447,58 @@
   .foot-row .links a{color:var(--muted)}
   .foot-row .links a:hover{color:var(--accent)}
 
+
+  /* ---------- 开屏弹窗 ---------- */
+  .modal-backdrop{
+    position:fixed;inset:0;z-index:100;
+    background:rgba(4,7,15,.76);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+    opacity:0;pointer-events:none;
+    transition:opacity .22s ease;
+  }
+  .modal-backdrop.open{opacity:1;pointer-events:auto}
+  .modal-card{
+    width:100%;max-width:540px;
+    border:1px solid rgba(62,224,200,.35);
+    border-radius:20px;
+    background:linear-gradient(180deg,#131e36,#0c1425);
+    box-shadow:0 28px 70px -20px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.04);
+    padding:26px 26px 24px;
+    transform:translateY(10px) scale(.98);
+    transition:transform .22s ease;
+    position:relative;
+  }
+  .modal-backdrop.open .modal-card{transform:translateY(0) scale(1)}
+  .modal-head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin-bottom:14px;
+  }
+  .modal-title{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:16.5px;font-weight:700;color:#fff;margin:0;
+  }
+  .modal-close{
+    width:32px;height:32px;border-radius:9px;
+    border:1px solid var(--line);background:rgba(255,255,255,.04);
+    color:var(--muted);font-size:18px;line-height:1;
+    cursor:pointer;display:grid;place-items:center;
+    transition:color .15s,border-color .15s,background .15s;
+  }
+  .modal-close:hover{color:#fff;border-color:rgba(62,224,200,.45);background:rgba(62,224,200,.1)}
+  .modal-body{
+    font-size:14.8px;line-height:1.78;color:#d6e2f8;
+  }
+  .modal-body p{margin:0 0 10px}
+  .modal-body p:last-child{margin-bottom:0}
+  .modal-body strong{color:var(--accent);font-weight:600}
+  .modal-foot{
+    display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;
+    margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
+  }
+
   @media (max-width:900px){
     .grid.three,.features-grid{grid-template-columns:repeat(2,1fr)}
     .timeline{grid-template-columns:repeat(2,1fr)}
@@ -878,6 +930,31 @@
 
 </main>
 
+
+<!-- ===== 开屏组队说明弹窗 ===== -->
+<div class="modal-backdrop open" id="welcomeModal" role="dialog" aria-modal="true" aria-labelledby="welcomeModalTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 class="modal-title" id="welcomeModalTitle">
+        <span class="ico-box" style="width:28px;height:28px;border-radius:8px;">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </span>
+        组队与选题说明 (｡･ω･｡)ﾉ♡
+      </h3>
+      <button type="button" class="modal-close" id="closeModalBtn" aria-label="关闭弹窗">×</button>
+    </div>
+    <div class="modal-body">
+      <p>具体大创方向暂未确定，期待不同意见的群U一起组队联系导师，讨论方向，确定选题 (๑•̀ㅂ•́)و✧</p>
+      <p>我倾向的方向是<strong>利用 AI 强化现代 IC 设计艺术，缩短设计周期</strong>，做出一批毕业后可复用的便捷工具，同时符合未来 IC 设计初学者上手的小助手 (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧</p>
+      <p>具体选题在联系导师、讨论方向后会有所改变，欢迎群U保持联系 (●'◡'●)</p>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn ghost small" id="modalBrowseBtn">先浏览页面</button>
+      <button type="button" class="btn small" id="modalApplyBtn">去组队 / 报名 (๑•̀ㅂ•́)و✧</button>
+    </div>
+  </div>
+</div>
+
 <footer>
   <div class="wrap foot-row">
     <div>基于大学 IC 教学兼具 AI 设计的电路仿真与 EDA 系统 · 电子科技大学 2027 大创</div>
@@ -894,6 +971,35 @@
 
 <script>
 (function () {
+  // 开屏弹窗控制
+  const welcomeModal = document.getElementById("welcomeModal");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+  const modalBrowseBtn = document.getElementById("modalBrowseBtn");
+  const modalApplyBtn = document.getElementById("modalApplyBtn");
+
+  function closeWelcomeModal() {
+    if (welcomeModal) {
+      welcomeModal.classList.remove("open");
+    }
+  }
+  if (closeModalBtn) closeModalBtn.addEventListener("click", closeWelcomeModal);
+  if (modalBrowseBtn) modalBrowseBtn.addEventListener("click", closeWelcomeModal);
+  if (modalApplyBtn) {
+    modalApplyBtn.addEventListener("click", function () {
+      closeWelcomeModal();
+      const applyEl = document.getElementById("apply");
+      if (applyEl) applyEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+  if (welcomeModal) {
+    welcomeModal.addEventListener("click", function (e) {
+      if (e.target === welcomeModal) closeWelcomeModal();
+    });
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeWelcomeModal();
+  });
+
   const FORM_ENDPOINT = "https://formsubmit.co/ajax/2115487769@qq.com";
   const CONTACT_EMAIL = "2115487769@qq.com";
 
