@@ -1,0 +1,5140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>电子科技大学 · 集成电路科学与工程学院 师资资料库查询</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <style>
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    mark.hl {
+      background-color: #fef08a;
+      color: #854d0e;
+      padding: 0 2px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-blue-500/20 border border-blue-400/30 text-blue-200">
+              <i data-lucide="cpu" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <h1 class="text-lg sm:text-xl font-bold tracking-tight">电子科技大学 · 集成电路科学与工程学院</h1>
+              <p class="text-xs sm:text-sm text-blue-200/90">师资资料库检索系统（共收录 131 位教师 · 教授级 85 位 · 副教授/副研究员 46 位）</p>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="btnFavFilter" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/15 transition">
+            <i data-lucide="star" class="w-4 h-4 text-amber-300"></i>
+            <span>我的收藏</span>
+            <span id="favCountBadge" class="ml-0.5 px-1.5 py-0.2 rounded-full bg-amber-400/20 text-amber-200 text-xs">0</span>
+          </button>
+          <button id="btnOpenCompare" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium bg-blue-600 hover:bg-blue-500 border border-blue-400/30 transition shadow-sm">
+            <i data-lucide="columns-2" class="w-4 h-4"></i>
+            <span>导师对比</span>
+            <span id="compareCountBadge" class="ml-0.5 px-1.5 py-0.2 rounded-full bg-white/20 text-white text-xs">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Search & Filter Console -->
+  <section class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 space-y-3">
+      <!-- Search Row -->
+      <div class="flex flex-col sm:flex-row gap-2.5">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="搜索姓名、研究方向（如 ADC、GaN、太赫兹、类脑）、主讲课程、招生代码（如 140100）… 支持空格多词组合"
+            class="w-full pl-10 pr-9 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+          />
+          <button id="btnClearSearch" type="button" title="清空搜索" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-200/70">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <select id="scopeSelect" class="px-3 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="all">检索范围：全部内容</option>
+            <option value="name">仅搜教师姓名</option>
+            <option value="research">仅搜研究方向</option>
+            <option value="courses">仅搜主讲课程</option>
+            <option value="admission">仅搜招生方向</option>
+            <option value="background">仅搜学历/去向</option>
+          </select>
+          <select id="titleSelect" class="px-3 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="all">全部职称</option>
+            <option value="教授">教授</option>
+            <option value="研究员">研究员</option>
+            <option value="副教授">副教授</option>
+            <option value="副研究员">副研究员</option>
+            <option value="高工/实验师">高工/实验师/其他</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Filter Pills Row -->
+      <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex flex-wrap items-center gap-1.5" id="rankPills">
+          <button type="button" data-rank="all" class="rank-pill px-2.5 py-1 rounded-lg font-medium bg-blue-600 text-white transition">全部 (131)</button>
+          <button type="button" data-rank="教授级" class="rank-pill px-2.5 py-1 rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">教授级 (85)</button>
+          <button type="button" data-rank="副教授/副研究员" class="rank-pill px-2.5 py-1 rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition">副教授/副研究员 (46)</button>
+          <span class="mx-1 text-slate-300 hidden sm:inline">|</span>
+          <select id="codeSelect" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-transparent hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <option value="all">招生专业代码：全部</option>
+            <option value="140100">140100 集成电路科学与工程</option>
+            <option value="085403">085403 集成电路工程</option>
+            <option value="085400">085400 电子信息</option>
+            <option value="080900">080900 电子科学与技术</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="btnToggleTags" type="button" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">
+            <i data-lucide="tags" class="w-3.5 h-3.5"></i>
+            <span>领域标签筛选</span>
+            <i id="tagsChevron" data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform"></i>
+          </button>
+          <select id="sortSelect" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 focus:outline-none">
+            <option value="default">排序：文档原序</option>
+            <option value="pinyin">排序：姓名拼音</option>
+          </select>
+          <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200">
+            <button id="btnViewGrid" type="button" title="卡片视图" class="p-1 rounded-md bg-white text-blue-600 shadow-sm">
+              <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+            </button>
+            <button id="btnViewList" type="button" title="列表视图" class="p-1 rounded-md text-slate-500 hover:text-slate-800">
+              <i data-lucide="list" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible Domain Tags -->
+      <div id="domainTagsBar" class="hidden pt-1 border-t border-slate-100">
+        <div id="domainTagsContainer" class="flex flex-wrap gap-1.5"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
+    <!-- Status Bar -->
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+      <div class="flex flex-wrap items-center gap-2 text-sm text-slate-600">
+        <span>共找到 <strong id="resultCount" class="text-blue-700 font-semibold">131</strong> 位教师</span>
+        <div id="activeFiltersChips" class="flex flex-wrap items-center gap-1.5"></div>
+      </div>
+      <button id="btnResetAll" type="button" class="hidden text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline">
+        重置所有筛选条件
+      </button>
+    </div>
+
+    <!-- Results Container -->
+    <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 text-slate-400 mb-3">
+        <i data-lucide="search-x" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-base font-semibold text-slate-800">未找到匹配的教师资料</h3>
+      <p class="text-sm text-slate-500 mt-1 max-w-md mx-auto">请尝试减少关键词、切换检索范围为“全部内容”，或清除部分筛选标签。</p>
+      <button id="btnEmptyReset" type="button" class="mt-4 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition">
+        查看全部 131 位教师
+      </button>
+    </div>
+  </main>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-start justify-between gap-3 bg-slate-50">
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 id="modalName" class="text-xl font-bold text-slate-900"></h2>
+            <span id="modalTitle" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"></span>
+            <span id="modalRankGroup" class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-200 text-slate-700"></span>
+          </div>
+          <div id="modalTags" class="flex flex-wrap gap-1.5 mt-2"></div>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="btnModalFav" type="button" class="p-2 rounded-lg border border-slate-200 bg-white hover:bg-amber-50 text-slate-500 transition" title="收藏">
+            <i data-lucide="star" class="w-4 h-4"></i>
+          </button>
+          <button id="btnModalCopy" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-xs font-medium text-slate-700 transition">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>复制资料</span>
+          </button>
+          <button id="btnCloseDetail" type="button" class="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+      <div id="modalBody" class="p-5 overflow-y-auto custom-scroll space-y-4 text-sm text-slate-700"></div>
+    </div>
+  </div>
+
+  <!-- Compare Modal -->
+  <div id="compareModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="columns-2" class="w-5 h-5 text-blue-600"></i>
+          <h2 class="text-lg font-bold text-slate-900">导师横向对比（最多 4 位）</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btnClearCompare" type="button" class="px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition">清空对比</button>
+          <button id="btnCloseCompare" type="button" class="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+      <div id="compareBody" class="p-5 overflow-auto custom-scroll flex-1"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs sm:text-sm shadow-lg"></div>
+
+  <script>
+    const TEACHERS = [
+  {
+    "id": 1,
+    "name": "罗萍",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：智能功率集成电路与系统设计",
+      "主要研究方向为智能功率集成电路与系统设计、高效电源管理策略、模拟集成电路抗辐射加固技术、能量采集技术和低功耗数模混合集成技术。",
+      "主讲课程：",
+      "本科生：《功率集成电路与微电子封装前沿技术》、《项目管理》",
+      "研究生：《模拟集成电路分析与设计》",
+      "招生方向：集成电路科学与工程、微电子器件与集成电路",
+      "连续数年指导学生在全国大学生集成电路创新创业大赛、“华为杯”中国研究生创“芯”大赛事中取得一、二等奖。",
+      "毕业生去往大厂、研究所等。"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：智能功率集成电路与系统设计",
+      "主要研究方向为智能功率集成电路与系统设计、高效电源管理策略、模拟集成电路抗辐射加固技术、能量采集技术和低功耗数模混合集成技术。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《功率集成电路与微电子封装前沿技术》、《项目管理》",
+      "研究生：《模拟集成电路分析与设计》"
+    ],
+    "admission": [
+      "招生方向：集成电路科学与工程、微电子器件与集成电路"
+    ],
+    "background": [
+      "连续数年指导学生在全国大学生集成电路创新创业大赛、“华为杯”中国研究生创“芯”大赛事中取得一、二等奖。",
+      "毕业生去往大厂、研究所等。"
+    ],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC",
+      "先进封装/三维集成",
+      "ESD/可靠性"
+    ],
+    "codes": []
+  },
+  {
+    "id": 2,
+    "name": "刘佳欣",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：模拟与混合信号集成电路",
+      "主要研究方向模拟与混合信号集成电路设计，尤其是数模转换器（ADC）芯片的设计。",
+      "山东大学本，成电硕博，清华博士后。",
+      "主讲课程：本科生：《数字集成电路原理》",
+      "招生方向：致力于发展模拟与混合信号电路设计的新架构、新技术，解决现有设计方法在后摩尔时代遭遇瓶颈的问题，并不断突破现有方法的极限，实现高性能高能效的集成电路与系统。",
+      "目前的研究兴趣主要一以下几点：",
+      "超高精度/高速高精度ADC芯片设计，",
+      "高能效模拟计算技术与存算融合系统。"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：模拟与混合信号集成电路",
+      "主要研究方向模拟与混合信号集成电路设计，尤其是数模转换器（ADC）芯片的设计。"
+    ],
+    "courses": [
+      "主讲课程：本科生：《数字集成电路原理》"
+    ],
+    "admission": [
+      "招生方向：致力于发展模拟与混合信号电路设计的新架构、新技术，解决现有设计方法在后摩尔时代遭遇瓶颈的问题，并不断突破现有方法的极限，实现高性能高能效的集成电路与系统。",
+      "目前的研究兴趣主要一以下几点：",
+      "超高精度/高速高精度ADC芯片设计，",
+      "高能效模拟计算技术与存算融合系统。"
+    ],
+    "background": [
+      "山东大学本，成电硕博，清华博士后。"
+    ],
+    "tags": [
+      "模拟/混合信号",
+      "数字IC/SoC/EDA",
+      "类脑/存算/AI芯片",
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 3,
+    "name": "鲍景富",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：RF集成电路",
+      "成电本硕博",
+      "主讲课程：",
+      "本科生：《频率合成技术》",
+      "研究生：《RFMEMS》",
+      "招生方向：硕士/博士",
+      "射频集成电路",
+      "微机电系统（RFMEMS）",
+      "声学技术：SAW/BAW",
+      "毕业生：留学、国企、民企、创业都有"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：RF集成电路"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《频率合成技术》",
+      "研究生：《RFMEMS》"
+    ],
+    "admission": [
+      "招生方向：硕士/博士",
+      "射频集成电路",
+      "微机电系统（RFMEMS）",
+      "声学技术：SAW/BAW"
+    ],
+    "background": [
+      "成电本硕博",
+      "毕业生：留学、国企、民企、创业都有"
+    ],
+    "tags": [
+      "射频/毫米波/太赫兹",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 4,
+    "name": "刘洋",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：集成电路设计",
+      "主要研究方向为数字集成电路设计；射频集成电路设计；存算一体芯片设计；类脑芯片设计；人工智能算法设计、忆阻器及神经网络等。",
+      "主讲课程：研究生：《微电子技术前沿》、《半导体器件物理》",
+      "招生方向：（与以上主要研究方向一样）",
+      "毕业生：华为、中兴、字节跳动、阿里巴巴、复旦微电子有限公司、中电科、中航科技、北方华创等。"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：集成电路设计",
+      "主要研究方向为数字集成电路设计；射频集成电路设计；存算一体芯片设计；类脑芯片设计；人工智能算法设计、忆阻器及神经网络等。"
+    ],
+    "courses": [
+      "主讲课程：研究生：《微电子技术前沿》、《半导体器件物理》"
+    ],
+    "admission": [
+      "招生方向：（与以上主要研究方向一样）"
+    ],
+    "background": [
+      "毕业生：华为、中兴、字节跳动、阿里巴巴、复旦微电子有限公司、中电科、中航科技、北方华创等。"
+    ],
+    "tags": [
+      "射频/毫米波/太赫兹",
+      "数字IC/SoC/EDA",
+      "类脑/存算/AI芯片"
+    ],
+    "codes": []
+  },
+  {
+    "id": 5,
+    "name": "李泽宏",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：功率控制系统、模拟集成电路、功率半导体器件。",
+      "重点开展新型功率器件/功率模组、采样技术、智能功率驱动集成电路和功率系统控制策略的基础、技术和可靠性研究。",
+      "主讲课程：",
+      "本科生：《微电子技术前沿》、《项目决策与经济管理》",
+      "硕博研究生：《半导体器件物理》",
+      "工程硕士：《智能功率器件与功率集成电路》",
+      "招生方向：",
+      "方向1、功率控制系统",
+      "方向2、模拟集成电路（1）重点开展磁、温度等传感器信号处理专用IC，（2）大功率智能驱动控制IC等。",
+      "方向3功率半导体器件",
+      "指导硕博研究生近200人。"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：功率控制系统、模拟集成电路、功率半导体器件。",
+      "重点开展新型功率器件/功率模组、采样技术、智能功率驱动集成电路和功率系统控制策略的基础、技术和可靠性研究。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《微电子技术前沿》、《项目决策与经济管理》",
+      "硕博研究生：《半导体器件物理》",
+      "工程硕士：《智能功率器件与功率集成电路》"
+    ],
+    "admission": [
+      "招生方向：",
+      "方向1、功率控制系统",
+      "方向2、模拟集成电路（1）重点开展磁、温度等传感器信号处理专用IC，（2）大功率智能驱动控制IC等。",
+      "方向3功率半导体器件"
+    ],
+    "background": [
+      "指导硕博研究生近200人。"
+    ],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC",
+      "MEMS/传感器",
+      "ESD/可靠性"
+    ],
+    "codes": []
+  },
+  {
+    "id": 6,
+    "name": "唐鹤",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：模数混合信号芯片、专用SoC芯片",
+      "长期从事集成电路（IC）的前沿研究和高端产业化开发，专注于模数混合信号集成电路（ADC/DAC）、模拟/射频集成电路、信号链微系统/专用SoC研究，具备丰富的前沿芯片研究基础和高端芯片产业化开发经验。",
+      "科学研究：",
+      "方向1：高速高精度ADC芯片……",
+      "方向2、高精度计量型ADC芯片……",
+      "方向3、“AFE+信号处理”专业智能SoC芯片……",
+      "主讲课程《模拟集成电路原理》、《微电子电路设计》"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：模数混合信号芯片、专用SoC芯片",
+      "长期从事集成电路（IC）的前沿研究和高端产业化开发，专注于模数混合信号集成电路（ADC/DAC）、模拟/射频集成电路、信号链微系统/专用SoC研究，具备丰富的前沿芯片研究基础和高端芯片产业化开发经验。",
+      "科学研究：",
+      "方向1：高速高精度ADC芯片……",
+      "方向2、高精度计量型ADC芯片……",
+      "方向3、“AFE+信号处理”专业智能SoC芯片……"
+    ],
+    "courses": [
+      "主讲课程《模拟集成电路原理》、《微电子电路设计》"
+    ],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "射频/毫米波/太赫兹",
+      "数字IC/SoC/EDA"
+    ],
+    "codes": []
+  },
+  {
+    "id": 7,
+    "name": "宁宁",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：数模混合集成电路设计",
+      "长期从事数模混合集成电路、传感器读出系统、高速时钟和数据接口，电源管理芯片等领域的研究工作，特别在超高速低功耗ADC、传感读出和显示驱动等领域有长期积累。",
+      "主讲课程：《类脑系统初探》、《综合课程设置B》",
+      "招生方向：集成电路科学与工程、电子信息"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：数模混合集成电路设计",
+      "长期从事数模混合集成电路、传感器读出系统、高速时钟和数据接口，电源管理芯片等领域的研究工作，特别在超高速低功耗ADC、传感读出和显示驱动等领域有长期积累。"
+    ],
+    "courses": [
+      "主讲课程：《类脑系统初探》、《综合课程设置B》"
+    ],
+    "admission": [
+      "招生方向：集成电路科学与工程、电子信息"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC",
+      "类脑/存算/AI芯片",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 8,
+    "name": "王忆文",
+    "title": "教授（博导）",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：片上系统/混合信号IC",
+      "研究领域主要包括：",
+      "SoC技术（基于RISC-V等）",
+      "网络技术（Fiber Channel、以太网等）",
+      "数模混合IC（MCU、SerDes等）",
+      "面向计算密集、存储密集的新型AI电路",
+      "主讲课程：",
+      "本科生《数字集成电路应用I、》《IC综合实验II》、《IC综合实验III》",
+      "研究生：《DFT技术》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）",
+      "085400电子信息 06微电子器件与集成电路，13微电子器件与集成电路（非全日制）（博）",
+      "（指导学生参加各种竞赛，多次获国奖、省奖，如“华为杯”研究生电赛、大学生电赛、集创赛等）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：片上系统/混合信号IC",
+      "研究领域主要包括：",
+      "SoC技术（基于RISC-V等）",
+      "网络技术（Fiber Channel、以太网等）",
+      "数模混合IC（MCU、SerDes等）",
+      "面向计算密集、存储密集的新型AI电路"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生《数字集成电路应用I、》《IC综合实验II》、《IC综合实验III》",
+      "研究生：《DFT技术》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）",
+      "085400电子信息 06微电子器件与集成电路，13微电子器件与集成电路（非全日制）（博）",
+      "（指导学生参加各种竞赛，多次获国奖、省奖，如“华为杯”研究生电赛、大学生电赛、集创赛等）"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "数字IC/SoC/EDA"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 9,
+    "name": "王政",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：射频/毫米波/太赫兹集成电路设计",
+      "清华本硕加州大学博",
+      "长期从事硅基射频、毫米波、太赫兹集成电路的理论及设计研究，在硅基太赫兹通信、成像等领域取得了一系列国际领先的、原创性的研究成果，在集成电路设计领域顶尖会议IEEE ISSCC和期刊IEEE JASC上发表了多篇论文。",
+      "主要围绕硅基模拟/射频集成电路展开工作，主要包括：",
+      "硅基射频、毫米波、太赫兹收发电路研究，",
+      "硅基射频、毫米波、太赫兹频率综合器研究，",
+      "模拟射频集成元件模型及设计自动化研究，",
+      "智能无线集成电路与系统研究。",
+      "主讲课程《模拟集成电路原理》",
+      "招生方向：（同上1、2、3、4项）",
+      "毕业生就业质量高且好。"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：射频/毫米波/太赫兹集成电路设计",
+      "长期从事硅基射频、毫米波、太赫兹集成电路的理论及设计研究，在硅基太赫兹通信、成像等领域取得了一系列国际领先的、原创性的研究成果，在集成电路设计领域顶尖会议IEEE ISSCC和期刊IEEE JASC上发表了多篇论文。",
+      "主要围绕硅基模拟/射频集成电路展开工作，主要包括：",
+      "硅基射频、毫米波、太赫兹收发电路研究，",
+      "硅基射频、毫米波、太赫兹频率综合器研究，",
+      "模拟射频集成元件模型及设计自动化研究，",
+      "智能无线集成电路与系统研究。"
+    ],
+    "courses": [
+      "主讲课程《模拟集成电路原理》"
+    ],
+    "admission": [
+      "招生方向：（同上1、2、3、4项）"
+    ],
+    "background": [
+      "清华本硕加州大学博",
+      "毕业生就业质量高且好。"
+    ],
+    "tags": [
+      "模拟/混合信号",
+      "射频/毫米波/太赫兹"
+    ],
+    "codes": []
+  },
+  {
+    "id": 10,
+    "name": "胡邵刚",
+    "title": "教授，特聘研究员",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：类脑集成芯片与系统",
+      "长期从事累脑器件、芯片和算法系统研究。",
+      "主讲课程：《类脑系统初探》、《类脑芯片技术》",
+      "招生方向：1、集成电路科学与工程，2、电子信息"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：类脑集成芯片与系统",
+      "长期从事累脑器件、芯片和算法系统研究。"
+    ],
+    "courses": [
+      "主讲课程：《类脑系统初探》、《类脑芯片技术》"
+    ],
+    "admission": [
+      "招生方向：1、集成电路科学与工程，2、电子信息"
+    ],
+    "background": [],
+    "tags": [
+      "类脑/存算/AI芯片"
+    ],
+    "codes": []
+  },
+  {
+    "id": 11,
+    "name": "彭析竹",
+    "title": "研究员",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：高性能模数混合集成电路（ADC/DAC）/超导单磁通量子集成电路",
+      "主要从事集成电路/微电子方面的前沿研究和高端产业化开发工作，专注于模数混合信号芯片（ADC/DAC）、、模拟前端及信号处理器（AFE/DSP）、人工智能算法及应用芯片的研究与开发，具备丰富的高性能ADC和信号处理器自主研制经验。",
+      "科学研究：",
+      "高速高精度ADC芯片自主可控研制；",
+      "高速高精度ADC数字校准研究；",
+      "智能大动态模数转换机理研究；",
+      "专用信号处理SoC芯片研究。",
+      "主讲课程：本科生：《数字逻辑设计及应用》",
+      "招生方向：模数混合集成电路设计、数字校准算法研究和ASIC电路设计、人工智能与信号处理电路设计等研究方向。"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：高性能模数混合集成电路（ADC/DAC）/超导单磁通量子集成电路",
+      "主要从事集成电路/微电子方面的前沿研究和高端产业化开发工作，专注于模数混合信号芯片（ADC/DAC）、、模拟前端及信号处理器（AFE/DSP）、人工智能算法及应用芯片的研究与开发，具备丰富的高性能ADC和信号处理器自主研制经验。",
+      "科学研究：",
+      "高速高精度ADC芯片自主可控研制；",
+      "高速高精度ADC数字校准研究；",
+      "智能大动态模数转换机理研究；",
+      "专用信号处理SoC芯片研究。"
+    ],
+    "courses": [
+      "主讲课程：本科生：《数字逻辑设计及应用》"
+    ],
+    "admission": [
+      "招生方向：模数混合集成电路设计、数字校准算法研究和ASIC电路设计、人工智能与信号处理电路设计等研究方向。"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "数字IC/SoC/EDA",
+      "类脑/存算/AI芯片",
+      "微纳/二维材料/薄膜",
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": []
+  },
+  {
+    "id": 12,
+    "name": "贺雅娟",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：集成电路设计",
+      "主要研究方向为低压低功耗技术，高能效数字集成电路设计。",
+      "科学研究：",
+      "近似计算芯片设计技术，",
+      "近/亚阈值数字集成电路技术",
+      "存内计算。",
+      "主讲课程：",
+      "本科生：《数字集成电路原理》",
+      "研究生：《高等数学集成电路技术（全英文）》",
+      "招生方向：",
+      "集成电路科学与工程，",
+      "微电子器件与集成电路。"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：集成电路设计",
+      "主要研究方向为低压低功耗技术，高能效数字集成电路设计。",
+      "科学研究：",
+      "近似计算芯片设计技术，",
+      "近/亚阈值数字集成电路技术",
+      "存内计算。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《数字集成电路原理》",
+      "研究生：《高等数学集成电路技术（全英文）》"
+    ],
+    "admission": [
+      "招生方向：",
+      "集成电路科学与工程，",
+      "微电子器件与集成电路。"
+    ],
+    "background": [],
+    "tags": [
+      "数字IC/SoC/EDA",
+      "类脑/存算/AI芯片"
+    ],
+    "codes": []
+  },
+  {
+    "id": 13,
+    "name": "舒一洋",
+    "title": "研究员（特聘）",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "成电本硕博",
+      "研究方向：射频、微波、毫米波、太赫兹集成电路",
+      "主要研究方向为射频、微波、毫米波、太赫兹集成电路设计，研制出多款高性能超宽带振荡器、频率源，数字功率放大器等芯片。",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕/学博）",
+      "085400电子信息 06微电子器件与集成电路，13微电子器件与集成电路（非全日制）（专博）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：射频、微波、毫米波、太赫兹集成电路",
+      "主要研究方向为射频、微波、毫米波、太赫兹集成电路设计，研制出多款高性能超宽带振荡器、频率源，数字功率放大器等芯片。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕/学博）",
+      "085400电子信息 06微电子器件与集成电路，13微电子器件与集成电路（非全日制）（专博）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "background": [
+      "成电本硕博"
+    ],
+    "tags": [
+      "功率半导体与IC",
+      "射频/毫米波/太赫兹"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 14,
+    "name": "杨世恒",
+    "title": "特聘研究员",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：模拟、射频集成电路设计",
+      "模拟、射频集成电路设计（低功耗、高性能锁相环，时钟生成）",
+      "数模混合集成电路设计",
+      "主讲课程：《数字集成电路原理》",
+      "招生方向：模拟、射频集成电路技术"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：模拟、射频集成电路设计",
+      "模拟、射频集成电路设计（低功耗、高性能锁相环，时钟生成）",
+      "数模混合集成电路设计"
+    ],
+    "courses": [
+      "主讲课程：《数字集成电路原理》"
+    ],
+    "admission": [
+      "招生方向：模拟、射频集成电路技术"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "射频/毫米波/太赫兹",
+      "数字IC/SoC/EDA"
+    ],
+    "codes": []
+  },
+  {
+    "id": 15,
+    "name": "杨秉正",
+    "title": "研究员（特聘）",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：射频、微波、毫米波、太赫兹集成电路设计",
+      "主要研究方向为射频、微波、毫米波、太赫兹功率放大器、发射机等集成电路设计，研制出多款高性能数字化功率放大器、发射机等芯片。"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：射频、微波、毫米波、太赫兹集成电路设计",
+      "主要研究方向为射频、微波、毫米波、太赫兹功率放大器、发射机等集成电路设计，研制出多款高性能数字化功率放大器、发射机等芯片。"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "射频/毫米波/太赫兹"
+    ],
+    "codes": []
+  },
+  {
+    "id": 16,
+    "name": "王海",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：芯片设计自动化（EDA）人工智能芯片与优化",
+      "主要研究领域包括芯片设计自动化（EDA）、人工智能（AI芯片设计与优化。现致力于研究基于人工智能的芯片全主动设计与性能优化技术，特别是人工神经网络芯片优化技术与多核/3D芯片的性能优化技术。",
+      "主讲课程：",
+      "本科生：《软件技术基础》",
+      "研究生：《集成电路仿真与自动化设计基础（全英文）》"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：芯片设计自动化（EDA）人工智能芯片与优化",
+      "主要研究领域包括芯片设计自动化（EDA）、人工智能（AI芯片设计与优化。现致力于研究基于人工智能的芯片全主动设计与性能优化技术，特别是人工神经网络芯片优化技术与多核/3D芯片的性能优化技术。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《软件技术基础》",
+      "研究生：《集成电路仿真与自动化设计基础（全英文）》"
+    ],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "数字IC/SoC/EDA",
+      "类脑/存算/AI芯片"
+    ],
+    "codes": []
+  },
+  {
+    "id": 17,
+    "name": "方健",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：模拟、功率集成电路",
+      "主讲课程：",
+      "本科生：《模拟集成电路原理》",
+      "研究生：《集成电路基础实验》",
+      "招生方向：",
+      "集成电路科学与工程（学硕）",
+      "集成电路工程（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：模拟、功率集成电路"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《模拟集成电路原理》",
+      "研究生：《集成电路基础实验》"
+    ],
+    "admission": [
+      "招生方向：",
+      "集成电路科学与工程（学硕）",
+      "集成电路工程（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC"
+    ],
+    "codes": []
+  },
+  {
+    "id": 18,
+    "name": "谢小东",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：集成电路设计（偏数字、军工）",
+      "主讲课程：《电子设计自动机技术》",
+      "招生方向：集成电路设计"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：集成电路设计（偏数字、军工）"
+    ],
+    "courses": [
+      "主讲课程：《电子设计自动机技术》"
+    ],
+    "admission": [
+      "招生方向：集成电路设计"
+    ],
+    "background": [],
+    "tags": [],
+    "codes": []
+  },
+  {
+    "id": 19,
+    "name": "李靖",
+    "title": "教授（博导）",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：数模混合集成电路（超高速、高精度、低功耗ADC/DAC）、超声成像前端集成电路、温度传感器、生物医学集成电路、传感读出。",
+      "代表性成果：",
+      "基于SAR+SS混合型量化的微型三维超声成像前端，",
+      "16位高精度噪声整形逐次逼近型ADC，",
+      "12位4GSPS超高速A/D转换器，",
+      "低压低功耗高速ADC的研究，",
+      "超高速时间交织ADC时钟失配校正算法研究，",
+      "CMOS高精度低功耗温度传感器。",
+      "主讲课程：",
+      "本科生：《集成电路原理》、《IC2综合实验2》、《高精度低功耗CMOS温度传感器芯片设计及应用》",
+      "研究生：《半导体封装测试与可靠性》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕/学博）",
+      "085403集成电路工程 01微电子器件与集成电路（工程博/专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：数模混合集成电路（超高速、高精度、低功耗ADC/DAC）、超声成像前端集成电路、温度传感器、生物医学集成电路、传感读出。",
+      "代表性成果：",
+      "基于SAR+SS混合型量化的微型三维超声成像前端，",
+      "16位高精度噪声整形逐次逼近型ADC，",
+      "12位4GSPS超高速A/D转换器，",
+      "低压低功耗高速ADC的研究，",
+      "超高速时间交织ADC时钟失配校正算法研究，",
+      "CMOS高精度低功耗温度传感器。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《集成电路原理》、《IC2综合实验2》、《高精度低功耗CMOS温度传感器芯片设计及应用》",
+      "研究生：《半导体封装测试与可靠性》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕/学博）",
+      "085403集成电路工程 01微电子器件与集成电路（工程博/专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "MEMS/传感器",
+      "先进封装/三维集成",
+      "ESD/可靠性"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 20,
+    "name": "张红帅",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：模数转换器、时钟综合器、高速接口等",
+      "专注于混合集成电路设计，研究对象涉及模数转换器、滤波器、放大器、带隙基准？低压差线性稳压器、频率综合器和高速接口等电路，主攻各类型高性能模数转换器设计。",
+      "主讲课程：《模拟集成电路原理与设计II》",
+      "招生方向：模数转换器、时钟综合器、高速接口等。",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学博）",
+      "085400集成电路工程 01微电子器件与集成电路，03微电子器件与集成电路（非全日制）（专博）",
+      "140100集成电路科学与工程 02功率半导体与集成技术，03集成电路设计与自动化，04封装与微系统集成（学硕）",
+      "085403集成电路工程 02功率半导体与集成技术，03集成电路设计与设计自动化，04封装与微系统集成"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：模数转换器、时钟综合器、高速接口等",
+      "专注于混合集成电路设计，研究对象涉及模数转换器、滤波器、放大器、带隙基准？低压差线性稳压器、频率综合器和高速接口等电路，主攻各类型高性能模数转换器设计。"
+    ],
+    "courses": [
+      "主讲课程：《模拟集成电路原理与设计II》"
+    ],
+    "admission": [
+      "招生方向：模数转换器、时钟综合器、高速接口等。",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学博）",
+      "085400集成电路工程 01微电子器件与集成电路，03微电子器件与集成电路（非全日制）（专博）",
+      "140100集成电路科学与工程 02功率半导体与集成技术，03集成电路设计与自动化，04封装与微系统集成（学硕）",
+      "085403集成电路工程 02功率半导体与集成技术，03集成电路设计与设计自动化，04封装与微系统集成"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC",
+      "射频/毫米波/太赫兹",
+      "先进封装/三维集成"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 21,
+    "name": "毛翔宇",
+    "title": "教授（博导）",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：电源管理及模拟集成电路设计",
+      "主要研究方向为电源管理及模拟集成电路设计，包括大功率集成芯片的垂直供电架构高频高密度DC-DC转换器，高性能模拟/数字控制LDO等。",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学博）",
+      "085400电子信息 01微电子器件与集成电路，03微电子器件与集成电路（非全日制）（专博）",
+      "140100集成电路科学与工程 03集成电路设计与设计自动化"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：电源管理及模拟集成电路设计",
+      "主要研究方向为电源管理及模拟集成电路设计，包括大功率集成芯片的垂直供电架构高频高密度DC-DC转换器，高性能模拟/数字控制LDO等。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学博）",
+      "085400电子信息 01微电子器件与集成电路，03微电子器件与集成电路（非全日制）（专博）",
+      "140100集成电路科学与工程 03集成电路设计与设计自动化"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC"
+    ],
+    "codes": [
+      "140100",
+      "085400"
+    ]
+  },
+  {
+    "id": 22,
+    "name": "樊华",
+    "title": "教授（博导）",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：模拟混合信号设计，传感器芯片设计，数据转换器芯片设计",
+      "主讲课程：",
+      "本科生：《电路分析与电子线路》、《电子电路基础》、《模拟集成电路原理与设计I》",
+      "研究生：《模拟集成电路分析与设计》",
+      "招生方向：集成电路芯片设计"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：模拟混合信号设计，传感器芯片设计，数据转换器芯片设计"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《电路分析与电子线路》、《电子电路基础》、《模拟集成电路原理与设计I》",
+      "研究生：《模拟集成电路分析与设计》"
+    ],
+    "admission": [
+      "招生方向：集成电路芯片设计"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 23,
+    "name": "杨万里",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：电子功能薄膜材料与器件",
+      "成电本硕博"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：电子功能薄膜材料与器件"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [
+      "成电本硕博"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 24,
+    "name": "张波",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：微电子器件与集成电路，功率半导体技术。",
+      "北理本成电硕",
+      "主讲课程：",
+      "本科生：微电子技术前沿；",
+      "研究生：功率半导体器件与SPIC。",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学博/学硕）",
+      "085400电子信息： 06微电子器件与集成电路；13微电子器件与集成电路（非全日制）",
+      "085403集成电路工程：01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：微电子器件与集成电路，功率半导体技术。",
+      "北理本成电硕"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：微电子技术前沿；",
+      "研究生：功率半导体器件与SPIC。"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学博/学硕）",
+      "085400电子信息： 06微电子器件与集成电路；13微电子器件与集成电路（非全日制）",
+      "085403集成电路工程：01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 25,
+    "name": "张晓升",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：智能微钠电路与系统集成",
+      "成电本硕北大博"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：智能微钠电路与系统集成"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [
+      "成电本硕北大博"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 26,
+    "name": "张泽坤",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：集成电路与系统",
+      "主要从事高性能功率集成电路与系统研究，包括电源管理集成技术、高精度低功耗模拟集成电路、高速低噪声模拟前端集成电路、高功率密度控制器、宽禁带半导体集成电路及能量收集系统等。",
+      "主讲课程：",
+      "本科生：《电路分析与电子线路》、《模拟集成电路原理》。",
+      "研究生：《模拟集成电路分析与设计》。",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（硕/博）",
+      "085400电子信息 06微电子器件与集成电路；13微电子器件与集成电路（非全日制）（博）",
+      "085403集成电路工程 01集成电路工程 01微电子器件与集成电路"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：集成电路与系统",
+      "主要从事高性能功率集成电路与系统研究，包括电源管理集成技术、高精度低功耗模拟集成电路、高速低噪声模拟前端集成电路、高功率密度控制器、宽禁带半导体集成电路及能量收集系统等。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《电路分析与电子线路》、《模拟集成电路原理》。",
+      "研究生：《模拟集成电路分析与设计》。"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（硕/博）",
+      "085400电子信息 06微电子器件与集成电路；13微电子器件与集成电路（非全日制）（博）",
+      "085403集成电路工程 01集成电路工程 01微电子器件与集成电路"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC",
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 27,
+    "name": "陈万军",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：功率半导体与集成技术",
+      "科研方向：",
+      "硅基VDMOS、IGBT等功率半导体器件及其应用；",
+      "氮化镓、碳化硅等宽禁带功率半导体与集成技术；",
+      "脉冲功率半导体器件与微系统；",
+      "功率集成电路与系统。",
+      "主讲课程：",
+      "本科生：《固体物理》",
+      "研究生：《先进集成电路制造技术》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕/学博）",
+      "085400电子信息 06微电子器件与集成电路；13微电子器件与集成电路（非全日制）（专博）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：功率半导体与集成技术",
+      "科研方向：",
+      "硅基VDMOS、IGBT等功率半导体器件及其应用；",
+      "氮化镓、碳化硅等宽禁带功率半导体与集成技术；",
+      "脉冲功率半导体器件与微系统；",
+      "功率集成电路与系统。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《固体物理》",
+      "研究生：《先进集成电路制造技术》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕/学博）",
+      "085400电子信息 06微电子器件与集成电路；13微电子器件与集成电路（非全日制）（专博）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 28,
+    "name": "明鑫",
+    "title": "教授/博导",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：功率集成电路与系统",
+      "团队专注于高效、高功率密度电源管理IC及硅基GsN驱动痛点问题，以提高转换效率、降低EMI噪声干扰、实现快速负载影响为目标。",
+      "主讲课程：《模拟集成电路原理》、《微电子电路设计》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学博/学硕）",
+      "085400电子信息 06微电子器件与集成电路，13微电子器件与集成电路（非全日制）（学博）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：功率集成电路与系统",
+      "团队专注于高效、高功率密度电源管理IC及硅基GsN驱动痛点问题，以提高转换效率、降低EMI噪声干扰、实现快速负载影响为目标。"
+    ],
+    "courses": [
+      "主讲课程：《模拟集成电路原理》、《微电子电路设计》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学博/学硕）",
+      "085400电子信息 06微电子器件与集成电路，13微电子器件与集成电路（非全日制）（学博）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 29,
+    "name": "乔明",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：功率半导体器件及集成技术",
+      "长期从事功率半导体器件，功率高压集成技术，功率高压集成电路，功率器件可靠性，抗辐射功率器件及高压集成技术，高压ESD防护技术研究。",
+      "主讲课程：",
+      "本科生：《功率半导体器件与集成技术》、《功率半导体芯片设计》",
+      "研究生：《半导体功率器件与智能功率IC》、《半导体功率器件与智能功率IC实验》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕/学博）",
+      "085400电子信息 06微电子器件与集成电路，13微电子器件与集成电路（非全日制）（专博）",
+      "085403集成电路工程01微电子器件与集成电路，（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：功率半导体器件及集成技术",
+      "长期从事功率半导体器件，功率高压集成技术，功率高压集成电路，功率器件可靠性，抗辐射功率器件及高压集成技术，高压ESD防护技术研究。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《功率半导体器件与集成技术》、《功率半导体芯片设计》",
+      "研究生：《半导体功率器件与智能功率IC》、《半导体功率器件与智能功率IC实验》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕/学博）",
+      "085400电子信息 06微电子器件与集成电路，13微电子器件与集成电路（非全日制）（专博）",
+      "085403集成电路工程01微电子器件与集成电路，（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "ESD/可靠性"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 30,
+    "name": "罗小容",
+    "title": "教授/博导",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：功率半导体器件与集成电路",
+      "四川师范学院本，川大硕，成电博。",
+      "主讲课程：",
+      "本科生：《半导体物理》",
+      "研究生：《微电子基础物理实验》",
+      "招生方向：",
+      "140100集成电路科学与工程01微电子器件与集成电路（学硕/学博）",
+      "085400电子信息 06微电子器件与集成电路，13微电子器件与集成电路（非全日制）（专博）",
+      "085403集成电路工程01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：功率半导体器件与集成电路",
+      "四川师范学院本，川大硕，成电博。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《半导体物理》",
+      "研究生：《微电子基础物理实验》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程01微电子器件与集成电路（学硕/学博）",
+      "085400电子信息 06微电子器件与集成电路，13微电子器件与集成电路（非全日制）（专博）",
+      "085403集成电路工程01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 31,
+    "name": "桥本研也",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：声表面波/体声波器件",
+      "主讲课程：",
+      "本科生：《数字时代下的滤波器设计》",
+      "研究生：《声表面波和体声波器件在通信中的运用》"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：声表面波/体声波器件"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《数字时代下的滤波器设计》",
+      "研究生：《声表面波和体声波器件在通信中的运用》"
+    ],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "射频/毫米波/太赫兹"
+    ],
+    "codes": []
+  },
+  {
+    "id": 32,
+    "name": "杨超",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：1、固态量子相变，2、新型二维材料与器件，3、新型光电探测器件与系统，4、超导量子集成芯片研究。",
+      "招生方向：《电子科学与技术》、《电子信息材料与元器件》"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：1、固态量子相变，2、新型二维材料与器件，3、新型光电探测器件与系统，4、超导量子集成芯片研究。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：《电子科学与技术》、《电子信息材料与元器件》"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 33,
+    "name": "严颖怡",
+    "title": "教授/博导",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：功率变换电路架构和系统优化，开关变换器的建模和先进控制，高性能功率集成电路设计。",
+      "浙大本硕，弗吉尼亚理工大学博。"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：功率变换电路架构和系统优化，开关变换器的建模和先进控制，高性能功率集成电路设计。"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [
+      "浙大本硕，弗吉尼亚理工大学博。"
+    ],
+    "tags": [
+      "功率半导体与IC"
+    ],
+    "codes": []
+  },
+  {
+    "id": 34,
+    "name": "贾春阳",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：微钠电子材料与器件",
+      "主讲课程：",
+      "本科生前沿研讨课《分子电子材料与器件》",
+      "招生方向：电子信息材料与元器件"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：微钠电子材料与器件"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生前沿研讨课《分子电子材料与器件》"
+    ],
+    "admission": [
+      "招生方向：电子信息材料与元器件"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 35,
+    "name": "任敏",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：功率半导体器件及集成电路",
+      "清华博",
+      "主讲课程：",
+      "本科生：《微电子器件》",
+      "研究生：《半导体封装测试与可靠性》",
+      "招生方向：",
+      "140100集成电路科学与工程01微电子器件与集成电路（学硕）",
+      "085403集成电路工程01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：功率半导体器件及集成电路",
+      "清华博"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《微电子器件》",
+      "研究生：《半导体封装测试与可靠性》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程01微电子器件与集成电路（学硕）",
+      "085403集成电路工程01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "先进封装/三维集成",
+      "ESD/可靠性"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 36,
+    "name": "罗文博",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：先进封装：射频微系统、SiP、异构集成、光电共封；集成传感器以及测试检测技术",
+      "成电本博"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：先进封装：射频微系统、SiP、异构集成、光电共封；集成传感器以及测试检测技术"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [
+      "成电本博"
+    ],
+    "tags": [
+      "射频/毫米波/太赫兹",
+      "MEMS/传感器",
+      "先进封装/三维集成"
+    ],
+    "codes": []
+  },
+  {
+    "id": 37,
+    "name": "周琦",
+    "title": "教授/博导",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：宽禁带半导体器件与集成技术",
+      "西电本硕，香港科技大学博。",
+      "一直从事宽禁带氮化镓（HcN）功率半导体器件理论模型、结构设计、器件制备技术、可靠性与集成电路的研究。",
+      "主讲课程：",
+      "本科生：《微电子工艺》",
+      "研究生：《先进集成电路制造技术》",
+      "招生方向：",
+      "1400100集成电路科学与工程 01微电子器件与集成电路（学硕/学博）",
+      "085400电子信息 06微电子器件与集成电路 13微电子器件与集成电路（非全日制）博",
+      "028电子科技大学（深圳）高等研究院",
+      "085403集成电路工程（学硕）01集成电路工程"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：宽禁带半导体器件与集成技术",
+      "一直从事宽禁带氮化镓（HcN）功率半导体器件理论模型、结构设计、器件制备技术、可靠性与集成电路的研究。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《微电子工艺》",
+      "研究生：《先进集成电路制造技术》"
+    ],
+    "admission": [
+      "招生方向：",
+      "1400100集成电路科学与工程 01微电子器件与集成电路（学硕/学博）",
+      "085400电子信息 06微电子器件与集成电路 13微电子器件与集成电路（非全日制）博",
+      "028电子科技大学（深圳）高等研究院",
+      "085403集成电路工程（学硕）01集成电路工程"
+    ],
+    "background": [
+      "西电本硕，香港科技大学博。"
+    ],
+    "tags": [
+      "功率半导体与IC",
+      "宽禁带(GaN/SiC)",
+      "ESD/可靠性"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 38,
+    "name": "杜江峰",
+    "title": "教授/博导",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：宽禁带半导体器件与集成电路",
+      "主要研究领域包括：第三代宽禁带半导体氮化镓（GcN）微波功率器件、GaN电力电子器件与功率集成、栅极驱动电路芯片设计、DC/DC电源管理芯片设计、电子元器件失效分析与可靠性等。",
+      "主讲课程：",
+      "本科生：《集成电路测试与封装》",
+      "研究生：《集成电路封装测试与可靠性》",
+      "招生方向：",
+      "导师代码：11375",
+      "1400100集成电路科学与工程 01微电子器件与集成电路（学硕/博）",
+      "085400电子信息 06微电子器件与集成电路13微电子器件与集成电路（非全日制）（博）",
+      "085403集成电路工程01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：宽禁带半导体器件与集成电路",
+      "主要研究领域包括：第三代宽禁带半导体氮化镓（GcN）微波功率器件、GaN电力电子器件与功率集成、栅极驱动电路芯片设计、DC/DC电源管理芯片设计、电子元器件失效分析与可靠性等。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《集成电路测试与封装》",
+      "研究生：《集成电路封装测试与可靠性》"
+    ],
+    "admission": [
+      "招生方向：",
+      "导师代码：11375",
+      "1400100集成电路科学与工程 01微电子器件与集成电路（学硕/博）",
+      "085400电子信息 06微电子器件与集成电路13微电子器件与集成电路（非全日制）（博）",
+      "085403集成电路工程01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "射频/毫米波/太赫兹",
+      "先进封装/三维集成",
+      "宽禁带(GaN/SiC)",
+      "ESD/可靠性"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 39,
+    "name": "钟朝位",
+    "title": "享受正高级待遇的高级工程师",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：电子陶瓷及器件、电子薄膜与集成器件",
+      "成电本硕",
+      "一直从事介电/铁电/压电/光电陶瓷、薄膜与集成器件的教学、科研及产业化工作。"
+    ],
+    "titleCategory": "高工/实验师",
+    "research": [
+      "研究方向：电子陶瓷及器件、电子薄膜与集成器件",
+      "一直从事介电/铁电/压电/光电陶瓷、薄膜与集成器件的教学、科研及产业化工作。"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [
+      "成电本硕"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 40,
+    "name": "赵怡程",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：高通量智能实验；光伏器件；传感器件。",
+      "主讲课程：半导体物理",
+      "招生方向：电子信息与元器件；物理化学；材料化学；机器学习。"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：高通量智能实验；光伏器件；传感器件。"
+    ],
+    "courses": [
+      "主讲课程：半导体物理"
+    ],
+    "admission": [
+      "招生方向：电子信息与元器件；物理化学；材料化学；机器学习。"
+    ],
+    "background": [],
+    "tags": [
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 41,
+    "name": "王显福",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：类脑器件与芯片",
+      "主要从事类脑神经形态计算、低功耗多功能光电子集成芯片等领域的研究。",
+      "招生方向：每年3-4名研究生（硕士生、硕博连读生或博士生）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：类脑器件与芯片",
+      "主要从事类脑神经形态计算、低功耗多功能光电子集成芯片等领域的研究。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：每年3-4名研究生（硕士生、硕博连读生或博士生）"
+    ],
+    "background": [],
+    "tags": [
+      "类脑/存算/AI芯片"
+    ],
+    "codes": []
+  },
+  {
+    "id": 42,
+    "name": "李轩",
+    "title": "研究员",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：碳化硅功率半导体器件设计与可靠性、驱动电路与功率变换拓扑。",
+      "成电本博",
+      "主讲课程：《微电子器件》、《功率半导体器件与集成技术》"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：碳化硅功率半导体器件设计与可靠性、驱动电路与功率变换拓扑。"
+    ],
+    "courses": [
+      "主讲课程：《微电子器件》、《功率半导体器件与集成技术》"
+    ],
+    "admission": [],
+    "background": [
+      "成电本博"
+    ],
+    "tags": [
+      "功率半导体与IC",
+      "宽禁带(GaN/SiC)",
+      "ESD/可靠性"
+    ],
+    "codes": []
+  },
+  {
+    "id": 43,
+    "name": "钱凌轩",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：微电子器件与工艺",
+      "川大本硕，香港大学博。",
+      "主讲课程：",
+      "本科生：《微电子工艺与封装》",
+      "研究生：《科技写作》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学博）",
+      "140100集成电路科学与工程01、02、04方向，（学硕）",
+      "085403集成电路工程01、02、04方向（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：微电子器件与工艺"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《微电子工艺与封装》",
+      "研究生：《科技写作》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学博）",
+      "140100集成电路科学与工程01、02、04方向，（学硕）",
+      "085403集成电路工程01、02、04方向（专硕）"
+    ],
+    "background": [
+      "川大本硕，香港大学博。"
+    ],
+    "tags": [
+      "先进封装/三维集成"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 44,
+    "name": "张继华",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：三维封装材料与集成技术",
+      "主讲课程：",
+      "本科生：《热力学与统计物理》、《量子力学》、《信息论导论》",
+      "研究生：《固体物理》、《无源集成与三维集成导论》、《无源集成器件》",
+      "招生方向：",
+      "140100集成电路科学与工程01微电子器件与集成电路 02纳电子科学与集成电路制造工程（学士学位）",
+      "085400：电子信息（专业学位）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：三维封装材料与集成技术"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《热力学与统计物理》、《量子力学》、《信息论导论》",
+      "研究生：《固体物理》、《无源集成与三维集成导论》、《无源集成器件》"
+    ],
+    "admission": [
+      "招生方向：",
+      "085400：电子信息（专业学位）"
+    ],
+    "background": [
+      "140100集成电路科学与工程01微电子器件与集成电路 02纳电子科学与集成电路制造工程（学士学位）"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "先进封装/三维集成"
+    ],
+    "codes": [
+      "140100",
+      "085400"
+    ]
+  },
+  {
+    "id": 45,
+    "name": "陈宏伟",
+    "title": "享受正高级待遇的高级工程师",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：微波介质与集成器件",
+      "长期从事微波介质陶瓷材料、薄膜器件以及三维集成技术的研究与开发工作。",
+      "主讲课程：",
+      "本科生：《电子测量技术》、《电子测量技术实验》",
+      "招生方向：电子信息材料与元器件"
+    ],
+    "titleCategory": "高工/实验师",
+    "research": [
+      "研究方向：微波介质与集成器件",
+      "长期从事微波介质陶瓷材料、薄膜器件以及三维集成技术的研究与开发工作。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《电子测量技术》、《电子测量技术实验》"
+    ],
+    "admission": [
+      "招生方向：电子信息材料与元器件"
+    ],
+    "background": [],
+    "tags": [
+      "射频/毫米波/太赫兹",
+      "微纳/二维材料/薄膜",
+      "先进封装/三维集成"
+    ],
+    "codes": []
+  },
+  {
+    "id": 46,
+    "name": "章文通",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：功率半导体器件与功率集成电路",
+      "主讲课程：",
+      "本科生：《半导体物理A》",
+      "研究生：《先进集成电路制造技术》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：功率半导体器件与功率集成电路"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《半导体物理A》",
+      "研究生：《先进集成电路制造技术》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 47,
+    "name": "李恩竹",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：集成电路封装",
+      "研究方向为新型微波介质陶瓷及器件。"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：集成电路封装",
+      "研究方向为新型微波介质陶瓷及器件。"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "射频/毫米波/太赫兹",
+      "微纳/二维材料/薄膜",
+      "先进封装/三维集成"
+    ],
+    "codes": []
+  },
+  {
+    "id": 48,
+    "name": "孔谋夫",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：功率半导体器件及功率集成电路。",
+      "研究方向为智能功率集成电路、高压功率半导体器件、宽禁带半导体器件、（SiC、GaN、Ga2o3器件等）、基于AI的新型功率器件，以及新材料器件及集成电路技术。",
+      "主讲课程：",
+      "本科生：《模拟集成电路原与设计》课程组长。《模拟集成电路原与设计I》",
+      "研究生：《科技写作》",
+      "招生方向：",
+      "140100集成电路科学与工程01微电子器件与集成电路02功率半导体器件与集成技术（硕博）",
+      "085403集成电路工程01微电子器件与集成电路02钠电子科学与集成电路制造工程（硕博）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：功率半导体器件及功率集成电路。",
+      "研究方向为智能功率集成电路、高压功率半导体器件、宽禁带半导体器件、（SiC、GaN、Ga2o3器件等）、基于AI的新型功率器件，以及新材料器件及集成电路技术。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《模拟集成电路原与设计》课程组长。《模拟集成电路原与设计I》",
+      "研究生：《科技写作》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程01微电子器件与集成电路02功率半导体器件与集成技术（硕博）",
+      "085403集成电路工程01微电子器件与集成电路02钠电子科学与集成电路制造工程（硕博）"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC",
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 49,
+    "name": "李雪松",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：面向后摩尔时代的二维材料制备及新型半导体微钠器件",
+      "主讲课程：《热力学与统计物理》",
+      "招生方向：",
+      "140100集成电路科学与工程02钠电子科学与集成电路制造工程（学硕/学博）",
+      "085400电子信息07钠电子科学与集成电路制造工程14钠电子科学与集成电路制造工程（非全日制）（专博）",
+      "085403集成电路工程02钠电子科学与集成电路制造工程（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：面向后摩尔时代的二维材料制备及新型半导体微钠器件"
+    ],
+    "courses": [
+      "主讲课程：《热力学与统计物理》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程02钠电子科学与集成电路制造工程（学硕/学博）",
+      "085400电子信息07钠电子科学与集成电路制造工程14钠电子科学与集成电路制造工程（非全日制）（专博）",
+      "085403集成电路工程02钠电子科学与集成电路制造工程（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 50,
+    "name": "李鹏",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：量子光电探测、量子电磁传感、量子信息存储",
+      "天津大学本硕博",
+      "主讲课程：",
+      "本科生：《大学物理》",
+      "研究生：《材料物理学》",
+      "招生方向：",
+      "140100集成电路科学与工程02钠电子科学与集成电路制造工程（学硕/学博）",
+      "085400集成电路工程07钠电子科学与集成电路制造工程14钠电子科学与集成电路制造工程（非全日制）（专博）",
+      "085403集成电路工程02钠电子科学与集成电路制造工程（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：量子光电探测、量子电磁传感、量子信息存储"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《大学物理》",
+      "研究生：《材料物理学》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程02钠电子科学与集成电路制造工程（学硕/学博）",
+      "085400集成电路工程07钠电子科学与集成电路制造工程14钠电子科学与集成电路制造工程（非全日制）（专博）",
+      "085403集成电路工程02钠电子科学与集成电路制造工程（专硕）"
+    ],
+    "background": [
+      "天津大学本硕博"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 51,
+    "name": "张金平",
+    "title": "研究员",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向功率半导体器件与集成电路",
+      "研究方向1：Si基功率半导体器件及模块",
+      "研究方向2：宽禁带功率半导体器件及模块",
+      "研究方向3：功率集成器件及智能功率集成电路",
+      "主讲课程：",
+      "本科生：《集成电路工艺》",
+      "研究生：《先进集成电路制造技术》",
+      "招生方向：",
+      "140100集成电路科学与工程01微电子器件与集成电路",
+      "085403集成电路工程01微电子器件与集成电路"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向功率半导体器件与集成电路",
+      "研究方向1：Si基功率半导体器件及模块",
+      "研究方向2：宽禁带功率半导体器件及模块",
+      "研究方向3：功率集成器件及智能功率集成电路"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《集成电路工艺》",
+      "研究生：《先进集成电路制造技术》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程01微电子器件与集成电路",
+      "085403集成电路工程01微电子器件与集成电路"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 52,
+    "name": "魏杰",
+    "title": "特聘研究员",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：功率半导体器件与集成电路",
+      "招生方向：",
+      "140100集成电路科学与工程01微电子器件与集成电路（学硕/学博）",
+      "085403集成电路工程01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：功率半导体器件与集成电路"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程01微电子器件与集成电路（学硕/学博）",
+      "085403集成电路工程01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 53,
+    "name": "姜晶",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：复杂环境下的在线测量技术",
+      "成电本博",
+      "主讲课程：《第三代半导体前沿》",
+      "招生方向：钠电子与集成电路制造工程"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：复杂环境下的在线测量技术"
+    ],
+    "courses": [
+      "主讲课程：《第三代半导体前沿》"
+    ],
+    "admission": [
+      "招生方向：钠电子与集成电路制造工程"
+    ],
+    "background": [
+      "成电本博"
+    ],
+    "tags": [
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": []
+  },
+  {
+    "id": 54,
+    "name": "伍荣翔",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：芯片级隔离/电源管理技术",
+      "主要研究方向为芯片级隔离/电源管理技术，研究课题覆盖片上功率电感、片上隔离变压器、片上电源、数字隔离芯片、芯片级隔离电源、无线功率传输等。主要包括：1、芯片级磁性元件设计及集成技术；2、高频电源管理集成电路设计技术；3、磁耦合信号收发集成电路设计技术；4、磁耦合功率收发集成电路设计技术。",
+      "主讲课程：《集成电路工艺》、《无源集成与三维集成技术导论》",
+      "招生方向：",
+      "芯片级磁性元件设计及集成",
+      "高频电源管理集成电路设计",
+      "磁耦合信号收发集成电路设计",
+      "磁耦合功率收发集成电路设计"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：芯片级隔离/电源管理技术",
+      "主要研究方向为芯片级隔离/电源管理技术，研究课题覆盖片上功率电感、片上隔离变压器、片上电源、数字隔离芯片、芯片级隔离电源、无线功率传输等。主要包括：1、芯片级磁性元件设计及集成技术；2、高频电源管理集成电路设计技术；3、磁耦合信号收发集成电路设计技术；4、磁耦合功率收发集成电路设计技术。"
+    ],
+    "courses": [
+      "主讲课程：《集成电路工艺》、《无源集成与三维集成技术导论》"
+    ],
+    "admission": [
+      "招生方向：",
+      "芯片级磁性元件设计及集成",
+      "高频电源管理集成电路设计",
+      "磁耦合信号收发集成电路设计",
+      "磁耦合功率收发集成电路设计"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "射频/毫米波/太赫兹",
+      "先进封装/三维集成"
+    ],
+    "codes": []
+  },
+  {
+    "id": 55,
+    "name": "朱俊",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：电子薄膜与集成器件",
+      "南京大学本硕博",
+      "主讲课程：本科生《半导体物理》、《固体电子学基础》",
+      "招生方向：1、电子信息材料与元器件；2、钠电子科学与集成电路制造工程"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：电子薄膜与集成器件"
+    ],
+    "courses": [
+      "主讲课程：本科生《半导体物理》、《固体电子学基础》"
+    ],
+    "admission": [
+      "招生方向：1、电子信息材料与元器件；2、钠电子科学与集成电路制造工程"
+    ],
+    "background": [
+      "南京大学本硕博"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 56,
+    "name": "蒋洪川",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：集成薄膜传感器",
+      "川大本硕，成电博",
+      "主讲课程：",
+      "本科生：《项目管理》",
+      "研究生：《纳米结构与纳米材料》",
+      "招生方向：",
+      "学硕：集成电路科学与工程：集成钠电子科学",
+      "专硕：电子信息"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：集成薄膜传感器"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《项目管理》",
+      "研究生：《纳米结构与纳米材料》"
+    ],
+    "admission": [
+      "招生方向：",
+      "学硕：集成电路科学与工程：集成钠电子科学",
+      "专硕：电子信息"
+    ],
+    "background": [
+      "川大本硕，成电博"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 57,
+    "name": "张翼",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：微钠传感；生物传感；微钠制造；增材制造",
+      "主讲课程：《纳米科学初探》",
+      "招生方向：集成电路科学与工程：方向1微电子器件与集成电路"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：微钠传感；生物传感；微钠制造；增材制造"
+    ],
+    "courses": [
+      "主讲课程：《纳米科学初探》"
+    ],
+    "admission": [
+      "招生方向：集成电路科学与工程：方向1微电子器件与集成电路"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 58,
+    "name": "刘志伟",
+    "title": "教授/研究员（原文：教研）",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：集成电路静电保护研究、半导体器件设计与建模",
+      "科研方向：",
+      "基于AI半导体器件设计与优化",
+      "先进7nm/14nmFET纳米工艺ESD保护器件研究",
+      "三维集成芯片（chiplet）ESD保护研究",
+      "5G/6G宽频ESD保护器件研究",
+      "高压BCD工艺ESD保护器件研究",
+      "lll-V半导体器件建模",
+      "TFET/FinFET器件建模",
+      "集成电路spice建模以及IC EDA仿真软件",
+      "电子系统ESD保护仿真与优化",
+      "硅基光电器件研究",
+      "主讲课程：",
+      "本科生：《微电子器件》",
+      "研究生：《半导体器件物理》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕/学博）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：集成电路静电保护研究、半导体器件设计与建模",
+      "科研方向：",
+      "基于AI半导体器件设计与优化",
+      "先进7nm/14nmFET纳米工艺ESD保护器件研究",
+      "三维集成芯片（chiplet）ESD保护研究",
+      "5G/6G宽频ESD保护器件研究",
+      "高压BCD工艺ESD保护器件研究",
+      "lll-V半导体器件建模",
+      "TFET/FinFET器件建模",
+      "集成电路spice建模以及IC EDA仿真软件",
+      "电子系统ESD保护仿真与优化",
+      "硅基光电器件研究"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《微电子器件》",
+      "研究生：《半导体器件物理》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕/学博）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "数字IC/SoC/EDA",
+      "微纳/二维材料/薄膜",
+      "先进封装/三维集成",
+      "ESD/可靠性"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 59,
+    "name": "刘兴钊",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：半导体与器件",
+      "武大本，中科院硕，成电博",
+      "主讲课程：",
+      "本科生：《固体物理》",
+      "研究生：《固体电子学基础》",
+      "招生方向：钠电子科学与集成电路制造工程"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：半导体与器件",
+      "武大本，中科院硕，成电博"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《固体物理》",
+      "研究生：《固体电子学基础》"
+    ],
+    "admission": [
+      "招生方向：钠电子科学与集成电路制造工程"
+    ],
+    "background": [],
+    "tags": [],
+    "codes": []
+  },
+  {
+    "id": 60,
+    "name": "谢倩",
+    "title": "副教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：集成器件与电路设计",
+      "成电本，清华博。",
+      "主讲课程：《微电子器件》、《模拟集成电路原理》",
+      "招生方向：",
+      "1、太赫兹器件与模型，",
+      "2、射频集成电路设计，",
+      "3、射频集成电路设计自动化。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：集成器件与电路设计",
+      "成电本，清华博。"
+    ],
+    "courses": [
+      "主讲课程：《微电子器件》、《模拟集成电路原理》"
+    ],
+    "admission": [
+      "招生方向：",
+      "1、太赫兹器件与模型，",
+      "2、射频集成电路设计，",
+      "3、射频集成电路设计自动化。"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "射频/毫米波/太赫兹"
+    ],
+    "codes": []
+  },
+  {
+    "id": 61,
+    "name": "唐斌",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：有源-无源微系统基板",
+      "成电本博",
+      "主讲课程：",
+      "本科生：《试验设计》、《纳米材料》",
+      "研究生：：《优化试验设计与数据分析》",
+      "招生方向：080900电子科学与技术--05电子信息材料与元器件"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：有源-无源微系统基板"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《试验设计》、《纳米材料》",
+      "研究生：：《优化试验设计与数据分析》"
+    ],
+    "admission": [
+      "招生方向：080900电子科学与技术--05电子信息材料与元器件"
+    ],
+    "background": [
+      "成电本博"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "先进封装/三维集成"
+    ],
+    "codes": [
+      "080900"
+    ]
+  },
+  {
+    "id": 62,
+    "name": "刘继芝",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：功率器件及功率集成电路，ESD保护设计",
+      "成电博",
+      "主讲课程：",
+      "本科生：《微电子器件》",
+      "研究生：《半导体器件物理》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：功率器件及功率集成电路，ESD保护设计",
+      "成电博"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《微电子器件》",
+      "研究生：《半导体器件物理》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "ESD/可靠性"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 63,
+    "name": "王卓",
+    "title": "享受正高级待遇的高级工程师",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：功率半导体器件及功率集成电路",
+      "成电本硕博",
+      "目前主要研究方向为功率半导体器件及集成电路与系统。从事硅基功率半导体器件及集成技术研究，带领小组从事电源管理、模拟前端、汽车电子及宽禁带半导体驱动控制等芯片研究。",
+      "主讲课程：",
+      "本科生：《高级语言程序设计》、《软件技术基础》",
+      "研究生：电子材料与微电子实验实践平台负责人。",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）",
+      "已培养75名博士，硕士1000余名。"
+    ],
+    "titleCategory": "高工/实验师",
+    "research": [
+      "研究方向：功率半导体器件及功率集成电路",
+      "目前主要研究方向为功率半导体器件及集成电路与系统。从事硅基功率半导体器件及集成技术研究，带领小组从事电源管理、模拟前端、汽车电子及宽禁带半导体驱动控制等芯片研究。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《高级语言程序设计》、《软件技术基础》",
+      "研究生：电子材料与微电子实验实践平台负责人。"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "background": [
+      "成电本硕博",
+      "已培养75名博士，硕士1000余名。"
+    ],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC",
+      "微纳/二维材料/薄膜",
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 64,
+    "name": "陶伯万",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：热流传感器，高温超导薄膜及器件",
+      "成都科技大学本，四川联合大学硕，电子科技大学博。",
+      "主讲课程：",
+      "本科生：《固体物理》、《薄膜物理与技术》",
+      "研究生：《表面与界面物理》、《材料物理学》",
+      "招生方向：集成电路科学与工程钠电子科学与集成电路制造工程"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：热流传感器，高温超导薄膜及器件",
+      "成都科技大学本，四川联合大学硕，电子科技大学博。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《固体物理》、《薄膜物理与技术》",
+      "研究生：《表面与界面物理》、《材料物理学》"
+    ],
+    "admission": [
+      "招生方向：集成电路科学与工程钠电子科学与集成电路制造工程"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 65,
+    "name": "李波",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：电子信息材料与元器件",
+      "主讲课程：《电介质物理》、《电子材料》、《近代电介质理论》等多门本科生、研究生核心课。",
+      "招生方向：",
+      "080900电子科学与技术、085400电子信息  05电子信息材料与元器件"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：电子信息材料与元器件"
+    ],
+    "courses": [
+      "主讲课程：《电介质物理》、《电子材料》、《近代电介质理论》等多门本科生、研究生核心课。"
+    ],
+    "admission": [
+      "招生方向：",
+      "080900电子科学与技术、085400电子信息  05电子信息材料与元器件"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": [
+      "085400",
+      "080900"
+    ]
+  },
+  {
+    "id": 66,
+    "name": "彭斌",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：集成器件与微钠电子",
+      "成电本硕博",
+      "主讲课程：量子力学、统计物理、微波技术基础。",
+      "招生方向：集成器件与微钠电子、传感器、声学谐振器与滤波器"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：集成器件与微钠电子"
+    ],
+    "courses": [
+      "主讲课程：量子力学、统计物理、微波技术基础。"
+    ],
+    "admission": [
+      "招生方向：集成器件与微钠电子、传感器、声学谐振器与滤波器"
+    ],
+    "background": [
+      "成电本硕博"
+    ],
+    "tags": [
+      "射频/毫米波/太赫兹",
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 67,
+    "name": "杨成韬",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：电子薄膜与集成器件",
+      "主讲课程：薄膜物理与技术、电子陶瓷物理与器件",
+      "招生方向：电子薄膜与集成器件"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：电子薄膜与集成器件"
+    ],
+    "courses": [
+      "主讲课程：薄膜物理与技术、电子陶瓷物理与器件"
+    ],
+    "admission": [
+      "招生方向：电子薄膜与集成器件"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 68,
+    "name": "赵晓辉",
+    "title": "研究员",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：薄膜传感器，先进封装，微系统集成",
+      "浙大本硕，美国博",
+      "主讲课程：本科生：《专业写作基础》、《薄膜物理与技术》"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：薄膜传感器，先进封装，微系统集成"
+    ],
+    "courses": [
+      "主讲课程：本科生：《专业写作基础》、《薄膜物理与技术》"
+    ],
+    "admission": [],
+    "background": [
+      "浙大本硕，美国博"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器",
+      "先进封装/三维集成"
+    ],
+    "codes": []
+  },
+  {
+    "id": 69,
+    "name": "杨洪强",
+    "title": "研究员",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：MEMS惯性传感器、硅振荡器",
+      "成电本硕博"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：MEMS惯性传感器、硅振荡器"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [
+      "成电本硕博"
+    ],
+    "tags": [
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 70,
+    "name": "黄文",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：光电探测与识别",
+      "研究内容、招生方向：",
+      "智能仿生视觉新器件光谱调控与拓展",
+      "权重可调控的视觉仿生新器件与红外识别",
+      "光电突触器件的界面调控与集成制造"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：光电探测与识别",
+      "研究内容、招生方向：",
+      "智能仿生视觉新器件光谱调控与拓展",
+      "权重可调控的视觉仿生新器件与红外识别",
+      "光电突触器件的界面调控与集成制造"
+    ],
+    "courses": [],
+    "admission": [
+      "研究内容、招生方向："
+    ],
+    "background": [],
+    "tags": [],
+    "codes": []
+  },
+  {
+    "id": 71,
+    "name": "刘诺",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：集成钠电子科学",
+      "贵州师范本，四川大学硕。",
+      "主讲课程：",
+      "本科生：《半导体物理A》、《半导体物理B》、《专业综合实验1》、《IC综合实验1》",
+      "招生方向：集成钠电子科学"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：集成钠电子科学",
+      "贵州师范本，四川大学硕。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《半导体物理A》、《半导体物理B》、《专业综合实验1》、《IC综合实验1》"
+    ],
+    "admission": [
+      "招生方向：集成钠电子科学"
+    ],
+    "background": [],
+    "tags": [],
+    "codes": []
+  },
+  {
+    "id": 72,
+    "name": "袁颖",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：电子材料与元器件",
+      "成电博",
+      "主讲课程：",
+      "本科生：《电子材料与元器件》",
+      "研究生：《电子陶瓷与器件》",
+      "招生方向：",
+      "电子科学与技术（学硕/学博）",
+      "电子信息（专博）",
+      "新一代电子信息技术（专硕）",
+      "研究方向：电子信息材料与元器件"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：电子材料与元器件",
+      "成电博",
+      "研究方向：电子信息材料与元器件"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《电子材料与元器件》",
+      "研究生：《电子陶瓷与器件》"
+    ],
+    "admission": [
+      "招生方向：",
+      "电子科学与技术（学硕/学博）",
+      "电子信息（专博）",
+      "新一代电子信息技术（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 73,
+    "name": "张有润",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：微电子器件与集成电路（功率半导体器件与集成电路、光电集成电路与硅光集成技术）",
+      "成电博",
+      "主讲课程：",
+      "本科生：《微电子器件》",
+      "研究生：《先进集成电路制造技术》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：微电子器件与集成电路（功率半导体器件与集成电路、光电集成电路与硅光集成技术）",
+      "成电博"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《微电子器件》",
+      "研究生：《先进集成电路制造技术》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 74,
+    "name": "张国俊",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：模拟集成电路设计、功率半导体器件、半导体与集成电路工艺"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：模拟集成电路设计、功率半导体器件、半导体与集成电路工艺"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC"
+    ],
+    "codes": []
+  },
+  {
+    "id": 75,
+    "name": "石玉",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "专业研究方向为：微波射频器件的宽带和高线性化、功率磁性器件的小型化和高压特种电源。",
+      "主讲课程：",
+      "本科生、研究生：《模拟电路》、《磁芯设计》、《磁性功率与控制器件》、《量子力学与统计物理》等。"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "专业研究方向为：微波射频器件的宽带和高线性化、功率磁性器件的小型化和高压特种电源。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生、研究生：《模拟电路》、《磁芯设计》、《磁性功率与控制器件》、《量子力学与统计物理》等。"
+    ],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC",
+      "射频/毫米波/太赫兹",
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 76,
+    "name": "蒋书文",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：电子薄膜与敏感器件"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：电子薄膜与敏感器件"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 77,
+    "name": "周梓",
+    "title": "研究员",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：高压集成技术及器件可靠性",
+      "目前研究关注的：",
+      "低功耗BCD技术",
+      "抗辐射Si基功率高压器件",
+      "抗辐射GaN基功率器件",
+      "主讲课程：《Power Semiconductor Device and Integration Tech nology》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程 01集成电路工程（专硕）"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：高压集成技术及器件可靠性",
+      "目前研究关注的：",
+      "低功耗BCD技术",
+      "抗辐射Si基功率高压器件",
+      "抗辐射GaN基功率器件"
+    ],
+    "courses": [
+      "主讲课程：《Power Semiconductor Device and Integration Tech nology》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程 01集成电路工程（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "宽禁带(GaN/SiC)",
+      "ESD/可靠性"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 78,
+    "name": "罗军生",
+    "title": "研究员",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：微钠光电子材料与器件、智能波/谱可调材料与器件",
+      "招生方向：",
+      "140100集成电路科学与工程 02钠电子科学与集成电路制造工程（学术学位）",
+      "085400电子信息 02/04钠电子科学与集成电路制造工程（专业学位）"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：微钠光电子材料与器件、智能波/谱可调材料与器件"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 02钠电子科学与集成电路制造工程（学术学位）",
+      "085400电子信息 02/04钠电子科学与集成电路制造工程（专业学位）"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": [
+      "140100",
+      "085400"
+    ]
+  },
+  {
+    "id": 79,
+    "name": "张文旭",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：钠电子学、磁性传感器、AI+材料",
+      "成电本硕",
+      "主讲课程：",
+      "本科生：《量子力学与统计物理简介》、《集成电路材料基础》",
+      "研究生：《微钠电子中的输运》",
+      "招生方向：微钠电子学、集成传感器相关理论和实验"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：钠电子学、磁性传感器、AI+材料"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《量子力学与统计物理简介》、《集成电路材料基础》",
+      "研究生：《微钠电子中的输运》"
+    ],
+    "admission": [
+      "招生方向：微钠电子学、集成传感器相关理论和实验"
+    ],
+    "background": [
+      "成电本硕"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 80,
+    "name": "万中全",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：半导体微钠材料与器件",
+      "主讲课程：",
+      "本科生：《分子电子材料与器件》、《专业写作基础》",
+      "研究生：《纳米材料及纳米结构》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子材料与器件",
+      "085403集成电路工程01微钠电子材料与器件"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：半导体微钠材料与器件"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《分子电子材料与器件》、《专业写作基础》",
+      "研究生：《纳米材料及纳米结构》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子材料与器件",
+      "085403集成电路工程01微钠电子材料与器件"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 81,
+    "name": "董宇锋",
+    "title": "研究员/博导",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：微机械系统MEMS传感器与ASIC",
+      "主讲课程：《微电子技术学科前沿（一）》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学博）",
+      "085400电子信息01微电子器件与集成电路，03微电子器件与集成电路（非全）（专博）",
+      "140100集成电路科学与工程03集成电路设计与设计自动化（学硕）",
+      "085403集成电路工程03集成电路设计与设计自动化（专硕）"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：微机械系统MEMS传感器与ASIC"
+    ],
+    "courses": [
+      "主讲课程：《微电子技术学科前沿（一）》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学博）",
+      "085400电子信息01微电子器件与集成电路，03微电子器件与集成电路（非全）（专博）",
+      "140100集成电路科学与工程03集成电路设计与设计自动化（学硕）",
+      "085403集成电路工程03集成电路设计与设计自动化（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "数字IC/SoC/EDA",
+      "MEMS/传感器",
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 82,
+    "name": "陈远富",
+    "title": "教授/博导",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：二维半导体材料及器件、金刚石材料及器件、芯片先进封装热管理材料及应用、新型源材料及器件",
+      "主讲课程：《先进电子材料及器件前沿专利》",
+      "招生方向：",
+      "钠电子科学与集成电路制造工程（博）",
+      "微钠电子材料与器件（硕）"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：二维半导体材料及器件、金刚石材料及器件、芯片先进封装热管理材料及应用、新型源材料及器件"
+    ],
+    "courses": [
+      "主讲课程：《先进电子材料及器件前沿专利》"
+    ],
+    "admission": [
+      "招生方向：",
+      "钠电子科学与集成电路制造工程（博）",
+      "微钠电子材料与器件（硕）"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "先进封装/三维集成"
+    ],
+    "codes": []
+  },
+  {
+    "id": 83,
+    "name": "李虞锋",
+    "title": "研究员/博导",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：集成光电技术、异质、异构混合集成技术、微钠制造与传感",
+      "招生方向：",
+      "1、集成光电技术",
+      "2、微电子器件与集成电路"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：集成光电技术、异质、异构混合集成技术、微钠制造与传感"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：",
+      "1、集成光电技术",
+      "2、微电子器件与集成电路"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 84,
+    "name": "吴翰翔",
+    "title": "教授",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：基于电卡制冷与电致伸缩的集成电路热管理器件"
+    ],
+    "titleCategory": "教授",
+    "research": [
+      "研究方向：基于电卡制冷与电致伸缩的集成电路热管理器件"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "先进封装/三维集成"
+    ],
+    "codes": []
+  },
+  {
+    "id": 85,
+    "name": "牛胜普",
+    "title": "（特聘）研究员",
+    "rankGroup": "教授级",
+    "rawLines": [
+      "研究方向：超高速宽带收发集成电路设计",
+      "长期从事超高速宽带收发集成电路研究，研究方向主要包括超高速采样、电光调制器驱动、跨阻放大器（TIA）、SerDes及高速数据转换（ADC/DAC）",
+      "等芯片设计。",
+      "招生方向：集成电路设计，光通信集成电路。"
+    ],
+    "titleCategory": "研究员",
+    "research": [
+      "研究方向：超高速宽带收发集成电路设计",
+      "长期从事超高速宽带收发集成电路研究，研究方向主要包括超高速采样、电光调制器驱动、跨阻放大器（TIA）、SerDes及高速数据转换（ADC/DAC）",
+      "等芯片设计。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：集成电路设计，光通信集成电路。"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC",
+      "射频/毫米波/太赫兹"
+    ],
+    "codes": []
+  },
+  {
+    "id": 86,
+    "name": "黄乐天",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：系统级集成电路设计与测试",
+      "长期从事计算机系统结构与芯片设计领域的交叉方向的研究，对片上系统～",
+      "、微处理器设计、软硬件协同设计、系统级集成电路可测性设计与测试方法学等有较深入的研究。",
+      "招生方向：",
+      "学硕：140100集成电路科学与工程",
+      "专硕：085403集成电路工程",
+      "主讲课程：",
+      "本科生：《微处理器与嵌入式系统设计》、《微处理器与片上系统设计》、（挑战性课程）",
+      "研究生：《片上系统设计与实现》"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：系统级集成电路设计与测试",
+      "长期从事计算机系统结构与芯片设计领域的交叉方向的研究，对片上系统～",
+      "、微处理器设计、软硬件协同设计、系统级集成电路可测性设计与测试方法学等有较深入的研究。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：《微处理器与嵌入式系统设计》、《微处理器与片上系统设计》、（挑战性课程）",
+      "研究生：《片上系统设计与实现》"
+    ],
+    "admission": [
+      "招生方向：",
+      "学硕：140100集成电路科学与工程",
+      "专硕：085403集成电路工程"
+    ],
+    "background": [],
+    "tags": [
+      "数字IC/SoC/EDA"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 87,
+    "name": "庄浩宇",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "西电博",
+      "研究方向：ADC芯片",
+      "招生方向：混合信号集成电路设计；数模转换器设计。",
+      "主讲课程：信号与系统"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "西电博",
+      "研究方向：ADC芯片"
+    ],
+    "courses": [
+      "主讲课程：信号与系统"
+    ],
+    "admission": [
+      "招生方向：混合信号集成电路设计；数模转换器设计。"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号"
+    ],
+    "codes": []
+  },
+  {
+    "id": 88,
+    "name": "甄少伟",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：电源管理集成电路设计，混合集成电路设计",
+      "在研项目：BucBoost控制器芯片；混合变换器设计；高频多相DC-DC变换器设计；10MHz Buck变换器芯片设计；隔离芯片设计；APD阵列焦平面读出电路。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：电源管理集成电路设计，混合集成电路设计",
+      "在研项目：BucBoost控制器芯片；混合变换器设计；高频多相DC-DC变换器设计；10MHz Buck变换器芯片设计；隔离芯片设计；APD阵列焦平面读出电路。"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "功率半导体与IC"
+    ],
+    "codes": []
+  },
+  {
+    "id": 89,
+    "name": "黄海猛",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：微电子器件与集成电路",
+      "长期从事创新型功率器件及智能功率集成电路的研究。",
+      "主讲课程：",
+      "本科生：半导体物理A、Semiconductor Physics、数字逻辑设计及应用、FPGA系统设计。",
+      "研究生：半导体器件物理",
+      "招生方向：微电子器件与集成电路"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：微电子器件与集成电路",
+      "长期从事创新型功率器件及智能功率集成电路的研究。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生：半导体物理A、Semiconductor Physics、数字逻辑设计及应用、FPGA系统设计。",
+      "研究生：半导体器件物理"
+    ],
+    "admission": [
+      "招生方向：微电子器件与集成电路"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "数字IC/SoC/EDA",
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": []
+  },
+  {
+    "id": 90,
+    "name": "杜涛",
+    "title": "高级工程师",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：大规模集成电路设计",
+      "成电本硕博",
+      "主要研究方向包括：",
+      "可编程逻辑器件芯片设计与验证；",
+      "存储技术及存储器芯片设计研究；",
+      "微控制器芯片设计与应用研究；",
+      "接口芯片设计研究。",
+      "主讲课程：《电子设计自动化技术》、《EDA实验》、《新生项目课程》、《综合课程设计》。",
+      "招生方向：大规模集成电路设计。"
+    ],
+    "titleCategory": "高工/实验师",
+    "research": [
+      "研究方向：大规模集成电路设计",
+      "主要研究方向包括：",
+      "可编程逻辑器件芯片设计与验证；",
+      "存储技术及存储器芯片设计研究；",
+      "微控制器芯片设计与应用研究；",
+      "接口芯片设计研究。"
+    ],
+    "courses": [
+      "主讲课程：《电子设计自动化技术》、《EDA实验》、《新生项目课程》、《综合课程设计》。"
+    ],
+    "admission": [
+      "招生方向：大规模集成电路设计。"
+    ],
+    "background": [
+      "成电本硕博"
+    ],
+    "tags": [
+      "数字IC/SoC/EDA"
+    ],
+    "codes": []
+  },
+  {
+    "id": 91,
+    "name": "李辉",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：算法/架构协同设计、FPGA图像处理、高性能计算电路设计、数字IC前端设计。",
+      "研究兴趣包括数字信号处理算法与硬件实现架构的协同设计、高性能计算电路设计、数字IC前端设计等。目前主要研究方向是FPGA图像处理、卷积神经网络的FPGA设计实现。",
+      "主讲课程：“数字逻辑设计及应用”、“电路设计自动化技术A”、“高性能计算单元的设计与验证”、“FPGA音频信号处理系统”。",
+      "招生方向：微电子器件与集成电路。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：算法/架构协同设计、FPGA图像处理、高性能计算电路设计、数字IC前端设计。",
+      "研究兴趣包括数字信号处理算法与硬件实现架构的协同设计、高性能计算电路设计、数字IC前端设计等。目前主要研究方向是FPGA图像处理、卷积神经网络的FPGA设计实现。"
+    ],
+    "courses": [
+      "主讲课程：“数字逻辑设计及应用”、“电路设计自动化技术A”、“高性能计算单元的设计与验证”、“FPGA音频信号处理系统”。"
+    ],
+    "admission": [
+      "招生方向：微电子器件与集成电路。"
+    ],
+    "background": [],
+    "tags": [
+      "数字IC/SoC/EDA",
+      "类脑/存算/AI芯片"
+    ],
+    "codes": []
+  },
+  {
+    "id": 92,
+    "name": "吴克军",
+    "title": "副研究员（特聘）",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "成电硕博",
+      "研究方向：模数混合集成电路，光电集成技术，尤其高速高精度ADC/DAC、宽电压域专用驱动电路、全硅发光器件、全硅微显示技术等。",
+      "招生方向：微电子学与固体电子，集成电路设计与集成系统。"
+    ],
+    "titleCategory": "副研究员",
+    "research": [
+      "成电硕博",
+      "研究方向：模数混合集成电路，光电集成技术，尤其高速高精度ADC/DAC、宽电压域专用驱动电路、全硅发光器件、全硅微显示技术等。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：微电子学与固体电子，集成电路设计与集成系统。"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC"
+    ],
+    "codes": []
+  },
+  {
+    "id": 93,
+    "name": "周雄",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：混合信号集成电路设计",
+      "本成电博丹麦奥胡斯大学",
+      "研究方向为高速、高精度、低功耗数据转换器，低功耗模拟集成电路，生命体征信号采集前端和系统，片上电源噪声频谱分析等。",
+      "主讲课程：《数字集成电路原理》",
+      "招生方向：集成电路科学与工程"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：混合信号集成电路设计",
+      "本成电博丹麦奥胡斯大学",
+      "研究方向为高速、高精度、低功耗数据转换器，低功耗模拟集成电路，生命体征信号采集前端和系统，片上电源噪声频谱分析等。"
+    ],
+    "courses": [
+      "主讲课程：《数字集成电路原理》"
+    ],
+    "admission": [
+      "招生方向：集成电路科学与工程"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "数字IC/SoC/EDA",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 94,
+    "name": "廖永波",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：新型器件设计、数模混合集成电路设计",
+      "成电本成电博",
+      "长期从事高性能数字和混合信号集成电路设计、电源管理集成电路设计、微能量收集系统、集成电路的抗核加固技术、温度传感器芯片设计及生产和测试、类脑算法及芯片等方向的研究，对片上系统、软硬件协同设计、基带算法的FPGA实现以及ASIC实现、测试机的设计与实现等有独到的见解。",
+      "主讲课程：",
+      "电子设计自动化技术B、微处理器系统结构与嵌入式系统设计、片上系统（SoC）技术、复杂数字集成电路设计、数字逻辑设计及应用、高级微电子技术、传感器与测试技术、人工智能及应用。",
+      "招生方向：",
+      "专业：微电子与固体电子学、电子信息",
+      "方向：先进器件设计、模拟集成电路、数字集成电路、测试系统设计、无线输能系统设计。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：新型器件设计、数模混合集成电路设计",
+      "成电本成电博",
+      "长期从事高性能数字和混合信号集成电路设计、电源管理集成电路设计、微能量收集系统、集成电路的抗核加固技术、温度传感器芯片设计及生产和测试、类脑算法及芯片等方向的研究，对片上系统、软硬件协同设计、基带算法的FPGA实现以及ASIC实现、测试机的设计与实现等有独到的见解。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "电子设计自动化技术B、微处理器系统结构与嵌入式系统设计、片上系统（SoC）技术、复杂数字集成电路设计、数字逻辑设计及应用、高级微电子技术、传感器与测试技术、人工智能及应用。"
+    ],
+    "admission": [
+      "招生方向：",
+      "专业：微电子与固体电子学、电子信息",
+      "方向：先进器件设计、模拟集成电路、数字集成电路、测试系统设计、无线输能系统设计。"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "功率半导体与IC",
+      "数字IC/SoC/EDA",
+      "类脑/存算/AI芯片",
+      "MEMS/传感器",
+      "宽禁带(GaN/SiC)",
+      "ESD/可靠性"
+    ],
+    "codes": []
+  },
+  {
+    "id": 95,
+    "name": "程骏骥",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：微电子",
+      "主讲课程：半导体物理、通信电子电路",
+      "招生方向：主要为功率半导体方向"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：微电子"
+    ],
+    "courses": [
+      "主讲课程：半导体物理、通信电子电路"
+    ],
+    "admission": [
+      "招生方向：主要为功率半导体方向"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC"
+    ],
+    "codes": []
+  },
+  {
+    "id": 96,
+    "name": "孙瑞泽",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：新型宽禁带功率半导体器件与集成电路、脉冲功率半导体技术",
+      "成电本硕",
+      "主讲课程：固体物理、半导体物理、微电子工艺",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085400电子信息 06微电子器件与集成电路（专硕）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）",
+      "特别欢迎大二以上同学联系，进入实验室学习，共同进步。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：新型宽禁带功率半导体器件与集成电路、脉冲功率半导体技术"
+    ],
+    "courses": [
+      "主讲课程：固体物理、半导体物理、微电子工艺"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085400电子信息 06微电子器件与集成电路（专硕）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "background": [
+      "成电本硕",
+      "特别欢迎大二以上同学联系，进入实验室学习，共同进步。"
+    ],
+    "tags": [
+      "功率半导体与IC",
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": [
+      "140100",
+      "085403",
+      "085400"
+    ]
+  },
+  {
+    "id": 97,
+    "name": "陈勇",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：微电子器件与集成电路技术",
+      "本川大硕成都电讯工程学院博成电",
+      "主讲课程：",
+      "新生研讨课程“集成电路设计基础”",
+      "研究生专业基础课程“集成电子学”",
+      "研究生专业选修课程“纳米电子学与自旋电子学”",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：微电子器件与集成电路技术",
+      "本川大硕成都电讯工程学院博成电",
+      "新生研讨课程“集成电路设计基础”"
+    ],
+    "courses": [
+      "主讲课程：",
+      "研究生专业基础课程“集成电子学”",
+      "研究生专业选修课程“纳米电子学与自旋电子学”"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路（学硕）",
+      "085403集成电路工程 01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 98,
+    "name": "钟慧",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：微电子器件与集成电路",
+      "成电博",
+      "主要从事混合集成电路器件及电路方面的研究，特别是射频前端滤波器、收发组件及电路系统的设计及集成。",
+      "研究方向：研究课题主要围绕射频前端模块、收发模块电路与器件建模、设计及制作。",
+      "射频混合集成电路设计与封测；",
+      "射频前端模组芯片设计与建模；",
+      "声表波器及体声滤波器设计；",
+      "微带滤波器设计。",
+      "主讲课程《半导体物理》、《IC综合实验1（物理、器件、工艺、封测）》、《专业综合实验III：系统与应用》",
+      "招生方向：",
+      "射频混合集成电路设计与封装",
+      "射频前端模组芯片设计与建模",
+      "声表滤波器及体声滤波器设计",
+      "微带滤波器设计"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：微电子器件与集成电路",
+      "成电博",
+      "主要从事混合集成电路器件及电路方面的研究，特别是射频前端滤波器、收发组件及电路系统的设计及集成。",
+      "研究方向：研究课题主要围绕射频前端模块、收发模块电路与器件建模、设计及制作。",
+      "射频混合集成电路设计与封测；",
+      "射频前端模组芯片设计与建模；",
+      "声表波器及体声滤波器设计；",
+      "微带滤波器设计。"
+    ],
+    "courses": [
+      "主讲课程《半导体物理》、《IC综合实验1（物理、器件、工艺、封测）》、《专业综合实验III：系统与应用》"
+    ],
+    "admission": [
+      "招生方向：",
+      "射频混合集成电路设计与封装",
+      "射频前端模组芯片设计与建模",
+      "声表滤波器及体声滤波器设计",
+      "微带滤波器设计"
+    ],
+    "background": [],
+    "tags": [
+      "射频/毫米波/太赫兹",
+      "先进封装/三维集成"
+    ],
+    "codes": []
+  },
+  {
+    "id": 99,
+    "name": "李建军",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：非易失性存储器及嵌入式应用、半导体器件/电路可靠性分析、集成电路工艺线可靠性研究、高可靠集成电路设计、先进封装。",
+      "华中本硕博",
+      "主讲课程：《微电子工艺》、《高级微电子技术》",
+      "招生方向：",
+      "微钠电子材料与器件；",
+      "集成电路设计与自动化；",
+      "封装与微系统集成。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：非易失性存储器及嵌入式应用、半导体器件/电路可靠性分析、集成电路工艺线可靠性研究、高可靠集成电路设计、先进封装。"
+    ],
+    "courses": [
+      "主讲课程：《微电子工艺》、《高级微电子技术》"
+    ],
+    "admission": [
+      "招生方向：",
+      "微钠电子材料与器件；",
+      "集成电路设计与自动化；",
+      "封装与微系统集成。"
+    ],
+    "background": [
+      "华中本硕博"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "先进封装/三维集成",
+      "ESD/可靠性"
+    ],
+    "codes": []
+  },
+  {
+    "id": 100,
+    "name": "李俊宏",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：功率集成电路与功率集成器件",
+      "主要研究新型功率器件，功率驱动电路，电机驱动电路。",
+      "主讲课程：《信号与系统B》、《VHDL语言与数字集成电路设计》。",
+      "招生方向：",
+      "1、集成电路设计；",
+      "2、功率器件设计。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：功率集成电路与功率集成器件",
+      "主要研究新型功率器件，功率驱动电路，电机驱动电路。"
+    ],
+    "courses": [
+      "主讲课程：《信号与系统B》、《VHDL语言与数字集成电路设计》。"
+    ],
+    "admission": [
+      "招生方向：",
+      "1、集成电路设计；",
+      "2、功率器件设计。"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "数字IC/SoC/EDA"
+    ],
+    "codes": []
+  },
+  {
+    "id": 101,
+    "name": "邓高强",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：功率半导体器件及功率集成电路",
+      "成电本博",
+      "主要从事功率器件及其应用技术的研究。",
+      "目前研究关注点：1、硅基功率半导体器件建模、设计与应用；2、GaN基功率半导体器件设计和应用。",
+      "主讲课程：《电工电子学》、《数字电子技术基础》、《功率半导体器件及其应用》。",
+      "招生方向：",
+      "140100集成电路科学与工程  01微电子器件与集成电路（学硕）",
+      "085403集成电路工程  01微电子器件与集成电路（专硕）。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：功率半导体器件及功率集成电路",
+      "主要从事功率器件及其应用技术的研究。",
+      "目前研究关注点：1、硅基功率半导体器件建模、设计与应用；2、GaN基功率半导体器件设计和应用。"
+    ],
+    "courses": [
+      "主讲课程：《电工电子学》、《数字电子技术基础》、《功率半导体器件及其应用》。"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程  01微电子器件与集成电路（学硕）",
+      "085403集成电路工程  01微电子器件与集成电路（专硕）。"
+    ],
+    "background": [
+      "成电本博"
+    ],
+    "tags": [
+      "功率半导体与IC",
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 102,
+    "name": "张中",
+    "title": "副研究员",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：高性能生物电信号读出系统设计、低功耗高精度模数转换器芯片设计。",
+      "主要从事人体生命体征信号非理想因素作用机理、高性能便携式模拟前端读出电路架构以及终端智能处理系统的研究。"
+    ],
+    "titleCategory": "副研究员",
+    "research": [
+      "研究方向：高性能生物电信号读出系统设计、低功耗高精度模数转换器芯片设计。",
+      "主要从事人体生命体征信号非理想因素作用机理、高性能便携式模拟前端读出电路架构以及终端智能处理系统的研究。"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 103,
+    "name": "高莉彬",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：微波介质与集成器件",
+      "哈佛与成电联培博士",
+      "目前研究方向集中在微波介质薄膜、薄膜集成器件、以及三维集成技术的开发。",
+      "主讲课程：",
+      "本科生课程：《节能技术与应用》、《材料科学基础》、《固体电子学基础》、《电子材料导论》",
+      "研究生课程：《人工材料与智能技术在医学中的应用》",
+      "招生方向：电子科学与技术、集成电路工程"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：微波介质与集成器件",
+      "目前研究方向集中在微波介质薄膜、薄膜集成器件、以及三维集成技术的开发。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生课程：《节能技术与应用》、《材料科学基础》、《固体电子学基础》、《电子材料导论》",
+      "研究生课程：《人工材料与智能技术在医学中的应用》"
+    ],
+    "admission": [
+      "招生方向：电子科学与技术、集成电路工程"
+    ],
+    "background": [
+      "哈佛与成电联培博士"
+    ],
+    "tags": [
+      "射频/毫米波/太赫兹",
+      "微纳/二维材料/薄膜",
+      "先进封装/三维集成"
+    ],
+    "codes": []
+  },
+  {
+    "id": 104,
+    "name": "钟志亲",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：微电子器件与集成电路",
+      "本硕博川大",
+      "研究方向：从事新型光电器件、器件辐照特性以及半导体器件工艺的研究。",
+      "主讲课程：",
+      "本科生课程：《半导体物理B》、《微电子器件》、《IC综合实验1（物理、器件、工艺、封测）》、《专业综合实验I（微电子基础物理实验）》、《半导体物理A》",
+      "研究生课程：《半导体器件物理》",
+      "招生方向：微电子器件与集成电路"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：微电子器件与集成电路",
+      "研究方向：从事新型光电器件、器件辐照特性以及半导体器件工艺的研究。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生课程：《半导体物理B》、《微电子器件》、《IC综合实验1（物理、器件、工艺、封测）》、《专业综合实验I（微电子基础物理实验）》、《半导体物理A》",
+      "研究生课程：《半导体器件物理》"
+    ],
+    "admission": [
+      "招生方向：微电子器件与集成电路"
+    ],
+    "background": [
+      "本硕博川大"
+    ],
+    "tags": [],
+    "codes": []
+  },
+  {
+    "id": 105,
+    "name": "雷天宇",
+    "title": "副研究员",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：柔性可穿戴电子设备以及全固态储能器件",
+      "近年来从事高比能锂金属储能器件、纳微复合电子器件、纳米材料的多尺度结构演化等方面的研究，在锂金属电池各组件的相互作用机制、储能机理探索以及高分子材料的可控合成等领域积累了丰富的经验，具有良好的项目实施和管理能力。",
+      "招生方向：080900电子科学与技术（硕）"
+    ],
+    "titleCategory": "副研究员",
+    "research": [
+      "研究方向：柔性可穿戴电子设备以及全固态储能器件",
+      "近年来从事高比能锂金属储能器件、纳微复合电子器件、纳米材料的多尺度结构演化等方面的研究，在锂金属电池各组件的相互作用机制、储能机理探索以及高分子材料的可控合成等领域积累了丰富的经验，具有良好的项目实施和管理能力。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：080900电子科学与技术（硕）"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": [
+      "080900"
+    ]
+  },
+  {
+    "id": 106,
+    "name": "刘超",
+    "title": "副教授（特聘）",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：新型脉冲功率半导体芯片与微系统集成",
+      "成电本博",
+      "一直从事新型脉冲功率半导体芯片与微系统集成的科学创新研究。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：新型脉冲功率半导体芯片与微系统集成",
+      "一直从事新型脉冲功率半导体芯片与微系统集成的科学创新研究。"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [
+      "成电本博"
+    ],
+    "tags": [
+      "功率半导体与IC"
+    ],
+    "codes": []
+  },
+  {
+    "id": 107,
+    "name": "青芳竹",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：面向后摩尔时代的二维材料制备及新型半导体微钠器件",
+      "主讲课程：《固态物理》、《薄膜材料与技术》",
+      "招生方向：",
+      "080900电子科学与技术 05电子信息材料与元器件",
+      "085410新一代电子信息技术（含量子技术等）05电子信息材料与元器件"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：面向后摩尔时代的二维材料制备及新型半导体微钠器件"
+    ],
+    "courses": [
+      "主讲课程：《固态物理》、《薄膜材料与技术》"
+    ],
+    "admission": [
+      "招生方向：",
+      "080900电子科学与技术 05电子信息材料与元器件",
+      "085410新一代电子信息技术（含量子技术等）05电子信息材料与元器件"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": [
+      "080900",
+      "085410"
+    ]
+  },
+  {
+    "id": 108,
+    "name": "牛夷",
+    "title": "副研究员（特聘）",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：复杂环境下的在线测量技术",
+      "四川师范学士，成电博士",
+      "研究方向包括高温高动态等复杂环境下的在线测量方法及器件研发、热电与储能材料及器件研究等。",
+      "招生方向：纳电子科学与集成电路制造工程"
+    ],
+    "titleCategory": "副研究员",
+    "research": [
+      "研究方向：复杂环境下的在线测量技术",
+      "研究方向包括高温高动态等复杂环境下的在线测量方法及器件研发、热电与储能材料及器件研究等。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：纳电子科学与集成电路制造工程"
+    ],
+    "background": [
+      "四川师范学士，成电博士"
+    ],
+    "tags": [],
+    "codes": []
+  },
+  {
+    "id": 109,
+    "name": "涂程",
+    "title": "副研究员",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：MEMS传感器和接口ASIC芯片",
+      "重点研究PFMEMS器件，包括基于硅上压电薄膜（Thin Piezoelec tric film on Slicon,TPoS）结构的射频声学谐振器、片上可集成谐振式传感器（加工度、磁场？压力、温度等）和传感器接口ASIC芯片。",
+      "主讲课程：",
+      "电子分析与电子线路（本科专业核心课程）",
+      "模拟集成电路原理与设计（本科专业核心课程）",
+      "射频声学谐振器和滤波器技术（本科新生项目",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路",
+      "085403集成电路工程 01微电子器件与集成电路"
+    ],
+    "titleCategory": "副研究员",
+    "research": [
+      "研究方向：MEMS传感器和接口ASIC芯片",
+      "重点研究PFMEMS器件，包括基于硅上压电薄膜（Thin Piezoelec tric film on Slicon,TPoS）结构的射频声学谐振器、片上可集成谐振式传感器（加工度、磁场？压力、温度等）和传感器接口ASIC芯片。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "电子分析与电子线路（本科专业核心课程）",
+      "模拟集成电路原理与设计（本科专业核心课程）",
+      "射频声学谐振器和滤波器技术（本科新生项目"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路",
+      "085403集成电路工程 01微电子器件与集成电路"
+    ],
+    "background": [],
+    "tags": [
+      "模拟/混合信号",
+      "射频/毫米波/太赫兹",
+      "数字IC/SoC/EDA",
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器",
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 110,
+    "name": "王刚",
+    "title": "高级工程师",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：集成电路科学与工程",
+      "成电本硕博"
+    ],
+    "titleCategory": "高工/实验师",
+    "research": [
+      "研究方向：集成电路科学与工程"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [
+      "成电本硕博"
+    ],
+    "tags": [],
+    "codes": []
+  },
+  {
+    "id": 111,
+    "name": "龚天巡",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：智能微钠生物医学传感",
+      "本成电硕博南阳理工",
+      "针对当前医疗健康传感及检测前沿热点问题及工程技术瓶颈，在疾病快速检测、人体信号传感方向开展了深入的研究工作。",
+      "主讲课程：《纳米材料传感器的设计与应用》、《传感的世界》",
+      "招生方向：",
+      "080800电子信息科学与技术 02电路与系统（硕）",
+      "085400电子信息 04电路与系统（硕）"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：智能微钠生物医学传感",
+      "本成电硕博南阳理工",
+      "针对当前医疗健康传感及检测前沿热点问题及工程技术瓶颈，在疾病快速检测、人体信号传感方向开展了深入的研究工作。"
+    ],
+    "courses": [
+      "主讲课程：《纳米材料传感器的设计与应用》、《传感的世界》"
+    ],
+    "admission": [
+      "招生方向：",
+      "080800电子信息科学与技术 02电路与系统（硕）",
+      "085400电子信息 04电路与系统（硕）"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": [
+      "085400",
+      "080800"
+    ]
+  },
+  {
+    "id": 112,
+    "name": "王彦",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：柔性器件制备及微钠互连",
+      "主要从事柔性传感器制备和微钠互连、柔性MEMS制备及工艺研究？应用于高端芯片的先进封装、微结构制造、多尺度流体流动及传质、动态模型建模等领域的研究。",
+      "主讲课程：《先进MEMS制造与系统集成》、《微电子工艺》、《微钠电子学前沿技术》"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：柔性器件制备及微钠互连",
+      "主要从事柔性传感器制备和微钠互连、柔性MEMS制备及工艺研究？应用于高端芯片的先进封装、微结构制造、多尺度流体流动及传质、动态模型建模等领域的研究。"
+    ],
+    "courses": [
+      "主讲课程：《先进MEMS制造与系统集成》、《微电子工艺》、《微钠电子学前沿技术》"
+    ],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器",
+      "先进封装/三维集成"
+    ],
+    "codes": []
+  },
+  {
+    "id": 113,
+    "name": "晏超贻",
+    "title": "副研究员（特聘）",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：新型低维材料与光电集成器件",
+      "本西南科技硕博成电",
+      "主要研究新型低维材料和光电探测器件。",
+      "招生方向：电子科学与技术"
+    ],
+    "titleCategory": "副研究员",
+    "research": [
+      "研究方向：新型低维材料与光电集成器件",
+      "本西南科技硕博成电",
+      "主要研究新型低维材料和光电探测器件。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：电子科学与技术"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 114,
+    "name": "王姝娅",
+    "title": "高级实验师（特聘）",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：集成电路工艺",
+      "主讲课程《微电子工艺实验》"
+    ],
+    "titleCategory": "高工/实验师",
+    "research": [
+      "研究方向：集成电路工艺"
+    ],
+    "courses": [
+      "主讲课程《微电子工艺实验》"
+    ],
+    "admission": [],
+    "background": [],
+    "tags": [],
+    "codes": []
+  },
+  {
+    "id": 115,
+    "name": "赵睿鹏",
+    "title": "副研究员",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：敏感薄膜及传感器、高温超导薄膜及器件",
+      "主讲课程：",
+      "本科生课程：《传感器芯片细微加工工艺》",
+      "招生方向：",
+      "080900电子科学与技术 05电子信息材料与元器件",
+      "085600材料与化学 01电子材料与器件"
+    ],
+    "titleCategory": "副研究员",
+    "research": [
+      "研究方向：敏感薄膜及传感器、高温超导薄膜及器件"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生课程：《传感器芯片细微加工工艺》"
+    ],
+    "admission": [
+      "招生方向：",
+      "080900电子科学与技术 05电子信息材料与元器件",
+      "085600材料与化学 01电子材料与器件"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": [
+      "080900",
+      "085600"
+    ]
+  },
+  {
+    "id": 116,
+    "name": "潘忻强",
+    "title": "副研究员",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：单晶薄膜材料与器件、忆阻器件及类脑计算芯片",
+      "主要从事单晶薄膜材料与器件研究，包括单晶薄膜的制备与集成、忆阻器件、基于忆阻器的类脑计算芯片、传感器信号仿生处理、感存算一体智能微系统筹方面的研究。"
+    ],
+    "titleCategory": "副研究员",
+    "research": [
+      "研究方向：单晶薄膜材料与器件、忆阻器件及类脑计算芯片",
+      "主要从事单晶薄膜材料与器件研究，包括单晶薄膜的制备与集成、忆阻器件、基于忆阻器的类脑计算芯片、传感器信号仿生处理、感存算一体智能微系统筹方面的研究。"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "类脑/存算/AI芯片",
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 117,
+    "name": "罗谦",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：宽禁带半导体技术、小尺寸应变硅计算器。",
+      "主要研究领域为微电子器件。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：宽禁带半导体技术、小尺寸应变硅计算器。",
+      "主要研究领域为微电子器件。"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "宽禁带(GaN/SiC)"
+    ],
+    "codes": []
+  },
+  {
+    "id": 118,
+    "name": "宋亚梅",
+    "title": "副研究员",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：电路与系统",
+      "主讲课程：《电路分析与电子线路》",
+      "招生方向：080900电子科学与技术 02电路与系统"
+    ],
+    "titleCategory": "副研究员",
+    "research": [
+      "研究方向：电路与系统"
+    ],
+    "courses": [
+      "主讲课程：《电路分析与电子线路》"
+    ],
+    "admission": [
+      "招生方向：080900电子科学与技术 02电路与系统"
+    ],
+    "background": [],
+    "tags": [],
+    "codes": [
+      "080900"
+    ]
+  },
+  {
+    "id": 119,
+    "name": "李萍剑",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：二维材料制备及其半导体器件研制",
+      "北大本博，导师是吴锦雷",
+      "招生方向：二维材料制备及其半导体研制"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：二维材料制备及其半导体器件研制"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：二维材料制备及其半导体研制"
+    ],
+    "background": [
+      "北大本博，导师是吴锦雷"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 120,
+    "name": "邓新武",
+    "title": "高级工程师（工程、实验）",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：微电子技术  功能电子器件",
+      "研究方向为功能电子器件和微电子工艺技术",
+      "主讲课程：《微电子工艺实验》"
+    ],
+    "titleCategory": "高工/实验师",
+    "research": [
+      "研究方向：微电子技术  功能电子器件",
+      "研究方向为功能电子器件和微电子工艺技术"
+    ],
+    "courses": [
+      "主讲课程：《微电子工艺实验》"
+    ],
+    "admission": [],
+    "background": [],
+    "tags": [],
+    "codes": []
+  },
+  {
+    "id": 121,
+    "name": "韦敏",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：薄膜集成器件及传感电路设计",
+      "主讲课程：",
+      "本科生课程：《光电子技术》、《半导体光电器件》、《数字逻辑电路》、《软件技术基础》、《软件技术基础》、挑战性示范课《基于电子薄膜的光电探测系统的设计与实现》。",
+      "研究生实验课程：《铁电薄膜的制备与性能研究》",
+      "招生方向：集成电路科学与工程、纳电子科学"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：薄膜集成器件及传感电路设计"
+    ],
+    "courses": [
+      "主讲课程：",
+      "本科生课程：《光电子技术》、《半导体光电器件》、《数字逻辑电路》、《软件技术基础》、《软件技术基础》、挑战性示范课《基于电子薄膜的光电探测系统的设计与实现》。",
+      "研究生实验课程：《铁电薄膜的制备与性能研究》"
+    ],
+    "admission": [
+      "招生方向：集成电路科学与工程、纳电子科学"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 122,
+    "name": "齐钊",
+    "title": "未注明职称",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：功率半导体器件及集成技术",
+      "长期从事半导体工艺器件的研究，主要专注于高压/低压集成电路ESD防护器件与电路设计，先进防雷器件工艺，结构与封装设计等。",
+      "主讲课程：",
+      "研究生课程：《半导体功率器件与智能功率IC实验》",
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路",
+      "085403集成电路工程 01微电子器件与集成电路"
+    ],
+    "titleCategory": "高工/实验师",
+    "research": [
+      "研究方向：功率半导体器件及集成技术",
+      "长期从事半导体工艺器件的研究，主要专注于高压/低压集成电路ESD防护器件与电路设计，先进防雷器件工艺，结构与封装设计等。"
+    ],
+    "courses": [
+      "主讲课程：",
+      "研究生课程：《半导体功率器件与智能功率IC实验》"
+    ],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程 01微电子器件与集成电路",
+      "085403集成电路工程 01微电子器件与集成电路"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "先进封装/三维集成",
+      "ESD/可靠性"
+    ],
+    "codes": [
+      "140100",
+      "085403"
+    ]
+  },
+  {
+    "id": 123,
+    "name": "胡永达",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：多层陶瓷封装，微波介质陶瓷。",
+      "招生方向：电子材料，电子器件。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：多层陶瓷封装，微波介质陶瓷。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：电子材料，电子器件。"
+    ],
+    "background": [],
+    "tags": [
+      "射频/毫米波/太赫兹",
+      "微纳/二维材料/薄膜",
+      "先进封装/三维集成"
+    ],
+    "codes": []
+  },
+  {
+    "id": 124,
+    "name": "黄建文",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：低维电子材料与量子器件。",
+      "成电本博。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：低维电子材料与量子器件。"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [
+      "成电本博。"
+    ],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": []
+  },
+  {
+    "id": 125,
+    "name": "易波",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：功率半导体器件，先进封装射频微系统集成。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：功率半导体器件，先进封装射频微系统集成。"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "射频/毫米波/太赫兹",
+      "先进封装/三维集成"
+    ],
+    "codes": []
+  },
+  {
+    "id": 126,
+    "name": "陈东江",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：1、新型微钠能量转换存储器件；2、集成化微钠薄膜器件。",
+      "招生方向：",
+      "140100集成电路科学与工程",
+      "微钠电子材料与器件",
+      "新型微钠能量转换/存储器件。",
+      "集成化微钠薄膜器件。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：1、新型微钠能量转换存储器件；2、集成化微钠薄膜器件。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程",
+      "微钠电子材料与器件",
+      "新型微钠能量转换/存储器件。",
+      "集成化微钠薄膜器件。"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜"
+    ],
+    "codes": [
+      "140100"
+    ]
+  },
+  {
+    "id": 127,
+    "name": "张泽展",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：复杂环境下非接触式在线监测技术及仪器。",
+      "西南民族大学本，成电硕博。",
+      "主讲课程：集成电路导论。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：复杂环境下非接触式在线监测技术及仪器。",
+      "西南民族大学本，成电硕博。"
+    ],
+    "courses": [
+      "主讲课程：集成电路导论。"
+    ],
+    "admission": [],
+    "background": [],
+    "tags": [],
+    "codes": []
+  },
+  {
+    "id": 128,
+    "name": "陈伟",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：陶瓷基固态能源芯粒及集成技术研究。",
+      "招生方向：",
+      "140100集成电路科学与工程",
+      "01微钠电子材料与器件。",
+      "02封装与微系统集成。"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：陶瓷基固态能源芯粒及集成技术研究。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程",
+      "01微钠电子材料与器件。",
+      "02封装与微系统集成。"
+    ],
+    "background": [],
+    "tags": [
+      "微纳/二维材料/薄膜",
+      "先进封装/三维集成"
+    ],
+    "codes": [
+      "140100"
+    ]
+  },
+  {
+    "id": 129,
+    "name": "刘柯钦",
+    "title": "副研究员",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：新型存储器件、存内计算、神经形态计算。"
+    ],
+    "titleCategory": "副研究员",
+    "research": [
+      "研究方向：新型存储器件、存内计算、神经形态计算。"
+    ],
+    "courses": [],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "类脑/存算/AI芯片"
+    ],
+    "codes": []
+  },
+  {
+    "id": 130,
+    "name": "肖红彬",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：高通量+AI同驱动的光电材料与器件的性能研究。",
+      "主讲课程：《柔性导电薄膜的性能仿真与制备》"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：高通量+AI同驱动的光电材料与器件的性能研究。"
+    ],
+    "courses": [
+      "主讲课程：《柔性导电薄膜的性能仿真与制备》"
+    ],
+    "admission": [],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "微纳/二维材料/薄膜",
+      "MEMS/传感器"
+    ],
+    "codes": []
+  },
+  {
+    "id": 131,
+    "name": "周靖贵",
+    "title": "副教授",
+    "rankGroup": "副教授/副研究员",
+    "rawLines": [
+      "研究方向：宽禁带功率半导体器件与集成技术",
+      "目前研究聚集点：聚焦GaN单片功率集成技术，致力于推动GaN互补逻辑IC向低功耗、高集成度发展；面向人工智能、航空航天等国家战略需求，重点开发面向AI芯片供电的低压大电流电源芯片；开展面向宇航的抗辐照GaN器件关键技术研究。",
+      "招生方向：",
+      "140100集成电路科学与工程",
+      "01微电子器件与集成电路（学硕）",
+      "085400集成电路工程",
+      "01微电子器件与集成电路（专硕）"
+    ],
+    "titleCategory": "副教授",
+    "research": [
+      "研究方向：宽禁带功率半导体器件与集成技术",
+      "目前研究聚集点：聚焦GaN单片功率集成技术，致力于推动GaN互补逻辑IC向低功耗、高集成度发展；面向人工智能、航空航天等国家战略需求，重点开发面向AI芯片供电的低压大电流电源芯片；开展面向宇航的抗辐照GaN器件关键技术研究。"
+    ],
+    "courses": [],
+    "admission": [
+      "招生方向：",
+      "140100集成电路科学与工程",
+      "01微电子器件与集成电路（学硕）",
+      "085400集成电路工程",
+      "01微电子器件与集成电路（专硕）"
+    ],
+    "background": [],
+    "tags": [
+      "功率半导体与IC",
+      "类脑/存算/AI芯片",
+      "宽禁带(GaN/SiC)",
+      "ESD/可靠性"
+    ],
+    "codes": [
+      "140100",
+      "085400"
+    ]
+  }
+];
+
+    const state = {
+      query: '',
+      scope: 'all',
+      rankGroup: 'all',
+      titleCat: 'all',
+      code: 'all',
+      selectedTag: null,
+      onlyFav: false,
+      sort: 'default',
+      view: 'grid',
+      tagsOpen: false,
+      favIds: new Set(),
+      compareIds: []
+    };
+
+    try {
+      const savedFavs = JSON.parse(localStorage.getItem('uestc_ic_favs') || '[]');
+      if (Array.isArray(savedFavs)) state.favIds = new Set(savedFavs);
+    } catch (e) {}
+
+    function saveFavs() {
+      try {
+        localStorage.setItem('uestc_ic_favs', JSON.stringify(Array.from(state.favIds)));
+      } catch (e) {}
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => el.classList.add('hidden'), 2200);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function highlightText(text, terms) {
+      let safe = escapeHtml(text);
+      if (!terms.length) return safe;
+      const escapedTerms = terms
+        .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+        .filter(Boolean);
+      if (!escapedTerms.length) return safe;
+      const re = new RegExp('(' + escapedTerms.join('|') + ')', 'gi');
+      return safe.replace(re, '<mark class="hl">$1</mark>');
+    }
+
+    function getSearchTarget(t, scope) {
+      if (scope === 'name') return t.name;
+      if (scope === 'research') return t.research.join('\n');
+      if (scope === 'courses') return t.courses.join('\n');
+      if (scope === 'admission') return t.admission.join('\n');
+      if (scope === 'background') return t.background.join('\n');
+      return [t.name, t.title, t.rankGroup, ...t.rawLines].join('\n');
+    }
+
+    function getFilteredTeachers() {
+      const terms = state.query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      let list = TEACHERS.filter(t => {
+        if (state.rankGroup !== 'all' && t.rankGroup !== state.rankGroup) return false;
+        if (state.titleCat !== 'all' && t.titleCategory !== state.titleCat) return false;
+        if (state.code !== 'all' && !t.codes.includes(state.code)) return false;
+        if (state.selectedTag && !t.tags.includes(state.selectedTag)) return false;
+        if (state.onlyFav && !state.favIds.has(t.id)) return false;
+        if (terms.length) {
+          const target = getSearchTarget(t, state.scope).toLowerCase();
+          if (!terms.every(term => target.includes(term))) return false;
+        }
+        return true;
+      });
+
+      if (state.sort === 'pinyin') {
+        list = [...list].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+      }
+      return { list, terms };
+    }
+
+    function renderDomainTags() {
+      const counts = {};
+      TEACHERS.forEach(t => t.tags.forEach(tag => { counts[tag] = (counts[tag] || 0) + 1; }));
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      const container = document.getElementById('domainTagsContainer');
+      container.innerHTML = sorted.map(([tag, count]) => {
+        const active = state.selectedTag === tag;
+        return `<button type="button" data-tag="${escapeHtml(tag)}" class="domain-tag px-2.5 py-1 rounded-full text-xs font-medium border transition ${
+          active
+            ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-blue-50 hover:border-blue-300'
+        }">${escapeHtml(tag)} <span class="${active ? 'text-blue-100' : 'text-slate-400'}">(${count})</span></button>`;
+      }).join('');
+    }
+
+    function renderActiveChips() {
+      const chips = [];
+      if (state.query.trim()) chips.push({ label: `关键词: ${state.query.trim()}`, clear: () => { state.query = ''; document.getElementById('searchInput').value = ''; } });
+      if (state.rankGroup !== 'all') chips.push({ label: state.rankGroup, clear: () => { state.rankGroup = 'all'; updateRankPills(); } });
+      if (state.titleCat !== 'all') chips.push({ label: `职称: ${state.titleCat}`, clear: () => { state.titleCat = 'all'; document.getElementById('titleSelect').value = 'all'; } });
+      if (state.code !== 'all') chips.push({ label: `专业代码: ${state.code}`, clear: () => { state.code = 'all'; document.getElementById('codeSelect').value = 'all'; } });
+      if (state.selectedTag) chips.push({ label: `领域: ${state.selectedTag}`, clear: () => { state.selectedTag = null; renderDomainTags(); } });
+      if (state.onlyFav) chips.push({ label: '仅看收藏', clear: () => { state.onlyFav = false; updateFavBtn(); } });
+
+      const container = document.getElementById('activeFiltersChips');
+      container.innerHTML = chips.map((c, idx) => `
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs">
+          ${escapeHtml(c.label)}
+          <button type="button" data-chip-idx="${idx}" class="hover:text-blue-950 font-bold leading-none">&times;</button>
+        </span>
+      `).join('');
+      container.querySelectorAll('button[data-chip-idx]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          chips[Number(btn.dataset.chipIdx)].clear();
+          render();
+        });
+      });
+
+      document.getElementById('btnResetAll').classList.toggle('hidden', chips.length === 0);
+    }
+
+    function updateRankPills() {
+      document.querySelectorAll('.rank-pill').forEach(btn => {
+        const active = btn.dataset.rank === state.rankGroup;
+        btn.className = `rank-pill px-2.5 py-1 rounded-lg font-medium transition ${
+          active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+        }`;
+      });
+    }
+
+    function updateFavBtn() {
+      const btn = document.getElementById('btnFavFilter');
+      document.getElementById('favCountBadge').textContent = state.favIds.size;
+      if (state.onlyFav) {
+        btn.classList.add('ring-2', 'ring-amber-300', 'bg-white/25');
+      } else {
+        btn.classList.remove('ring-2', 'ring-amber-300', 'bg-white/25');
+      }
+    }
+
+    function updateCompareBadge() {
+      document.getElementById('compareCountBadge').textContent = state.compareIds.length;
+    }
+
+    function cleanSectionText(lines, prefixRegex) {
+      if (!lines.length) return '';
+      return lines.map((l, i) => i === 0 ? l.replace(prefixRegex, '') : l).filter(Boolean).join('；');
+    }
+
+    function render() {
+      const { list, terms } = getFilteredTeachers();
+      document.getElementById('resultCount').textContent = list.length;
+      document.getElementById('btnClearSearch').classList.toggle('hidden', !state.query.trim());
+      updateFavBtn();
+      updateCompareBadge();
+      renderActiveChips();
+
+      const container = document.getElementById('resultsContainer');
+      const emptyState = document.getElementById('emptyState');
+
+      if (!list.length) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      emptyState.classList.add('hidden');
+
+      if (state.view === 'grid') {
+        container.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+      } else {
+        container.className = 'flex flex-col gap-3';
+      }
+
+      container.innerHTML = list.map(t => {
+        const isFav = state.favIds.has(t.id);
+        const isCmp = state.compareIds.includes(t.id);
+        const researchText = cleanSectionText(t.research, /^(研究方向|科研方向|主要研究方向|研究领域)[：:]?/) || '详见完整资料';
+        const coursesText = cleanSectionText(t.courses, /^主讲课程[：:]?/);
+        const admissionText = cleanSectionText(t.admission, /^招生方向[：:]?/);
+        const bgText = t.background.join('；');
+
+        const tagsHtml = t.tags.slice(0, 3).map(tag =>
+          `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px] font-medium">${escapeHtml(tag)}</span>`
+        ).join('') + (t.tags.length > 3 ? `<span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[11px]">+${t.tags.length - 3}</span>` : '');
+
+        if (state.view === 'list') {
+          return `
+            <article data-id="${t.id}" class="teacher-card bg-white rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition p-4 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex-1 min-w-0 space-y-1.5">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="text-base font-bold text-slate-900">${highlightText(t.name, terms)}</h3>
+                  <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">${highlightText(t.title, terms)}</span>
+                  <span class="text-xs text-slate-400">${escapeHtml(t.rankGroup)}</span>
+                  <div class="flex flex-wrap gap-1">${tagsHtml}</div>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-600 line-clamp-2"><span class="font-medium text-slate-800">研究方向：</span>${highlightText(researchText, terms)}</p>
+                ${coursesText ? `<p class="text-xs text-slate-500 line-clamp-1"><span class="font-medium text-slate-700">主讲课程：</span>${highlightText(coursesText, terms)}</p>` : ''}
+                ${admissionText ? `<p class="text-xs text-slate-500 line-clamp-1"><span class="font-medium text-slate-700">招生方向：</span>${highlightText(admissionText, terms)}</p>` : ''}
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <button type="button" data-action="fav" data-id="${t.id}" class="px-2.5 py-1.5 rounded-lg border text-xs font-medium transition ${isFav ? 'bg-amber-50 border-amber-300 text-amber-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
+                  ${isFav ? '★ 已收藏' : '☆ 收藏'}
+                </button>
+                <button type="button" data-action="cmp" data-id="${t.id}" class="px-2.5 py-1.5 rounded-lg border text-xs font-medium transition ${isCmp ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
+                  ${isCmp ? '✓ 已选对比' : '+ 对比'}
+                </button>
+              </div>
+            </article>
+          `;
+        }
+
+        return `
+          <article data-id="${t.id}" class="teacher-card bg-white rounded-2xl border border-slate-200 hover:border-blue-400 hover:shadow-lg transition p-4 flex flex-col justify-between cursor-pointer group">
+            <div class="space-y-2.5">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-700 transition">${highlightText(t.name, terms)}</h3>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">${highlightText(t.title, terms)}</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">${escapeHtml(t.rankGroup)}</p>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  <button type="button" data-action="fav" data-id="${t.id}" title="收藏导师" class="p-1.5 rounded-lg border transition ${isFav ? 'bg-amber-50 border-amber-300 text-amber-500' : 'bg-white border-slate-200 text-slate-400 hover:text-amber-500 hover:bg-amber-50/50'}">
+                    <i data-lucide="star" class="w-3.5 h-3.5 ${isFav ? 'fill-amber-400' : ''}"></i>
+                  </button>
+                  <button type="button" data-action="cmp" data-id="${t.id}" title="加入对比" class="px-2 py-1 rounded-lg border text-[11px] font-medium transition ${isCmp ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600'}">
+                    ${isCmp ? '已选' : '对比'}
+                  </button>
+                </div>
+              </div>
+
+              ${tagsHtml ? `<div class="flex flex-wrap gap-1">${tagsHtml}</div>` : ''}
+
+              <div class="space-y-1.5 text-xs text-slate-600 pt-1 border-t border-slate-100">
+                <p class="line-clamp-3 leading-relaxed"><span class="font-semibold text-slate-800">研究方向：</span>${highlightText(researchText, terms)}</p>
+                ${coursesText ? `<p class="line-clamp-2 leading-relaxed"><span class="font-semibold text-slate-800">主讲课程：</span>${highlightText(coursesText, terms)}</p>` : ''}
+                ${admissionText ? `<p class="line-clamp-2 leading-relaxed"><span class="font-semibold text-slate-800">招生方向：</span>${highlightText(admissionText, terms)}</p>` : ''}
+                ${bgText ? `<p class="line-clamp-1 text-slate-500"><span class="font-semibold text-slate-700">背景/去向：</span>${highlightText(bgText, terms)}</p>` : ''}
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-blue-600 font-medium">
+              <span>查看完整资料</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openDetailModal(id) {
+      const t = TEACHERS.find(x => x.id === id);
+      if (!t) return;
+      const terms = state.query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+
+      document.getElementById('modalName').textContent = t.name;
+      document.getElementById('modalTitle').textContent = t.title;
+      document.getElementById('modalRankGroup').textContent = t.rankGroup;
+      document.getElementById('modalTags').innerHTML = t.tags.map(tag =>
+        `<span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium">${escapeHtml(tag)}</span>`
+      ).join('');
+
+      const favBtn = document.getElementById('btnModalFav');
+      const updateModalFav = () => {
+        const isFav = state.favIds.has(t.id);
+        favBtn.className = `p-2 rounded-lg border transition ${isFav ? 'bg-amber-50 border-amber-300 text-amber-500' : 'bg-white border-slate-200 text-slate-400 hover:text-amber-500'}`;
+      };
+      updateModalFav();
+      favBtn.onclick = () => {
+        toggleFav(t.id);
+        updateModalFav();
+      };
+
+      document.getElementById('btnModalCopy').onclick = () => {
+        const txt = `${t.name}：${t.title}\n${t.rawLines.join('\n')}`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(() => showToast(`已复制 ${t.name} 的完整资料`)).catch(() => fallbackCopy(txt, t.name));
+        } else {
+          fallbackCopy(txt, t.name);
+        }
+      };
+
+      const renderBlock = (title, icon, lines, emptyMsg) => {
+        if (!lines.length) return '';
+        return `
+          <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200/80">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
+              <i data-lucide="${icon}" class="w-3.5 h-3.5 text-blue-600"></i>
+              <span>${title}</span>
+            </h4>
+            <ul class="space-y-1 text-slate-800 leading-relaxed">
+              ${lines.map(l => `<li>${highlightText(l, terms)}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      };
+
+      document.getElementById('modalBody').innerHTML = `
+        ${renderBlock('研究方向与科研内容', 'flask-conical', t.research)}
+        ${renderBlock('主讲课程', 'book-open', t.courses)}
+        ${renderBlock('招生方向与专业代码', 'graduation-cap', t.admission)}
+        ${renderBlock('学历背景、指导竞赛与毕业去向', 'award', t.background)}
+        <details class="bg-white rounded-xl border border-slate-200 p-3.5">
+          <summary class="text-xs font-semibold text-slate-600 cursor-pointer select-none">查看文档原文全部记录（${t.rawLines.length} 行）</summary>
+          <div class="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1 text-xs text-slate-600 leading-relaxed">
+            ${t.rawLines.map(l => `<p>${highlightText(l, terms)}</p>`).join('')}
+          </div>
+        </details>
+      `;
+
+      document.getElementById('detailModal').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function fallbackCopy(text, name) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast(`已复制 ${name} 的完整资料`);
+      } catch (e) {
+        showToast('复制失败，请手动选中文本复制');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function toggleFav(id) {
+      if (state.favIds.has(id)) {
+        state.favIds.delete(id);
+        showToast('已取消收藏');
+      } else {
+        state.favIds.add(id);
+        showToast('已加入收藏');
+      }
+      saveFavs();
+      render();
+    }
+
+    function toggleCompare(id) {
+      const idx = state.compareIds.indexOf(id);
+      if (idx >= 0) {
+        state.compareIds.splice(idx, 1);
+      } else {
+        if (state.compareIds.length >= 4) {
+          showToast('最多同时对比 4 位导师');
+          return;
+        }
+        state.compareIds.push(id);
+      }
+      render();
+    }
+
+    function openCompareModal() {
+      const body = document.getElementById('compareBody');
+      if (!state.compareIds.length) {
+        body.innerHTML = `<div class="text-center py-12 text-slate-500 text-sm">尚未选择任何导师进行对比。请在教师卡片右上角点击“对比”按钮添加（最多 4 位）。</div>`;
+      } else {
+        const selected = state.compareIds.map(id => TEACHERS.find(t => t.id === id)).filter(Boolean);
+        const rows = [
+          { label: '职称 / 职级', fn: t => `${t.title}（${t.rankGroup}）` },
+          { label: '领域标签', fn: t => t.tags.join('、') || '—' },
+          { label: '研究方向', fn: t => t.research.join('\n') || '—' },
+          { label: '主讲课程', fn: t => t.courses.join('\n') || '—' },
+          { label: '招生方向', fn: t => t.admission.join('\n') || '—' },
+          { label: '背景与去向', fn: t => t.background.join('\n') || '—' }
+        ];
+        body.innerHTML = `
+          <table class="w-full border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200">
+                <th class="p-3 text-left font-semibold text-slate-600 w-28 align-top">对比维度</th>
+                ${selected.map(t => `
+                  <th class="p-3 text-left font-bold text-slate-900 min-w-[200px] align-top">
+                    <div class="flex items-center justify-between gap-2">
+                      <span>${escapeHtml(t.name)}</span>
+                      <button type="button" data-rm-cmp="${t.id}" class="text-xs font-normal text-slate-400 hover:text-red-600">移除</button>
+                    </div>
+                  </th>
+                `).join('')}
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              ${rows.map(r => `
+                <tr>
+                  <td class="p-3 font-medium text-slate-600 bg-slate-50/50 align-top">${r.label}</td>
+                  ${selected.map(t => `<td class="p-3 text-slate-700 align-top whitespace-pre-line leading-relaxed">${escapeHtml(r.fn(t))}</td>`).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+        body.querySelectorAll('button[data-rm-cmp]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            toggleCompare(Number(btn.dataset.rmCmp));
+            openCompareModal();
+          });
+        });
+      }
+      document.getElementById('compareModal').classList.remove('hidden');
+    }
+
+    function resetAll() {
+      state.query = '';
+      state.scope = 'all';
+      state.rankGroup = 'all';
+      state.titleCat = 'all';
+      state.code = 'all';
+      state.selectedTag = null;
+      state.onlyFav = false;
+      document.getElementById('searchInput').value = '';
+      document.getElementById('scopeSelect').value = 'all';
+      document.getElementById('titleSelect').value = 'all';
+      document.getElementById('codeSelect').value = 'all';
+      updateRankPills();
+      renderDomainTags();
+      render();
+    }
+
+    // Event bindings
+    document.getElementById('searchInput').addEventListener('input', e => {
+      state.query = e.target.value;
+      render();
+    });
+    document.getElementById('btnClearSearch').addEventListener('click', () => {
+      state.query = '';
+      document.getElementById('searchInput').value = '';
+      render();
+    });
+    document.getElementById('scopeSelect').addEventListener('change', e => {
+      state.scope = e.target.value;
+      render();
+    });
+    document.getElementById('titleSelect').addEventListener('change', e => {
+      state.titleCat = e.target.value;
+      render();
+    });
+    document.getElementById('codeSelect').addEventListener('change', e => {
+      state.code = e.target.value;
+      render();
+    });
+    document.getElementById('sortSelect').addEventListener('change', e => {
+      state.sort = e.target.value;
+      render();
+    });
+    document.getElementById('rankPills').addEventListener('click', e => {
+      const btn = e.target.closest('.rank-pill');
+      if (!btn) return;
+      state.rankGroup = btn.dataset.rank;
+      updateRankPills();
+      render();
+    });
+    document.getElementById('btnToggleTags').addEventListener('click', () => {
+      state.tagsOpen = !state.tagsOpen;
+      document.getElementById('domainTagsBar').classList.toggle('hidden', !state.tagsOpen);
+      document.getElementById('tagsChevron').classList.toggle('rotate-180', state.tagsOpen);
+    });
+    document.getElementById('domainTagsContainer').addEventListener('click', e => {
+      const btn = e.target.closest('.domain-tag');
+      if (!btn) return;
+      const tag = btn.dataset.tag;
+      state.selectedTag = state.selectedTag === tag ? null : tag;
+      renderDomainTags();
+      render();
+    });
+    document.getElementById('btnViewGrid').addEventListener('click', () => {
+      state.view = 'grid';
+      document.getElementById('btnViewGrid').className = 'p-1 rounded-md bg-white text-blue-600 shadow-sm';
+      document.getElementById('btnViewList').className = 'p-1 rounded-md text-slate-500 hover:text-slate-800';
+      render();
+    });
+    document.getElementById('btnViewList').addEventListener('click', () => {
+      state.view = 'list';
+      document.getElementById('btnViewList').className = 'p-1 rounded-md bg-white text-blue-600 shadow-sm';
+      document.getElementById('btnViewGrid').className = 'p-1 rounded-md text-slate-500 hover:text-slate-800';
+      render();
+    });
+    document.getElementById('btnFavFilter').addEventListener('click', () => {
+      state.onlyFav = !state.onlyFav;
+      render();
+    });
+    document.getElementById('btnResetAll').addEventListener('click', resetAll);
+    document.getElementById('btnEmptyReset').addEventListener('click', resetAll);
+
+    // Card click delegation
+    document.getElementById('resultsContainer').addEventListener('click', e => {
+      const actionBtn = e.target.closest('button[data-action]');
+      if (actionBtn) {
+        e.stopPropagation();
+        const id = Number(actionBtn.dataset.id);
+        if (actionBtn.dataset.action === 'fav') toggleFav(id);
+        if (actionBtn.dataset.action === 'cmp') toggleCompare(id);
+        return;
+      }
+      const card = e.target.closest('.teacher-card');
+      if (card) openDetailModal(Number(card.dataset.id));
+    });
+
+    // Modals
+    document.getElementById('btnCloseDetail').addEventListener('click', () => document.getElementById('detailModal').classList.add('hidden'));
+    document.getElementById('detailModal').addEventListener('click', e => {
+      if (e.target.id === 'detailModal') document.getElementById('detailModal').classList.add('hidden');
+    });
+    document.getElementById('btnOpenCompare').addEventListener('click', openCompareModal);
+    document.getElementById('btnCloseCompare').addEventListener('click', () => document.getElementById('compareModal').classList.add('hidden'));
+    document.getElementById('compareModal').addEventListener('click', e => {
+      if (e.target.id === 'compareModal') document.getElementById('compareModal').classList.add('hidden');
+    });
+    document.getElementById('btnClearCompare').addEventListener('click', () => {
+      state.compareIds = [];
+      render();
+      openCompareModal();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.getElementById('detailModal').classList.add('hidden');
+        document.getElementById('compareModal').classList.add('hidden');
+      }
+    });
+
+    // Init
+    renderDomainTags();
+    render();
+  </script>
+</body>
+</html>
